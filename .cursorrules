@@ -1,0 +1,142 @@
+# Antigravity & Cursor Rules for Wishper Project
+
+## 🚨 CRITICAL: Design Source of Truth
+- **Primary Design Source**: The `design-template/` directory in the root contains HTML files that describe all screens and features.
+- **Workflow:**:
+  1. **ALWAYS** check docs/concept.md for information about the project and specific detail implementations for features and screen
+
+
+## 🛠️ MCP (Model Context Protocol) Usage
+- **Explicitly use MCPs** when available to gather context:
+  - **Flutter**: Use the `flutter` MCP for framework documentation, widget specs, and best practices.
+  - **Dart**: Use the `dart` MCP for language features and package information.
+- Use `list_resources` on these servers to discover available context.
+
+## 🧩 Flutter & Dart Best Practices
+
+### Widget Composition
+- **ALWAYS** break down large widgets into small, focused, reusable widgets
+- Each widget should have a single responsibility
+- Prefer `StatelessWidget` over `StatefulWidget` when possible
+- Use `const` constructors wherever possible for better performance
+- Avoid creating widgets as functions - use proper widget classes
+- Extract complex build logic into separate methods or widgets
+- Keep widget build methods under 50 lines - extract to smaller widgets if needed
+
+### Naming Conventions
+- **Classes**: `UpperCamelCase` (e.g., `RecipientProfileScreen`, `IdeaCard`)
+- **Variables and functions**: `lowerCamelCase` (e.g., `recipientId`, `getAllRecipients`)
+- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_RECIPIENTS`, `DEFAULT_TIMEOUT`)
+- **Private members**: Prefix with `_` (e.g., `_textController`, `_handleSubmit`)
+- **Widget files**: Match class name (e.g., `recipient_profile_screen.dart` for `RecipientProfileScreen`)
+- Use descriptive, intention-revealing names - avoid abbreviations unless widely understood
+- Boolean variables should be questions: `isLoading`, `hasError`, `canSubmit`
+- Collections should be plural: `recipients`, `events`, `ideas`
+
+
+### Code Organization
+- Group imports: Flutter/Dart packages, then third-party, then local
+- Use relative imports for local files within the same package
+- Keep files focused - one main class per file
+- Extract reusable logic into mixins, extensions, or utility classes
+- Use extensions for common operations (e.g., `context.router`, `context.theme`)
+
+### Performance
+- Use `const` widgets to prevent unnecessary rebuilds
+- Implement `keys` for widgets in lists when order changes
+- Use `ListView.builder` for long lists instead of `ListView`
+- Avoid rebuilding entire trees - use `Consumer` or `ConsumerWidget` selectively
+- Cache expensive computations with `useMemoized` or provider caching
+- Use `RepaintBoundary` for complex widgets that don't need frequent repaints
+
+### Error Handling
+- Always handle errors gracefully with try-catch blocks
+- Show user-friendly error messages
+- Use `Result` types or `Either` patterns for operations that can fail
+- Log errors appropriately for debugging
+- Never silently swallow exceptions
+
+## DRY (Don't Repeat Yourself) Principles
+
+### Code Reuse
+- Extract common patterns into reusable functions or classes
+- Use mixins for shared behavior across classes
+- Create utility classes for common operations
+- Use extensions for adding functionality to existing types
+- Abstract repeated logic into services or repositories
+
+### Avoid Duplication
+- If you write the same code 3+ times, extract it
+- Share constants in a central location
+- Use enums for fixed sets of values
+- Create base classes for common widget patterns
+- Reuse validation logic across forms
+
+## Testing Best Practices
+
+### Unit Tests
+- Write tests for all business logic (services, notifiers, repositories)
+- Test edge cases and error conditions
+- Use mocks for external dependencies
+- Aim for high code coverage on critical paths
+- Keep tests fast and independent
+
+### Widget Tests
+- Test widget behavior, not implementation details
+- Use `pumpWidget` and `tester` utilities
+- Test user interactions (taps, scrolls, inputs)
+- Verify UI state changes
+- Test error states and loading states
+
+### Integration Tests
+- Test complete user flows
+- Use test databases for server tests
+- Clean up test data after tests
+
+## General Code Quality
+
+### Code Style
+- Follow Dart style guide: https://dart.dev/guides/language/effective-dart/style
+- Use `dart format` before committing
+- Run `flutter analyze` to catch issues
+- Fix all linter warnings
+- Use meaningful variable names
+- Add comments for complex logic, not obvious code
+
+### Documentation
+- Document public APIs with doc comments
+- Explain "why" not "what" in comments
+- Keep comments up to date with code changes
+- Use `///` for documentation comments
+- Document complex algorithms and business rules
+
+### Git Practices
+- Write clear, descriptive commit messages
+- Keep commits focused and atomic
+- Review code before committing
+- Use meaningful branch names
+
+
+## Anti-Patterns to Avoid
+
+### Flutter
+- ❌ Don't create widgets as functions
+- ❌ Don't hardcode colors, sizes, or strings
+- ❌ Don't put business logic in widgets
+- ❌ Don't rebuild entire trees unnecessarily
+- ❌ Don't ignore const constructors
+
+
+## Code Review Checklist
+
+Before submitting code, ensure:
+- [ ] All widgets are small and focused
+- [ ] Database queries use indexes
+- [ ] Business logic is in services, not endpoints
+- [ ] Code follows DRY principles
+- [ ] Tests are written for new functionality
+- [ ] Error handling is implemented
+- [ ] Code is formatted and analyzed
+- [ ] Documentation is added where needed
+- [ ] Naming conventions are followed
+

@@ -1,0 +1,20 @@
+library fluvie;
+
+export 'src/presentation/video_composition.dart';
+export 'src/presentation/clip.dart';
+export 'src/presentation/time_consumer.dart';
+export 'src/presentation/layer_stack.dart';
+export 'src/presentation/collage_template.dart';
+export 'src/presentation/video_clip.dart';
+export 'src/presentation/text_clip.dart';
+export 'src/presentation/cross_fade_transition.dart';
+export 'src/utils/interpolate.dart';
+export 'src/utils/text_layout_utils.dart';
+export 'src/domain/render_config.dart';
+export 'src/domain/video_effect.dart';
+export 'src/domain/driver.dart';
+export 'src/domain/renderable.dart';
+export 'src/capture/frame_sequencer.dart';
+export 'src/encoding/ffmpeg_filter_graph_builder.dart';
+export 'src/encoding/video_encoder_service.dart';
+export 'src/integration/render_service.dart';
