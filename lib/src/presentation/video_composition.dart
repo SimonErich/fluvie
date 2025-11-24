@@ -52,18 +52,8 @@ class VideoComposition extends InheritedWidget implements Renderable {
 
   @override
   RenderConfig toConfig() {
-    // We need to traverse the element tree to find Clips.
-    // Since this method is called outside of the build phase (usually),
-    // we might need a context or a way to access the element tree.
-    // However, Renderable.toConfig() doesn't take a context.
-    // This implies we need to capture the config during build or have a mechanism to walk.
-    
-    // For now, we will assume this method is called when we have access to the Element.
-    // But wait, VideoComposition is a Widget. It doesn't have state or element access directly in this method.
-    // The RenderService will likely use an ElementVisitor on the root of the tree.
-    
-    // So VideoComposition.toConfig might just return the root config, 
-    // and the RenderService is responsible for populating the clips by walking the tree.
+    // VideoComposition.toConfig returns the root config.
+    // The RenderService is responsible for populating the clips by walking the tree.
     
     return RenderConfig(
       timeline: TimelineConfig(

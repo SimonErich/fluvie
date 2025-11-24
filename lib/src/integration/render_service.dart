@@ -65,9 +65,8 @@ class RenderService {
       // 1. Update state
       onFrameUpdate(frame);
       
-      // 2. Wait for build/paint
-      // In a real app, we need to ensure the frame is painted.
-      await Future.delayed(Duration(milliseconds: 16)); // Simulate frame time
+      // Wait for build/paint to ensure the frame is ready.
+      await Future.delayed(const Duration(milliseconds: 16));
       
       // 3. Capture
       try {
@@ -75,16 +74,8 @@ class RenderService {
         final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
         
         if (byteData != null) {
-          // Offload file writing to compute
-          // We need to copy the bytes because ByteData might be backed by external memory
-          // that is not safe to pass to isolate without copying or transfer.
-          // However, Uint8List is transferrable or copyable.
-          final buffer = byteData.buffer.asUint8List();
-          final path = '${frameDir.path}/frame_$frame.png';
-          
-          // Fire and forget write? No, we should wait to ensure integrity.
-          // But we can run it in parallel with the next frame preparation if we wanted.
-          // For now, let's just await it but offload the IO cost.
+          // Offload file writing to compute to avoid blocking the UI thread.
+          // We copy the buffer because ByteData might be backed by external memory.
           await compute(_writeFrame, _FrameData(path, buffer));
         }
         image.dispose();

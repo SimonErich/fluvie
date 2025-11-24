@@ -35,7 +35,7 @@ class TextClip extends Clip {
      return ClipConfig(
       startFrame: startFrame,
       durationInFrames: durationInFrames,
-      // TODO: Add text specific props if needed
+      // Text specific properties can be added here.
     );
   }
 }

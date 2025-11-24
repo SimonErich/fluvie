@@ -31,8 +31,6 @@ class Clip extends StatelessWidget implements Renderable {
   @override
   RenderConfig toConfig() {
     // Clip itself doesn't produce a full RenderConfig, but contributes to one.
-    // This interface might need adjustment or we return a ClipConfig.
-    // For now, we return a dummy RenderConfig or throw.
     throw UnimplementedError('Clip should return ClipConfig, not RenderConfig');
   }
 
@@ -40,7 +38,7 @@ class Clip extends StatelessWidget implements Renderable {
     return ClipConfig(
       startFrame: startFrame,
       durationInFrames: durationInFrames,
-      // TODO: Add child clips
+      // Child clips can be added here in the future.
     );
   }
 }

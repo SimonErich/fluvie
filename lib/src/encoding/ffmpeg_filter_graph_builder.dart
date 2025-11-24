@@ -27,9 +27,7 @@ class FFmpegFilterGraphBuilder {
     // If we had audio, we would mix it here.
     // [1:a] [2:a] amix=inputs=2 [a_out]
     
-    // For now, just return the video chain.
-    // Note: The actual command construction happens in VideoEncoderService which combines inputs and filtergraph.
-    // This builder just builds the filter string.
+    // Return the video chain.
     
     return sb.toString();
   }
