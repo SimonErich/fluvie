@@ -29,7 +29,7 @@ void main() {
       await theOutputFiltergraphUsesAnOverlayFilterWithAnEnableAndAlphaExpression(
           tester);
     });
-    testWidgets('''TextClip Animation''', (tester) async {
+    testWidgets('''TextSequence Animation''', (tester) async {
       await iUseATextclipAndAnimateItsOpacityUsingInterpolateBasedOnTheFrameNumber(
           tester);
       await theFramesequencerCapturesFramesDuringTheAnimation(tester);

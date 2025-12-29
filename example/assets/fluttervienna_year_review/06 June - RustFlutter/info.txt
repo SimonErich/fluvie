@@ -1,0 +1,3 @@
+June Meetup @ Lean-Coders
+Max R. Carrara comparing Dart and Rust
+Andreas Monitzer talking about when Dash Met Ferris

@@ -1,0 +1,24 @@
+# Files and directories to exclude from pub.dev publication
+
+# Documentation (hosted separately on GitHub Pages)
+doc/
+
+# MCP server (separate tool, not part of the Flutter package)
+mcp-server/
+
+# Development files
+new_concept.md
+.cursorrules
+
+# CI/CD configuration (users don't need this)
+.github/
+
+# IDE configuration
+.vscode/
+*.iml
+.idea/
+
+# Example build artifacts and assets (reduces package size from 1.3GB to ~1MB)
+example/build/
+example/.idea/
+example/assets/

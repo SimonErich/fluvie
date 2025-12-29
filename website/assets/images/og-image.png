@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="og-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0175C2;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1A1A2E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C4DFF;stop-opacity:1" />
+    </linearGradient>
+    <filter id="og-glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#og-gradient)"/>
+
+  <!-- Logo -->
+  <g transform="translate(100, 150)">
+    <rect x="0" y="0" width="80" height="80" rx="12" fill="none" stroke="white" stroke-width="6"/>
+    <line x1="0" y1="25" x2="80" y2="25" stroke="white" stroke-width="5"/>
+    <line x1="0" y1="55" x2="80" y2="55" stroke="white" stroke-width="5"/>
+    <circle cx="40" cy="40" r="15" fill="white"/>
+    <polygon points="34,32 34,48 48,40" fill="#0175C2"/>
+  </g>
+
+  <!-- Title -->
+  <text x="100" y="310" font-family="Arial, sans-serif" font-size="72" font-weight="900" fill="white" filter="url(#og-glow)">
+    Fluvie
+  </text>
+
+  <!-- Subtitle -->
+  <text x="100" y="370" font-family="Arial, sans-serif" font-size="36" fill="rgba(255,255,255,0.9)">
+    Programmatic Video Generation for Flutter
+  </text>
+
+  <!-- Feature bullets -->
+  <g transform="translate(100, 420)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="24" fill="rgba(255,255,255,0.8)">
+      ✓ Declarative widgets → Frame-perfect videos
+    </text>
+    <text x="0" y="40" font-family="Arial, sans-serif" font-size="24" fill="rgba(255,255,255,0.8)">
+      ✓ 30fps/60fps rendering with FFmpeg encoding
+    </text>
+    <text x="0" y="80" font-family="Arial, sans-serif" font-size="24" fill="rgba(255,255,255,0.8)">
+      ✓ Cross-platform (Desktop + Web)
+    </text>
+  </g>
+
+  <!-- Bottom -->
+  <text x="1100" y="600" text-anchor="end" font-family="Arial, sans-serif" font-size="20" fill="rgba(255,255,255,0.6)">
+    fluvie.dev
+  </text>
+</svg>

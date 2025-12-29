@@ -1,7 +1,17 @@
 name: fluvie
-description: "A new Flutter plugin project."
-version: 0.0.1
-homepage:
+description: A Flutter package for programmatic video generation using declarative widgets and FFmpeg. Create animated videos from Flutter widgets with frame-level control.
+version: 0.1.0
+homepage: https://github.com/simonerich/fluvie
+repository: https://github.com/simonerich/fluvie
+issue_tracker: https://github.com/simonerich/fluvie/issues
+documentation: https://simonerich.github.io/fluvie/
+
+topics:
+  - video
+  - animation
+  - ffmpeg
+  - rendering
+  - media
 
 environment:
   sdk: ^3.10.0
@@ -15,11 +25,11 @@ dependencies:
   web: ^1.0.0
   plugin_platform_interface: ^2.0.2
   flutter_riverpod: ^2.4.9
-  ffmpeg_kit_flutter_min_gpl: ^6.0.3
   freezed_annotation: ^2.4.1
   json_annotation: ^4.8.1
   path_provider: ^2.1.1
   uuid: ^4.2.1
+  just_audio: ^0.9.36
 
 dev_dependencies:
   flutter_test:
@@ -47,6 +57,8 @@ flutter:
   # adding or updating assets for this project.
   plugin:
     platforms:
+      linux:
+        pluginClass: FluviePlugin
       web:
         pluginClass: FluvieWeb
         fileName: fluvie_web.dart

@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0175C2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C4DFF;stop-opacity:1" />
+    </linearGradient>
+
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <style>
+      .box-fill { fill: rgba(255,255,255,0.05); }
+      .box-stroke { stroke: rgba(255,255,255,0.2); stroke-width: 2; }
+      .box-title { fill: white; font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 700; }
+      .box-subtitle { fill: #B0B0B0; font-family: 'Inter', sans-serif; font-size: 14px; }
+      .arrow { fill: none; stroke: url(#grad1); stroke-width: 3; marker-end: url(#arrowhead); }
+      .arrow-label { fill: #13B9FD; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; }
+    </style>
+
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#13B9FD" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="300" fill="#1A1A2E"/>
+
+  <!-- Title -->
+  <text x="500" y="30" text-anchor="middle" class="box-title" fill="url(#grad1)">
+    Fluvie Architecture: Dual-Engine Model
+  </text>
+
+  <!-- Box 1: Widget Tree -->
+  <g transform="translate(50, 80)">
+    <rect class="box-fill box-stroke" width="180" height="140" rx="12"/>
+    <text x="90" y="30" text-anchor="middle" class="box-title">Widget Tree</text>
+    <text x="90" y="55" text-anchor="middle" class="box-subtitle">Flutter Rendering</text>
+
+    <g transform="translate(20, 70)">
+      <text x="0" y="0" class="box-subtitle" font-size="12">• VideoComposition</text>
+      <text x="0" y="18" class="box-subtitle" font-size="12">• LayerStack</text>
+      <text x="0" y="36" class="box-subtitle" font-size="12">• Sequence</text>
+      <text x="0" y="54" class="box-subtitle" font-size="12">• TimeConsumer</text>
+    </g>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M 240 150 L 300 150" class="arrow"/>
+  <text x="270" y="140" text-anchor="middle" class="arrow-label">Render</text>
+
+  <!-- Box 2: Frame Sequence -->
+  <g transform="translate(310, 80)">
+    <rect class="box-fill box-stroke" width="180" height="140" rx="12"/>
+    <text x="90" y="30" text-anchor="middle" class="box-title">Frame Sequence</text>
+    <text x="90" y="55" text-anchor="middle" class="box-subtitle">Capture Pipeline</text>
+
+    <g transform="translate(20, 70)">
+      <rect width="30" height="24" fill="rgba(1, 117, 194, 0.3)" stroke="#0175C2" stroke-width="1" rx="2"/>
+      <text x="38" y="16" class="box-subtitle" font-size="11">frame_0001.png</text>
+
+      <rect y="30" width="30" height="24" fill="rgba(1, 117, 194, 0.3)" stroke="#0175C2" stroke-width="1" rx="2"/>
+      <text x="38" y="46" class="box-subtitle" font-size="11">frame_0002.png</text>
+
+      <text x="15" y="68" class="box-subtitle" font-size="16" text-anchor="middle">...</text>
+    </g>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M 500 150 L 560 150" class="arrow"/>
+  <text x="530" y="140" text-anchor="middle" class="arrow-label">Encode</text>
+
+  <!-- Box 3: FFmpeg -->
+  <g transform="translate(570, 80)">
+    <rect class="box-fill box-stroke" width="180" height="140" rx="12"/>
+    <text x="90" y="30" text-anchor="middle" class="box-title">FFmpeg</text>
+    <text x="90" y="55" text-anchor="middle" class="box-subtitle">Composition Engine</text>
+
+    <g transform="translate(20, 70)">
+      <text x="0" y="0" class="box-subtitle" font-size="12">• Video encoding</text>
+      <text x="0" y="18" class="box-subtitle" font-size="12">• Audio mixing</text>
+      <text x="0" y="36" class="box-subtitle" font-size="12">• Filter graphs</text>
+      <text x="0" y="54" class="box-subtitle" font-size="12">• Format conversion</text>
+    </g>
+  </g>
+
+  <!-- Arrow 3 -->
+  <path d="M 760 150 L 820 150" class="arrow"/>
+  <text x="790" y="140" text-anchor="middle" class="arrow-label">Output</text>
+
+  <!-- Box 4: Video Output -->
+  <g transform="translate(820, 80)">
+    <rect class="box-fill box-stroke" width="130" height="140" rx="12"/>
+    <text x="65" y="30" text-anchor="middle" class="box-title">Output</text>
+    <text x="65" y="55" text-anchor="middle" class="box-subtitle">Production Video</text>
+
+    <g transform="translate(25, 70)">
+      <!-- Video file icon -->
+      <rect width="80" height="60" fill="rgba(124, 77, 255, 0.2)" stroke="#7C4DFF" stroke-width="2" rx="6"/>
+      <polygon points="35,23 35,37 50,30" fill="#7C4DFF"/>
+      <text x="40" y="52" text-anchor="middle" class="box-subtitle" font-size="10">.mp4</text>
+    </g>
+  </g>
+
+  <!-- Bottom note -->
+  <text x="500" y="270" text-anchor="middle" class="box-subtitle" font-size="13">
+    Frame-perfect rendering: 30fps/60fps deterministic output
+  </text>
+</svg>

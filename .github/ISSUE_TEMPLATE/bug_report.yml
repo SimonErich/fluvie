@@ -1,0 +1,106 @@
+name: Bug Report
+description: Report a bug in Fluvie
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the form below.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+      placeholder: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Create a VideoComposition with...
+        2. Add a Sequence with...
+        3. Call render...
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Code Sample
+      description: If applicable, provide a minimal code sample that reproduces the issue.
+      render: dart
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: What platform are you running on?
+      multiple: true
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Web (Chrome)
+        - Web (Firefox)
+        - Web (Safari)
+        - Android
+        - iOS
+    validations:
+      required: true
+
+  - type: input
+    id: flutter-version
+    attributes:
+      label: Flutter Version
+      description: Output of `flutter --version`
+      placeholder: "Flutter 3.38.3 • channel stable"
+    validations:
+      required: true
+
+  - type: input
+    id: fluvie-version
+    attributes:
+      label: Fluvie Version
+      description: Version from your pubspec.yaml
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Include any relevant error messages or logs.
+      render: shell
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched for existing issues that describe this bug.
+          required: true
+        - label: I can reproduce this bug with the latest version of Fluvie.
+          required: true

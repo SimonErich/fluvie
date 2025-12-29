@@ -7,10 +7,10 @@ Future<void> theRenderserviceExecutesTheComposition(WidgetTester tester) async {
 
   final element = tester.element(compositionFinder);
   final service = RenderService();
-  
+
   // This should not throw
   final config = service.createConfigFromContext(element);
-  
+
   expect(config.timeline.fps, 30);
   expect(config.timeline.durationInFrames, 90);
 }

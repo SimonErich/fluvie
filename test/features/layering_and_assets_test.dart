@@ -16,7 +16,7 @@ import './step/the_resulting_frame_image_shows_both_child_clips_correctly_positi
 
 void main() {
   group('''Layering and External Assets''', () {
-    testWidgets('''VideoClip Integration''', (tester) async {
+    testWidgets('''VideoSequence Integration''', (tester) async {
       await iUseAVideoclipOfLength10SecondsStartingAtFrame30WithATrimOf2Seconds(
           tester);
       await theFfmpegfiltergraphbuilderGeneratesTheCommand(tester);

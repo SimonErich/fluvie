@@ -15,12 +15,10 @@ import 'video_composition.dart';
 /// ```
 class TimeConsumer extends StatelessWidget {
   /// Builder function called with the current context, frame number, and progress (0.0 to 1.0).
-  final Widget Function(BuildContext context, int frame, double progress) builder;
+  final Widget Function(BuildContext context, int frame, double progress)
+  builder;
 
-  const TimeConsumer({
-    super.key,
-    required this.builder,
-  });
+  const TimeConsumer({super.key, required this.builder});
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +39,23 @@ class FrameProvider extends InheritedWidget {
   /// The current frame number.
   final int frame;
 
-  const FrameProvider({
-    super.key,
-    required this.frame,
-    required super.child,
-  });
+  static final Set<void Function(int)> _frameListeners = {};
+  static int? _lastNotifiedFrame;
+
+  FrameProvider({super.key, required this.frame, required super.child}) {
+    if (_lastNotifiedFrame != frame) {
+      _lastNotifiedFrame = frame;
+      _notifyListeners(frame);
+    }
+  }
+
+  static void addFrameListener(void Function(int) listener) {
+    _frameListeners.add(listener);
+  }
+
+  static void removeFrameListener(void Function(int) listener) {
+    _frameListeners.remove(listener);
+  }
 
   static int? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<FrameProvider>()?.frame;
@@ -53,6 +63,16 @@ class FrameProvider extends InheritedWidget {
 
   @override
   bool updateShouldNotify(FrameProvider oldWidget) {
-    return frame != oldWidget.frame;
+    if (frame != oldWidget.frame) {
+      _notifyListeners(frame);
+      return true;
+    }
+    return false;
+  }
+
+  static void _notifyListeners(int frame) {
+    for (final listener in _frameListeners) {
+      listener(frame);
+    }
   }
 }

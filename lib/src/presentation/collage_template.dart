@@ -10,7 +10,7 @@ class CollageTemplate extends StatelessWidget {
 
   /// Creates a split-screen layout with two children side-by-side.
   const CollageTemplate.splitScreen({super.key, required this.children})
-      : type = 'splitScreen';
+    : type = 'splitScreen';
 
   @override
   Widget build(BuildContext context) {

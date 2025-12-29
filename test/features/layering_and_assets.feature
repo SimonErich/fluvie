@@ -1,7 +1,7 @@
 Feature: Layering and External Assets
 
-  Scenario: VideoClip Integration
-    Given I use a VideoClip of length 10 seconds, starting at frame 30, with a trim of 2 seconds
+  Scenario: VideoSequence Integration
+    Given I use a VideoSequence of length 10 seconds, starting at frame 30, with a trim of 2 seconds
     When the FFmpegFilterGraphBuilder generates the command
     Then the command includes input flags and a trim filter referencing the external file
 

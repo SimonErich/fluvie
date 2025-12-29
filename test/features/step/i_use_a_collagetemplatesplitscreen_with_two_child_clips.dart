@@ -3,7 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 
 Future<void> iUseACollagetemplatesplitscreenWithTwoChildClips(
-    WidgetTester tester) async {
+  WidgetTester tester,
+) async {
   await tester.pumpWidget(
     MaterialApp(
       home: VideoComposition(

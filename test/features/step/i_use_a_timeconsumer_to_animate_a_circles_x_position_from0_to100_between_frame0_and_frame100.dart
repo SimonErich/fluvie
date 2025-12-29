@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
-import 'package:fluvie/src/presentation/time_consumer.dart'; // Import for FrameProvider
+// Import for FrameProvider
 
-Future<void> iUseATimeconsumerToAnimateACirclesXPositionFrom0To100BetweenFrame0AndFrame100(
-    WidgetTester tester) async {
+Future<void>
+iUseATimeconsumerToAnimateACirclesXPositionFrom0To100BetweenFrame0AndFrame100(
+  WidgetTester tester,
+) async {
   // We start at frame 0
   await tester.pumpWidget(
     MaterialApp(
@@ -21,11 +23,7 @@ Future<void> iUseATimeconsumerToAnimateACirclesXPositionFrom0To100BetweenFrame0A
                   Positioned(
                     left: x,
                     top: 0,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      color: Colors.red,
-                    ),
+                    child: Container(width: 10, height: 10, color: Colors.red),
                   ),
                 ],
               );

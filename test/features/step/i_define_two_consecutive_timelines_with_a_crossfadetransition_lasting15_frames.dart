@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 
-Future<void> iDefineTwoConsecutiveTimelinesWithACrossfadetransitionLasting15Frames(
-    WidgetTester tester) async {
+Future<void>
+iDefineTwoConsecutiveTimelinesWithACrossfadetransitionLasting15Frames(
+  WidgetTester tester,
+) async {
   await tester.pumpWidget(
     MaterialApp(
       home: VideoComposition(

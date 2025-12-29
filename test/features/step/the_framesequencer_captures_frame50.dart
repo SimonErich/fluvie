@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
-import 'package:fluvie/src/presentation/time_consumer.dart';
 
 Future<void> theFramesequencerCapturesFrame50(WidgetTester tester) async {
   // Re-pump with frame 50
@@ -20,11 +19,7 @@ Future<void> theFramesequencerCapturesFrame50(WidgetTester tester) async {
                   Positioned(
                     left: x,
                     top: 0,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      color: Colors.red,
-                    ),
+                    child: Container(width: 10, height: 10, color: Colors.red),
                   ),
                 ],
               );
