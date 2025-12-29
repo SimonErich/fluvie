@@ -21,49 +21,49 @@ class DataVisualizationExample extends InteractiveExample {
 
   @override
   List<String> get features => [
-        'CounterText',
-        'Animated bars',
-        'VColumn',
-        'Stagger',
-      ];
+    'CounterText',
+    'Animated bars',
+    'VColumn',
+    'Stagger',
+  ];
 
   @override
   List<ExampleParameter> get parameters => [
-        ExampleParameter.slider(
-          id: 'targetValue1',
-          label: 'Metric 1 Target',
-          description: 'First metric value',
-          defaultValue: 1234,
-          minValue: 100,
-          maxValue: 9999,
-        ),
-        ExampleParameter.slider(
-          id: 'targetValue2',
-          label: 'Metric 2 Target',
-          description: 'Second metric value',
-          defaultValue: 567,
-          minValue: 100,
-          maxValue: 9999,
-        ),
-        ExampleParameter.slider(
-          id: 'targetValue3',
-          label: 'Metric 3 Target',
-          description: 'Third metric value',
-          defaultValue: 890,
-          minValue: 100,
-          maxValue: 9999,
-        ),
-      ];
+    ExampleParameter.slider(
+      id: 'targetValue1',
+      label: 'Metric 1 Target',
+      description: 'First metric value',
+      defaultValue: 1234,
+      minValue: 100,
+      maxValue: 9999,
+    ),
+    ExampleParameter.slider(
+      id: 'targetValue2',
+      label: 'Metric 2 Target',
+      description: 'Second metric value',
+      defaultValue: 567,
+      minValue: 100,
+      maxValue: 9999,
+    ),
+    ExampleParameter.slider(
+      id: 'targetValue3',
+      label: 'Metric 3 Target',
+      description: 'Third metric value',
+      defaultValue: 890,
+      minValue: 100,
+      maxValue: 9999,
+    ),
+  ];
 
   @override
   List<String> get instructions => [
-        'This example demonstrates data visualization in Fluvie.',
-        'CounterText animates numbers smoothly from 0 to the target value.',
-        'Stagger creates a cascading reveal of metrics for visual interest.',
-        'Progress bars use AnimatedProp to grow from 0% to their target width.',
-        'The combination creates an engaging data dashboard animation.',
-        'Adjust target values to see how the animation adapts!',
-      ];
+    'This example demonstrates data visualization in Fluvie.',
+    'CounterText animates numbers smoothly from 0 to the target value.',
+    'Stagger creates a cascading reveal of metrics for visual interest.',
+    'Progress bars use AnimatedProp to grow from 0% to their target width.',
+    'The combination creates an engaging data dashboard animation.',
+    'Adjust target values to see how the animation adapts!',
+  ];
 
   @override
   Widget buildWithParameters(Map<String, dynamic> parameterValues) {

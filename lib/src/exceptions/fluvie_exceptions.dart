@@ -77,8 +77,7 @@ class FFmpegNotFoundException extends FluvieException {
   ///
   /// - [message]: Details about where FFmpeg was searched for
   /// - [cause]: Optional underlying error
-  FFmpegNotFoundException(String message, [dynamic cause, StackTrace? stackTrace])
-      : super(message, cause, stackTrace);
+  FFmpegNotFoundException(super.message, [super.cause, super.stackTrace]);
 
   @override
   String toString() => 'FFmpegNotFoundException: $message';
@@ -410,11 +409,8 @@ class FileNotFoundException extends FluvieException {
   ///
   /// - [filePath]: The path that was searched for
   /// - [cause]: Optional underlying error
-  FileNotFoundException(
-    this.filePath, [
-    dynamic cause,
-    StackTrace? stackTrace,
-  ]) : super('File not found: $filePath', cause, stackTrace);
+  FileNotFoundException(this.filePath, [dynamic cause, StackTrace? stackTrace])
+    : super('File not found: $filePath', cause, stackTrace);
 
   @override
   String toString() {

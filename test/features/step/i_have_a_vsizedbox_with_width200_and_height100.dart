@@ -5,7 +5,8 @@ import 'layout_context.dart';
 
 /// Usage: I have a VSizedBox with width 200 and height 100
 Future<void> iHaveAVsizedboxWithWidth200AndHeight100(
-    WidgetTester tester) async {
+  WidgetTester tester,
+) async {
   final widget = VSizedBox(
     width: 200,
     height: 100,

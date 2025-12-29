@@ -20,18 +20,22 @@ void main() {
       await iApplyAVintageeffectToAClip(tester);
       await theFfmpegfiltergraphbuilderProcessesTheRenderconfig(tester);
       await theOutputFiltergraphIncludesACurvesFilterAppliedToTheClipsStreamLabel(
-          tester);
+        tester,
+      );
     });
     testWidgets('''CrossFade Transition''', (tester) async {
       await iDefineTwoConsecutiveTimelinesWithACrossfadetransitionLasting15Frames(
-          tester);
+        tester,
+      );
       await theFfmpegfiltergraphbuilderProcessesTheTransitionPoint(tester);
       await theOutputFiltergraphUsesAnOverlayFilterWithAnEnableAndAlphaExpression(
-          tester);
+        tester,
+      );
     });
     testWidgets('''TextSequence Animation''', (tester) async {
       await iUseATextclipAndAnimateItsOpacityUsingInterpolateBasedOnTheFrameNumber(
-          tester);
+        tester,
+      );
       await theFramesequencerCapturesFramesDuringTheAnimation(tester);
       await theIntermediatePngSequenceShowsTheTextElementFadingSmoothly(tester);
     });

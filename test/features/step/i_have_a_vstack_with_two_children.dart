@@ -7,8 +7,18 @@ import 'layout_context.dart';
 Future<void> iHaveAVstackWithTwoChildren(WidgetTester tester) async {
   final widget = VStack(
     children: [
-      Container(key: const Key('child1'), width: 100, height: 100, color: Colors.red),
-      Container(key: const Key('child2'), width: 50, height: 50, color: Colors.blue),
+      Container(
+        key: const Key('child1'),
+        width: 100,
+        height: 100,
+        color: Colors.red,
+      ),
+      Container(
+        key: const Key('child2'),
+        width: 50,
+        height: 50,
+        color: Colors.blue,
+      ),
     ],
   );
   setCurrentWidget(widget);

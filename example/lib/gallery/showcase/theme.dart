@@ -58,10 +58,7 @@ class GalleryTheme {
     return BoxDecoration(
       color: backgroundColor ?? glassBackground,
       borderRadius: BorderRadius.circular(borderRadius),
-      border: Border.all(
-        color: borderColor ?? glassBorder,
-        width: borderWidth,
-      ),
+      border: Border.all(color: borderColor ?? glassBorder, width: borderWidth),
     );
   }
 
@@ -86,7 +83,9 @@ class GalleryTheme {
         borderRadius: BorderRadius.circular(borderRadius),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: padding != null ? Padding(padding: padding, child: child) : child,
+          child: padding != null
+              ? Padding(padding: padding, child: child)
+              : child,
         ),
       ),
     );
@@ -199,13 +198,8 @@ class GalleryTheme {
         side: BorderSide(color: glassBorder),
       ),
     ),
-    iconTheme: const IconThemeData(
-      color: textPrimary,
-    ),
-    dividerTheme: DividerThemeData(
-      color: glassBorder,
-      thickness: 1,
-    ),
+    iconTheme: const IconThemeData(color: textPrimary),
+    dividerTheme: DividerThemeData(color: glassBorder, thickness: 1),
     chipTheme: ChipThemeData(
       backgroundColor: glassBackground,
       labelStyle: const TextStyle(color: textPrimary, fontSize: 12),

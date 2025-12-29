@@ -9,8 +9,18 @@ Future<void> iHaveAVcolumnWithStaggerDelay15(WidgetTester tester) async {
   final widget = VColumn(
     stagger: StaggerConfig(delay: 15),
     children: [
-      Container(key: const Key('child1'), width: 50, height: 50, color: Colors.red),
-      Container(key: const Key('child2'), width: 50, height: 50, color: Colors.green),
+      Container(
+        key: const Key('child1'),
+        width: 50,
+        height: 50,
+        color: Colors.red,
+      ),
+      Container(
+        key: const Key('child2'),
+        width: 50,
+        height: 50,
+        color: Colors.green,
+      ),
     ],
   );
   setCurrentWidget(widget);

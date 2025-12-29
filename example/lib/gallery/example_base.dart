@@ -72,4 +72,3 @@ abstract class InteractiveExample extends VideoExample {
     return buildWithParameters(defaultParameters);
   }
 }
-

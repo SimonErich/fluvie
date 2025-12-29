@@ -18,22 +18,26 @@ void main() {
   group('''Layering and External Assets''', () {
     testWidgets('''VideoSequence Integration''', (tester) async {
       await iUseAVideoclipOfLength10SecondsStartingAtFrame30WithATrimOf2Seconds(
-          tester);
+        tester,
+      );
       await theFfmpegfiltergraphbuilderGeneratesTheCommand(tester);
       await theCommandIncludesInputFlagsAndATrimFilterReferencingTheExternalFile(
-          tester);
+        tester,
+      );
     });
     testWidgets('''LayerStack Z-Index''', (tester) async {
       await iUseALayerstackContainingARedBoxAndAGreenCircle(tester);
       await theFramesequencerCapturesAnyFrame(tester);
       await theRasterizedImageShowsTheGreenCircleVisiblyOverlayingTheRedBox(
-          tester);
+        tester,
+      );
     });
     testWidgets('''Collage Template Layout''', (tester) async {
       await iUseACollagetemplatesplitscreenWithTwoChildClips(tester);
       await theFramesequencerCapturesTheFirstFrame(tester);
       await theResultingFrameImageShowsBothChildClipsCorrectlyPositionedSidebyside(
-          tester);
+        tester,
+      );
     });
   });
 }

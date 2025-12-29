@@ -23,7 +23,8 @@ void main() {
     });
     testWidgets('''Driver Interpolation Accuracy''', (tester) async {
       await iUseATimeconsumerToAnimateACirclesXPositionFrom0To100BetweenFrame0AndFrame100(
-          tester);
+        tester,
+      );
       await theFramesequencerCapturesFrame50(tester);
       await theRasterizedImageForFrame50ContainsTheCircleCenteredAtX50(tester);
     });
@@ -31,7 +32,8 @@ void main() {
       await iDefineAVideocompositionWrappedInARepaintboundary(tester);
       await iInspectTheRenderconfigOutput(tester);
       await theGlobalkeyForTheBoundaryIsCorrectlyRegisteredForTheFramesequencer(
-          tester);
+        tester,
+      );
     });
   });
 }

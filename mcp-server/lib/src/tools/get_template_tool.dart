@@ -5,7 +5,8 @@ import '../mcp/mcp_types.dart';
 ToolDefinition createGetTemplateTool() {
   return ToolDefinition(
     name: 'getTemplate',
-    description: '''Get detailed information about a specific Fluvie template including its properties, data requirements, usage examples, and recommended configurations.
+    description:
+        '''Get detailed information about a specific Fluvie template including its properties, data requirements, usage examples, and recommended configurations.
 
 Available categories: intro, ranking, data_viz, collage, thematic, conclusion
 
@@ -20,7 +21,14 @@ Conclusion templates: ParticleFarewell, TheSignature, TheSummaryPoster, TheInfin
       'properties': {
         'category': {
           'type': 'string',
-          'enum': ['intro', 'ranking', 'data_viz', 'collage', 'thematic', 'conclusion'],
+          'enum': [
+            'intro',
+            'ranking',
+            'data_viz',
+            'collage',
+            'thematic',
+            'conclusion',
+          ],
           'description': 'Template category',
         },
         'name': {
@@ -81,7 +89,8 @@ String _formatTemplateDetails(TemplateInfo template) {
   buffer.writeln('# ${template.name}');
   buffer.writeln();
   buffer.writeln('**Category:** ${template.category}');
-  buffer.writeln('**Recommended Length:** ${template.recommendedLength} frames');
+  buffer
+      .writeln('**Recommended Length:** ${template.recommendedLength} frames');
   buffer.writeln('**Default Theme:** ${template.defaultTheme}');
   buffer.writeln('**Default Timing:** ${template.defaultTiming}');
   buffer.writeln();
@@ -142,9 +151,15 @@ String _formatTemplateDetails(TemplateInfo template) {
     case 'RankingData':
       buffer.writeln("        title: 'Top 5',");
       buffer.writeln('        items: [');
-      buffer.writeln("          RankingItem(rank: 1, title: 'First Place', subtitle: 'Details'),");
-      buffer.writeln("          RankingItem(rank: 2, title: 'Second Place', subtitle: 'Details'),");
-      buffer.writeln("          RankingItem(rank: 3, title: 'Third Place', subtitle: 'Details'),");
+      buffer.writeln(
+        "          RankingItem(rank: 1, title: 'First Place', subtitle: 'Details'),",
+      );
+      buffer.writeln(
+        "          RankingItem(rank: 2, title: 'Second Place', subtitle: 'Details'),",
+      );
+      buffer.writeln(
+        "          RankingItem(rank: 3, title: 'Third Place', subtitle: 'Details'),",
+      );
       buffer.writeln('        ],');
     case 'MetricsData':
       buffer.writeln("        title: 'Your Stats',");

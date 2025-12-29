@@ -22,77 +22,77 @@ class MotionGraphicsDemoExample extends InteractiveExample {
 
   @override
   List<String> get features => [
-        'PropAnimation.combine',
-        'Translate',
-        'Rotate',
-        'Scale',
-        'VStack',
-      ];
+    'PropAnimation.combine',
+    'Translate',
+    'Rotate',
+    'Scale',
+    'VStack',
+  ];
 
   @override
   List<ExampleParameter> get parameters => [
-        ExampleParameter.slider(
-          id: 'shapeCount',
-          label: 'Shape Count',
-          description: 'Number of animated shapes',
-          defaultValue: 5,
-          minValue: 3,
-          maxValue: 8,
+    ExampleParameter.slider(
+      id: 'shapeCount',
+      label: 'Shape Count',
+      description: 'Number of animated shapes',
+      defaultValue: 5,
+      minValue: 3,
+      maxValue: 8,
+    ),
+    ExampleParameter.slider(
+      id: 'animationDuration',
+      label: 'Animation Duration (frames)',
+      description: 'How long each shape animates',
+      defaultValue: 60,
+      minValue: 30,
+      maxValue: 120,
+    ),
+    ExampleParameter.dropdown(
+      id: 'easingCurve',
+      label: 'Easing Curve',
+      description: 'Animation easing style',
+      defaultValue: 'easeInOut',
+      options: const [
+        DropdownOption(
+          value: 'linear',
+          label: 'Linear',
+          description: 'Constant speed',
         ),
-        ExampleParameter.slider(
-          id: 'animationDuration',
-          label: 'Animation Duration (frames)',
-          description: 'How long each shape animates',
-          defaultValue: 60,
-          minValue: 30,
-          maxValue: 120,
+        DropdownOption(
+          value: 'easeInOut',
+          label: 'Ease In Out',
+          description: 'Smooth acceleration and deceleration',
         ),
-        ExampleParameter.dropdown(
-          id: 'easingCurve',
-          label: 'Easing Curve',
-          description: 'Animation easing style',
-          defaultValue: 'easeInOut',
-          options: const [
-            DropdownOption(
-              value: 'linear',
-              label: 'Linear',
-              description: 'Constant speed',
-            ),
-            DropdownOption(
-              value: 'easeInOut',
-              label: 'Ease In Out',
-              description: 'Smooth acceleration and deceleration',
-            ),
-            DropdownOption(
-              value: 'elasticOut',
-              label: 'Elastic Out',
-              description: 'Bouncy overshoot',
-            ),
-          ],
+        DropdownOption(
+          value: 'elasticOut',
+          label: 'Elastic Out',
+          description: 'Bouncy overshoot',
         ),
-        ExampleParameter.color(
-          id: 'primaryColor',
-          label: 'Primary Color',
-          description: 'Color for shapes',
-          defaultValue: const Color(0xFF6C5CE7),
-        ),
-      ];
+      ],
+    ),
+    ExampleParameter.color(
+      id: 'primaryColor',
+      label: 'Primary Color',
+      description: 'Color for shapes',
+      defaultValue: const Color(0xFF6C5CE7),
+    ),
+  ];
 
   @override
   List<String> get instructions => [
-        'This example demonstrates combined property animations in Fluvie.',
-        'PropAnimation.combine merges multiple transformations: translate, rotate, and scale.',
-        'Each shape uses a staggered delay based on its index for a cascading effect.',
-        'VStack layers the shapes on top of each other with timing control.',
-        'The animations use different easing curves to create varied motion feels.',
-        'Experiment with different shape counts and curves to see unique patterns!',
-      ];
+    'This example demonstrates combined property animations in Fluvie.',
+    'PropAnimation.combine merges multiple transformations: translate, rotate, and scale.',
+    'Each shape uses a staggered delay based on its index for a cascading effect.',
+    'VStack layers the shapes on top of each other with timing control.',
+    'The animations use different easing curves to create varied motion feels.',
+    'Experiment with different shape counts and curves to see unique patterns!',
+  ];
 
   @override
   Widget buildWithParameters(Map<String, dynamic> parameterValues) {
     final shapeCount = (parameterValues['shapeCount'] as num).toInt();
-    final animationDuration =
-        (parameterValues['animationDuration'] as num).toInt();
+    final animationDuration = (parameterValues['animationDuration'] as num)
+        .toInt();
     final easingCurve = parameterValues['easingCurve'] as String;
     final primaryColor = parameterValues['primaryColor'] as Color;
 
@@ -150,18 +150,9 @@ class MotionGraphicsDemoExample extends InteractiveExample {
         start: Offset(0, -100 - (index * 20).toDouble()),
         end: Offset.zero,
       ),
-      PropAnimation.rotate(
-        start: 0,
-        end: rotationAmount,
-      ),
-      PropAnimation.scale(
-        start: startScale,
-        end: 1.0,
-      ),
-      PropAnimation.fade(
-        start: 0.0,
-        end: 0.8 - (index * 0.1),
-      ),
+      PropAnimation.rotate(start: 0, end: rotationAmount),
+      PropAnimation.scale(start: startScale, end: 1.0),
+      PropAnimation.fade(start: 0.0, end: 0.8 - (index * 0.1)),
     ]);
 
     return AnimatedProp(
@@ -176,12 +167,7 @@ class MotionGraphicsDemoExample extends InteractiveExample {
   Widget _buildShape(int index, int total, Color color) {
     final size = 150.0 - (index * 15.0);
     final hue = (color.computeLuminance() * 360 + (index * 30)) % 360;
-    final shapeColor = HSVColor.fromAHSV(
-      1.0,
-      hue,
-      0.7,
-      0.9,
-    ).toColor();
+    final shapeColor = HSVColor.fromAHSV(1.0, hue, 0.7, 0.9).toColor();
 
     // Alternate between circle and square
     if (index % 2 == 0) {

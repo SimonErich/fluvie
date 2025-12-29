@@ -31,7 +31,9 @@ class SseHandler {
 
   /// Send a keep-alive ping
   static String createPing() {
-    return jsonEncode({'type': 'ping', 'timestamp': DateTime.now().toIso8601String()});
+    return jsonEncode(
+      {'type': 'ping', 'timestamp': DateTime.now().toIso8601String()},
+    );
   }
 
   /// Create an event message

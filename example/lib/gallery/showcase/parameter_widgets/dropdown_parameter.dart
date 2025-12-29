@@ -22,19 +22,16 @@ class DropdownParameterWidget extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          parameter.label,
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
+        Text(parameter.label, style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           initialValue: value,
           decoration: InputDecoration(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
             ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
           items: options.map((option) {
             return DropdownMenuItem<String>(
@@ -47,9 +44,9 @@ class DropdownParameterWidget extends ConsumerWidget {
                   if (option.description != null)
                     Text(
                       option.description!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                     ),
                 ],
               ),
@@ -66,9 +63,9 @@ class DropdownParameterWidget extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 4),
             child: Text(
               parameter.description,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
             ),
           ),
       ],

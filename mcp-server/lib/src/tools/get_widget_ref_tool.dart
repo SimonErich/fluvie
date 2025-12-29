@@ -4,7 +4,8 @@ import '../mcp/mcp_types.dart';
 ToolDefinition createGetWidgetReferenceTool() {
   return ToolDefinition(
     name: 'getWidgetReference',
-    description: '''Get detailed documentation for a specific Fluvie widget including properties, examples, and related widgets.
+    description:
+        '''Get detailed documentation for a specific Fluvie widget including properties, examples, and related widgets.
 
 Core widgets: Video, VideoComposition, Scene, Sequence, TimeConsumer
 Layout widgets: LayerStack, Layer, VStack, VColumn, VRow, VCenter, VPadding, VSizedBox, VPositioned
@@ -97,7 +98,6 @@ Video(
 ## Related
 - Scene, SceneTransition, EncodingConfig
 ''',
-
     'Scene': '''
 # Scene Widget
 
@@ -133,7 +133,6 @@ Scene(
 ## Related
 - Video, Background, SceneTransition
 ''',
-
     'AnimatedText': '''
 # AnimatedText Widget
 
@@ -184,7 +183,6 @@ AnimatedText.scaleFade(
 ## Related
 - TypewriterText, CounterText, FadeText
 ''',
-
     'VCenter': '''
 # VCenter Widget
 
@@ -213,7 +211,6 @@ VCenter(
 ## Related
 - VPositioned, VColumn, VRow, VStack
 ''',
-
     'VPositioned': '''
 # VPositioned Widget
 
@@ -250,7 +247,6 @@ VPositioned(
 ## Related
 - VCenter, VStack, LayerStack
 ''',
-
     'VColumn': '''
 # VColumn Widget
 
@@ -283,7 +279,6 @@ VColumn(
 ## Related
 - VRow, StaggerConfig, VStack
 ''',
-
     'AnimatedProp': '''
 # AnimatedProp Widget
 
@@ -319,7 +314,6 @@ AnimatedProp.zoomIn(duration: 30, child: widget)
 ## Related
 - PropAnimation, TimeConsumer, StaggerConfig
 ''',
-
     'PropAnimation': '''
 # PropAnimation
 
@@ -356,7 +350,6 @@ PropAnimation.combine([
 ## Related
 - AnimatedProp, TimeConsumer
 ''',
-
     'ParticleEffect': '''
 # ParticleEffect Widget
 
@@ -395,7 +388,6 @@ ParticleEffect.confetti(
 ## Related
 - EffectOverlay, Background
 ''',
-
     'StatCard': '''
 # StatCard Widget
 
@@ -433,7 +425,6 @@ StatCard(
 ## Related
 - CounterText, AnimatedText
 ''',
-
     'EmbeddedVideo': '''
 # EmbeddedVideo Widget
 
@@ -472,7 +463,6 @@ EmbeddedVideo(
 ## Related
 - KenBurnsImage, VideoSequence
 ''',
-
     'Background': '''
 # Background
 
@@ -507,7 +497,6 @@ Background.gradient(
 ## Related
 - Scene, EffectOverlay
 ''',
-
     'SceneTransition': '''
 # SceneTransition
 
@@ -542,7 +531,6 @@ Scene(
 ## Related
 - Video, Scene
 ''',
-
     'TimeConsumer': '''
 # TimeConsumer Widget
 
@@ -570,7 +558,6 @@ TimeConsumer(
 ## Related
 - AnimatedProp, interpolate()
 ''',
-
     'StaggerConfig': '''
 # StaggerConfig
 

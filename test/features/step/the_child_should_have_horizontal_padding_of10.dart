@@ -4,7 +4,8 @@ import 'layout_context.dart';
 
 /// Usage: the child should have horizontal padding of 10
 Future<void> theChildShouldHaveHorizontalPaddingOf10(
-    WidgetTester tester) async {
+  WidgetTester tester,
+) async {
   final widget = getCurrentWidget();
   await tester.pumpWidget(MaterialApp(home: widget));
 

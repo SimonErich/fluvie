@@ -20,44 +20,39 @@ class TemplateSamplerExample extends InteractiveExample {
   String get category => 'Templates & Helpers';
 
   @override
-  List<String> get features => [
-        'PhotoCard',
-        'Templates',
-        'VColumn',
-        'Stagger',
-      ];
+  List<String> get features => ['PhotoCard', 'Templates', 'VColumn', 'Stagger'];
 
   @override
   List<ExampleParameter> get parameters => [
-        ExampleParameter.text(
-          id: 'cardTitle',
-          label: 'Card Title',
-          description: 'Title text for the photo card',
-          defaultValue: 'My Photo',
-        ),
-        ExampleParameter.text(
-          id: 'cardSubtitle',
-          label: 'Card Subtitle',
-          description: 'Subtitle text',
-          defaultValue: 'Beautiful Moment',
-        ),
-        ExampleParameter.color(
-          id: 'accentColor',
-          label: 'Accent Color',
-          description: 'Theme color',
-          defaultValue: const Color(0xFFE74C3C),
-        ),
-      ];
+    ExampleParameter.text(
+      id: 'cardTitle',
+      label: 'Card Title',
+      description: 'Title text for the photo card',
+      defaultValue: 'My Photo',
+    ),
+    ExampleParameter.text(
+      id: 'cardSubtitle',
+      label: 'Card Subtitle',
+      description: 'Subtitle text',
+      defaultValue: 'Beautiful Moment',
+    ),
+    ExampleParameter.color(
+      id: 'accentColor',
+      label: 'Accent Color',
+      description: 'Theme color',
+      defaultValue: const Color(0xFFE74C3C),
+    ),
+  ];
 
   @override
   List<String> get instructions => [
-        'This example demonstrates Fluvie\'s built-in template widgets.',
-        'PhotoCard is a pre-made component for displaying images with captions.',
-        'Templates handle common layouts so you don\'t have to build them from scratch.',
-        'The template system makes creating professional videos faster.',
-        'Each template is customizable with colors, text, and timing.',
-        'Try different titles and colors to personalize the template!',
-      ];
+    'This example demonstrates Fluvie\'s built-in template widgets.',
+    'PhotoCard is a pre-made component for displaying images with captions.',
+    'Templates handle common layouts so you don\'t have to build them from scratch.',
+    'The template system makes creating professional videos faster.',
+    'Each template is customizable with colors, text, and timing.',
+    'Try different titles and colors to personalize the template!',
+  ];
 
   @override
   Widget buildWithParameters(Map<String, dynamic> parameterValues) {
@@ -161,10 +156,7 @@ class TemplateSamplerExample extends InteractiveExample {
                 const SizedBox(height: 8),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    color: Colors.white70,
-                  ),
+                  style: const TextStyle(fontSize: 22, color: Colors.white70),
                 ),
               ],
             ),
@@ -181,10 +173,7 @@ class TemplateSamplerExample extends InteractiveExample {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 2,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,10 +204,7 @@ class TemplateSamplerExample extends InteractiveExample {
                   const SizedBox(height: 5),
                   const Text(
                     'Pre-built layout component',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white60,
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.white60),
                   ),
                 ],
               ),
@@ -247,7 +233,11 @@ class TemplateSamplerExample extends InteractiveExample {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.format_quote, size: 50, color: color.withValues(alpha: 0.5)),
+          Icon(
+            Icons.format_quote,
+            size: 50,
+            color: color.withValues(alpha: 0.5),
+          ),
           const SizedBox(height: 15),
           const Text(
             'Templates make video creation faster and more consistent',

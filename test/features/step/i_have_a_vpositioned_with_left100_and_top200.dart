@@ -8,7 +8,12 @@ Future<void> iHaveAVpositionedWithLeft100AndTop200(WidgetTester tester) async {
   final widget = VPositioned(
     left: 100,
     top: 200,
-    child: Container(key: const Key('child'), width: 50, height: 50, color: Colors.blue),
+    child: Container(
+      key: const Key('child'),
+      width: 50,
+      height: 50,
+      color: Colors.blue,
+    ),
   );
   setCurrentWidget(widget);
 }

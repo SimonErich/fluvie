@@ -7,7 +7,12 @@ import 'layout_context.dart';
 Future<void> iHaveAVpaddingWithPadding20(WidgetTester tester) async {
   final widget = VPadding.all(
     20,
-    child: Container(key: const Key('child'), width: 50, height: 50, color: Colors.blue),
+    child: Container(
+      key: const Key('child'),
+      width: 50,
+      height: 50,
+      color: Colors.blue,
+    ),
   );
   setCurrentWidget(widget);
 }

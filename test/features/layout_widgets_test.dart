@@ -52,8 +52,9 @@ void main() {
       await iHaveAVstackWithTwoChildren(tester);
       await theChildrenShouldBeRenderedInAStack(tester);
     });
-    testWidgets('''VStack with timing shows and hides content''',
-        (tester) async {
+    testWidgets('''VStack with timing shows and hides content''', (
+      tester,
+    ) async {
       await iHaveAVstackWithStartframe30AndEndframe120(tester);
       await theCurrentFrameIs0(tester);
       await theVstackShouldNotBeVisible(tester);
@@ -66,8 +67,9 @@ void main() {
       await iHaveAVpositionedWithLeft100AndTop200(tester);
       await theChildShouldBePositionedAtLeft100AndTop200(tester);
     });
-    testWidgets('''VPositioned.fill creates a filling positioned widget''',
-        (tester) async {
+    testWidgets('''VPositioned.fill creates a filling positioned widget''', (
+      tester,
+    ) async {
       await iHaveAVpositionedfill(tester);
       await thePositionedShouldHaveAllEdgesSetTo0(tester);
     });
@@ -75,8 +77,9 @@ void main() {
       await iHaveAVrowWithThreeChildren(tester);
       await theChildrenShouldBeArrangedInARow(tester);
     });
-    testWidgets('''VRow with spacing adds gaps between children''',
-        (tester) async {
+    testWidgets('''VRow with spacing adds gaps between children''', (
+      tester,
+    ) async {
       await iHaveAVrowWithSpacing20(tester);
       await thereShouldBeSizedboxSpacersBetweenChildren(tester);
     });
@@ -84,8 +87,9 @@ void main() {
       await iHaveAVcolumnWithThreeChildren(tester);
       await theChildrenShouldBeArrangedInAColumn(tester);
     });
-    testWidgets('''VColumn with stagger animates children sequentially''',
-        (tester) async {
+    testWidgets('''VColumn with stagger animates children sequentially''', (
+      tester,
+    ) async {
       await iHaveAVcolumnWithStaggerDelay15(tester);
       await theCurrentFrameIs0(tester);
       await theFirstChildShouldStartAnimating(tester);
@@ -100,8 +104,9 @@ void main() {
       await iHaveAVpaddingWithPadding20(tester);
       await theChildShouldHave20PixelsOfPaddingOnAllSides(tester);
     });
-    testWidgets('''VPadding.symmetric creates symmetric padding''',
-        (tester) async {
+    testWidgets('''VPadding.symmetric creates symmetric padding''', (
+      tester,
+    ) async {
       await iHaveAVpaddingsymmetricWithHorizontal10AndVertical20(tester);
       await theChildShouldHaveHorizontalPaddingOf10(tester);
       await theChildShouldHaveVerticalPaddingOf20(tester);

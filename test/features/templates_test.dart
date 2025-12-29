@@ -46,8 +46,9 @@ void main() {
       await theTemplateShouldBuildWithoutErrors(tester);
       await theTemplateShouldHaveCategoryRanking(tester);
     });
-    testWidgets('''Data visualization template renders metrics''',
-        (tester) async {
+    testWidgets('''Data visualization template renders metrics''', (
+      tester,
+    ) async {
       await iHaveADatavizdataWith3Metrics(tester);
       await iCreateALiquidminutesTemplateWithTheData(tester);
       await theTemplateShouldBuildWithoutErrors(tester);
@@ -82,8 +83,9 @@ void main() {
       await iCreateATheneongateTemplateWithNeonTheme(tester);
       await theTemplateShouldUseTheNeonColorPalette(tester);
     });
-    testWidgets('''Audio reactive widgets work with mock provider''',
-        (tester) async {
+    testWidgets('''Audio reactive widgets work with mock provider''', (
+      tester,
+    ) async {
       await iHaveAMockaudiodataproviderWith120Bpm(tester);
       await iInitializeTheAudioProvider(tester);
       await iCanGetTheBpmValue(tester);

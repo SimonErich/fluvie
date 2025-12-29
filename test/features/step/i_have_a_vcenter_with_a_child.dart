@@ -6,7 +6,12 @@ import 'layout_context.dart';
 /// Usage: I have a VCenter with a child
 Future<void> iHaveAVcenterWithAChild(WidgetTester tester) async {
   final widget = VCenter(
-    child: Container(key: const Key('child'), width: 50, height: 50, color: Colors.blue),
+    child: Container(
+      key: const Key('child'),
+      width: 50,
+      height: 50,
+      color: Colors.blue,
+    ),
   );
   setCurrentWidget(widget);
 }

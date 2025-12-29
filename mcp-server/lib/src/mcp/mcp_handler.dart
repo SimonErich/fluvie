@@ -22,7 +22,9 @@ class McpHandler {
   });
 
   /// Handle an incoming MCP JSON-RPC request
-  Future<Map<String, dynamic>> handleRequest(Map<String, dynamic> request) async {
+  Future<Map<String, dynamic>> handleRequest(
+    Map<String, dynamic> request,
+  ) async {
     final method = request['method'] as String?;
     final params = request['params'] as Map<String, dynamic>?;
     final id = request['id'];
@@ -151,7 +153,10 @@ class McpHandler {
   }
 
   /// Create a success response
-  Map<String, dynamic> _successResponse(dynamic id, Map<String, dynamic> result) {
+  Map<String, dynamic> _successResponse(
+    dynamic id,
+    Map<String, dynamic> result,
+  ) {
     return {
       'jsonrpc': '2.0',
       'id': id,

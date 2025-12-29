@@ -55,13 +55,31 @@ class TemplateIndex {
         recommendedLength: 150,
         dataType: 'IntroData',
         requiredFields: ['title'],
-        optionalFields: ['subtitle', 'year', 'logoPath', 'userName', 'profileImagePath'],
+        optionalFields: [
+          'subtitle',
+          'year',
+          'logoPath',
+          'userName',
+          'profileImagePath',
+        ],
         defaultTheme: 'neon',
         defaultTiming: 'dramatic',
         properties: {
-          'ringCount': {'type': 'int', 'default': 5, 'description': 'Number of concentric rings'},
-          'showParticles': {'type': 'bool', 'default': true, 'description': 'Show sparkle particles'},
-          'animateRotation': {'type': 'bool', 'default': true, 'description': 'Rotate rings'},
+          'ringCount': {
+            'type': 'int',
+            'default': 5,
+            'description': 'Number of concentric rings',
+          },
+          'showParticles': {
+            'type': 'bool',
+            'default': true,
+            'description': 'Show sparkle particles',
+          },
+          'animateRotation': {
+            'type': 'bool',
+            'default': true,
+            'description': 'Rotate rings',
+          },
         },
       ),
       'DigitalMirror': const TemplateInfo(

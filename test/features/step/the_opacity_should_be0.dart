@@ -15,10 +15,7 @@ Future<void> theOpacityShouldBe0(WidgetTester tester) async {
       home: VideoComposition(
         durationInFrames: 200,
         fps: 30,
-        child: FrameProvider(
-          frame: frame,
-          child: widget,
-        ),
+        child: FrameProvider(frame: frame, child: widget),
       ),
     ),
   );

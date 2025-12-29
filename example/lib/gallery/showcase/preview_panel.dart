@@ -73,7 +73,9 @@ class PreviewPanel extends ConsumerWidget {
           // Frame scrubber controls - glassmorphic bar
           GalleryTheme.glassmorphicContainer(
             borderRadius: 0,
-            backgroundColor: GalleryTheme.elevatedSurface.withValues(alpha: 0.5),
+            backgroundColor: GalleryTheme.elevatedSurface.withValues(
+              alpha: 0.5,
+            ),
             blur: 15,
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -82,7 +84,10 @@ class PreviewPanel extends ConsumerWidget {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: GalleryTheme.glassBackground,
                         borderRadius: BorderRadius.circular(20),
@@ -103,7 +108,9 @@ class PreviewPanel extends ConsumerWidget {
                           activeTrackColor: GalleryTheme.accentPink,
                           inactiveTrackColor: GalleryTheme.elevatedSurface,
                           thumbColor: GalleryTheme.accentPink,
-                          overlayColor: GalleryTheme.accentPink.withValues(alpha: 0.2),
+                          overlayColor: GalleryTheme.accentPink.withValues(
+                            alpha: 0.2,
+                          ),
                           thumbShape: const RoundSliderThumbShape(
                             enabledThumbRadius: 8,
                             elevation: 3,
@@ -123,7 +130,10 @@ class PreviewPanel extends ConsumerWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: GalleryTheme.glassBackground,
                         borderRadius: BorderRadius.circular(20),

@@ -11,9 +11,7 @@ void main() {
         MaterialApp(
           home: Scene(
             durationInFrames: 120,
-            children: [
-              Container(key: const Key('child'), color: Colors.blue),
-            ],
+            children: [Container(key: const Key('child'), color: Colors.blue)],
           ),
         ),
       );
@@ -65,7 +63,9 @@ void main() {
           home: Scene(
             durationInFrames: 90,
             transitionIn: const SceneTransition.crossFade(durationInFrames: 15),
-            transitionOut: const SceneTransition.crossFade(durationInFrames: 10),
+            transitionOut: const SceneTransition.crossFade(
+              durationInFrames: 10,
+            ),
             children: const [],
           ),
         ),
@@ -84,9 +84,7 @@ void main() {
           home: Scene.solid(
             durationInFrames: 120,
             color: Colors.black,
-            children: [
-              Container(key: const Key('child')),
-            ],
+            children: [Container(key: const Key('child'))],
           ),
         ),
       );
@@ -121,7 +119,9 @@ void main() {
             durationInFrames: 120,
             color: Colors.blue,
             transitionIn: const SceneTransition.crossFade(durationInFrames: 20),
-            transitionOut: const SceneTransition.crossFade(durationInFrames: 20),
+            transitionOut: const SceneTransition.crossFade(
+              durationInFrames: 20,
+            ),
           ),
         ),
       );
@@ -139,9 +139,7 @@ void main() {
           home: Scene.gradient(
             durationInFrames: 120,
             colors: {0: Colors.blue, 120: Colors.purple},
-            children: [
-              Container(key: const Key('child')),
-            ],
+            children: [Container(key: const Key('child'))],
           ),
         ),
       );
@@ -225,10 +223,7 @@ void main() {
     testWidgets('uses default 15 frame transitions', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scene.crossFade(
-            durationInFrames: 120,
-            children: [],
-          ),
+          home: Scene.crossFade(durationInFrames: 120, children: []),
         ),
       );
 
@@ -241,11 +236,7 @@ void main() {
   group('Scene.empty', () {
     testWidgets('creates empty scene with no children', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scene.empty(
-            durationInFrames: 30,
-          ),
-        ),
+        const MaterialApp(home: Scene.empty(durationInFrames: 30)),
       );
 
       final scene = tester.widget<Scene>(find.byType(Scene));
@@ -256,11 +247,7 @@ void main() {
 
     testWidgets('has no fade by default', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scene.empty(
-            durationInFrames: 30,
-          ),
-        ),
+        const MaterialApp(home: Scene.empty(durationInFrames: 30)),
       );
 
       final scene = tester.widget<Scene>(find.byType(Scene));
@@ -286,7 +273,9 @@ void main() {
   });
 
   group('SceneContext', () {
-    testWidgets('provides scene timing information to descendants', (tester) async {
+    testWidgets('provides scene timing information to descendants', (
+      tester,
+    ) async {
       SceneContext? capturedContext;
 
       await tester.pumpWidget(
@@ -309,7 +298,9 @@ void main() {
       expect(capturedContext!.sceneDurationInFrames, equals(200));
     });
 
-    testWidgets('returns null when no SceneContext ancestor exists', (tester) async {
+    testWidgets('returns null when no SceneContext ancestor exists', (
+      tester,
+    ) async {
       SceneContext? capturedContext;
 
       await tester.pumpWidget(

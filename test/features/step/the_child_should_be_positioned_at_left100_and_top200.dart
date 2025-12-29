@@ -4,7 +4,8 @@ import 'layout_context.dart';
 
 /// Usage: the child should be positioned at left 100 and top 200
 Future<void> theChildShouldBePositionedAtLeft100AndTop200(
-    WidgetTester tester) async {
+  WidgetTester tester,
+) async {
   final widget = getCurrentWidget();
   // Wrap in a Stack since Positioned requires it
   await tester.pumpWidget(MaterialApp(home: Stack(children: [widget])));

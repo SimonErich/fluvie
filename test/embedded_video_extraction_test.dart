@@ -4,54 +4,57 @@ import 'package:fluvie/fluvie.dart';
 
 void main() {
   group('EmbeddedVideo extraction', () {
-    test('extracts EmbeddedVideo from nested VPositioned -> AnimatedProp -> Container', () {
-      // Create a Video with EmbeddedVideo nested in custom widgets
-      final video = Video(
-        fps: 30,
-        width: 1080,
-        height: 1920,
-        scenes: [
-          Scene(
-            durationInFrames: 240,
-            children: [
-              VPositioned(
-                top: 750,
-                left: 90,
-                child: AnimatedProp(
-                  animation: const TranslateAnimation(
-                    start: Offset(0, 30),
-                    end: Offset.zero,
-                  ),
-                  duration: 35,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+    test(
+      'extracts EmbeddedVideo from nested VPositioned -> AnimatedProp -> Container',
+      () {
+        // Create a Video with EmbeddedVideo nested in custom widgets
+        final video = Video(
+          fps: 30,
+          width: 1080,
+          height: 1920,
+          scenes: [
+            Scene(
+              durationInFrames: 240,
+              children: [
+                VPositioned(
+                  top: 750,
+                  left: 90,
+                  child: AnimatedProp(
+                    animation: const TranslateAnimation(
+                      start: Offset(0, 30),
+                      end: Offset.zero,
                     ),
-                    child: EmbeddedVideo(
-                      assetPath: 'assets/test_video.mp4',
-                      width: 900,
-                      height: 500,
-                      startFrame: 40,
-                      durationInFrames: 200,
-                      includeAudio: true,
+                    duration: 35,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: EmbeddedVideo(
+                        assetPath: 'assets/test_video.mp4',
+                        width: 900,
+                        height: 500,
+                        startFrame: 40,
+                        durationInFrames: 200,
+                        includeAudio: true,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      );
+              ],
+            ),
+          ],
+        );
 
-      // Extract embedded video configs
-      final configs = video.extractEmbeddedVideoConfigs();
+        // Extract embedded video configs
+        final configs = video.extractEmbeddedVideoConfigs();
 
-      // Should find the EmbeddedVideo
-      expect(configs.length, equals(1));
-      expect(configs[0].videoPath, equals('assets/test_video.mp4'));
-      expect(configs[0].durationInFrames, equals(200));
-      expect(configs[0].includeAudio, isTrue);
-    });
+        // Should find the EmbeddedVideo
+        expect(configs.length, equals(1));
+        expect(configs[0].videoPath, equals('assets/test_video.mp4'));
+        expect(configs[0].durationInFrames, equals(200));
+        expect(configs[0].includeAudio, isTrue);
+      },
+    );
 
     test('extracts EmbeddedVideo directly in scene children', () {
       final video = Video(
@@ -100,9 +103,7 @@ void main() {
                 right: 0,
                 startFrame: 5,
                 fadeInFrames: 20,
-                child: const Center(
-                  child: SizedBox(width: 120, height: 120),
-                ),
+                child: const Center(child: SizedBox(width: 120, height: 120)),
               ),
               // Title - VPositioned with Column
               VPositioned(
@@ -165,11 +166,18 @@ void main() {
       final configs = video.extractEmbeddedVideoConfigs();
 
       // Should find the EmbeddedVideo
-      expect(configs.length, equals(1), reason: 'Should find exactly 1 EmbeddedVideo');
+      expect(
+        configs.length,
+        equals(1),
+        reason: 'Should find exactly 1 EmbeddedVideo',
+      );
       expect(configs[0].videoPath, equals('assets/demo_data/highlight.mp4'));
       expect(configs[0].durationInFrames, equals(200));
       expect(configs[0].includeAudio, isTrue);
-      expect(configs[0].startFrame, equals(40)); // sceneStartFrame (0) + widget.startFrame (40)
+      expect(
+        configs[0].startFrame,
+        equals(40),
+      ); // sceneStartFrame (0) + widget.startFrame (40)
     });
   });
 }

@@ -4,7 +4,8 @@ import 'layout_context.dart';
 
 /// Usage: there should be SizedBox spacers between children
 Future<void> thereShouldBeSizedboxSpacersBetweenChildren(
-    WidgetTester tester) async {
+  WidgetTester tester,
+) async {
   final widget = getCurrentWidget();
   await tester.pumpWidget(MaterialApp(home: widget));
 

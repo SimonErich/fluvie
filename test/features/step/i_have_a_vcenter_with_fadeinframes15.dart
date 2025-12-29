@@ -9,7 +9,12 @@ Future<void> iHaveAVcenterWithFadeinframes15(WidgetTester tester) async {
     startFrame: 30,
     endFrame: 100,
     fadeInFrames: 15,
-    child: Container(key: const Key('child'), width: 50, height: 50, color: Colors.blue),
+    child: Container(
+      key: const Key('child'),
+      width: 50,
+      height: 50,
+      color: Colors.blue,
+    ),
   );
   setCurrentWidget(widget);
   setStartFrame(30);

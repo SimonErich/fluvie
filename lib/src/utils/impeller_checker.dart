@@ -58,10 +58,7 @@ class ImpellerChecker {
 
       return _isImpellerEnabled;
     } catch (e) {
-      FluvieLogger.warning(
-        'Error detecting renderer: $e',
-        module: 'impeller',
-      );
+      FluvieLogger.warning('Error detecting renderer: $e', module: 'impeller');
       _isImpellerEnabled = null;
       return null;
     }
@@ -125,14 +122,18 @@ class ImpellerChecker {
       ),
       title: Row(
         children: [
-          const Icon(Icons.warning_amber_rounded, color: Color(0xFFFF3333), size: 32),
+          const Icon(
+            Icons.warning_amber_rounded,
+            color: Color(0xFFFF3333),
+            size: 32,
+          ),
           const SizedBox(width: 12),
           Text(
             'Renderer Warning',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: const Color(0xFFFF3333),
-                  fontWeight: FontWeight.bold,
-                ),
+              color: const Color(0xFFFF3333),
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -154,7 +155,9 @@ class ImpellerChecker {
             decoration: BoxDecoration(
               color: const Color(0xFF330000),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFFF3333).withValues(alpha: 0.3)),
+              border: Border.all(
+                color: const Color(0xFFFF3333).withValues(alpha: 0.3),
+              ),
             ),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,10 +173,7 @@ class ImpellerChecker {
                 SizedBox(height: 8),
                 Text(
                   'This will cause black backgrounds and rendering artifacts in exported videos.',
-                  style: TextStyle(
-                    color: Color(0xFFFFAAAA),
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: Color(0xFFFFAAAA), fontSize: 13),
                 ),
               ],
             ),
@@ -181,10 +181,7 @@ class ImpellerChecker {
           const SizedBox(height: 16),
           const Text(
             'To enable Impeller, restart your app with:',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.white70, fontSize: 14),
           ),
           const SizedBox(height: 8),
           Container(
@@ -192,7 +189,9 @@ class ImpellerChecker {
             decoration: BoxDecoration(
               color: const Color(0xFF002200),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFF00FF00).withValues(alpha: 0.3)),
+              border: Border.all(
+                color: const Color(0xFF00FF00).withValues(alpha: 0.3),
+              ),
             ),
             child: const SelectableText(
               'flutter run --enable-impeller',
@@ -207,10 +206,7 @@ class ImpellerChecker {
           const SizedBox(height: 12),
           const Text(
             'Or add to your launch.json for debugging:',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 8),
           Container(
@@ -234,9 +230,7 @@ class ImpellerChecker {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          style: TextButton.styleFrom(
-            foregroundColor: const Color(0xFFFF6666),
-          ),
+          style: TextButton.styleFrom(foregroundColor: const Color(0xFFFF6666)),
           child: const Text('I UNDERSTAND - CONTINUE ANYWAY'),
         ),
       ],
@@ -250,22 +244,18 @@ class ImpellerChecker {
     final isImpeller = isImpellerEnabled();
 
     if (isImpeller == false) {
-      FluvieLogger.box(
-        '⚠️  RENDERER WARNING ⚠️',
-        [
-          '',
-          'Fluvie requires Impeller for proper video rendering.',
-          'Skia renderer detected - this will cause rendering artifacts!',
-          '',
-          'To fix this, restart your app with:',
-          '  flutter run --enable-impeller',
-          '',
-          'Or add to launch.json:',
-          '  "args": ["--enable-impeller"]',
-          '',
-        ],
-        module: 'impeller',
-      );
+      FluvieLogger.box('⚠️  RENDERER WARNING ⚠️', [
+        '',
+        'Fluvie requires Impeller for proper video rendering.',
+        'Skia renderer detected - this will cause rendering artifacts!',
+        '',
+        'To fix this, restart your app with:',
+        '  flutter run --enable-impeller',
+        '',
+        'Or add to launch.json:',
+        '  "args": ["--enable-impeller"]',
+        '',
+      ], module: 'impeller');
     }
   }
 

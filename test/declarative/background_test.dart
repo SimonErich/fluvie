@@ -4,7 +4,9 @@ import 'package:fluvie/src/declarative/background/background.dart';
 
 void main() {
   group('Background.solid', () {
-    testWidgets('creates solid background with specified color', (tester) async {
+    testWidgets('creates solid background with specified color', (
+      tester,
+    ) async {
       const color = Color(0xFF123456);
       final background = Background.solid(color);
 
@@ -88,7 +90,10 @@ void main() {
       const background = Background.image(assetPath: 'assets/bg.png');
 
       expect(background, isA<ImageBackground>());
-      expect((background as ImageBackground).assetPath, equals('assets/bg.png'));
+      expect(
+        (background as ImageBackground).assetPath,
+        equals('assets/bg.png'),
+      );
     });
 
     testWidgets('uses default cover fit', (tester) async {
@@ -112,7 +117,10 @@ void main() {
       const background = Background.video(assetPath: 'assets/bg.mp4');
 
       expect(background, isA<VideoBackground>());
-      expect((background as VideoBackground).assetPath, equals('assets/bg.mp4'));
+      expect(
+        (background as VideoBackground).assetPath,
+        equals('assets/bg.mp4'),
+      );
     });
 
     testWidgets('uses default cover fit', (tester) async {
@@ -181,7 +189,9 @@ void main() {
   });
 
   group('Background.radial', () {
-    testWidgets('creates radial gradient with center and edge colors', (tester) async {
+    testWidgets('creates radial gradient with center and edge colors', (
+      tester,
+    ) async {
       final background = Background.radial(
         centerColor: Colors.purple,
         edgeColor: Colors.black,
@@ -238,9 +248,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Builder(
-            builder: (context) => background.build(context, 100),
-          ),
+          home: Builder(builder: (context) => background.build(context, 100)),
         ),
       );
 
@@ -252,9 +260,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Builder(
-            builder: (context) => background.build(context, 100),
-          ),
+          home: Builder(builder: (context) => background.build(context, 100)),
         ),
       );
 

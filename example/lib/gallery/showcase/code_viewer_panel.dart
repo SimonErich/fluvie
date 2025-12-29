@@ -21,11 +21,7 @@ class CodeViewerPanel extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.code,
-              size: 64,
-              color: GalleryTheme.textTertiary,
-            ),
+            Icon(Icons.code, size: 64, color: GalleryTheme.textTertiary),
             const SizedBox(height: 16),
             Text(
               'Select an example to view code',
@@ -47,9 +43,7 @@ class CodeViewerPanel extends ConsumerWidget {
           // Custom tab header
           Row(
             children: [
-              Expanded(
-                child: _buildCustomTabs(showInstructions, ref),
-              ),
+              Expanded(child: _buildCustomTabs(showInstructions, ref)),
               const SizedBox(width: 8),
               if (!showInstructions)
                 Container(
@@ -121,21 +115,17 @@ class CodeViewerPanel extends ConsumerWidget {
             color: isSelected ? null : GalleryTheme.elevatedSurface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected
-                  ? Colors.transparent
-                  : GalleryTheme.glassBorder,
+              color: isSelected ? Colors.transparent : GalleryTheme.glassBorder,
               width: 1.5,
             ),
-            boxShadow: isSelected ? GalleryTheme.glowEffect(blurRadius: 12) : null,
+            boxShadow: isSelected
+                ? GalleryTheme.glowEffect(blurRadius: 12)
+                : null,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                color: Colors.white,
-                size: 18,
-              ),
+              Icon(icon, color: Colors.white, size: 18),
               const SizedBox(width: 8),
               Text(
                 label,
@@ -173,7 +163,9 @@ class CodeViewerPanel extends ConsumerWidget {
 
   Widget _buildInstructions(BuildContext context) {
     final instructions = example!.instructions;
-    final difficultyColor = GalleryTheme.getDifficultyColor(example!.difficulty);
+    final difficultyColor = GalleryTheme.getDifficultyColor(
+      example!.difficulty,
+    );
 
     return ListView.separated(
       itemCount: instructions.length + 1,
@@ -182,7 +174,9 @@ class CodeViewerPanel extends ConsumerWidget {
         if (index == 0) {
           // Header card
           return GalleryTheme.glassmorphicContainer(
-            backgroundColor: GalleryTheme.elevatedSurface.withValues(alpha: 0.3),
+            backgroundColor: GalleryTheme.elevatedSurface.withValues(
+              alpha: 0.3,
+            ),
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +198,10 @@ class CodeViewerPanel extends ConsumerWidget {
                   runSpacing: 10,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: difficultyColor.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
@@ -234,12 +231,19 @@ class CodeViewerPanel extends ConsumerWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
-                        color: GalleryTheme.gradientStart.withValues(alpha: 0.2),
+                        color: GalleryTheme.gradientStart.withValues(
+                          alpha: 0.2,
+                        ),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: GalleryTheme.gradientStart.withValues(alpha: 0.5),
+                          color: GalleryTheme.gradientStart.withValues(
+                            alpha: 0.5,
+                          ),
                           width: 1.5,
                         ),
                       ),
@@ -252,25 +256,30 @@ class CodeViewerPanel extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    ...example!.features.map((feature) => Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: GalleryTheme.glassBackground,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: GalleryTheme.glassBorder,
-                              width: 1.5,
-                            ),
+                    ...example!.features.map(
+                      (feature) => Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: GalleryTheme.glassBackground,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: GalleryTheme.glassBorder,
+                            width: 1.5,
                           ),
-                          child: Text(
-                            feature,
-                            style: const TextStyle(
-                              color: GalleryTheme.textSecondary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
+                        ),
+                        child: Text(
+                          feature,
+                          style: const TextStyle(
+                            color: GalleryTheme.textSecondary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
                           ),
-                        )),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],

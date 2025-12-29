@@ -21,43 +21,43 @@ class AdvancedShowcaseExample extends InteractiveExample {
 
   @override
   List<String> get features => [
-        'Multi-scene',
-        'Scene transitions',
-        'Complex animations',
-        'All widgets combined',
-      ];
+    'Multi-scene',
+    'Scene transitions',
+    'Complex animations',
+    'All widgets combined',
+  ];
 
   @override
   List<ExampleParameter> get parameters => [
-        ExampleParameter.text(
-          id: 'projectName',
-          label: 'Project Name',
-          description: 'Name of your project',
-          defaultValue: 'Fluvie',
-        ),
-        ExampleParameter.text(
-          id: 'tagline',
-          label: 'Tagline',
-          description: 'Project tagline',
-          defaultValue: 'Create Videos with Flutter',
-        ),
-        ExampleParameter.color(
-          id: 'brandColor',
-          label: 'Brand Color',
-          description: 'Primary brand color',
-          defaultValue: const Color(0xFF6C5CE7),
-        ),
-      ];
+    ExampleParameter.text(
+      id: 'projectName',
+      label: 'Project Name',
+      description: 'Name of your project',
+      defaultValue: 'Fluvie',
+    ),
+    ExampleParameter.text(
+      id: 'tagline',
+      label: 'Tagline',
+      description: 'Project tagline',
+      defaultValue: 'Create Videos with Flutter',
+    ),
+    ExampleParameter.color(
+      id: 'brandColor',
+      label: 'Brand Color',
+      description: 'Primary brand color',
+      defaultValue: const Color(0xFF6C5CE7),
+    ),
+  ];
 
   @override
   List<String> get instructions => [
-        'This advanced example combines multiple scenes into a complete video.',
-        'Scene 1: Animated title with particle-like elements.',
-        'Scene 2: Feature showcase with staggered entry.',
-        'Scene 3: Statistics dashboard with counters.',
-        'Scene transitions create smooth flow between sections.',
-        'This demonstrates how to build complete, production-ready videos!',
-      ];
+    'This advanced example combines multiple scenes into a complete video.',
+    'Scene 1: Animated title with particle-like elements.',
+    'Scene 2: Feature showcase with staggered entry.',
+    'Scene 3: Statistics dashboard with counters.',
+    'Scene transitions create smooth flow between sections.',
+    'This demonstrates how to build complete, production-ready videos!',
+  ];
 
   @override
   Widget buildWithParameters(Map<String, dynamic> parameterValues) {
@@ -165,10 +165,7 @@ class AdvancedShowcaseExample extends InteractiveExample {
     return Scene(
       durationInFrames: 90,
       background: Background.gradient(
-        colors: {
-          0: const Color(0xFF24243E),
-          90: const Color(0xFF0F0C29),
-        },
+        colors: {0: const Color(0xFF24243E), 90: const Color(0xFF0F0C29)},
       ),
       transitionOut: SceneTransition.crossFade(durationInFrames: 15),
       children: [
@@ -231,10 +228,7 @@ class AdvancedShowcaseExample extends InteractiveExample {
     return Scene(
       durationInFrames: 90,
       background: Background.gradient(
-        colors: {
-          0: const Color(0xFF0F0C29),
-          90: const Color(0xFF302B63),
-        },
+        colors: {0: const Color(0xFF0F0C29), 90: const Color(0xFF302B63)},
       ),
       children: [
         VCenter(
@@ -280,10 +274,7 @@ class AdvancedShowcaseExample extends InteractiveExample {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 24,
-              color: Colors.white60,
-            ),
+            style: const TextStyle(fontSize: 24, color: Colors.white60),
           ),
           const SizedBox(height: 10),
           CounterText(

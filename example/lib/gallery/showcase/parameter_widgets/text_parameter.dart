@@ -54,19 +54,17 @@ class _TextParameterWidgetState extends ConsumerState<TextParameterWidget> {
         children: [
           Text(
             widget.parameter.label,
-            style: GalleryTheme.textTheme.titleLarge?.copyWith(
-              fontSize: 15,
-            ),
+            style: GalleryTheme.textTheme.titleLarge?.copyWith(fontSize: 15),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _controller,
-            style: GalleryTheme.textTheme.bodyLarge?.copyWith(
-              fontSize: 14,
-            ),
+            style: GalleryTheme.textTheme.bodyLarge?.copyWith(fontSize: 14),
             decoration: InputDecoration(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
               filled: true,
               fillColor: GalleryTheme.deepBackground,
               border: OutlineInputBorder(
@@ -75,11 +73,17 @@ class _TextParameterWidgetState extends ConsumerState<TextParameterWidget> {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: GalleryTheme.glassBorder, width: 1.5),
+                borderSide: BorderSide(
+                  color: GalleryTheme.glassBorder,
+                  width: 1.5,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: GalleryTheme.accentPink, width: 2),
+                borderSide: BorderSide(
+                  color: GalleryTheme.accentPink,
+                  width: 2,
+                ),
               ),
               hintText: 'Enter ${widget.parameter.label.toLowerCase()}',
               hintStyle: GalleryTheme.textTheme.bodyMedium?.copyWith(
@@ -92,9 +96,7 @@ class _TextParameterWidgetState extends ConsumerState<TextParameterWidget> {
             const SizedBox(height: 8),
             Text(
               widget.parameter.description,
-              style: GalleryTheme.textTheme.bodyMedium?.copyWith(
-                fontSize: 12,
-              ),
+              style: GalleryTheme.textTheme.bodyMedium?.copyWith(fontSize: 12),
             ),
           ],
         ],

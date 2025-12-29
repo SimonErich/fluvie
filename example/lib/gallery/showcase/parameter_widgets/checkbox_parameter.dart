@@ -28,9 +28,9 @@ class CheckboxParameterWidget extends ConsumerWidget {
           subtitle: parameter.description.isNotEmpty
               ? Text(
                   parameter.description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                 )
               : null,
           value: value,

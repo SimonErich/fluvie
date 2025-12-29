@@ -21,62 +21,53 @@ class TextAnimationsShowcaseExample extends InteractiveExample {
 
   @override
   List<String> get features => [
-        'TypewriterText',
-        'CounterText',
-        'AnimatedText',
-        'VColumn',
-      ];
+    'TypewriterText',
+    'CounterText',
+    'AnimatedText',
+    'VColumn',
+  ];
 
   @override
   List<ExampleParameter> get parameters => [
-        ExampleParameter.slider(
-          id: 'typewriterSpeed',
-          label: 'Typewriter Speed',
-          description: 'Characters per second',
-          defaultValue: 15.0,
-          minValue: 5.0,
-          maxValue: 30.0,
-          divisions: 25,
-        ),
-        ExampleParameter.slider(
-          id: 'counterTarget',
-          label: 'Counter Target',
-          description: 'Number to count to',
-          defaultValue: 1000,
-          minValue: 100,
-          maxValue: 9999,
-        ),
-        ExampleParameter.dropdown(
-          id: 'animationStyle',
-          label: 'Animation Style',
-          description: 'Type of animation for third text',
-          defaultValue: 'slideUpFade',
-          options: const [
-            DropdownOption(
-              value: 'slideUpFade',
-              label: 'Slide Up Fade',
-            ),
-            DropdownOption(
-              value: 'scaleFade',
-              label: 'Scale Fade',
-            ),
-            DropdownOption(
-              value: 'fadeIn',
-              label: 'Fade In',
-            ),
-          ],
-        ),
-      ];
+    ExampleParameter.slider(
+      id: 'typewriterSpeed',
+      label: 'Typewriter Speed',
+      description: 'Characters per second',
+      defaultValue: 15.0,
+      minValue: 5.0,
+      maxValue: 30.0,
+      divisions: 25,
+    ),
+    ExampleParameter.slider(
+      id: 'counterTarget',
+      label: 'Counter Target',
+      description: 'Number to count to',
+      defaultValue: 1000,
+      minValue: 100,
+      maxValue: 9999,
+    ),
+    ExampleParameter.dropdown(
+      id: 'animationStyle',
+      label: 'Animation Style',
+      description: 'Type of animation for third text',
+      defaultValue: 'slideUpFade',
+      options: const [
+        DropdownOption(value: 'slideUpFade', label: 'Slide Up Fade'),
+        DropdownOption(value: 'scaleFade', label: 'Scale Fade'),
+        DropdownOption(value: 'fadeIn', label: 'Fade In'),
+      ],
+    ),
+  ];
 
   @override
   List<String> get instructions => [
-        'This example showcases three different text animation types in Fluvie.',
-        'TypewriterText reveals characters one at a time, like typing.',
-        'CounterText animates numbers from a starting value to a target.',
-        'AnimatedText provides various preset animations like slide, scale, and fade.',
-        'VColumn arranges the text elements vertically with spacing.',
-        'All three animations run simultaneously, each with their own timing.',
-      ];
+    'This example showcases three different text animation types in Fluvie.',
+    'TypewriterText reveals characters one at a time, like typing.',
+    'CounterText animates numbers from a starting value to a target.',
+    'AnimatedText provides various preset animations like slide, scale, and fade.',
+    'VColumn arranges the text elements vertically with spacing.',
+    'All three animations run simultaneously, each with their own timing.',
+  ];
 
   @override
   Widget buildWithParameters(Map<String, dynamic> parameterValues) {
@@ -136,10 +127,7 @@ class TextAnimationsShowcaseExample extends InteractiveExample {
   }
 
   Widget _buildAnimatedText(String style) {
-    const textStyle = TextStyle(
-      fontSize: 36,
-      color: Colors.white70,
-    );
+    const textStyle = TextStyle(fontSize: 36, color: Colors.white70);
 
     switch (style) {
       case 'slideUpFade':

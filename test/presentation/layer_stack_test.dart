@@ -11,16 +11,10 @@ void main() {
           home: LayerStack(
             children: [
               Layer(
-                child: Container(
-                  key: const Key('layer1'),
-                  color: Colors.red,
-                ),
+                child: Container(key: const Key('layer1'), color: Colors.red),
               ),
               Layer(
-                child: Container(
-                  key: const Key('layer2'),
-                  color: Colors.green,
-                ),
+                child: Container(key: const Key('layer2'), color: Colors.green),
               ),
             ],
           ),
@@ -33,11 +27,7 @@ void main() {
 
     testWidgets('can be created with empty children', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: LayerStack(
-            children: [],
-          ),
-        ),
+        const MaterialApp(home: LayerStack(children: [])),
       );
 
       expect(find.byType(LayerStack), findsOneWidget);
@@ -47,9 +37,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: LayerStack(
-            children: [
-              Layer(child: Container(color: Colors.red)),
-            ],
+            children: [Layer(child: Container(color: Colors.red))],
           ),
         ),
       );
@@ -78,9 +66,7 @@ void main() {
         MaterialApp(
           home: LayerStack(
             fit: StackFit.expand,
-            children: [
-              Layer(child: Container(color: Colors.red)),
-            ],
+            children: [Layer(child: Container(color: Colors.red))],
           ),
         ),
       );
@@ -94,9 +80,7 @@ void main() {
         MaterialApp(
           home: LayerStack(
             clipBehavior: Clip.antiAlias,
-            children: [
-              Layer(child: Container(color: Colors.red)),
-            ],
+            children: [Layer(child: Container(color: Colors.red))],
           ),
         ),
       );
@@ -113,10 +97,7 @@ void main() {
           home: LayerStack(
             children: [
               Layer(
-                child: Container(
-                  key: const Key('child'),
-                  color: Colors.blue,
-                ),
+                child: Container(key: const Key('child'), color: Colors.blue),
               ),
             ],
           ),
@@ -131,10 +112,7 @@ void main() {
         MaterialApp(
           home: LayerStack(
             children: [
-              Layer(
-                opacity: 0.5,
-                child: Container(color: Colors.blue),
-              ),
+              Layer(opacity: 0.5, child: Container(color: Colors.blue)),
             ],
           ),
         ),
@@ -167,10 +145,7 @@ void main() {
             children: [
               Layer(
                 enabled: false,
-                child: Container(
-                  key: const Key('hidden'),
-                  color: Colors.blue,
-                ),
+                child: Container(key: const Key('hidden'), color: Colors.blue),
               ),
             ],
           ),
@@ -271,11 +246,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: LayerStack(
-            children: [
-              Layer.faded(
-                child: Container(color: Colors.blue),
-              ),
-            ],
+            children: [Layer.faded(child: Container(color: Colors.blue))],
           ),
         ),
       );
@@ -388,11 +359,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: LayerStack(
-            children: [
-              Layer.background(
-                child: Container(color: Colors.black),
-              ),
-            ],
+            children: [Layer.background(child: Container(color: Colors.black))],
           ),
         ),
       );
@@ -405,11 +372,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: LayerStack(
-            children: [
-              Layer.background(
-                child: Container(color: Colors.black),
-              ),
-            ],
+            children: [Layer.background(child: Container(color: Colors.black))],
           ),
         ),
       );

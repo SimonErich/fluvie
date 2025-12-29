@@ -10,8 +10,9 @@ import 'parameter_widgets/text_parameter.dart';
 import 'theme.dart';
 
 /// Provider for parameter values
-final parameterValuesProvider =
-    StateProvider<Map<String, dynamic>>((ref) => {});
+final parameterValuesProvider = StateProvider<Map<String, dynamic>>(
+  (ref) => {},
+);
 
 /// Panel displaying parameter controls
 class ControlsPanel extends ConsumerWidget {
@@ -26,11 +27,7 @@ class ControlsPanel extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.tune,
-              size: 64,
-              color: GalleryTheme.textTertiary,
-            ),
+            Icon(Icons.tune, size: 64, color: GalleryTheme.textTertiary),
             const SizedBox(height: 16),
             Text(
               'Select an example to see controls',
@@ -83,7 +80,11 @@ class ControlsPanel extends ConsumerWidget {
                   ),
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.refresh, color: Colors.white, size: 20),
+                  icon: const Icon(
+                    Icons.refresh,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                   tooltip: 'Reset to defaults',
                   onPressed: () {
                     ref.read(parameterValuesProvider.notifier).state =
@@ -110,7 +111,8 @@ class ControlsPanel extends ConsumerWidget {
                         const SizedBox(height: 20),
                     itemBuilder: (context, index) {
                       final parameter = parameters[index];
-                      final value = parameterValues[parameter.id] ??
+                      final value =
+                          parameterValues[parameter.id] ??
                           parameter.defaultValue;
 
                       return _buildParameterWidget(

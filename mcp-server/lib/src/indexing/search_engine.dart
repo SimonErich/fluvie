@@ -105,10 +105,13 @@ class SearchEngine {
       }
 
       // Boost if query appears in first 500 chars (likely important content)
-      if (doc.content.toLowerCase().substring(
+      if (doc.content
+          .toLowerCase()
+          .substring(
             0,
             min(500, doc.content.length),
-          ).contains(queryLower)) {
+          )
+          .contains(queryLower)) {
         score *= 1.3;
       }
 

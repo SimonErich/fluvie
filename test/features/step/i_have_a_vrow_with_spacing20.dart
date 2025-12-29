@@ -8,8 +8,18 @@ Future<void> iHaveAVrowWithSpacing20(WidgetTester tester) async {
   final widget = VRow(
     spacing: 20,
     children: [
-      Container(key: const Key('child1'), width: 50, height: 50, color: Colors.red),
-      Container(key: const Key('child2'), width: 50, height: 50, color: Colors.blue),
+      Container(
+        key: const Key('child1'),
+        width: 50,
+        height: 50,
+        color: Colors.red,
+      ),
+      Container(
+        key: const Key('child2'),
+        width: 50,
+        height: 50,
+        color: Colors.blue,
+      ),
     ],
   );
   setCurrentWidget(widget);

@@ -5,7 +5,8 @@ import '../mcp/mcp_types.dart';
 ToolDefinition createSearchDocsTool() {
   return ToolDefinition(
     name: 'searchDocs',
-    description: '''Search through Fluvie documentation to find relevant information about widgets, APIs, templates, and usage patterns.
+    description:
+        '''Search through Fluvie documentation to find relevant information about widgets, APIs, templates, and usage patterns.
 
 Use this tool when:
 - Looking for how to use a specific widget or feature

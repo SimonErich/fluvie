@@ -42,7 +42,9 @@ void main() {
       expect(capturedComposition!.durationInFrames, equals(90));
     });
 
-    testWidgets('provides frame updates to descendants via FrameProvider', (tester) async {
+    testWidgets('provides frame updates to descendants via FrameProvider', (
+      tester,
+    ) async {
       int capturedFrame = -1;
 
       await tester.pumpWidget(
@@ -141,7 +143,9 @@ void main() {
       expect(config.timeline.height, equals(1080));
     });
 
-    testWidgets('notifies descendants when composition changes', (tester) async {
+    testWidgets('notifies descendants when composition changes', (
+      tester,
+    ) async {
       int buildCount = 0;
 
       await tester.pumpWidget(
@@ -247,7 +251,9 @@ void main() {
       expect(capturedFrame, equals(42));
     });
 
-    testWidgets('of returns null when no FrameProvider ancestor', (tester) async {
+    testWidgets('of returns null when no FrameProvider ancestor', (
+      tester,
+    ) async {
       int? capturedFrame;
 
       await tester.pumpWidget(
@@ -264,28 +270,20 @@ void main() {
       expect(capturedFrame, isNull);
     });
 
-    testWidgets('updateShouldNotify returns true when frame changes', (tester) async {
-      final oldWidget = FrameProvider(
-        frame: 10,
-        child: Container(),
-      );
-      final newWidget = FrameProvider(
-        frame: 20,
-        child: Container(),
-      );
+    testWidgets('updateShouldNotify returns true when frame changes', (
+      tester,
+    ) async {
+      final oldWidget = FrameProvider(frame: 10, child: Container());
+      final newWidget = FrameProvider(frame: 20, child: Container());
 
       expect(newWidget.updateShouldNotify(oldWidget), isTrue);
     });
 
-    testWidgets('updateShouldNotify returns false when frame unchanged', (tester) async {
-      final oldWidget = FrameProvider(
-        frame: 10,
-        child: Container(),
-      );
-      final newWidget = FrameProvider(
-        frame: 10,
-        child: Container(),
-      );
+    testWidgets('updateShouldNotify returns false when frame unchanged', (
+      tester,
+    ) async {
+      final oldWidget = FrameProvider(frame: 10, child: Container());
+      final newWidget = FrameProvider(frame: 10, child: Container());
 
       expect(newWidget.updateShouldNotify(oldWidget), isFalse);
     });

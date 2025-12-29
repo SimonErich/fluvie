@@ -32,7 +32,9 @@ void main() {
       expect(capturedProgress, equals(0.5));
     });
 
-    testWidgets('calculates progress based on composition duration', (tester) async {
+    testWidgets('calculates progress based on composition duration', (
+      tester,
+    ) async {
       double? capturedProgress;
 
       await tester.pumpWidget(
@@ -211,9 +213,6 @@ class _FrameProviderWrapperState extends State<_FrameProviderWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return FrameProvider(
-      frame: _frame,
-      child: widget.child,
-    );
+    return FrameProvider(frame: _frame, child: widget.child);
   }
 }

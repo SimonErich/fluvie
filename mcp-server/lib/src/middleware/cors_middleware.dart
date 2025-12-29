@@ -4,7 +4,8 @@ import 'package:shelf/shelf.dart';
 const _corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Origin, Content-Type, Authorization, X-API-Key',
+  'Access-Control-Allow-Headers':
+      'Origin, Content-Type, Authorization, X-API-Key',
   'Access-Control-Max-Age': '86400',
 };
 

@@ -21,7 +21,8 @@ class SliderParameterWidget extends ConsumerWidget {
     final minValue = (parameter.minValue as num).toDouble();
     final maxValue = (parameter.maxValue as num).toDouble();
     final currentValue = value.toDouble();
-    final divisions = parameter.divisions ??
+    final divisions =
+        parameter.divisions ??
         (maxValue - minValue).toInt(); // Default to range size
 
     return GalleryTheme.glassmorphicContainer(
@@ -42,7 +43,10 @@ class SliderParameterWidget extends ConsumerWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   gradient: GalleryTheme.primaryGradient,
                   borderRadius: BorderRadius.circular(12),
@@ -96,9 +100,7 @@ class SliderParameterWidget extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               parameter.description,
-              style: GalleryTheme.textTheme.bodyMedium?.copyWith(
-                fontSize: 12,
-              ),
+              style: GalleryTheme.textTheme.bodyMedium?.copyWith(fontSize: 12),
             ),
           ],
         ],

@@ -7,9 +7,24 @@ import 'layout_context.dart';
 Future<void> iHaveAVrowWithThreeChildren(WidgetTester tester) async {
   final widget = VRow(
     children: [
-      Container(key: const Key('child1'), width: 50, height: 50, color: Colors.red),
-      Container(key: const Key('child2'), width: 50, height: 50, color: Colors.green),
-      Container(key: const Key('child3'), width: 50, height: 50, color: Colors.blue),
+      Container(
+        key: const Key('child1'),
+        width: 50,
+        height: 50,
+        color: Colors.red,
+      ),
+      Container(
+        key: const Key('child2'),
+        width: 50,
+        height: 50,
+        color: Colors.green,
+      ),
+      Container(
+        key: const Key('child3'),
+        width: 50,
+        height: 50,
+        color: Colors.blue,
+      ),
     ],
   );
   setCurrentWidget(widget);

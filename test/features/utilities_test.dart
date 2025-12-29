@@ -52,8 +52,9 @@ void main() {
       await iCreateAFramerangeFrom30To120(tester);
       await theDurationShouldBe90Frames(tester);
     });
-    testWidgets('''FrameRange contains checks work correctly''',
-        (tester) async {
+    testWidgets('''FrameRange contains checks work correctly''', (
+      tester,
+    ) async {
       await iCreateAFramerangeFrom30To120(tester);
       await frame29ShouldNotBeContained(tester);
       await frame30ShouldBeContained(tester);

@@ -3,7 +3,8 @@ import 'layout_context.dart';
 
 /// Usage: the current frame is at endFrame minus fadeOutFrames
 Future<void> theCurrentFrameIsAtEndframeMinusFadeoutframes(
-    WidgetTester tester) async {
+  WidgetTester tester,
+) async {
   final endFrame = getEndFrame();
   final fadeOutFrames = getFadeOutFrames();
   if (endFrame == null || fadeOutFrames == null) {

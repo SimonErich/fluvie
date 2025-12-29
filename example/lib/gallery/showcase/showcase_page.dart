@@ -9,8 +9,9 @@ import '../../utils/file_downloader.dart';
 import 'package:fluvie/fluvie.dart';
 
 /// Provider for selected example
-final selectedShowcaseExampleProvider =
-    StateProvider<InteractiveExample?>((ref) => null);
+final selectedShowcaseExampleProvider = StateProvider<InteractiveExample?>(
+  (ref) => null,
+);
 
 /// Main showcase page with 3-panel layout
 class ShowcasePage extends ConsumerStatefulWidget {
@@ -82,9 +83,9 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Render error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Render error: $e')));
       }
     } finally {
       if (mounted) {
@@ -139,9 +140,9 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Download failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Download failed: $e')));
       }
     }
   }
@@ -164,8 +165,8 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
             child: isDesktop
                 ? _buildDesktopLayout(selectedExample)
                 : isTablet
-                    ? _buildTabletLayout(selectedExample)
-                    : _buildMobileLayout(selectedExample),
+                ? _buildTabletLayout(selectedExample)
+                : _buildMobileLayout(selectedExample),
           ),
           if (_isRendering) _buildRenderProgress(),
         ],
@@ -173,7 +174,10 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
     );
   }
 
-  Widget _buildCustomAppBar(BuildContext context, InteractiveExample? selectedExample) {
+  Widget _buildCustomAppBar(
+    BuildContext context,
+    InteractiveExample? selectedExample,
+  ) {
     return Container(
       decoration: BoxDecoration(
         gradient: GalleryTheme.backgroundGradient,
@@ -208,7 +212,8 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
               // Title with gradient
               Expanded(
                 child: ShaderMask(
-                  shaderCallback: (bounds) => GalleryTheme.primaryGradient.createShader(bounds),
+                  shaderCallback: (bounds) =>
+                      GalleryTheme.primaryGradient.createShader(bounds),
                   child: Text(
                     selectedExample?.title ?? 'Fluvie Interactive Gallery',
                     style: GalleryTheme.textTheme.headlineMedium?.copyWith(
@@ -307,10 +312,7 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
         const VerticalDivider(width: 1),
 
         // Code/Instructions panel (30%)
-        Expanded(
-          flex: 3,
-          child: CodeViewerPanel(example: example),
-        ),
+        Expanded(flex: 3, child: CodeViewerPanel(example: example)),
       ],
     );
   }
@@ -327,10 +329,7 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
           ),
         ),
         const VerticalDivider(width: 1),
-        Expanded(
-          flex: 4,
-          child: CodeViewerPanel(example: example),
-        ),
+        Expanded(flex: 4, child: CodeViewerPanel(example: example)),
       ],
     );
   }
@@ -433,7 +432,10 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 12,
+                      ),
                       child: Text(
                         entry.key,
                         style: GalleryTheme.textTheme.titleLarge?.copyWith(
@@ -447,7 +449,7 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
                     ...entry.value.map((example) {
                       final isSelected =
                           ref.watch(selectedShowcaseExampleProvider)?.title ==
-                              example.title;
+                          example.title;
                       return _buildExampleCard(example, isSelected);
                     }),
                     const SizedBox(height: 16),
@@ -491,7 +493,10 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: difficultyColor.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
@@ -569,7 +574,9 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
             children: [
               Text(
                 'Rendering Video...',
-                style: GalleryTheme.textTheme.titleLarge?.copyWith(fontSize: 16),
+                style: GalleryTheme.textTheme.titleLarge?.copyWith(
+                  fontSize: 16,
+                ),
               ),
               Text(
                 '${(progress * 100).toInt()}%',
@@ -587,7 +594,9 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
               value: progress,
               minHeight: 8,
               backgroundColor: GalleryTheme.elevatedSurface,
-              valueColor: const AlwaysStoppedAnimation<Color>(GalleryTheme.accentPink),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                GalleryTheme.accentPink,
+              ),
             ),
           ),
           const SizedBox(height: 8),

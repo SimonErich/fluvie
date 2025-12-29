@@ -5,12 +5,18 @@ import 'layout_context.dart';
 
 /// Usage: I have a VStack with startFrame 30 and endFrame 120
 Future<void> iHaveAVstackWithStartframe30AndEndframe120(
-    WidgetTester tester) async {
+  WidgetTester tester,
+) async {
   final widget = VStack(
     startFrame: 30,
     endFrame: 120,
     children: [
-      Container(key: const Key('content'), width: 100, height: 100, color: Colors.red),
+      Container(
+        key: const Key('content'),
+        width: 100,
+        height: 100,
+        color: Colors.red,
+      ),
     ],
   );
   setCurrentWidget(widget);

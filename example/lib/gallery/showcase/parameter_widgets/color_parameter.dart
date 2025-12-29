@@ -19,7 +19,8 @@ class ColorParameterWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hexColor = '#${value.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
+    final hexColor =
+        '#${value.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
 
     return GalleryTheme.glassmorphicContainer(
       backgroundColor: GalleryTheme.elevatedSurface.withValues(alpha: 0.3),
@@ -29,9 +30,7 @@ class ColorParameterWidget extends ConsumerWidget {
         children: [
           Text(
             parameter.label,
-            style: GalleryTheme.textTheme.titleLarge?.copyWith(
-              fontSize: 15,
-            ),
+            style: GalleryTheme.textTheme.titleLarge?.copyWith(fontSize: 15),
           ),
           const SizedBox(height: 12),
           InkWell(
@@ -42,10 +41,7 @@ class ColorParameterWidget extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: value,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: GalleryTheme.glassBorder,
-                  width: 2,
-                ),
+                border: Border.all(color: GalleryTheme.glassBorder, width: 2),
                 boxShadow: [
                   BoxShadow(
                     color: value.withValues(alpha: 0.4),
@@ -56,7 +52,10 @@ class ColorParameterWidget extends ConsumerWidget {
               ),
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
@@ -80,9 +79,7 @@ class ColorParameterWidget extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               parameter.description,
-              style: GalleryTheme.textTheme.bodyMedium?.copyWith(
-                fontSize: 12,
-              ),
+              style: GalleryTheme.textTheme.bodyMedium?.copyWith(fontSize: 12),
             ),
           ],
         ],

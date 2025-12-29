@@ -4,7 +4,8 @@ import 'layout_context.dart';
 
 /// Usage: the child should have 20 pixels of padding on all sides
 Future<void> theChildShouldHave20PixelsOfPaddingOnAllSides(
-    WidgetTester tester) async {
+  WidgetTester tester,
+) async {
   final widget = getCurrentWidget();
   await tester.pumpWidget(MaterialApp(home: widget));
 

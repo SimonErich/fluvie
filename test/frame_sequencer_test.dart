@@ -20,11 +20,7 @@ void main() {
         MaterialApp(
           home: RepaintBoundary(
             key: key,
-            child: Container(
-              width: 100,
-              height: 100,
-              color: Colors.red,
-            ),
+            child: Container(width: 100, height: 100, color: Colors.red),
           ),
         ),
       );
@@ -45,11 +41,7 @@ void main() {
         MaterialApp(
           home: RepaintBoundary(
             key: key,
-            child: Container(
-              width: 50,
-              height: 50,
-              color: Colors.blue,
-            ),
+            child: Container(width: 50, height: 50, color: Colors.blue),
           ),
         ),
       );
@@ -73,10 +65,7 @@ void main() {
 
       final sequencer = FrameSequencer(key);
 
-      expect(
-        () => sequencer.captureFrame(pixelRatio: 1.0),
-        throwsException,
-      );
+      expect(() => sequencer.captureFrame(pixelRatio: 1.0), throwsException);
     });
 
     // Note: Tests for captureFrameRaw and captureFrameRawExact are skipped

@@ -5,7 +5,8 @@ import '../mcp/mcp_types.dart';
 ToolDefinition createSuggestTemplatesTool() {
   return ToolDefinition(
     name: 'suggestTemplates',
-    description: '''Suggest appropriate Fluvie templates based on your use case or content type.
+    description:
+        '''Suggest appropriate Fluvie templates based on your use case or content type.
 
 Use cases include:
 - Spotify Wrapped-style year reviews
@@ -38,7 +39,14 @@ Use cases include:
         },
         'mood': {
           'type': 'string',
-          'enum': ['energetic', 'nostalgic', 'professional', 'playful', 'dramatic', 'minimal'],
+          'enum': [
+            'energetic',
+            'nostalgic',
+            'professional',
+            'playful',
+            'dramatic',
+            'minimal',
+          ],
           'description': 'Desired mood/atmosphere (optional)',
         },
       },
@@ -91,25 +99,76 @@ List<_TemplateSuggestion> _suggestTemplates({
 
   // Keywords mapping to templates
   final keywordMatches = <String, List<String>>{
-    'year review': ['TheNeonGate', 'StackClimb', 'LiquidMinutes', 'TheGridShuffle', 'ParticleFarewell'],
-    'wrapped': ['TheNeonGate', 'StackClimb', 'OrbitalMetrics', 'WrappedReceipt'],
+    'year review': [
+      'TheNeonGate',
+      'StackClimb',
+      'LiquidMinutes',
+      'TheGridShuffle',
+      'ParticleFarewell',
+    ],
+    'wrapped': [
+      'TheNeonGate',
+      'StackClimb',
+      'OrbitalMetrics',
+      'WrappedReceipt',
+    ],
     'spotify': ['TheNeonGate', 'TheMixtape', 'FrequencyGlow', 'StackClimb'],
     'music': ['TheMixtape', 'FrequencyGlow', 'MinimalistBeat', 'StackClimb'],
-    'stats': ['OrbitalMetrics', 'TheGrowthTree', 'LiquidMinutes', 'TheSummaryPoster'],
-    'statistics': ['OrbitalMetrics', 'TheGrowthTree', 'BinaryRain', 'TheSummaryPoster'],
-    'photos': ['TheGridShuffle', 'FloatingPolaroids', 'BentoRecap', 'TriptychScroll'],
-    'memories': ['FloatingPolaroids', 'TheGridShuffle', 'RetroPostcard', 'MosaicReveal'],
+    'stats': [
+      'OrbitalMetrics',
+      'TheGrowthTree',
+      'LiquidMinutes',
+      'TheSummaryPoster',
+    ],
+    'statistics': [
+      'OrbitalMetrics',
+      'TheGrowthTree',
+      'BinaryRain',
+      'TheSummaryPoster',
+    ],
+    'photos': [
+      'TheGridShuffle',
+      'FloatingPolaroids',
+      'BentoRecap',
+      'TriptychScroll',
+    ],
+    'memories': [
+      'FloatingPolaroids',
+      'TheGridShuffle',
+      'RetroPostcard',
+      'MosaicReveal',
+    ],
     'top 5': ['StackClimb', 'TheSpotlight', 'PerspectiveLadder', 'SlotMachine'],
-    'ranking': ['StackClimb', 'SlotMachine', 'TheSpotlight', 'FloatingPolaroids'],
+    'ranking': [
+      'StackClimb',
+      'SlotMachine',
+      'TheSpotlight',
+      'FloatingPolaroids',
+    ],
     'intro': ['TheNeonGate', 'DigitalMirror', 'VortexTitle', 'TheMixtape'],
-    'outro': ['ParticleFarewell', 'TheSignature', 'TheInfinityLoop', 'WrappedReceipt'],
-    'ending': ['ParticleFarewell', 'TheSummaryPoster', 'TheSignature', 'WrappedReceipt'],
+    'outro': [
+      'ParticleFarewell',
+      'TheSignature',
+      'TheInfinityLoop',
+      'WrappedReceipt',
+    ],
+    'ending': [
+      'ParticleFarewell',
+      'TheSummaryPoster',
+      'TheSignature',
+      'WrappedReceipt',
+    ],
     'celebration': ['ParticleFarewell', 'TheNeonGate', 'StackClimb'],
     'neon': ['TheNeonGate', 'FrequencyGlow', 'BinaryRain', 'GlitchReality'],
     'retro': ['TheMixtape', 'RetroPostcard', 'LofiWindow'],
     'minimal': ['MinimalistBeat', 'DigitalMirror', 'TheSignature'],
     'glitch': ['GlitchReality', 'NoiseID', 'BinaryRain'],
-    'collage': ['TheGridShuffle', 'BentoRecap', 'MosaicReveal', 'SplitPersonality'],
+    'collage': [
+      'TheGridShuffle',
+      'BentoRecap',
+      'MosaicReveal',
+      'SplitPersonality',
+    ],
   };
 
   // Find matching templates based on keywords
@@ -117,7 +176,8 @@ List<_TemplateSuggestion> _suggestTemplates({
   for (final entry in keywordMatches.entries) {
     if (useCaseLower.contains(entry.key)) {
       for (final templateName in entry.value) {
-        matchedTemplates[templateName] = (matchedTemplates[templateName] ?? 0) + 1;
+        matchedTemplates[templateName] =
+            (matchedTemplates[templateName] ?? 0) + 1;
       }
     }
   }
@@ -125,18 +185,50 @@ List<_TemplateSuggestion> _suggestTemplates({
   // Add content type specific templates
   if (contentType != null) {
     final contentTemplates = <String, List<String>>{
-      'year_review': ['TheNeonGate', 'OrbitalMetrics', 'TheGridShuffle', 'TheSummaryPoster', 'ParticleFarewell'],
-      'statistics': ['OrbitalMetrics', 'TheGrowthTree', 'LiquidMinutes', 'BinaryRain'],
-      'photo_gallery': ['TheGridShuffle', 'FloatingPolaroids', 'BentoRecap', 'TriptychScroll'],
+      'year_review': [
+        'TheNeonGate',
+        'OrbitalMetrics',
+        'TheGridShuffle',
+        'TheSummaryPoster',
+        'ParticleFarewell',
+      ],
+      'statistics': [
+        'OrbitalMetrics',
+        'TheGrowthTree',
+        'LiquidMinutes',
+        'BinaryRain',
+      ],
+      'photo_gallery': [
+        'TheGridShuffle',
+        'FloatingPolaroids',
+        'BentoRecap',
+        'TriptychScroll',
+      ],
       'brand_intro': ['TheNeonGate', 'DigitalMirror', 'VortexTitle', 'NoiseID'],
-      'social_content': ['TheNeonGate', 'StackClimb', 'TheGridShuffle', 'ParticleFarewell'],
-      'achievement': ['StackClimb', 'TheSpotlight', 'OrbitalMetrics', 'ParticleFarewell'],
-      'ranking_list': ['StackClimb', 'SlotMachine', 'TheSpotlight', 'PerspectiveLadder'],
+      'social_content': [
+        'TheNeonGate',
+        'StackClimb',
+        'TheGridShuffle',
+        'ParticleFarewell',
+      ],
+      'achievement': [
+        'StackClimb',
+        'TheSpotlight',
+        'OrbitalMetrics',
+        'ParticleFarewell',
+      ],
+      'ranking_list': [
+        'StackClimb',
+        'SlotMachine',
+        'TheSpotlight',
+        'PerspectiveLadder',
+      ],
     };
 
     if (contentTemplates.containsKey(contentType)) {
       for (final templateName in contentTemplates[contentType]!) {
-        matchedTemplates[templateName] = (matchedTemplates[templateName] ?? 0) + 2;
+        matchedTemplates[templateName] =
+            (matchedTemplates[templateName] ?? 0) + 2;
       }
     }
   }
@@ -144,17 +236,48 @@ List<_TemplateSuggestion> _suggestTemplates({
   // Add mood specific templates
   if (mood != null) {
     final moodTemplates = <String, List<String>>{
-      'energetic': ['TheNeonGate', 'ParticleFarewell', 'SlotMachine', 'GlitchReality'],
-      'nostalgic': ['FloatingPolaroids', 'RetroPostcard', 'TheMixtape', 'LofiWindow'],
-      'professional': ['DigitalMirror', 'OrbitalMetrics', 'TheSummaryPoster', 'MinimalistBeat'],
-      'playful': ['SlotMachine', 'ParticleFarewell', 'Kaleidoscope', 'WrappedReceipt'],
-      'dramatic': ['TheNeonGate', 'TheSpotlight', 'VortexTitle', 'TheGrowthTree'],
-      'minimal': ['MinimalistBeat', 'DigitalMirror', 'TheSignature', 'SplitPersonality'],
+      'energetic': [
+        'TheNeonGate',
+        'ParticleFarewell',
+        'SlotMachine',
+        'GlitchReality',
+      ],
+      'nostalgic': [
+        'FloatingPolaroids',
+        'RetroPostcard',
+        'TheMixtape',
+        'LofiWindow',
+      ],
+      'professional': [
+        'DigitalMirror',
+        'OrbitalMetrics',
+        'TheSummaryPoster',
+        'MinimalistBeat',
+      ],
+      'playful': [
+        'SlotMachine',
+        'ParticleFarewell',
+        'Kaleidoscope',
+        'WrappedReceipt',
+      ],
+      'dramatic': [
+        'TheNeonGate',
+        'TheSpotlight',
+        'VortexTitle',
+        'TheGrowthTree',
+      ],
+      'minimal': [
+        'MinimalistBeat',
+        'DigitalMirror',
+        'TheSignature',
+        'SplitPersonality',
+      ],
     };
 
     if (moodTemplates.containsKey(mood)) {
       for (final templateName in moodTemplates[mood]!) {
-        matchedTemplates[templateName] = (matchedTemplates[templateName] ?? 0) + 1;
+        matchedTemplates[templateName] =
+            (matchedTemplates[templateName] ?? 0) + 1;
       }
     }
   }
@@ -174,14 +297,25 @@ List<_TemplateSuggestion> _suggestTemplates({
       _TemplateSuggestion(
         template: template,
         relevanceScore: entry.value,
-        reason: _getReasonForSuggestion(template.name, useCaseLower, contentType, mood),
+        reason: _getReasonForSuggestion(
+          template.name,
+          useCaseLower,
+          contentType,
+          mood,
+        ),
       ),
     );
   }
 
   // If no matches, suggest based on category
   if (suggestions.isEmpty) {
-    final defaultSuggestions = ['TheNeonGate', 'StackClimb', 'OrbitalMetrics', 'TheGridShuffle', 'ParticleFarewell'];
+    final defaultSuggestions = [
+      'TheNeonGate',
+      'StackClimb',
+      'OrbitalMetrics',
+      'TheGridShuffle',
+      'ParticleFarewell',
+    ];
     for (final name in defaultSuggestions) {
       final allTemplates = templateIndex.getAllTemplates();
       final template = allTemplates.firstWhere(
@@ -201,12 +335,23 @@ List<_TemplateSuggestion> _suggestTemplates({
   return suggestions;
 }
 
-String _getReasonForSuggestion(String templateName, String useCase, String? contentType, String? mood) {
+String _getReasonForSuggestion(
+  String templateName,
+  String useCase,
+  String? contentType,
+  String? mood,
+) {
   final reasons = <String>[];
 
-  if (useCase.contains('year') || useCase.contains('review') || useCase.contains('wrapped')) {
-    if (templateName == 'TheNeonGate') reasons.add('Great for dramatic year intro');
-    if (templateName == 'TheSummaryPoster') reasons.add('Perfect for recap stats');
+  if (useCase.contains('year') ||
+      useCase.contains('review') ||
+      useCase.contains('wrapped')) {
+    if (templateName == 'TheNeonGate') {
+      reasons.add('Great for dramatic year intro');
+    }
+    if (templateName == 'TheSummaryPoster') {
+      reasons.add('Perfect for recap stats');
+    }
     if (templateName == 'ParticleFarewell') reasons.add('Celebratory ending');
   }
 
@@ -216,7 +361,9 @@ String _getReasonForSuggestion(String templateName, String useCase, String? cont
     }
   }
 
-  if (useCase.contains('top') || useCase.contains('rank') || useCase.contains('best')) {
+  if (useCase.contains('top') ||
+      useCase.contains('rank') ||
+      useCase.contains('best')) {
     if (templateName == 'StackClimb' || templateName == 'TheSpotlight') {
       reasons.add('Perfect for ranked lists');
     }
@@ -233,7 +380,10 @@ String _getReasonForSuggestion(String templateName, String useCase, String? cont
   return reasons.isEmpty ? 'Versatile template' : reasons.join(', ');
 }
 
-String _formatSuggestions(List<_TemplateSuggestion> suggestions, String useCase) {
+String _formatSuggestions(
+  List<_TemplateSuggestion> suggestions,
+  String useCase,
+) {
   final buffer = StringBuffer();
 
   buffer.writeln('# Template Suggestions for "$useCase"\n');
@@ -248,25 +398,43 @@ String _formatSuggestions(List<_TemplateSuggestion> suggestions, String useCase)
     buffer.writeln();
     buffer.writeln(template.description);
     buffer.writeln();
-    buffer.writeln('**Recommended Length:** ${template.recommendedLength} frames (${(template.recommendedLength / 30).toStringAsFixed(1)}s at 30fps)');
+    buffer.writeln(
+      '**Recommended Length:** ${template.recommendedLength} frames (${(template.recommendedLength / 30).toStringAsFixed(1)}s at 30fps)',
+    );
     buffer.writeln('**Data Type:** `${template.dataType}`');
     buffer.writeln();
   }
 
   buffer.writeln('---\n');
   buffer.writeln('## Suggested Video Structure\n');
-  buffer.writeln('For a complete "$useCase" video, consider this scene order:\n');
+  buffer
+      .writeln('For a complete "$useCase" video, consider this scene order:\n');
 
   // Suggest a complete video structure
-  final intro = suggestions.firstWhere((s) => s.template.category == 'intro', orElse: () => suggestions.first);
-  final main = suggestions.where((s) => !['intro', 'conclusion'].contains(s.template.category)).take(2).toList();
-  final outro = suggestions.firstWhere((s) => s.template.category == 'conclusion', orElse: () => suggestions.last);
+  final intro = suggestions.firstWhere(
+    (s) => s.template.category == 'intro',
+    orElse: () => suggestions.first,
+  );
+  final main = suggestions
+      .where((s) => !['intro', 'conclusion'].contains(s.template.category))
+      .take(2)
+      .toList();
+  final outro = suggestions.firstWhere(
+    (s) => s.template.category == 'conclusion',
+    orElse: () => suggestions.last,
+  );
 
-  buffer.writeln('1. **Opening:** ${intro.template.name} (${intro.template.category})');
+  buffer.writeln(
+    '1. **Opening:** ${intro.template.name} (${intro.template.category})',
+  );
   for (var i = 0; i < main.length; i++) {
-    buffer.writeln('${i + 2}. **Content ${i + 1}:** ${main[i].template.name} (${main[i].template.category})');
+    buffer.writeln(
+      '${i + 2}. **Content ${i + 1}:** ${main[i].template.name} (${main[i].template.category})',
+    );
   }
-  buffer.writeln('${main.length + 2}. **Closing:** ${outro.template.name} (${outro.template.category})');
+  buffer.writeln(
+    '${main.length + 2}. **Closing:** ${outro.template.name} (${outro.template.category})',
+  );
 
   return buffer.toString();
 }

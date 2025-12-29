@@ -15,10 +15,7 @@ Future<void> theSecondChildShouldStartAnimating(WidgetTester tester) async {
         body: VideoComposition(
           durationInFrames: 200,
           fps: 30,
-          child: FrameProvider(
-            frame: frame,
-            child: widget,
-          ),
+          child: FrameProvider(frame: frame, child: widget),
         ),
       ),
     ),

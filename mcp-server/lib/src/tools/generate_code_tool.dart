@@ -4,7 +4,8 @@ import '../mcp/mcp_types.dart';
 ToolDefinition createGenerateCodeTool() {
   return ToolDefinition(
     name: 'generateCode',
-    description: '''Generate Fluvie code for video compositions based on a natural language description.
+    description:
+        '''Generate Fluvie code for video compositions based on a natural language description.
 
 Can generate:
 - Complete Video compositions with multiple scenes
@@ -24,7 +25,13 @@ The generated code uses the declarative API: import 'package:fluvie/declarative.
         },
         'type': {
           'type': 'string',
-          'enum': ['full_video', 'scene', 'template_usage', 'animation', 'layout'],
+          'enum': [
+            'full_video',
+            'scene',
+            'template_usage',
+            'animation',
+            'layout',
+          ],
           'description': 'Type of code to generate',
         },
         'fps': {
@@ -98,19 +105,35 @@ String _generateCode({
   buffer.writeln();
   buffer.writeln('## Notes\n');
   buffer.writeln('- Timing is in frames. At ${fps}fps: 30 frames = 1 second');
-  buffer.writeln('- Adjust `startFrame` values to control when elements appear');
+  buffer
+      .writeln('- Adjust `startFrame` values to control when elements appear');
   buffer.writeln('- Use `fadeInFrames`/`fadeOutFrames` for smooth transitions');
   buffer.writeln('- Replace asset paths with your actual file paths');
 
   return buffer.toString();
 }
 
-void _generateFullVideo(StringBuffer buffer, String desc, int fps, _Dimensions dim) {
-  final hasStats = desc.contains('stat') || desc.contains('number') || desc.contains('count');
-  final hasPhotos = desc.contains('photo') || desc.contains('image') || desc.contains('memor');
-  final hasParticles = desc.contains('particle') || desc.contains('sparkle') || desc.contains('confetti');
-  final hasIntro = desc.contains('intro') || desc.contains('title') || desc.contains('opening');
-  final hasOutro = desc.contains('outro') || desc.contains('ending') || desc.contains('close');
+void _generateFullVideo(
+  StringBuffer buffer,
+  String desc,
+  int fps,
+  _Dimensions dim,
+) {
+  final hasStats = desc.contains('stat') ||
+      desc.contains('number') ||
+      desc.contains('count');
+  final hasPhotos = desc.contains('photo') ||
+      desc.contains('image') ||
+      desc.contains('memor');
+  final hasParticles = desc.contains('particle') ||
+      desc.contains('sparkle') ||
+      desc.contains('confetti');
+  final hasIntro = desc.contains('intro') ||
+      desc.contains('title') ||
+      desc.contains('opening');
+  final hasOutro = desc.contains('outro') ||
+      desc.contains('ending') ||
+      desc.contains('close');
 
   buffer.writeln('class MyVideo extends StatelessWidget {');
   buffer.writeln('  @override');
@@ -119,7 +142,9 @@ void _generateFullVideo(StringBuffer buffer, String desc, int fps, _Dimensions d
   buffer.writeln('      fps: $fps,');
   buffer.writeln('      width: ${dim.width},');
   buffer.writeln('      height: ${dim.height},');
-  buffer.writeln('      defaultTransition: const SceneTransition.crossFade(durationInFrames: 15),');
+  buffer.writeln(
+    '      defaultTransition: const SceneTransition.crossFade(durationInFrames: 15),',
+  );
   buffer.writeln('      // Uncomment to add background music:');
   buffer.writeln("      // backgroundMusicAsset: 'assets/music.mp3',");
   buffer.writeln('      // musicVolume: 0.7,');
@@ -149,7 +174,9 @@ void _generateFullVideo(StringBuffer buffer, String desc, int fps, _Dimensions d
     buffer.writeln('    return Scene(');
     buffer.writeln('      durationInFrames: 120,');
     buffer.writeln('      background: Background.gradient(');
-    buffer.writeln('        colors: {0: const Color(0xFF1a1a2e), 120: const Color(0xFF0f3460)},');
+    buffer.writeln(
+      '        colors: {0: const Color(0xFF1a1a2e), 120: const Color(0xFF0f3460)},',
+    );
     buffer.writeln('      ),');
     buffer.writeln('      fadeInFrames: 20,');
     buffer.writeln('      children: [');
@@ -177,7 +204,9 @@ void _generateFullVideo(StringBuffer buffer, String desc, int fps, _Dimensions d
     buffer.writeln('                duration: 25,');
     buffer.writeln('                style: TextStyle(');
     buffer.writeln('                  fontSize: 32,');
-    buffer.writeln('                  color: Colors.white.withValues(alpha: 0.8),');
+    buffer.writeln(
+      '                  color: Colors.white.withValues(alpha: 0.8),',
+    );
     buffer.writeln('                ),');
     buffer.writeln('              ),');
     buffer.writeln('            ],');
@@ -195,7 +224,9 @@ void _generateFullVideo(StringBuffer buffer, String desc, int fps, _Dimensions d
     buffer.writeln('    return Scene(');
     buffer.writeln('      durationInFrames: 180,');
     buffer.writeln('      background: Background.gradient(');
-    buffer.writeln('        colors: {0: const Color(0xFF2c003e), 180: const Color(0xFF512b58)},');
+    buffer.writeln(
+      '        colors: {0: const Color(0xFF2c003e), 180: const Color(0xFF512b58)},',
+    );
     buffer.writeln('      ),');
     buffer.writeln('      children: [');
     buffer.writeln('        VPositioned(');
@@ -251,7 +282,9 @@ void _generateFullVideo(StringBuffer buffer, String desc, int fps, _Dimensions d
     buffer.writeln('    return Scene(');
     buffer.writeln('      durationInFrames: 180,');
     buffer.writeln('      background: Background.gradient(');
-    buffer.writeln('        colors: {0: const Color(0xFFff9a9e), 180: const Color(0xFFfcb69f)},');
+    buffer.writeln(
+      '        colors: {0: const Color(0xFFff9a9e), 180: const Color(0xFFfcb69f)},',
+    );
     buffer.writeln('      ),');
     buffer.writeln('      children: [');
     buffer.writeln('        VPositioned(');
@@ -310,11 +343,15 @@ void _generateFullVideo(StringBuffer buffer, String desc, int fps, _Dimensions d
     buffer.writeln('    return Scene(');
     buffer.writeln('      durationInFrames: 150,');
     buffer.writeln('      background: Background.gradient(');
-    buffer.writeln('        colors: {0: const Color(0xFF1a1a2e), 150: const Color(0xFFe94560)},');
+    buffer.writeln(
+      '        colors: {0: const Color(0xFF1a1a2e), 150: const Color(0xFFe94560)},',
+    );
     buffer.writeln('      ),');
     buffer.writeln('      children: [');
     if (hasParticles) {
-      buffer.writeln('        ParticleEffect.sparkles(count: 40, color: const Color(0xFFe94560)),');
+      buffer.writeln(
+        '        ParticleEffect.sparkles(count: 40, color: const Color(0xFFe94560)),',
+      );
     }
     buffer.writeln('        VCenter(');
     buffer.writeln('          child: Column(');
@@ -325,7 +362,9 @@ void _generateFullVideo(StringBuffer buffer, String desc, int fps, _Dimensions d
     buffer.writeln('                duration: 25,');
     buffer.writeln('                style: TextStyle(');
     buffer.writeln('                  fontSize: 40,');
-    buffer.writeln('                  color: Colors.white.withValues(alpha: 0.8),');
+    buffer.writeln(
+      '                  color: Colors.white.withValues(alpha: 0.8),',
+    );
     buffer.writeln('                  letterSpacing: 8,');
     buffer.writeln('                ),');
     buffer.writeln('              ),');
@@ -386,7 +425,12 @@ void _generateScene(StringBuffer buffer, String desc, int fps) {
   buffer.writeln('}');
 }
 
-void _generateTemplateUsage(StringBuffer buffer, String desc, int fps, _Dimensions dim) {
+void _generateTemplateUsage(
+  StringBuffer buffer,
+  String desc,
+  int fps,
+  _Dimensions dim,
+) {
   String templateName = 'TheNeonGate';
   String dataType = 'IntroData';
   String category = 'intro';
@@ -427,9 +471,15 @@ void _generateTemplateUsage(StringBuffer buffer, String desc, int fps, _Dimensio
     case 'RankingData':
       buffer.writeln("        title: 'Top 5',");
       buffer.writeln('        items: [');
-      buffer.writeln("          RankingItem(rank: 1, title: 'First', subtitle: 'Details'),");
-      buffer.writeln("          RankingItem(rank: 2, title: 'Second', subtitle: 'Details'),");
-      buffer.writeln("          RankingItem(rank: 3, title: 'Third', subtitle: 'Details'),");
+      buffer.writeln(
+        "          RankingItem(rank: 1, title: 'First', subtitle: 'Details'),",
+      );
+      buffer.writeln(
+        "          RankingItem(rank: 2, title: 'Second', subtitle: 'Details'),",
+      );
+      buffer.writeln(
+        "          RankingItem(rank: 3, title: 'Third', subtitle: 'Details'),",
+      );
       buffer.writeln('        ],');
     case 'MetricsData':
       buffer.writeln("        title: 'Your Stats',");
@@ -439,7 +489,9 @@ void _generateTemplateUsage(StringBuffer buffer, String desc, int fps, _Dimensio
       buffer.writeln('        ],');
     case 'CollageData':
       buffer.writeln("        title: 'Memories',");
-      buffer.writeln("        images: ['assets/1.jpg', 'assets/2.jpg', 'assets/3.jpg'],");
+      buffer.writeln(
+        "        images: ['assets/1.jpg', 'assets/2.jpg', 'assets/3.jpg'],",
+      );
     case 'SummaryData':
       buffer.writeln("        message: 'See you next year!',");
       buffer.writeln('        year: 2024,');
@@ -477,11 +529,13 @@ void _generateAnimation(StringBuffer buffer, String desc) {
   buffer.writeln('// Option 3: Using TimeConsumer for custom animation');
   buffer.writeln('TimeConsumer(');
   buffer.writeln('  builder: (context, frame, progress) {');
-  buffer.writeln('    final opacity = interpolate(frame, [0, 30], [0.0, 1.0]);');
+  buffer
+      .writeln('    final opacity = interpolate(frame, [0, 30], [0.0, 1.0]);');
   buffer.writeln('    final scale = interpolate(frame, [0, 30], [0.8, 1.0]);');
   buffer.writeln('    return Transform.scale(');
   buffer.writeln('      scale: scale,');
-  buffer.writeln('      child: Opacity(opacity: opacity, child: YourWidget()),');
+  buffer
+      .writeln('      child: Opacity(opacity: opacity, child: YourWidget()),');
   buffer.writeln('    );');
   buffer.writeln('  },');
   buffer.writeln(')');
@@ -504,7 +558,8 @@ void _generateLayout(StringBuffer buffer, String desc) {
   buffer.writeln('// Positioned elements with timing');
   buffer.writeln('LayerStack(');
   buffer.writeln('  children: [');
-  buffer.writeln('    Layer.background(child: Background.solid(Colors.black)),');
+  buffer
+      .writeln('    Layer.background(child: Background.solid(Colors.black)),');
   buffer.writeln('    Layer(');
   buffer.writeln('      startFrame: 30,');
   buffer.writeln('      fadeInFrames: 15,');
