@@ -59,8 +59,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Smooth scroll animations and glassmorphic UI
   - Architecture diagram visualizing dual-engine model
   - Deployment guide and local development setup
+- **Demo Data Management**: Added `example/assets/demo_data/README.md` with instructions
+  - Documents why binary files are not in repository
+  - Provides sources for obtaining demo files (Pexels, Free Music Archive)
+  - Explains Git LFS alternative for teams needing shared binary files
 
 ### Changed
+
+- **Repository Cleanup**: Complete git history rewrite to remove binary files
+  - Removed 58MB of video/audio/image files from all commits
+  - Repository size reduced from 84MB to 25MB (70% reduction)
+  - Binary files now properly excluded via `.gitignore`
+  - Demo files remain available locally for development but are not tracked
 
 - **Error Handling**: Migrated from generic exceptions to custom types
   - `video_encoder_service.dart` now uses `InvalidConfigurationException` and `AudioProcessingException`

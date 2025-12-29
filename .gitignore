@@ -41,3 +41,14 @@ example/.idea/
 
 # Claude Code artifacts (plan files stored in home directory)
 .claude/
+
+# Demo data (large binary files - should use external storage or Git LFS)
+example/assets/demo_data/*.mp4
+example/assets/demo_data/*.MP4
+example/assets/demo_data/*.MOV
+example/assets/demo_data/*.mp3
+example/assets/demo_data/*.wav
+example/assets/demo_data/*.jpg
+example/assets/demo_data/*.jpeg
+example/assets/demo_data/*.png
+example/assets/demo_data/fluttervienna_year_review/
