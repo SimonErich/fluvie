@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/simonerich/fluvie/branch/main/graph/badge.svg)](https://codecov.io/gh/simonerich/fluvie)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-A Flutter package for **programmatic video generation** using declarative widgets and FFmpeg. Create animated videos from Flutter widgets with frame-level control.
+A Flutter package for **programmatic video generation** using declarative widgets and FFmpeg. Create animated videos from Flutter widgets with frame-level control
 
 **[🌐 Visit fluvie.dev](https://fluvie.dev)** | [📖 API Docs](https://simonerich.github.io/fluvie/) | [🎨 Examples](example/lib/gallery) | [🤖 MCP Server](https://mcp.fluvie.at)
 
