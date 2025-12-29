@@ -52,3 +52,8 @@ example/assets/demo_data/*.jpg
 example/assets/demo_data/*.jpeg
 example/assets/demo_data/*.png
 example/assets/demo_data/fluttervienna_year_review/
+
+# Personal/private assets - NOT for public repository
+example/assets/fluttervienna_year_review/
+example/assets/debugging/
+example/song-for-example.md

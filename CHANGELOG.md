@@ -66,11 +66,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Repository Cleanup**: Complete git history rewrite to remove binary files
-  - Removed 58MB of video/audio/image files from all commits
-  - Repository size reduced from 84MB to 25MB (70% reduction)
-  - Binary files now properly excluded via `.gitignore`
-  - Demo files remain available locally for development but are not tracked
+- **Repository Cleanup**: Complete git history rewrite to remove binary and personal files
+  - **Phase 1**: Removed 58MB of demo video/audio/image files from all commits
+  - **Phase 2**: Removed 26MB of personal/private assets (FlutterVienna photos, debugging files)
+  - **Final size**: Repository reduced from 84MB to 1.2MB (98.6% reduction!)
+  - Binary and personal files properly excluded via `.gitignore`
+  - Files remain available locally for development but are not tracked in git
+  - **Privacy**: Removed 50+ personal photos of community members from git history
+  - **Security**: Removed debugging screencast and internal planning documents
 
 - **Error Handling**: Migrated from generic exceptions to custom types
   - `video_encoder_service.dart` now uses `InvalidConfigurationException` and `AudioProcessingException`
