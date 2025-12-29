@@ -333,3 +333,7 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
+
+## Author
+
+Created by [Simon Auer](https://github.com/simonerich)

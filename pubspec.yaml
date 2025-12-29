@@ -6,6 +6,8 @@ repository: https://github.com/simonerich/fluvie
 issue_tracker: https://github.com/simonerich/fluvie/issues
 documentation: https://simonerich.github.io/fluvie/
 
+maintainer: Simon Auer (@simonerich)
+
 topics:
   - video
   - animation

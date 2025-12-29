@@ -57,3 +57,9 @@ example/assets/demo_data/fluttervienna_year_review/
 example/assets/fluttervienna_year_review/
 example/assets/debugging/
 example/song-for-example.md
+
+# Internal development/planning documents
+example/IMPLEMENTATION_COMPLETE.md
+example/EXAMPLES_PROGRESS.md
+website/LAUNCH_CHECKLIST.md
+website/IMPLEMENTATION_SUMMARY.md
