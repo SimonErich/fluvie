@@ -20,13 +20,13 @@ import '../exceptions/fluvie_exceptions.dart';
 class VideoProbeService {
   /// Custom path to the ffprobe executable.
   ///
-  /// If null, uses [FluvieConfig.current.ffprobePath] or falls back to 'ffprobe'.
+  /// If null, uses the configured ffprobe path or falls back to 'ffprobe'.
   final String? ffprobePath;
 
   /// Creates a new VideoProbeService.
   ///
   /// [ffprobePath] - Custom path to ffprobe executable. If null, uses
-  /// [FluvieConfig.current.ffprobePath] or 'ffprobe' from PATH.
+  /// the configured path or 'ffprobe' from PATH.
   VideoProbeService({this.ffprobePath});
 
   /// Gets the effective ffprobe executable path.

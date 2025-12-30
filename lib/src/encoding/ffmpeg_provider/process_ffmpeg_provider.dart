@@ -36,7 +36,7 @@ import 'ffmpeg_provider.dart';
 class ProcessFFmpegProvider implements FFmpegProvider {
   /// Custom path to the FFmpeg executable.
   ///
-  /// If null, uses [FluvieConfig.current.ffmpegPath] or falls back to 'ffmpeg'.
+  /// If null, uses the configured ffmpeg path or falls back to 'ffmpeg'.
   final String? ffmpegPath;
 
   /// Factory function for creating processes, used for testing.
@@ -49,7 +49,7 @@ class ProcessFFmpegProvider implements FFmpegProvider {
   /// Creates a new ProcessFFmpegProvider.
   ///
   /// [ffmpegPath] - Custom path to FFmpeg executable. If null, uses
-  /// [FluvieConfig.current.ffmpegPath] or 'ffmpeg' from PATH.
+  /// the configured path or 'ffmpeg' from PATH.
   ///
   /// For testing, you can provide custom [processFactory] and [tempDirProvider].
   ProcessFFmpegProvider({

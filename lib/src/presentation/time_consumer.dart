@@ -3,7 +3,7 @@ import 'video_composition.dart';
 
 /// A widget that rebuilds when the current frame changes.
 ///
-/// Use this widget to create animations based on the current [frame] or [progress].
+/// Use this widget to create animations based on the current frame or progress.
 ///
 /// Example:
 /// ```dart

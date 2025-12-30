@@ -312,12 +312,11 @@ void main() {
 
 ## Documentation
 
-- [API Reference](https://simonerich.github.io/fluvie/)
-- [Getting Started](doc/getting_started.md)
-- [Widget Reference](doc/widgets.md)
-- [Platform Setup](doc/platform_setup/overview.md)
-- [Migration Guide](doc/migration_guide.md)
-- [Examples](example/)
+- [Getting Started](https://simonerich.github.io/fluvie/getting-started/)
+- [Widget Reference](https://simonerich.github.io/fluvie/widgets/)
+- [Platform Setup](https://simonerich.github.io/fluvie/platform_setup/overview/)
+- [Migration Guide](https://simonerich.github.io/fluvie/migration_guide/)
+- [Examples](https://github.com/SimonErich/fluvie/tree/main/example)
 
 ## Troubleshooting
 
@@ -332,11 +331,11 @@ print(diagnostics);
 
 ### Web: SharedArrayBuffer Not Available
 
-Ensure your server sends the required CORS headers. See [Web Setup](doc/platform_setup/web.md).
+Ensure your server sends the required CORS headers. See [Web Setup](https://simonerich.github.io/fluvie/platform_setup/web/).
 
 ### Mobile: No Default Provider
 
-Mobile platforms require a custom provider. See [Mobile Setup](doc/platform_setup/mobile.md).
+Mobile platforms require a custom provider. See [Mobile Setup](https://simonerich.github.io/fluvie/platform_setup/mobile/).
 
 ## Contributing
 

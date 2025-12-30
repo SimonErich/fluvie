@@ -6,7 +6,7 @@ import 'sync_anchor_registry.dart';
 /// A widget that marks a sync point in the composition timeline.
 ///
 /// [SyncAnchor] registers timing information that other widgets can reference
-/// via [syncStartWith] and [syncEndWith] parameters. This enables loose coupling
+/// via `syncStartWith` and `syncEndWith` parameters. This enables loose coupling
 /// between animations and audio tracks that need to synchronize.
 ///
 /// ## Example
@@ -42,7 +42,7 @@ import 'sync_anchor_registry.dart';
 class SyncAnchor extends StatefulWidget {
   /// Unique identifier for this sync anchor.
   ///
-  /// Other widgets reference this ID via [syncStartWith] or [syncEndWith].
+  /// Other widgets reference this ID via `syncStartWith` or `syncEndWith`.
   final String anchorId;
 
   /// The frame at which this anchor becomes active.

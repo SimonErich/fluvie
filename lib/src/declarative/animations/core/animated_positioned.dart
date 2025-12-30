@@ -71,7 +71,7 @@ class FrameAnimatedPositioned extends StatelessWidget {
 
   /// Exit animation applied before [endFrame].
   ///
-  /// If null and [autoReverseExit] is true, uses [entryAnimation.reversed].
+  /// If null and [autoReverseExit] is true, uses the entry animation reversed.
   final PositionedAnimation? exitAnimation;
 
   /// Whether to automatically reverse the entry animation for exit.

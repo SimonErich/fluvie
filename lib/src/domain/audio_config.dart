@@ -186,12 +186,12 @@ enum SyncBehavior {
 class AudioSyncConfig {
   /// The anchor ID to sync the start frame with.
   ///
-  /// If set, [startFrame] will be resolved from this anchor.
+  /// If set, the start frame will be resolved from this anchor.
   final String? syncStartWithAnchor;
 
   /// The anchor ID to sync the end frame with.
   ///
-  /// If set, [durationInFrames] will be calculated from this anchor's end.
+  /// If set, the duration will be calculated from this anchor's end.
   final String? syncEndWithAnchor;
 
   /// Offset applied to the start sync point.
