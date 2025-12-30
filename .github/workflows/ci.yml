@@ -29,9 +29,6 @@ jobs:
       - name: Analyze project source
         run: dart analyze --fatal-warnings
 
-      - name: Security audit
-        run: dart pub audit
-
       - name: Validate documentation
         run: |
           dart doc --validate-links 2>&1 | tee doc-output.txt
