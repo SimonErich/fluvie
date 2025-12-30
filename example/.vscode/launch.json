@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Fluvie Example (Impeller)",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--enable-impeller"]
+    },
+    {
+      "name": "Fluvie Example (Impeller) - Profile",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "args": ["--enable-impeller"]
+    },
+    {
+      "name": "Fluvie Example (Impeller) - Release",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "args": ["--enable-impeller"]
+    }
+  ]
+}
