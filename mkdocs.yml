@@ -1,0 +1,204 @@
+site_name: Fluvie Documentation
+site_description: Programmatic video generation with Flutter widgets and FFmpeg
+site_author: Simon Auer
+site_url: https://simonerich.github.io/fluvie/
+
+repo_name: SimonErich/fluvie
+repo_url: https://github.com/SimonErich/fluvie
+
+copyright: Copyright &copy; 2024 Simon Auer
+
+docs_dir: doc
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/SimonErich/fluvie
+    - icon: fontawesome/solid/globe
+      link: https://fluvie.dev
+  generator: false
+
+nav:
+  - Home: README.md
+  - Getting Started:
+    - Overview: getting-started/README.md
+    - Installation: getting-started/installation.md
+    - FFmpeg Setup: getting-started/ffmpeg-setup.md
+    - First Video: getting-started/first-video.md
+  - Concepts:
+    - Overview: concept/README.md
+    - Architecture: concept/architecture.md
+    - Frame-Based Animation: concept/frame-based-animation.md
+    - Rendering Pipeline: concept/rendering-pipeline.md
+    - Two Modes: concept/two-modes.md
+  - Platform Setup:
+    - Overview: platform_setup/overview.md
+    - Linux: platform_setup/linux.md
+    - macOS: platform_setup/macos.md
+    - Windows: platform_setup/windows.md
+    - Web: platform_setup/web.md
+    - Mobile: platform_setup/mobile.md
+  - Widgets:
+    - Overview: widgets/README.md
+    - Core:
+      - VideoComposition: widgets/core/video-composition.md
+      - Sequence: widgets/core/sequence.md
+      - Scene: widgets/core/scene.md
+      - TimeConsumer: widgets/core/time-consumer.md
+      - Video: widgets/core/video.md
+    - Layout:
+      - Overview: widgets/layout/README.md
+      - LayerStack: widgets/layout/layer-stack.md
+      - Layer: widgets/layout/layer.md
+      - VStack: widgets/layout/v-stack.md
+      - VRow: widgets/layout/v-row.md
+      - VColumn: widgets/layout/v-column.md
+      - VCenter: widgets/layout/v-center.md
+      - VPadding: widgets/layout/v-padding.md
+      - VPositioned: widgets/layout/v-positioned.md
+      - VSizedBox: widgets/layout/v-sized-box.md
+    - Text:
+      - Overview: widgets/text/README.md
+      - AnimatedText: widgets/text/animated-text.md
+      - TypewriterText: widgets/text/typewriter-text.md
+      - FadeText: widgets/text/fade-text.md
+      - CounterText: widgets/text/counter-text.md
+    - Media:
+      - Overview: widgets/media/README.md
+      - EmbeddedVideo: widgets/media/embedded-video.md
+      - VideoSequence: widgets/media/video-sequence.md
+      - Collage: widgets/media/collage.md
+    - Audio:
+      - Overview: widgets/audio/README.md
+      - AudioTrack: widgets/audio/audio-track.md
+      - AudioSource: widgets/audio/audio-source.md
+      - BackgroundAudio: widgets/audio/background-audio.md
+      - AudioReactive: widgets/audio/audio-reactive.md
+  - Animations:
+    - Overview: animations/README.md
+    - Easing: animations/easing.md
+    - Entry Animations: animations/entry-animations.md
+    - Interpolate: animations/interpolate.md
+    - Prop Animation: animations/prop-animation.md
+    - Stagger Config: animations/stagger-config.md
+  - Effects:
+    - Overview: effects/README.md
+    - Backgrounds: effects/backgrounds.md
+    - Effect Overlay: effects/effect-overlay.md
+    - Particle Effect: effects/particle-effect.md
+    - Transitions: effects/transitions.md
+  - Embedding:
+    - Overview: embedding/README.md
+    - Images: embedding/images.md
+    - Videos: embedding/videos.md
+    - Audio: embedding/audio.md
+    - Fonts: embedding/fonts.md
+  - Helpers:
+    - Overview: helpers/README.md
+    - FloatingElement: helpers/floating-element.md
+    - KenBurnsImage: helpers/ken-burns-image.md
+    - PhotoCard: helpers/photo-card.md
+    - PolaroidFrame: helpers/polaroid-frame.md
+    - StatCard: helpers/stat-card.md
+  - Templates:
+    - Overview: templates/README.md
+    - Using Templates: templates/using-templates.md
+    - Intro Templates: templates/intro-templates.md
+    - Ranking Templates: templates/ranking-templates.md
+    - Data Viz Templates: templates/data-viz-templates.md
+    - Collage Templates: templates/collage-templates.md
+    - Thematic Templates: templates/thematic-templates.md
+    - Conclusion Templates: templates/conclusion-templates.md
+  - Tutorials:
+    - Overview: tutorials/README.md
+    - Simple Animation: tutorials/simple-animation.md
+    - Advanced Composition: tutorials/advanced-composition.md
+  - Cookbook:
+    - Overview: cookbook/README.md
+    - Animated Titles: cookbook/animated-titles.md
+    - Audio Sync: cookbook/audio-sync.md
+    - Crossfade: cookbook/crossfade.md
+    - Optimization: cookbook/optimization.md
+  - Advanced:
+    - Overview: advanced/README.md
+    - Custom Render Pipeline: advanced/custom-render-pipeline.md
+    - Encoding Settings: advanced/encoding-settings.md
+    - Error Handling: advanced/error-handling.md
+    - Frame Extraction: advanced/frame-extraction.md
+    - Performance Tips: advanced/performance-tips.md
+    - Sync Anchors: advanced/sync-anchors.md
+  - Extending:
+    - Overview: extending/README.md
+    - Custom Animations: extending/custom-animations.md
+    - Custom Effects: extending/custom-effects.md
+    - Custom FFmpeg Provider: extending/custom-ffmpeg-provider.md
+    - Custom Templates: extending/custom-templates.md
+  - Contributing:
+    - Overview: contributing/README.md
+    - Development Setup: contributing/development-setup.md
+    - Code Style: contributing/code-style.md
+    - Testing: contributing/testing.md
+    - Support: contributing/support.md
+  - AI Integration:
+    - MCP Agent: mcp-agent/README.md
+    - IDE Integration: mcp-agent/ide-integration.md
+    - MCP Setup: mcp-agent/setup.md
+    - IDE Helpers: ide-helpers/README.md
+    - Claude Code: ide-helpers/claude-code.md
+    - Cursor Rules: ide-helpers/cursor-rules.md
+  - Reference:
+    - AI Reference: FLUVIE_AI_REFERENCE.md
+    - Server Mode: ONLY_SERVER_MODE.md
+    - Migration Guide: migration_guide.md
+    - Roadmap: roadmap.md
+    - FAQ: FAQ.md
+    - Security: security/best-practices.md

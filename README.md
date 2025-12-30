@@ -7,7 +7,15 @@
 
 A Flutter package for **programmatic video generation** using declarative widgets and FFmpeg. Create animated videos from Flutter widgets with frame-level control
 
-**[🌐 Visit fluvie.dev](https://fluvie.dev)** | [📖 API Docs](https://simonerich.github.io/fluvie/) | [🎨 Examples](example/lib/gallery) | [🤖 MCP Server](https://mcp.fluvie.at)
+**[🌐 Visit fluvie.dev](https://fluvie.dev)** | [📖 Documentation](https://simonerich.github.io/fluvie/) | [🎨 Examples](example/lib/gallery) | [🤖 MCP Server](https://mcp.fluvie.at)
+
+## Related Projects
+
+| Project | Description |
+|---------|-------------|
+| [📦 fluvie](https://github.com/SimonErich/fluvie) | Main Flutter package for programmatic video generation (this repo) |
+| [🤖 fluvie_mcp_server](https://github.com/SimonErich/fluvie_mcp_server) | MCP server for AI-assisted Fluvie development |
+| [🌐 fluvie_website](https://github.com/SimonErich/fluvie_website) | Marketing website source code |
 
 ## Features
 
