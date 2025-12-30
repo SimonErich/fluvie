@@ -119,11 +119,13 @@ Fluvie will automatically detect if Skia is being used and display a prominent w
 Fluvie requires FFmpeg for video encoding.
 
 **Linux:**
+
 ```bash
 sudo apt install ffmpeg
 ```
 
 **macOS:**
+
 ```bash
 brew install ffmpeg
 ```
@@ -133,13 +135,15 @@ Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH.
 
 **Web:**
 Include in your `web/index.html`:
+
 ```html
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js"></script>
 <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/util.js"></script>
 ```
 
 Configure your server with required headers:
-```
+
+```txt
 Cross-Origin-Embedder-Policy: require-corp
 Cross-Origin-Opener-Policy: same-origin
 ```
@@ -279,7 +283,7 @@ void main() {
 ## Platform Support
 
 | Platform | Status | Provider |
-|----------|--------|----------|
+| ---------- | -------- | ---------- |
 | Linux | Supported | ProcessFFmpegProvider |
 | macOS | Supported | ProcessFFmpegProvider |
 | Windows | Supported | ProcessFFmpegProvider |
