@@ -10,6 +10,12 @@ copyright: Copyright &copy; 2024 Simon Auer
 
 docs_dir: doc
 
+# Include the templates folder (excluded by default as it's a reserved name for Jinja templates)
+not_in_nav: |
+  /templates.md
+exclude_docs: |
+  !/templates/
+
 theme:
   name: material
   palette:
