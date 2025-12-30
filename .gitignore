@@ -63,3 +63,6 @@ example/IMPLEMENTATION_COMPLETE.md
 example/EXAMPLES_PROGRESS.md
 website/LAUNCH_CHECKLIST.md
 website/IMPLEMENTATION_SUMMARY.md
+
+# MkDocs generated site (built in CI pipeline)
+site/
