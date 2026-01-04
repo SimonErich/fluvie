@@ -92,9 +92,7 @@ void main() {
           Scene(
             durationInFrames: 60,
             background: Background.solid(Colors.blue),
-            children: const [
-              Center(child: Text('Test')),
-            ],
+            children: const [Center(child: Text('Test'))],
           ),
         ],
       );
@@ -104,10 +102,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: VideoPreview(
-              video: buildTestVideo(),
-              autoPlay: false,
-            ),
+            body: VideoPreview(video: buildTestVideo(), autoPlay: false),
           ),
         ),
       );
@@ -127,10 +122,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: VideoPreview(
-              video: buildTestVideo(),
-              autoPlay: false,
-            ),
+            body: VideoPreview(video: buildTestVideo(), autoPlay: false),
           ),
         ),
       );
@@ -142,10 +134,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: VideoPreview(
-              video: buildTestVideo(),
-              autoPlay: false,
-            ),
+            body: VideoPreview(video: buildTestVideo(), autoPlay: false),
           ),
         ),
       );
@@ -174,8 +163,9 @@ void main() {
       expect(find.byType(Slider), findsOneWidget);
     });
 
-    testWidgets('shows export button when showExportButton is true',
-        (tester) async {
+    testWidgets('shows export button when showExportButton is true', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -310,24 +300,20 @@ void main() {
         ),
       );
 
-      final container = tester.widget<Container>(
-        find.byType(Container).first,
-      );
+      final container = tester.widget<Container>(find.byType(Container).first);
       final decoration = container.decoration as BoxDecoration?;
 
       // Container uses color property directly
       expect(container.color, Colors.red);
     });
 
-    testWidgets('disposes internal controller when not provided',
-        (tester) async {
+    testWidgets('disposes internal controller when not provided', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: VideoPreview(
-              video: buildTestVideo(),
-              autoPlay: false,
-            ),
+            body: VideoPreview(video: buildTestVideo(), autoPlay: false),
           ),
         ),
       );

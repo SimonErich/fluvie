@@ -366,11 +366,10 @@ class _VideoPreviewState extends State<VideoPreview>
   }
 
   void _onAnimationTick() {
-    final newFrame =
-        (_animationController.value * _totalFrames).floor().clamp(
-              0,
-              _totalFrames > 0 ? _totalFrames - 1 : 0,
-            );
+    final newFrame = (_animationController.value * _totalFrames).floor().clamp(
+      0,
+      _totalFrames > 0 ? _totalFrames - 1 : 0,
+    );
 
     if (newFrame != _controller._currentFrame) {
       _controller._updateFrame(newFrame);
@@ -413,9 +412,7 @@ class _VideoPreviewState extends State<VideoPreview>
       color: widget.backgroundColor,
       child: Column(
         children: [
-          Expanded(
-            child: _buildVideoPreview(),
-          ),
+          Expanded(child: _buildVideoPreview()),
           if (widget.showControls || widget.showExportButton)
             _VideoPreviewControls(
               controller: _controller,
@@ -445,10 +442,7 @@ class _VideoPreviewState extends State<VideoPreview>
     // Apply fitting
     switch (widget.fit) {
       case BoxFit.contain:
-        return FittedBox(
-          fit: BoxFit.contain,
-          child: content,
-        );
+        return FittedBox(fit: BoxFit.contain, child: content);
       case BoxFit.cover:
         return FittedBox(
           fit: BoxFit.cover,
@@ -456,17 +450,11 @@ class _VideoPreviewState extends State<VideoPreview>
           child: content,
         );
       case BoxFit.fill:
-        return FittedBox(
-          fit: BoxFit.fill,
-          child: content,
-        );
+        return FittedBox(fit: BoxFit.fill, child: content);
       case BoxFit.none:
         return Center(child: content);
       default:
-        return FittedBox(
-          fit: widget.fit,
-          child: content,
-        );
+        return FittedBox(fit: widget.fit, child: content);
     }
   }
 }
@@ -536,9 +524,7 @@ class _VideoPreviewControls extends StatelessWidget {
         return Container(
           height: style.height,
           padding: style.padding,
-          decoration: BoxDecoration(
-            color: style.backgroundColor,
-          ),
+          decoration: BoxDecoration(color: style.backgroundColor),
           child: Row(
             children: [
               // Play/Pause button
@@ -618,7 +604,8 @@ class _VideoPreviewControls extends StatelessWidget {
 
     return Text(
       '${currentSeconds}s / ${totalSeconds}s',
-      style: style.textStyle ??
+      style:
+          style.textStyle ??
           TextStyle(
             color: style.iconColor.withValues(alpha: 0.8),
             fontSize: 12,
@@ -654,10 +641,7 @@ class _VideoPreviewControls extends StatelessWidget {
     }
 
     return IconButton(
-      icon: Icon(
-        Icons.download,
-        color: style.iconColor,
-      ),
+      icon: Icon(Icons.download, color: style.iconColor),
       onPressed: onExport,
       tooltip: 'Export video',
     );

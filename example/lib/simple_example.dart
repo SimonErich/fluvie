@@ -60,9 +60,9 @@ class SimpleExamplePage extends StatelessWidget {
 
         // Optional: handle export completion
         onExportComplete: (path) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Video saved to: $path')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Video saved to: $path')));
         },
       ),
     );
@@ -85,10 +85,7 @@ class HelloWorldVideo extends StatelessWidget {
         Scene(
           durationInFrames: 90, // 3 seconds
           background: Background.gradient(
-            colors: {
-              0: const Color(0xFF667EEA),
-              90: const Color(0xFF764BA2),
-            },
+            colors: {0: const Color(0xFF667EEA), 90: const Color(0xFF764BA2)},
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -112,10 +109,7 @@ class HelloWorldVideo extends StatelessWidget {
         Scene(
           durationInFrames: 90, // 3 seconds
           background: Background.gradient(
-            colors: {
-              0: const Color(0xFF0EA5E9),
-              90: const Color(0xFF0284C7),
-            },
+            colors: {0: const Color(0xFF0EA5E9), 90: const Color(0xFF0284C7)},
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -190,15 +184,15 @@ class _ProgrammaticExportExampleState extends State<ProgrammaticExportExample> {
           .render();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Saved to: $path')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Saved to: $path')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
       }
     } finally {
       if (mounted) {
