@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
-// ignore: avoid_web_libraries_in_flutter
+// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
 import 'dart:html' as html;
-import 'dart:js_util' as js_util;
 
 /// Gets the downloads directory path - not applicable on web.
 Future<String?> getDownloadsPath() async {

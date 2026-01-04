@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -441,7 +440,6 @@ class VideoExporter {
   /// }
   /// ```
   Stream<VideoExportProgress> renderStream() async* {
-    final config = buildConfig();
     final totalFrames = _video.totalDuration;
     final stopwatch = Stopwatch()..start();
 

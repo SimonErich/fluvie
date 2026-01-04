@@ -69,7 +69,8 @@ class VideoPreviewController extends ChangeNotifier {
   /// Updates the current frame.
   ///
   /// Called internally by [VideoPreview].
-  void _updateFrame(int frame) {
+  @visibleForTesting
+  void updateFrame(int frame) {
     if (_currentFrame != frame) {
       _currentFrame = frame;
       notifyListeners();
@@ -79,7 +80,8 @@ class VideoPreviewController extends ChangeNotifier {
   /// Updates the playing state.
   ///
   /// Called internally by [VideoPreview].
-  void _updatePlayingState(bool playing) {
+  @visibleForTesting
+  void updatePlayingState(bool playing) {
     if (_isPlaying != playing) {
       _isPlaying = playing;
       notifyListeners();
@@ -89,7 +91,8 @@ class VideoPreviewController extends ChangeNotifier {
   /// Sets the exporting state.
   ///
   /// Called internally during export.
-  void _setExporting(bool exporting) {
+  @visibleForTesting
+  void setExporting(bool exporting) {
     _isExporting = exporting;
     if (!exporting) {
       _exportProgress = 0.0;
@@ -100,7 +103,8 @@ class VideoPreviewController extends ChangeNotifier {
   /// Updates export progress.
   ///
   /// Called internally during export.
-  void _updateExportProgress(double progress) {
+  @visibleForTesting
+  void updateExportProgress(double progress) {
     _exportProgress = progress.clamp(0.0, 1.0);
     notifyListeners();
   }
@@ -115,13 +119,13 @@ class VideoPreviewController extends ChangeNotifier {
     } else {
       controller.forward();
     }
-    _updatePlayingState(true);
+    updatePlayingState(true);
   }
 
   /// Pause playback.
   void pause() {
     _animationController?.stop();
-    _updatePlayingState(false);
+    updatePlayingState(false);
   }
 
   /// Toggle between play and pause.
@@ -141,7 +145,7 @@ class VideoPreviewController extends ChangeNotifier {
     final clampedFrame = frame.clamp(0, _totalFrames - 1);
     final value = clampedFrame / _totalFrames;
     controller.value = value;
-    _updateFrame(clampedFrame);
+    updateFrame(clampedFrame);
   }
 
   /// Seek to the beginning.
@@ -372,7 +376,7 @@ class _VideoPreviewState extends State<VideoPreview>
     );
 
     if (newFrame != _controller._currentFrame) {
-      _controller._updateFrame(newFrame);
+      _controller.updateFrame(newFrame);
       widget.onFrameUpdate?.call(newFrame, _totalFrames);
       if (mounted) setState(() {});
     }
@@ -387,10 +391,10 @@ class _VideoPreviewState extends State<VideoPreview>
       if (widget.loop) {
         _animationController.forward(from: 0.0);
       } else {
-        _controller._updatePlayingState(false);
+        _controller.updatePlayingState(false);
       }
     } else {
-      _controller._updatePlayingState(isPlaying);
+      _controller.updatePlayingState(isPlaying);
     }
   }
 

@@ -13,7 +13,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:fluvie/fluvie.dart';
-import 'package:fluvie/declarative.dart';
 
 /// Simple example app demonstrating VideoPreview and VideoExporter
 class SimpleExampleApp extends StatelessWidget {
@@ -44,7 +43,7 @@ class SimpleExamplePage extends StatelessWidget {
       ),
       body: VideoPreview(
         // Your Video widget goes here
-        video: const HelloWorldVideo(),
+        video: _buildHelloWorldVideo(),
 
         // Show playback controls (play/pause, scrubber)
         showControls: true,
@@ -57,24 +56,12 @@ class SimpleExamplePage extends StatelessWidget {
 
         // Loop continuously
         loop: true,
-
-        // Optional: handle export completion
-        onExportComplete: (path) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Video saved to: $path')));
-        },
       ),
     );
   }
-}
 
-/// A simple Hello World video
-class HelloWorldVideo extends StatelessWidget {
-  const HelloWorldVideo({super.key});
-
-  @override
-  Widget build(BuildContext context) {
+  /// Builds a simple Hello World video
+  static Video _buildHelloWorldVideo() {
     return Video(
       fps: 30,
       width: 1080,
@@ -175,13 +162,14 @@ class _ProgrammaticExportExampleState extends State<ProgrammaticExportExample> {
     });
 
     try {
-      final path = await VideoExporter(const HelloWorldVideo())
-          .withQuality(RenderQuality.high)
-          .withFileName('hello_world.mp4')
-          .withProgress((progress) {
-            setState(() => _progress = progress);
-          })
-          .render();
+      final path =
+          await VideoExporter(SimpleExamplePage._buildHelloWorldVideo())
+              .withQuality(RenderQuality.high)
+              .withFileName('hello_world.mp4')
+              .withProgress((progress) {
+                setState(() => _progress = progress);
+              })
+              .render();
 
       if (mounted) {
         ScaffoldMessenger.of(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/declarative.dart';
+import 'package:fluvie/src/presentation/time_consumer.dart';
 import 'package:fluvie/src/presentation/video_preview.dart';
 
 void main() {
@@ -23,7 +24,7 @@ void main() {
       int notifyCount = 0;
       controller.addListener(() => notifyCount++);
 
-      controller._updateFrame(10);
+      controller.updateFrame(10);
 
       expect(notifyCount, 1);
       expect(controller.currentFrame, 10);
@@ -36,12 +37,12 @@ void main() {
       int notifyCount = 0;
       controller.addListener(() => notifyCount++);
 
-      controller._updatePlayingState(true);
+      controller.updatePlayingState(true);
 
       expect(notifyCount, 1);
       expect(controller.isPlaying, true);
 
-      controller._updatePlayingState(false);
+      controller.updatePlayingState(false);
       expect(notifyCount, 2);
       expect(controller.isPlaying, false);
 
@@ -53,15 +54,15 @@ void main() {
       int notifyCount = 0;
       controller.addListener(() => notifyCount++);
 
-      controller._setExporting(true);
+      controller.setExporting(true);
       expect(controller.isExporting, true);
       expect(notifyCount, 1);
 
-      controller._updateExportProgress(0.5);
+      controller.updateExportProgress(0.5);
       expect(controller.exportProgress, 0.5);
       expect(notifyCount, 2);
 
-      controller._setExporting(false);
+      controller.setExporting(false);
       expect(controller.isExporting, false);
       expect(controller.exportProgress, 0.0); // Reset on stop
       expect(notifyCount, 3);
@@ -72,10 +73,10 @@ void main() {
     test('progress clamps to valid range', () {
       final controller = VideoPreviewController();
 
-      controller._updateExportProgress(-0.5);
+      controller.updateExportProgress(-0.5);
       expect(controller.exportProgress, 0.0);
 
-      controller._updateExportProgress(1.5);
+      controller.updateExportProgress(1.5);
       expect(controller.exportProgress, 1.0);
 
       controller.dispose();
@@ -83,7 +84,7 @@ void main() {
   });
 
   group('VideoPreview', () {
-    Widget buildTestVideo() {
+    Video buildTestVideo() {
       return Video(
         fps: 30,
         width: 640,
@@ -301,7 +302,6 @@ void main() {
       );
 
       final container = tester.widget<Container>(find.byType(Container).first);
-      final decoration = container.decoration as BoxDecoration?;
 
       // Container uses color property directly
       expect(container.color, Colors.red);
