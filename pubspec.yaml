@@ -16,8 +16,8 @@ topics:
   - media
 
 environment:
-  sdk: ^3.10.0
-  flutter: '>=3.3.0'
+  sdk: ^3.3.0
+  flutter: '>=3.19.0'
 
 dependencies:
   flutter:
