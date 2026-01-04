@@ -234,24 +234,24 @@ Video(
 
 ## Step 5: Preview Your Video
 
-### Add to Your App
+### Using VideoPreview (Recommended)
 
-Create a simple app to preview:
+The easiest way to preview your video is with the `VideoPreview` widget, which handles all the animation and playback boilerplate for you:
 
 ```dart
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:fluvie/fluvie.dart';
 import 'my_first_video.dart';
 
 void main() {
   runApp(MaterialApp(
     home: Scaffold(
       backgroundColor: Colors.black,
-      body: Center(
-        child: AspectRatio(
-          aspectRatio: 16 / 9,
-          child: MyFirstVideo(),
-        ),
+      body: VideoPreview(
+        video: MyFirstVideo(),
+        showControls: true,      // Play/pause, scrubber
+        showExportButton: true,  // Export to MP4
       ),
     ),
   ));
@@ -264,44 +264,45 @@ void main() {
 flutter run
 ```
 
-Your video will play in preview mode, looping automatically.
+Your video will play automatically with:
+- **Play/Pause** button
+- **Scrubber** to seek to any frame
+- **Export button** to render to MP4
 
-### Preview Controls (Optional)
+### Advanced: External Controller
 
-Add playback controls for better development:
+For more control over playback, use a `VideoPreviewController`:
 
 ```dart
-class VideoPreview extends StatefulWidget {
+class VideoPage extends StatefulWidget {
   @override
-  State<VideoPreview> createState() => _VideoPreviewState();
+  State<VideoPage> createState() => _VideoPageState();
 }
 
-class _VideoPreviewState extends State<VideoPreview> {
-  bool isPlaying = true;
+class _VideoPageState extends State<VideoPage> {
+  final _controller = VideoPreviewController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Expanded(
-          child: MyFirstVideo(),
-        ),
-        Padding(
-          padding: EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: Icon(
-                  isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  setState(() => isPlaying = !isPlaying);
-                },
-              ),
-            ],
+          child: VideoPreview(
+            video: MyFirstVideo(),
+            controller: _controller,
+            showControls: true,
           ),
+        ),
+        // Custom controls
+        ElevatedButton(
+          onPressed: () => _controller.seekTo(0),
+          child: Text('Reset'),
         ),
       ],
     );
@@ -313,9 +314,66 @@ class _VideoPreviewState extends State<VideoPreview> {
 
 ## Step 6: Export the Video
 
-### Option A: Export Button in App
+### Option A: Use VideoPreview's Export Button
 
-Add an export button:
+If you set `showExportButton: true` on `VideoPreview`, clicking the download button will automatically render and save your video.
+
+### Option B: Use VideoExporter (Programmatic)
+
+For more control over export, use `VideoExporter`:
+
+```dart
+ElevatedButton(
+  child: Text('Export Video'),
+  onPressed: () async {
+    final path = await VideoExporter(MyFirstVideo())
+      .withQuality(RenderQuality.high)
+      .withFileName('my_first_video.mp4')
+      .withProgress((progress) {
+        print('Progress: ${(progress * 100).toInt()}%');
+      })
+      .render();
+
+    print('Saved to: $path');
+
+    // Or render and save to Downloads in one step:
+    // await VideoExporter(MyFirstVideo()).renderAndSave();
+  },
+)
+```
+
+### Option C: Export via Test (Automated)
+
+For CI/CD or automated rendering, use a test file:
+
+```dart
+// test/render_first_video_test.dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:fluvie/fluvie.dart';
+import 'package:your_app/my_first_video.dart';
+
+void main() {
+  testWidgets('Render first video', (tester) async {
+    final path = await VideoExporter(MyFirstVideo())
+      .withQuality(RenderQuality.high)
+      .withProgress((p) => print('${(p * 100).toInt()}%'))
+      .render();
+
+    print('Video saved to: $path');
+  });
+}
+```
+
+Run with:
+```bash
+flutter test test/render_first_video_test.dart
+```
+
+---
+
+### Legacy: Manual Export (Not Recommended)
+
+If you need fine-grained control, you can use `RenderService` directly:
 
 ```dart
 ElevatedButton(

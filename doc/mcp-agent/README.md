@@ -11,7 +11,7 @@ The MCP server enables AI tools like Claude Desktop, VS Code extensions, and oth
 - **Suggest Templates** - Get template recommendations for your use case
 - **Access References** - Get detailed widget and template documentation
 
-**Public Server**: `https://mcp.fluvie.at`
+**Public Server**: `https://mcp.fluvie.dev`
 
 ---
 
@@ -27,7 +27,7 @@ The MCP server enables AI tools like Claude Desktop, VS Code extensions, and oth
 {
   "mcpServers": {
     "fluvie": {
-      "url": "https://mcp.fluvie.at/mcp",
+      "url": "https://mcp.fluvie.dev/mcp",
       "transport": "http"
     }
   }
@@ -47,7 +47,7 @@ The MCP server enables AI tools like Claude Desktop, VS Code extensions, and oth
 {
   "mcpServers": {
     "fluvie": {
-      "url": "https://mcp.fluvie.at/mcp"
+      "url": "https://mcp.fluvie.dev/mcp"
     }
   }
 }

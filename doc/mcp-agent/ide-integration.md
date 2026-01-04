@@ -17,7 +17,7 @@ Configure various IDEs and AI tools to use the Fluvie MCP server.
 {
   "mcpServers": {
     "fluvie": {
-      "url": "https://mcp.fluvie.at/mcp",
+      "url": "https://mcp.fluvie.dev/mcp",
       "transport": "http"
     }
   }
@@ -66,7 +66,7 @@ Add to `~/.continue/config.json`:
   "models": [...],
   "mcpServers": {
     "fluvie": {
-      "url": "https://mcp.fluvie.at/mcp"
+      "url": "https://mcp.fluvie.dev/mcp"
     }
   }
 }
@@ -92,7 +92,7 @@ Add to `~/.continue/config.json`:
 {
   "mcpServers": {
     "fluvie": {
-      "url": "https://mcp.fluvie.at/mcp",
+      "url": "https://mcp.fluvie.dev/mcp",
       "transport": "http"
     }
   }
@@ -118,7 +118,7 @@ Add to your Zed settings (`~/.config/zed/settings.json`):
   "assistant": {
     "mcp_servers": {
       "fluvie": {
-        "url": "https://mcp.fluvie.at/mcp"
+        "url": "https://mcp.fluvie.dev/mcp"
       }
     }
   }
@@ -133,14 +133,14 @@ For any MCP-compatible client, use these settings:
 
 | Setting | Value |
 |---------|-------|
-| Server URL | `https://mcp.fluvie.at/mcp` |
+| Server URL | `https://mcp.fluvie.dev/mcp` |
 | Transport | HTTP |
-| SSE Endpoint | `https://mcp.fluvie.at/mcp/sse` |
+| SSE Endpoint | `https://mcp.fluvie.dev/mcp/sse` |
 
 ### JSON-RPC Example
 
 ```bash
-curl -X POST https://mcp.fluvie.at/mcp \
+curl -X POST https://mcp.fluvie.dev/mcp \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -219,7 +219,7 @@ See [IDE Helpers](../ide-helpers/README.md) for using the reference file.
 
 ### "Server not found" error
 
-1. Check server is running: `curl https://mcp.fluvie.at/health`
+1. Check server is running: `curl https://mcp.fluvie.dev/health`
 2. Verify URL in configuration
 3. Restart IDE after changing config
 

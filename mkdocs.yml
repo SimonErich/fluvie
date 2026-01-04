@@ -1,12 +1,12 @@
 site_name: Fluvie Documentation
 site_description: Programmatic video generation with Flutter widgets and FFmpeg
 site_author: Simon Auer
-site_url: https://simonerich.github.io/fluvie/
+site_url: https://docs.fluvie.dev/
 
 repo_name: SimonErich/fluvie
 repo_url: https://github.com/SimonErich/fluvie
 
-copyright: Copyright &copy; 2024 Simon Auer
+copyright: Copyright &copy; 2025 Simon Auer
 
 docs_dir: doc
 
@@ -36,10 +36,11 @@ theme:
   features:
     - navigation.instant
     - navigation.tracking
-    - navigation.tabs
     - navigation.sections
     - navigation.expand
     - navigation.top
+    - navigation.indexes
+    - toc.integrate
     - search.suggest
     - search.highlight
     - content.code.copy

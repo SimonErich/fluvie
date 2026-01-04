@@ -280,4 +280,4 @@ Use AI assistants effectively with Fluvie:
 - [GitHub Repository](https://github.com/simonerich/fluvie)
 - [Pub.dev Package](https://pub.dev/packages/fluvie)
 - [Issue Tracker](https://github.com/simonerich/fluvie/issues)
-- [MCP Server](https://mcp.fluvie.at) - AI documentation server
+- [MCP Server](https://mcp.fluvie.dev) - AI documentation server

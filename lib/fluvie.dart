@@ -154,9 +154,16 @@ export 'src/encoding/ffmpeg_provider/wasm_ffmpeg_provider.dart';
 
 // Integration layer
 export 'src/integration/render_service.dart';
+export 'src/integration/video_exporter.dart';
 
 // Preview layer
 export 'src/preview/audio_preview_service.dart';
+
+// Presentation layer - VideoPreview
+export 'src/presentation/video_preview.dart';
+
+// Utilities - File saving
+export 'src/utils/file_saver.dart';
 
 // Declarative API
 export 'src/declarative/declarative.dart';

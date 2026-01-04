@@ -4,11 +4,22 @@
 
 This section guides you through setting up Fluvie and creating your first animated video.
 
+## Choose Your Path
+
+| Path | Best For | Guide |
+|------|----------|-------|
+| **MCP + AI** | Fast prototyping with Claude/Cursor | [with-mcp.md](with-mcp.md) |
+| **Manual Flutter** | Full control, understanding the framework | [with-flutter.md](with-flutter.md) |
+| **Headless/Server** | CI/CD, APIs, batch processing | [headless.md](headless.md) |
+
 ## Table of Contents
 
 - [Installation](installation.md) - Add Fluvie to your project
 - [FFmpeg Setup](ffmpeg-setup.md) - Configure video encoding
 - [First Video](first-video.md) - Build a complete animated video
+- [With MCP](with-mcp.md) - AI-assisted development (vibecoding)
+- [With Flutter](with-flutter.md) - Manual Flutter setup
+- [Headless](headless.md) - Server-side rendering
 
 ---
 

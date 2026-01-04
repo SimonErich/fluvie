@@ -80,7 +80,7 @@ For production with automatic HTTPS certificates:
 
 ### Step 1: Configure Domain
 
-Point your domain (e.g., `mcp.fluvie.at`) to your server's IP.
+Point your domain (e.g., `mcp.fluvie.dev`) to your server's IP.
 
 ### Step 2: Set Environment
 
