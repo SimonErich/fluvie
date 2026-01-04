@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -118,8 +119,12 @@ class VideoExporter {
   RenderQuality _quality = RenderQuality.medium;
   void Function(double progress)? _progressCallback;
   void Function(int frame, int totalFrames)? _frameCallback;
-  String _outputFileName = 'output.mp4';
+  String _outputFileNameValue = 'output.mp4';
   EncodingConfig? _encodingConfig;
+
+  /// The output file name. Exposed for testing.
+  @visibleForTesting
+  String get outputFileName => _outputFileNameValue;
 
   /// Creates a new exporter for the given video.
   VideoExporter(this._video);
@@ -173,7 +178,7 @@ class VideoExporter {
   /// Defaults to `'output.mp4'`.
   /// The file is created in the system temp directory.
   VideoExporter withFileName(String fileName) {
-    _outputFileName = fileName;
+    _outputFileNameValue = fileName;
     return this;
   }
 
@@ -196,7 +201,8 @@ class VideoExporter {
   }
 
   /// Builds the render configuration from the video.
-  RenderConfig _buildConfig() {
+  @visibleForTesting
+  RenderConfig buildConfig() {
     final encoding = _encodingConfig ?? EncodingConfig(quality: _quality);
 
     return RenderConfig(
@@ -229,7 +235,7 @@ class VideoExporter {
   /// print('Video saved to: $path');
   /// ```
   Future<String> render() async {
-    final config = _buildConfig();
+    final config = buildConfig();
     final totalFrames = _video.totalDuration;
 
     FluvieLogger.box(
@@ -238,7 +244,7 @@ class VideoExporter {
         'Video: ${_video.width}x${_video.height} @ ${_video.fps}fps',
         'Total frames: $totalFrames',
         'Quality: $_quality',
-        'Output: $_outputFileName',
+        'Output: $_outputFileNameValue',
       ],
       module: 'exporter',
       level: FluvieLogLevel.info,
@@ -262,10 +268,7 @@ class VideoExporter {
         child: RenderModeProvider(
           isRendering: true,
           frameReadyNotifier: renderController.frameReadyNotifier,
-          child: FrameProvider(
-            frame: 0,
-            child: _video,
-          ),
+          child: FrameProvider(frame: 0, child: _video),
         ),
       ),
     );
@@ -308,7 +311,7 @@ class VideoExporter {
     // Start FFmpeg encoding session
     final session = await encoderService.startEncoding(
       config: config,
-      outputFileName: _outputFileName,
+      outputFileName: _outputFileNameValue,
     );
 
     try {
@@ -327,10 +330,8 @@ class VideoExporter {
         await _waitForRasterization();
 
         // Wait for any pending async operations
-        final success =
-            await renderController.frameReadyNotifier.waitForAllFramesWithTimeout(
-          const Duration(seconds: 5),
-        );
+        final success = await renderController.frameReadyNotifier
+            .waitForAllFramesWithTimeout(const Duration(seconds: 5));
 
         if (!success) {
           FluvieLogger.warning(
@@ -415,7 +416,7 @@ class VideoExporter {
   /// ```
   Future<void> renderAndSave() async {
     final path = await render();
-    await FileSaver.save(path, suggestedName: _outputFileName);
+    await FileSaver.save(path, suggestedName: _outputFileNameValue);
   }
 
   /// Creates a stream that emits progress events during rendering.
@@ -440,7 +441,7 @@ class VideoExporter {
   /// }
   /// ```
   Stream<VideoExportProgress> renderStream() async* {
-    final config = _buildConfig();
+    final config = buildConfig();
     final totalFrames = _video.totalDuration;
     final stopwatch = Stopwatch()..start();
 
@@ -460,12 +461,14 @@ class VideoExporter {
       _frameCallback = (frame, total) {
         if (frame != lastFrame) {
           lastFrame = frame;
-          streamController.add(VideoExportProgress(
-            currentFrame: frame,
-            totalFrames: total,
-            phase: VideoExportPhase.capturing,
-            elapsed: stopwatch.elapsed,
-          ));
+          streamController.add(
+            VideoExportProgress(
+              currentFrame: frame,
+              totalFrames: total,
+              phase: VideoExportPhase.capturing,
+              elapsed: stopwatch.elapsed,
+            ),
+          );
         }
       };
 

@@ -15,9 +15,7 @@ void main() {
           Scene(
             durationInFrames: durationInFrames,
             background: Background.solid(Colors.blue),
-            children: const [
-              Center(child: Text('Test')),
-            ],
+            children: const [Center(child: Text('Test'))],
           ),
         ],
       );
@@ -29,7 +27,7 @@ void main() {
 
       // Access internal method via reflection-like approach
       // In a real test, we'd expose this or test through render()
-      final config = exporter._buildConfig();
+      final config = exporter.buildConfig();
 
       expect(config.timeline.fps, 30);
       expect(config.timeline.width, 640);
@@ -41,7 +39,7 @@ void main() {
       final video = buildTestVideo();
       final exporter = VideoExporter(video).withQuality(RenderQuality.high);
 
-      final config = exporter._buildConfig();
+      final config = exporter.buildConfig();
 
       expect(config.encoding?.quality, RenderQuality.high);
     });
@@ -54,7 +52,7 @@ void main() {
       );
       final exporter = VideoExporter(video).withEncoding(customEncoding);
 
-      final config = exporter._buildConfig();
+      final config = exporter.buildConfig();
 
       expect(config.encoding?.quality, RenderQuality.lossless);
       expect(config.encoding?.frameFormat, FrameFormat.png);
@@ -66,7 +64,7 @@ void main() {
           .withQuality(RenderQuality.low)
           .withEncoding(EncodingConfig(quality: RenderQuality.high));
 
-      final config = exporter._buildConfig();
+      final config = exporter.buildConfig();
 
       // Custom encoding should take precedence
       expect(config.encoding?.quality, RenderQuality.high);
@@ -76,7 +74,7 @@ void main() {
       final video = buildTestVideo();
       final exporter = VideoExporter(video).withFileName('my_video.mp4');
 
-      expect(exporter._outputFileName, 'my_video.mp4');
+      expect(exporter.outputFileName, 'my_video.mp4');
     });
 
     test('builder pattern returns same instance', () {
@@ -114,7 +112,7 @@ void main() {
       );
 
       final exporter = VideoExporter(video);
-      final config = exporter._buildConfig();
+      final config = exporter.buildConfig();
 
       expect(config.embeddedVideos.length, 1);
       expect(config.embeddedVideos.first.videoPath, 'assets/test.mp4');
@@ -154,10 +152,7 @@ void main() {
 
       // 50 remaining frames * 200ms = 10 seconds
       expect(progress.estimatedTimeRemaining, isNotNull);
-      expect(
-        progress.estimatedTimeRemaining!.inSeconds,
-        closeTo(10, 1),
-      );
+      expect(progress.estimatedTimeRemaining!.inSeconds, closeTo(10, 1));
     });
 
     test('estimatedTimeRemaining is null when not capturing', () {
@@ -208,29 +203,4 @@ void main() {
       expect(VideoExportPhase.values, contains(VideoExportPhase.failed));
     });
   });
-}
-
-// Extension to access private fields for testing
-extension _VideoExporterTestAccess on VideoExporter {
-  RenderConfig _buildConfig() {
-    // Access internal method - in real code we'd use @visibleForTesting
-    final encoding = _encodingConfig ?? EncodingConfig(quality: _quality);
-
-    return RenderConfig(
-      timeline: TimelineConfig(
-        fps: _video.fps,
-        durationInFrames: _video.totalDuration,
-        width: _video.width,
-        height: _video.height,
-      ),
-      sequences: [],
-      embeddedVideos: _video.extractEmbeddedVideoConfigs(),
-      encoding: encoding,
-    );
-  }
-
-  RenderQuality get _quality => RenderQuality.medium; // Default for testing
-  EncodingConfig? get _encodingConfig => null;
-  Video get _video;
-  String get _outputFileName;
 }
