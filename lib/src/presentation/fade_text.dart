@@ -23,7 +23,7 @@ import 'fade.dart';
 /// The text color's alpha will be multiplied by the fade opacity:
 /// - If the style color is `Colors.white` (alpha = 1.0) and fade opacity is 0.5,
 ///   the rendered color will have alpha = 0.5
-/// - If the style color already has alpha (e.g., `Colors.white.withOpacity(0.8)`)
+/// - If the style color already has alpha (e.g., `Colors.white.withValues(alpha: 0.8)`)
 ///   and fade opacity is 0.5, the rendered color will have alpha = 0.4 (0.8 * 0.5)
 class FadeText extends StatelessWidget {
   /// The text to display.

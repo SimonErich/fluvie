@@ -33,7 +33,7 @@ import 'audio_data_provider.dart';
 ///           height: 50 + beatStrength * 50,
 ///           decoration: BoxDecoration(
 ///             shape: BoxShape.circle,
-///             color: Colors.red.withOpacity(beatStrength),
+///             color: Colors.red.withValues(alpha: beatStrength),
 ///           ),
 ///         );
 ///       },

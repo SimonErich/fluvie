@@ -294,7 +294,7 @@ class TemplateSamplerExample extends InteractiveExample {
                     width: 800,
                     height: 350,
                     child: Container(
-                      color: accentColor.withOpacity(0.3),
+                      color: accentColor.withValues(alpha: 0.3),
                       child: Center(
                         child: Icon(Icons.photo_library, size: 100),
                       ),

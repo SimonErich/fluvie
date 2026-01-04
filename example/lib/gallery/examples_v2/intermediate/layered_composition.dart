@@ -240,7 +240,7 @@ class LayeredCompositionExample extends InteractiveExample {
                           width: size,
                           height: size,
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(opacity),
+                            color: Colors.blue.withValues(alpha: opacity),
                             shape: BoxShape.circle,
                           ),
                         ),
