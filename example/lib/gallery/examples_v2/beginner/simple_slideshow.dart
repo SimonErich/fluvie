@@ -21,77 +21,77 @@ class SimpleSlideshowExample extends InteractiveExample {
 
   @override
   List<String> get features => [
-    'Video',
-    'Multiple Scenes',
-    'SceneTransition.crossFade',
-    'Background.solid',
-  ];
+        'Video',
+        'Multiple Scenes',
+        'SceneTransition.crossFade',
+        'Background.solid',
+      ];
 
   @override
   List<ExampleParameter> get parameters => [
-    ExampleParameter.slider(
-      id: 'sceneDuration',
-      label: 'Scene Duration (frames)',
-      description: 'How long each scene appears',
-      defaultValue: 90,
-      minValue: 60,
-      maxValue: 180,
-    ),
-    ExampleParameter.slider(
-      id: 'transitionDuration',
-      label: 'Transition Duration (frames)',
-      description: 'Length of the fade transition',
-      defaultValue: 30,
-      minValue: 15,
-      maxValue: 60,
-    ),
-    ExampleParameter.dropdown(
-      id: 'transitionType',
-      label: 'Transition Type',
-      description: 'Type of transition between scenes',
-      defaultValue: 'crossFade',
-      options: const [
-        DropdownOption(
-          value: 'crossFade',
-          label: 'Cross Fade',
-          description: 'Smooth fade between scenes',
+        ExampleParameter.slider(
+          id: 'sceneDuration',
+          label: 'Scene Duration (frames)',
+          description: 'How long each scene appears',
+          defaultValue: 90,
+          minValue: 60,
+          maxValue: 180,
         ),
-        DropdownOption(
-          value: 'none',
-          label: 'None',
-          description: 'Instant cut',
+        ExampleParameter.slider(
+          id: 'transitionDuration',
+          label: 'Transition Duration (frames)',
+          description: 'Length of the fade transition',
+          defaultValue: 30,
+          minValue: 15,
+          maxValue: 60,
         ),
-      ],
-    ),
-    ExampleParameter.color(
-      id: 'color1',
-      label: 'Color 1',
-      description: 'First scene color',
-      defaultValue: const Color(0xFFFF6B6B),
-    ),
-    ExampleParameter.color(
-      id: 'color2',
-      label: 'Color 2',
-      description: 'Second scene color',
-      defaultValue: const Color(0xFF4ECDC4),
-    ),
-    ExampleParameter.color(
-      id: 'color3',
-      label: 'Color 3',
-      description: 'Third scene color',
-      defaultValue: const Color(0xFFFFE66D),
-    ),
-  ];
+        ExampleParameter.dropdown(
+          id: 'transitionType',
+          label: 'Transition Type',
+          description: 'Type of transition between scenes',
+          defaultValue: 'crossFade',
+          options: const [
+            DropdownOption(
+              value: 'crossFade',
+              label: 'Cross Fade',
+              description: 'Smooth fade between scenes',
+            ),
+            DropdownOption(
+              value: 'none',
+              label: 'None',
+              description: 'Instant cut',
+            ),
+          ],
+        ),
+        ExampleParameter.color(
+          id: 'color1',
+          label: 'Color 1',
+          description: 'First scene color',
+          defaultValue: const Color(0xFFFF6B6B),
+        ),
+        ExampleParameter.color(
+          id: 'color2',
+          label: 'Color 2',
+          description: 'Second scene color',
+          defaultValue: const Color(0xFF4ECDC4),
+        ),
+        ExampleParameter.color(
+          id: 'color3',
+          label: 'Color 3',
+          description: 'Third scene color',
+          defaultValue: const Color(0xFFFFE66D),
+        ),
+      ];
 
   @override
   List<String> get instructions => [
-    'This example demonstrates how to create a video with multiple scenes.',
-    'Each Scene represents a distinct section of your video with its own content.',
-    'SceneTransition controls how one scene transitions to the next.',
-    'Cross fade smoothly blends between scenes, creating a professional look.',
-    'The Video widget automatically handles timing and transitions between scenes.',
-    'Try changing transition types and durations to see different effects!',
-  ];
+        'This example demonstrates how to create a video with multiple scenes.',
+        'Each Scene represents a distinct section of your video with its own content.',
+        'SceneTransition controls how one scene transitions to the next.',
+        'Cross fade smoothly blends between scenes, creating a professional look.',
+        'The Video widget automatically handles timing and transitions between scenes.',
+        'Try changing transition types and durations to see different effects!',
+      ];
 
   @override
   Widget buildWithParameters(Map<String, dynamic> parameterValues) {

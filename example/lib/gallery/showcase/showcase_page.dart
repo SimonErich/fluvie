@@ -165,8 +165,8 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
             child: isDesktop
                 ? _buildDesktopLayout(selectedExample)
                 : isTablet
-                ? _buildTabletLayout(selectedExample)
-                : _buildMobileLayout(selectedExample),
+                    ? _buildTabletLayout(selectedExample)
+                    : _buildMobileLayout(selectedExample),
           ),
           if (_isRendering) _buildRenderProgress(),
         ],
@@ -449,7 +449,7 @@ class _ShowcasePageState extends ConsumerState<ShowcasePage> {
                     ...entry.value.map((example) {
                       final isSelected =
                           ref.watch(selectedShowcaseExampleProvider)?.title ==
-                          example.title;
+                              example.title;
                       return _buildExampleCard(example, isSelected);
                     }),
                     const SizedBox(height: 16),

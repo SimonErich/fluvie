@@ -167,9 +167,8 @@ class _ProgrammaticExportExampleState extends State<ProgrammaticExportExample> {
               .withQuality(RenderQuality.high)
               .withFileName('hello_world.mp4')
               .withProgress((progress) {
-                setState(() => _progress = progress);
-              })
-              .render();
+        setState(() => _progress = progress);
+      }).render();
 
       if (mounted) {
         ScaffoldMessenger.of(

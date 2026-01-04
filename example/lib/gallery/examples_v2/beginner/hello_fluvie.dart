@@ -21,89 +21,89 @@ class HelloFluvieExample extends InteractiveExample {
 
   @override
   List<String> get features => [
-    'Video',
-    'Scene',
-    'AnimatedText.slideUpFade',
-    'Background.gradient',
-  ];
+        'Video',
+        'Scene',
+        'AnimatedText.slideUpFade',
+        'Background.gradient',
+      ];
 
   @override
   List<ExampleParameter> get parameters => [
-    ExampleParameter.slider(
-      id: 'duration',
-      label: 'Duration (frames)',
-      description: 'Total length of the video',
-      defaultValue: 90,
-      minValue: 60,
-      maxValue: 180,
-    ),
-    ExampleParameter.text(
-      id: 'text',
-      label: 'Text',
-      description: 'The text to display',
-      defaultValue: 'Hello Fluvie!',
-    ),
-    ExampleParameter.slider(
-      id: 'fontSize',
-      label: 'Font Size',
-      description: 'Size of the text',
-      defaultValue: 64.0,
-      minValue: 32.0,
-      maxValue: 96.0,
-      divisions: 64,
-    ),
-    ExampleParameter.color(
-      id: 'colorStart',
-      label: 'Gradient Start',
-      description: 'Starting color of the gradient',
-      defaultValue: const Color(0xFF667EEA),
-    ),
-    ExampleParameter.color(
-      id: 'colorEnd',
-      label: 'Gradient End',
-      description: 'Ending color of the gradient',
-      defaultValue: const Color(0xFF764BA2),
-    ),
-    ExampleParameter.dropdown(
-      id: 'curve',
-      label: 'Animation Curve',
-      description: 'Easing curve for the animation',
-      defaultValue: 'easeOut',
-      options: const [
-        DropdownOption(
-          value: 'linear',
-          label: 'Linear',
-          description: 'Constant speed',
+        ExampleParameter.slider(
+          id: 'duration',
+          label: 'Duration (frames)',
+          description: 'Total length of the video',
+          defaultValue: 90,
+          minValue: 60,
+          maxValue: 180,
         ),
-        DropdownOption(
-          value: 'easeIn',
-          label: 'Ease In',
-          description: 'Starts slow',
+        ExampleParameter.text(
+          id: 'text',
+          label: 'Text',
+          description: 'The text to display',
+          defaultValue: 'Hello Fluvie!',
         ),
-        DropdownOption(
-          value: 'easeOut',
-          label: 'Ease Out',
-          description: 'Ends slow',
+        ExampleParameter.slider(
+          id: 'fontSize',
+          label: 'Font Size',
+          description: 'Size of the text',
+          defaultValue: 64.0,
+          minValue: 32.0,
+          maxValue: 96.0,
+          divisions: 64,
         ),
-        DropdownOption(
-          value: 'easeInOut',
-          label: 'Ease In Out',
-          description: 'Slow start and end',
+        ExampleParameter.color(
+          id: 'colorStart',
+          label: 'Gradient Start',
+          description: 'Starting color of the gradient',
+          defaultValue: const Color(0xFF667EEA),
         ),
-      ],
-    ),
-  ];
+        ExampleParameter.color(
+          id: 'colorEnd',
+          label: 'Gradient End',
+          description: 'Ending color of the gradient',
+          defaultValue: const Color(0xFF764BA2),
+        ),
+        ExampleParameter.dropdown(
+          id: 'curve',
+          label: 'Animation Curve',
+          description: 'Easing curve for the animation',
+          defaultValue: 'easeOut',
+          options: const [
+            DropdownOption(
+              value: 'linear',
+              label: 'Linear',
+              description: 'Constant speed',
+            ),
+            DropdownOption(
+              value: 'easeIn',
+              label: 'Ease In',
+              description: 'Starts slow',
+            ),
+            DropdownOption(
+              value: 'easeOut',
+              label: 'Ease Out',
+              description: 'Ends slow',
+            ),
+            DropdownOption(
+              value: 'easeInOut',
+              label: 'Ease In Out',
+              description: 'Slow start and end',
+            ),
+          ],
+        ),
+      ];
 
   @override
   List<String> get instructions => [
-    'This is the simplest Fluvie example. It creates a video with a single scene.',
-    'The Video widget is the root of all Fluvie compositions. It defines the format (1080x1080) and framerate (30 fps).',
-    'The Scene widget represents a time-bounded section of the video. Here it lasts for the full duration.',
-    'Background.gradient creates a smooth color transition behind our content.',
-    'AnimatedText.slideUpFade animates the text entering from below while fading in.',
-    'VCenter positions the text in the center of the screen.',
-    'Try adjusting the parameters to see how they affect the animation!',
-  ];
+        'This is the simplest Fluvie example. It creates a video with a single scene.',
+        'The Video widget is the root of all Fluvie compositions. It defines the format (1080x1080) and framerate (30 fps).',
+        'The Scene widget represents a time-bounded section of the video. Here it lasts for the full duration.',
+        'Background.gradient creates a smooth color transition behind our content.',
+        'AnimatedText.slideUpFade animates the text entering from below while fading in.',
+        'VCenter positions the text in the center of the screen.',
+        'Try adjusting the parameters to see how they affect the animation!',
+      ];
 
   @override
   Widget buildWithParameters(Map<String, dynamic> parameterValues) {

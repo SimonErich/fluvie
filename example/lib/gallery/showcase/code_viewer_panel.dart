@@ -118,9 +118,8 @@ class CodeViewerPanel extends ConsumerWidget {
               color: isSelected ? Colors.transparent : GalleryTheme.glassBorder,
               width: 1.5,
             ),
-            boxShadow: isSelected
-                ? GalleryTheme.glowEffect(blurRadius: 12)
-                : null,
+            boxShadow:
+                isSelected ? GalleryTheme.glowEffect(blurRadius: 12) : null,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

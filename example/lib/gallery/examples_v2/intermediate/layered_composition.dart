@@ -21,47 +21,47 @@ class LayeredCompositionExample extends InteractiveExample {
 
   @override
   List<String> get features => [
-    'VStack',
-    'Stagger',
-    'Multiple layers',
-    'AnimatedProp',
-  ];
+        'VStack',
+        'Stagger',
+        'Multiple layers',
+        'AnimatedProp',
+      ];
 
   @override
   List<ExampleParameter> get parameters => [
-    ExampleParameter.slider(
-      id: 'layerCount',
-      label: 'Layer Count',
-      description: 'Number of layers',
-      defaultValue: 5,
-      minValue: 3,
-      maxValue: 8,
-    ),
-    ExampleParameter.slider(
-      id: 'staggerDelay',
-      label: 'Stagger Delay (frames)',
-      description: 'Delay between each layer animation',
-      defaultValue: 8,
-      minValue: 3,
-      maxValue: 15,
-    ),
-    ExampleParameter.color(
-      id: 'accentColor',
-      label: 'Accent Color',
-      description: 'Primary color for layers',
-      defaultValue: const Color(0xFF6C5CE7),
-    ),
-  ];
+        ExampleParameter.slider(
+          id: 'layerCount',
+          label: 'Layer Count',
+          description: 'Number of layers',
+          defaultValue: 5,
+          minValue: 3,
+          maxValue: 8,
+        ),
+        ExampleParameter.slider(
+          id: 'staggerDelay',
+          label: 'Stagger Delay (frames)',
+          description: 'Delay between each layer animation',
+          defaultValue: 8,
+          minValue: 3,
+          maxValue: 15,
+        ),
+        ExampleParameter.color(
+          id: 'accentColor',
+          label: 'Accent Color',
+          description: 'Primary color for layers',
+          defaultValue: const Color(0xFF6C5CE7),
+        ),
+      ];
 
   @override
   List<String> get instructions => [
-    'This example demonstrates layered composition with depth in Fluvie.',
-    'VStack overlays multiple widgets to create depth and dimensionality.',
-    'Stagger creates cascading animations where each layer starts slightly after the previous.',
-    'Layers are sized and positioned to create a sense of perspective.',
-    'Different animation speeds and opacities enhance the depth effect.',
-    'Adjust stagger delay to control the rhythm of the cascade!',
-  ];
+        'This example demonstrates layered composition with depth in Fluvie.',
+        'VStack overlays multiple widgets to create depth and dimensionality.',
+        'Stagger creates cascading animations where each layer starts slightly after the previous.',
+        'Layers are sized and positioned to create a sense of perspective.',
+        'Different animation speeds and opacities enhance the depth effect.',
+        'Adjust stagger delay to control the rhythm of the cascade!',
+      ];
 
   @override
   Widget buildWithParameters(Map<String, dynamic> parameterValues) {

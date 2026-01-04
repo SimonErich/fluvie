@@ -21,49 +21,49 @@ class EntryEffectsGalleryExample extends InteractiveExample {
 
   @override
   List<String> get features => [
-    'AnimatedProp',
-    'Entry effects',
-    'VRow',
-    'Multiple animations',
-  ];
+        'AnimatedProp',
+        'Entry effects',
+        'VRow',
+        'Multiple animations',
+      ];
 
   @override
   List<ExampleParameter> get parameters => [
-    ExampleParameter.slider(
-      id: 'animationDuration',
-      label: 'Animation Duration (frames)',
-      description: 'How long each entry animation lasts',
-      defaultValue: 45,
-      minValue: 20,
-      maxValue: 90,
-    ),
-    ExampleParameter.dropdown(
-      id: 'easingCurve',
-      label: 'Easing Curve',
-      description: 'Animation easing style',
-      defaultValue: 'easeOut',
-      options: const [
-        DropdownOption(value: 'easeOut', label: 'Ease Out'),
-        DropdownOption(value: 'bounceOut', label: 'Bounce Out'),
-        DropdownOption(value: 'elasticOut', label: 'Elastic Out'),
-      ],
-    ),
-  ];
+        ExampleParameter.slider(
+          id: 'animationDuration',
+          label: 'Animation Duration (frames)',
+          description: 'How long each entry animation lasts',
+          defaultValue: 45,
+          minValue: 20,
+          maxValue: 90,
+        ),
+        ExampleParameter.dropdown(
+          id: 'easingCurve',
+          label: 'Easing Curve',
+          description: 'Animation easing style',
+          defaultValue: 'easeOut',
+          options: const [
+            DropdownOption(value: 'easeOut', label: 'Ease Out'),
+            DropdownOption(value: 'bounceOut', label: 'Bounce Out'),
+            DropdownOption(value: 'elasticOut', label: 'Elastic Out'),
+          ],
+        ),
+      ];
 
   @override
   List<String> get instructions => [
-    'This gallery demonstrates different entry animation effects.',
-    'Each box shows a distinct animation: Slide Up, Slide Down, Scale, Rotate, and Fade.',
-    'All animations start at the same time to allow easy comparison.',
-    'AnimatedProp applies the property animations to standard Flutter widgets.',
-    'Different curves create different feels - bounce, elastic, and ease all have unique character.',
-    'Experiment with duration and curves to find the perfect timing!',
-  ];
+        'This gallery demonstrates different entry animation effects.',
+        'Each box shows a distinct animation: Slide Up, Slide Down, Scale, Rotate, and Fade.',
+        'All animations start at the same time to allow easy comparison.',
+        'AnimatedProp applies the property animations to standard Flutter widgets.',
+        'Different curves create different feels - bounce, elastic, and ease all have unique character.',
+        'Experiment with duration and curves to find the perfect timing!',
+      ];
 
   @override
   Widget buildWithParameters(Map<String, dynamic> parameterValues) {
-    final animationDuration = (parameterValues['animationDuration'] as num)
-        .toInt();
+    final animationDuration =
+        (parameterValues['animationDuration'] as num).toInt();
     final easingCurve = parameterValues['easingCurve'] as String;
     final curve = _getCurve(easingCurve);
 

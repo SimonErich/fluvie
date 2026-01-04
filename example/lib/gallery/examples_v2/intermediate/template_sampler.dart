@@ -24,35 +24,35 @@ class TemplateSamplerExample extends InteractiveExample {
 
   @override
   List<ExampleParameter> get parameters => [
-    ExampleParameter.text(
-      id: 'cardTitle',
-      label: 'Card Title',
-      description: 'Title text for the photo card',
-      defaultValue: 'My Photo',
-    ),
-    ExampleParameter.text(
-      id: 'cardSubtitle',
-      label: 'Card Subtitle',
-      description: 'Subtitle text',
-      defaultValue: 'Beautiful Moment',
-    ),
-    ExampleParameter.color(
-      id: 'accentColor',
-      label: 'Accent Color',
-      description: 'Theme color',
-      defaultValue: const Color(0xFFE74C3C),
-    ),
-  ];
+        ExampleParameter.text(
+          id: 'cardTitle',
+          label: 'Card Title',
+          description: 'Title text for the photo card',
+          defaultValue: 'My Photo',
+        ),
+        ExampleParameter.text(
+          id: 'cardSubtitle',
+          label: 'Card Subtitle',
+          description: 'Subtitle text',
+          defaultValue: 'Beautiful Moment',
+        ),
+        ExampleParameter.color(
+          id: 'accentColor',
+          label: 'Accent Color',
+          description: 'Theme color',
+          defaultValue: const Color(0xFFE74C3C),
+        ),
+      ];
 
   @override
   List<String> get instructions => [
-    'This example demonstrates Fluvie\'s built-in template widgets.',
-    'PhotoCard is a pre-made component for displaying images with captions.',
-    'Templates handle common layouts so you don\'t have to build them from scratch.',
-    'The template system makes creating professional videos faster.',
-    'Each template is customizable with colors, text, and timing.',
-    'Try different titles and colors to personalize the template!',
-  ];
+        'This example demonstrates Fluvie\'s built-in template widgets.',
+        'PhotoCard is a pre-made component for displaying images with captions.',
+        'Templates handle common layouts so you don\'t have to build them from scratch.',
+        'The template system makes creating professional videos faster.',
+        'Each template is customizable with colors, text, and timing.',
+        'Try different titles and colors to personalize the template!',
+      ];
 
   @override
   Widget buildWithParameters(Map<String, dynamic> parameterValues) {

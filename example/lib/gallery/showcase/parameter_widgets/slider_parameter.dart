@@ -21,8 +21,7 @@ class SliderParameterWidget extends ConsumerWidget {
     final minValue = (parameter.minValue as num).toDouble();
     final maxValue = (parameter.maxValue as num).toDouble();
     final currentValue = value.toDouble();
-    final divisions =
-        parameter.divisions ??
+    final divisions = parameter.divisions ??
         (maxValue - minValue).toInt(); // Default to range size
 
     return GalleryTheme.glassmorphicContainer(

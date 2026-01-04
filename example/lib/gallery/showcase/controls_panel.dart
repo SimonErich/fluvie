@@ -111,8 +111,7 @@ class ControlsPanel extends ConsumerWidget {
                         const SizedBox(height: 20),
                     itemBuilder: (context, index) {
                       final parameter = parameters[index];
-                      final value =
-                          parameterValues[parameter.id] ??
+                      final value = parameterValues[parameter.id] ??
                           parameter.defaultValue;
 
                       return _buildParameterWidget(

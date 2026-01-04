@@ -83,9 +83,8 @@ class GalleryTheme {
         borderRadius: BorderRadius.circular(borderRadius),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: padding != null
-              ? Padding(padding: padding, child: child)
-              : child,
+          child:
+              padding != null ? Padding(padding: padding, child: child) : child,
         ),
       ),
     );
