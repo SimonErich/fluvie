@@ -145,9 +145,8 @@ class LiquidMinutes extends WrappedTemplate with TemplateAnimationMixin {
   }
 
   Widget _buildFloatingStats(TemplateTheme colors) {
-    final mainMetric = dataVizData.metrics.isNotEmpty
-        ? dataVizData.metrics.first
-        : null;
+    final mainMetric =
+        dataVizData.metrics.isNotEmpty ? dataVizData.metrics.first : null;
 
     final displayValue = _formatMinutes(dataVizData.total.toDouble());
 
@@ -371,8 +370,7 @@ class _LiquidContainerPainter extends CustomPainter {
 
     // Wave curve
     for (var x = 0.0; x <= size.width; x += 5) {
-      final y =
-          liquidTop +
+      final y = liquidTop +
           math.sin((x / size.width * waveFreq + time) * math.pi * 2) *
               waveHeight;
       path.lineTo(x, y);
@@ -396,8 +394,7 @@ class _LiquidContainerPainter extends CustomPainter {
 
     wavePath.moveTo(0, liquidTop);
     for (var x = 0.0; x <= size.width; x += 5) {
-      final y =
-          liquidTop +
+      final y = liquidTop +
           math.sin((x / size.width * 4 + time * 1.5) * math.pi * 2) *
               waveHeight;
       wavePath.lineTo(x, y);
@@ -433,17 +430,16 @@ class _LiquidContainerPainter extends CustomPainter {
 
   void _drawGlassShine(Canvas canvas, Size size) {
     final shinePaint = Paint()
-      ..shader =
-          LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white.withValues(alpha: 0.3),
-              Colors.white.withValues(alpha: 0.0),
-            ],
-          ).createShader(
-            Rect.fromLTWH(size.width * 0.2, 0, size.width * 0.15, size.height),
-          );
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.white.withValues(alpha: 0.3),
+          Colors.white.withValues(alpha: 0.0),
+        ],
+      ).createShader(
+        Rect.fromLTWH(size.width * 0.2, 0, size.width * 0.15, size.height),
+      );
 
     final shinePath = Path()
       ..moveTo(size.width * 0.25, size.height * 0.15)

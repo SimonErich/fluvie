@@ -67,11 +67,11 @@ class StaggerConfig {
     required this.delay,
     this.duration,
     this.curve = Curves.easeOut,
-  }) : fadeIn = true,
-       slideIn = false,
-       slideOffset = const Offset(0, 30),
-       scaleIn = false,
-       scaleStart = 0.8;
+  })  : fadeIn = true,
+        slideIn = false,
+        slideOffset = const Offset(0, 30),
+        scaleIn = false,
+        scaleStart = 0.8;
 
   /// Creates a slide-up stagger configuration.
   ///
@@ -82,11 +82,11 @@ class StaggerConfig {
     this.duration,
     this.curve = Curves.easeOut,
     double distance = 30,
-  }) : fadeIn = true,
-       slideIn = true,
-       slideOffset = Offset(0, distance),
-       scaleIn = false,
-       scaleStart = 0.8;
+  })  : fadeIn = true,
+        slideIn = true,
+        slideOffset = Offset(0, distance),
+        scaleIn = false,
+        scaleStart = 0.8;
 
   /// Creates a slide-down stagger configuration.
   ///
@@ -97,11 +97,11 @@ class StaggerConfig {
     this.duration,
     this.curve = Curves.easeOut,
     double distance = 30,
-  }) : fadeIn = true,
-       slideIn = true,
-       slideOffset = Offset(0, -distance),
-       scaleIn = false,
-       scaleStart = 0.8;
+  })  : fadeIn = true,
+        slideIn = true,
+        slideOffset = Offset(0, -distance),
+        scaleIn = false,
+        scaleStart = 0.8;
 
   /// Creates a slide-left stagger configuration.
   StaggerConfig.slideLeft({
@@ -109,11 +109,11 @@ class StaggerConfig {
     this.duration,
     this.curve = Curves.easeOut,
     double distance = 30,
-  }) : fadeIn = true,
-       slideIn = true,
-       slideOffset = Offset(distance, 0),
-       scaleIn = false,
-       scaleStart = 0.8;
+  })  : fadeIn = true,
+        slideIn = true,
+        slideOffset = Offset(distance, 0),
+        scaleIn = false,
+        scaleStart = 0.8;
 
   /// Creates a slide-right stagger configuration.
   StaggerConfig.slideRight({
@@ -121,11 +121,11 @@ class StaggerConfig {
     this.duration,
     this.curve = Curves.easeOut,
     double distance = 30,
-  }) : fadeIn = true,
-       slideIn = true,
-       slideOffset = Offset(-distance, 0),
-       scaleIn = false,
-       scaleStart = 0.8;
+  })  : fadeIn = true,
+        slideIn = true,
+        slideOffset = Offset(-distance, 0),
+        scaleIn = false,
+        scaleStart = 0.8;
 
   /// Creates a scale-in stagger configuration.
   StaggerConfig.scale({
@@ -133,11 +133,11 @@ class StaggerConfig {
     this.duration,
     this.curve = Curves.easeOut,
     double start = 0.8,
-  }) : fadeIn = true,
-       slideIn = false,
-       slideOffset = Offset.zero,
-       scaleIn = true,
-       scaleStart = start;
+  })  : fadeIn = true,
+        slideIn = false,
+        slideOffset = Offset.zero,
+        scaleIn = true,
+        scaleStart = start;
 
   /// Creates a combined slide-up + scale stagger configuration.
   StaggerConfig.slideUpScale({
@@ -146,10 +146,10 @@ class StaggerConfig {
     this.curve = Curves.easeOut,
     double slideDistance = 30,
     this.scaleStart = 0.8,
-  }) : fadeIn = true,
-       slideIn = true,
-       slideOffset = Offset(0, slideDistance),
-       scaleIn = true;
+  })  : fadeIn = true,
+        slideIn = true,
+        slideOffset = Offset(0, slideDistance),
+        scaleIn = true;
 
   /// The effective animation duration (uses default if not specified).
   int get effectiveDuration => duration ?? 20;

@@ -80,8 +80,8 @@ class CounterText extends StatelessWidget {
     this.style,
     this.formatter,
     this.textAlign,
-  }) : value = 0,
-       startValue = from;
+  })  : value = 0,
+        startValue = from;
 
   /// Creates a percentage counter (0% to value%).
   const CounterText.percentage({
@@ -92,8 +92,8 @@ class CounterText extends StatelessWidget {
     this.curve = Curves.easeOut,
     this.style,
     this.textAlign,
-  }) : startValue = 0,
-       formatter = _percentageFormatter;
+  })  : startValue = 0,
+        formatter = _percentageFormatter;
 
   static String _percentageFormatter(int n) => '$n%';
 
@@ -115,14 +115,13 @@ class CounterText extends StatelessWidget {
           // During animation
           final linearProgress = relativeFrame / duration;
           final curvedProgress = curve.transform(linearProgress);
-          displayValue = (startValue + (value - startValue) * curvedProgress)
-              .round();
+          displayValue =
+              (startValue + (value - startValue) * curvedProgress).round();
         }
 
         // Format the value
-        final displayText = formatter != null
-            ? formatter!(displayValue)
-            : '$displayValue';
+        final displayText =
+            formatter != null ? formatter!(displayValue) : '$displayValue';
 
         return FadeText(displayText, style: style, textAlign: textAlign);
       },

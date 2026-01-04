@@ -125,10 +125,11 @@ abstract class PropAnimation {
   static PropAnimation slideUpScale({
     double distance = 30,
     double startScale = 0.8,
-  }) => PropAnimation.combine([
-    PropAnimation.slideUp(distance: distance),
-    PropAnimation.zoomIn(start: startScale),
-  ]);
+  }) =>
+      PropAnimation.combine([
+        PropAnimation.slideUp(distance: distance),
+        PropAnimation.zoomIn(start: startScale),
+      ]);
 
   /// Creates a floating animation (for continuous oscillation).
   ///
@@ -136,7 +137,8 @@ abstract class PropAnimation {
   static PropAnimation float({
     Offset amplitude = const Offset(0, 10),
     double phase = 0.0,
-  }) => FloatAnimation(amplitude: amplitude, phase: phase);
+  }) =>
+      FloatAnimation(amplitude: amplitude, phase: phase);
 
   /// Creates a pulsing scale animation (for continuous oscillation).
   ///
@@ -145,7 +147,8 @@ abstract class PropAnimation {
     double min = 0.95,
     double max = 1.05,
     double phase = 0.0,
-  }) => PulseAnimation(min: min, max: max, phase: phase);
+  }) =>
+      PulseAnimation(min: min, max: max, phase: phase);
 
   /// Creates a horizontal scale animation (X axis only).
   ///

@@ -142,12 +142,12 @@ class SequenceConfig {
     required this.startFrame,
     required this.durationInFrames,
     this.spatialProps,
-  }) : type = SequenceType.base,
-       children = null,
-       assetPath = null,
-       trimStartFrame = null,
-       trimDurationInFrames = null,
-       text = null;
+  })  : type = SequenceType.base,
+        children = null,
+        assetPath = null,
+        trimStartFrame = null,
+        trimDurationInFrames = null,
+        text = null;
 
   /// Creates a video sequence configuration.
   ///
@@ -159,9 +159,9 @@ class SequenceConfig {
     this.trimStartFrame,
     this.trimDurationInFrames,
     this.spatialProps,
-  }) : type = SequenceType.video,
-       children = null,
-       text = null;
+  })  : type = SequenceType.video,
+        children = null,
+        text = null;
 
   /// Creates a text sequence configuration.
   ///
@@ -171,11 +171,11 @@ class SequenceConfig {
     required this.durationInFrames,
     required String this.text,
     this.spatialProps,
-  }) : type = SequenceType.text,
-       children = null,
-       assetPath = null,
-       trimStartFrame = null,
-       trimDurationInFrames = null;
+  })  : type = SequenceType.text,
+        children = null,
+        assetPath = null,
+        trimStartFrame = null,
+        trimDurationInFrames = null;
 
   /// Creates a composite sequence with child sequences.
   const SequenceConfig.composite({
@@ -183,11 +183,11 @@ class SequenceConfig {
     required this.durationInFrames,
     required List<SequenceConfig> this.children,
     this.spatialProps,
-  }) : type = SequenceType.composite,
-       assetPath = null,
-       trimStartFrame = null,
-       trimDurationInFrames = null,
-       text = null;
+  })  : type = SequenceType.composite,
+        assetPath = null,
+        trimStartFrame = null,
+        trimDurationInFrames = null,
+        text = null;
 
   /// Whether this is a video sequence.
   bool get isVideo => type == SequenceType.video;

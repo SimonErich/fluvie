@@ -113,11 +113,9 @@ class FloatingVibe extends AmbientAnimation {
     final phaseY2 = r.nextDouble() * 2 * math.pi;
 
     // Layer multiple frequencies for organic motion
-    final x =
-        math.sin(t * 2 * math.pi + phaseX1) * 0.6 +
+    final x = math.sin(t * 2 * math.pi + phaseX1) * 0.6 +
         math.sin(t * 4.3 * math.pi + phaseX2) * 0.4;
-    final y =
-        math.sin(t * 2.1 * math.pi + phaseY1) * 0.6 +
+    final y = math.sin(t * 2.1 * math.pi + phaseY1) * 0.6 +
         math.sin(t * 3.7 * math.pi + phaseY2) * 0.4;
 
     return Offset(x, y);
@@ -286,8 +284,7 @@ class PulseSync extends AmbientAnimation {
         final curvedProgress = pulseCurve.transform(beatProgress);
 
         // Scale oscillates: max at beat start, min at beat middle
-        final scale =
-            maxScale -
+        final scale = maxScale -
             (maxScale - minScale) *
                 (1 - math.cos(curvedProgress * 2 * math.pi)) /
                 2;
@@ -345,8 +342,7 @@ class BreathingAnimation extends AmbientAnimation {
         final cycleProgress = (time / cycleDuration) % 1.0;
 
         // Smooth sine wave for natural breathing motion
-        final scale =
-            minScale +
+        final scale = minScale +
             (maxScale - minScale) *
                 (1 + math.sin(cycleProgress * 2 * math.pi)) /
                 2;

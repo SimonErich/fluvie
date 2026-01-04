@@ -174,17 +174,17 @@ class AudioTrack extends StatelessWidget {
 
   /// Exposes the serializable configuration used by the encoder.
   AudioTrackConfig toAudioConfig() => AudioTrackConfig(
-    source: source.toConfig(),
-    startFrame: startFrame,
-    durationInFrames: durationInFrames,
-    trimStartFrame: trimStartFrame,
-    trimEndFrame: trimEndFrame,
-    volume: volume,
-    fadeInFrames: fadeInFrames,
-    fadeOutFrames: fadeOutFrames,
-    loop: loop,
-    sync: sync,
-  );
+        source: source.toConfig(),
+        startFrame: startFrame,
+        durationInFrames: durationInFrames,
+        trimStartFrame: trimStartFrame,
+        trimEndFrame: trimEndFrame,
+        volume: volume,
+        fadeInFrames: fadeInFrames,
+        fadeOutFrames: fadeOutFrames,
+        loop: loop,
+        sync: sync,
+      );
 
   @override
   Widget build(BuildContext context) => child;

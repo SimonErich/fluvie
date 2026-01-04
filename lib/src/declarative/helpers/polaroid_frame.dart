@@ -118,8 +118,7 @@ class PolaroidFrame extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: framePadding),
                   child: Text(
                     caption!,
-                    style:
-                        captionStyle ??
+                    style: captionStyle ??
                         const TextStyle(
                           fontFamily: 'serif',
                           fontSize: 14,

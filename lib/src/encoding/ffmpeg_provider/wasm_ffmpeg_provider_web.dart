@@ -170,9 +170,8 @@ class _WasmFFmpegSession implements FFmpegSession {
       final args = _buildFFmpegArgs();
 
       // Run FFmpeg
-      final result = await ffmpeg
-          .exec(args.map((a) => a.toJS).toList().toJS)
-          .toDart;
+      final result =
+          await ffmpeg.exec(args.map((a) => a.toJS).toList().toJS).toDart;
       final exitCode = result.toDartInt;
 
       if (exitCode != 0) {
@@ -183,9 +182,8 @@ class _WasmFFmpegSession implements FFmpegSession {
       }
 
       // Read output file
-      final outputData = await ffmpeg
-          .readFile(config.outputFileName.toJS)
-          .toDart;
+      final outputData =
+          await ffmpeg.readFile(config.outputFileName.toJS).toDart;
 
       // Create blob URL for the output
       final blob = web.Blob(

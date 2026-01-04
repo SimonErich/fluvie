@@ -285,8 +285,7 @@ class _EmbeddedVideoState extends State<EmbeddedVideo> {
     return Container(
       width: widget.width,
       height: widget.height,
-      decoration:
-          widget.decoration ??
+      decoration: widget.decoration ??
           BoxDecoration(color: Colors.black, borderRadius: widget.borderRadius),
       child: const Center(
         child: CircularProgressIndicator(
@@ -359,8 +358,7 @@ class _EmbeddedVideoState extends State<EmbeddedVideo> {
         Widget result = Container(
           width: widget.width,
           height: widget.height,
-          decoration:
-              widget.decoration ??
+          decoration: widget.decoration ??
               BoxDecoration(
                 color: Colors.black,
                 borderRadius: widget.borderRadius,
@@ -391,8 +389,7 @@ class _EmbeddedVideoState extends State<EmbeddedVideo> {
     return Container(
       width: widget.width,
       height: widget.height,
-      decoration:
-          widget.decoration ??
+      decoration: widget.decoration ??
           BoxDecoration(
             color: Colors.grey[900],
             borderRadius: widget.borderRadius,
@@ -434,15 +431,13 @@ class _EmbeddedVideoState extends State<EmbeddedVideo> {
     return Container(
       width: widget.width,
       height: widget.height,
-      decoration:
-          widget.decoration ??
+      decoration: widget.decoration ??
           BoxDecoration(
             color: Colors.grey[900],
             borderRadius: widget.borderRadius,
           ),
       child: Center(
-        child:
-            widget.placeholder ??
+        child: widget.placeholder ??
             Icon(
               Icons.play_circle_outline,
               size: 64,
@@ -474,18 +469,21 @@ class _EmbeddedVideoState extends State<EmbeddedVideo> {
     }
 
     // Log configuration details
-    FluvieLogger.section('EmbeddedVideo.toVideoConfig()', [
-      'assetPath: ${widget.assetPath}',
-      'widget.startFrame: ${widget.startFrame}',
-      'widget.durationInFrames: ${widget.durationInFrames}',
-      'widget.includeAudio: ${widget.includeAudio}',
-      'widget.audioVolume: ${widget.audioVolume}',
-      '_globalStartFrame: $_globalStartFrame',
-      '_controller.state: ${_controller.state}',
-      '_controller.calculatedDurationInFrames: ${_controller.calculatedDurationInFrames}',
-      'FINAL duration: $duration',
-      'Audio will be processed: ${widget.includeAudio && duration > 0 ? 'YES' : 'NO'}',
-    ], module: 'embedded');
+    FluvieLogger.section(
+        'EmbeddedVideo.toVideoConfig()',
+        [
+          'assetPath: ${widget.assetPath}',
+          'widget.startFrame: ${widget.startFrame}',
+          'widget.durationInFrames: ${widget.durationInFrames}',
+          'widget.includeAudio: ${widget.includeAudio}',
+          'widget.audioVolume: ${widget.audioVolume}',
+          '_globalStartFrame: $_globalStartFrame',
+          '_controller.state: ${_controller.state}',
+          '_controller.calculatedDurationInFrames: ${_controller.calculatedDurationInFrames}',
+          'FINAL duration: $duration',
+          'Audio will be processed: ${widget.includeAudio && duration > 0 ? 'YES' : 'NO'}',
+        ],
+        module: 'embedded');
 
     return EmbeddedVideoConfig(
       videoPath: widget.assetPath,

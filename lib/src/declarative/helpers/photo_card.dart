@@ -216,14 +216,14 @@ class PhotoCard extends StatelessWidget {
         width: width,
         height: imageHeight,
         fit: fit,
-        errorBuilder:
-            errorBuilder ??
+        errorBuilder: errorBuilder ??
             (context, error, stack) => Container(
-              width: width,
-              height: imageHeight,
-              color: Colors.grey[300],
-              child: Icon(Icons.image, size: width * 0.3, color: Colors.grey),
-            ),
+                  width: width,
+                  height: imageHeight,
+                  color: Colors.grey[300],
+                  child:
+                      Icon(Icons.image, size: width * 0.3, color: Colors.grey),
+                ),
       );
     }
 
@@ -266,8 +266,7 @@ class PhotoCard extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 caption!,
-                style:
-                    captionStyle ??
+                style: captionStyle ??
                     const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,

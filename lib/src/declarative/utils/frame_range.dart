@@ -29,7 +29,7 @@ class FrameRange {
   /// [start] is inclusive, [end] is exclusive.
   /// Throws [ArgumentError] if end <= start.
   const FrameRange(this.start, this.end)
-    : assert(end > start, 'end must be greater than start');
+      : assert(end > start, 'end must be greater than start');
 
   /// Creates a frame range from a start frame and duration.
   ///

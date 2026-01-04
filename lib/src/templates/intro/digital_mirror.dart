@@ -149,9 +149,8 @@ class DigitalMirror extends WrappedTemplate with TemplateAnimationMixin {
         }
 
         // Glow intensity follows breathing
-        final glowIntensity = showBreathing
-            ? 0.3 + math.sin(time * 1.5) * 0.1
-            : 0.3;
+        final glowIntensity =
+            showBreathing ? 0.3 + math.sin(time * 1.5) * 0.1 : 0.3;
 
         final size = 280.0 * easedEntry * breathingScale;
 
@@ -165,7 +164,8 @@ class DigitalMirror extends WrappedTemplate with TemplateAnimationMixin {
               width: size,
               height: size,
               fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => _buildPlaceholderProfile(size, colors),
+              errorBuilder: (_, __, ___) =>
+                  _buildPlaceholderProfile(size, colors),
             ),
           );
         } else {
@@ -279,8 +279,7 @@ class DigitalMirror extends WrappedTemplate with TemplateAnimationMixin {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w300,
-                color:
-                    colors.mutedColor ??
+                color: colors.mutedColor ??
                     colors.textColor.withValues(alpha: 0.7),
               ),
             ),
@@ -308,12 +307,13 @@ class _ProfileShapeClipper extends CustomClipper<Path> {
       case ProfileShape.circle:
         return Path()..addOval(Rect.fromLTWH(0, 0, size.width, size.height));
       case ProfileShape.roundedSquare:
-        return Path()..addRRect(
-          RRect.fromRectAndRadius(
-            Rect.fromLTWH(0, 0, size.width, size.height),
-            const Radius.circular(30),
-          ),
-        );
+        return Path()
+          ..addRRect(
+            RRect.fromRectAndRadius(
+              Rect.fromLTWH(0, 0, size.width, size.height),
+              const Radius.circular(30),
+            ),
+          );
       case ProfileShape.hexagon:
         return _createHexagonPath(size);
     }

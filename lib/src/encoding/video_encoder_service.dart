@@ -14,8 +14,8 @@ import 'ffmpeg_filter_graph_builder.dart';
 /// Factory function for creating [Process] instances.
 ///
 /// Used for dependency injection in testing to mock FFmpeg process execution.
-typedef ProcessFactory =
-    Future<Process> Function(String executable, List<String> arguments);
+typedef ProcessFactory = Future<Process> Function(
+    String executable, List<String> arguments);
 
 /// Provider function for obtaining temporary directories.
 ///
@@ -61,9 +61,9 @@ class VideoEncodingSession {
     required IOSink stdin,
     required Future<String> completion,
     required Process process,
-  }) : _stdin = stdin,
-       _completion = completion,
-       _process = process;
+  })  : _stdin = stdin,
+        _completion = completion,
+        _process = process;
 
   /// The stdin sink for writing raw frame data to FFmpeg.
   ///
@@ -162,8 +162,8 @@ class VideoEncoderService {
   VideoEncoderService({
     ProcessFactory? processFactory,
     TempDirProvider? tempDirProvider,
-  }) : _processFactory = processFactory ?? Process.start,
-       _tempDirProvider = tempDirProvider ?? getTemporaryDirectory;
+  })  : _processFactory = processFactory ?? Process.start,
+        _tempDirProvider = tempDirProvider ?? getTemporaryDirectory;
 
   /// Starts a new video encoding session.
   ///

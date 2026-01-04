@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void>
-theCommandIncludesInputFlagsAndATrimFilterReferencingTheExternalFile(
+    theCommandIncludesInputFlagsAndATrimFilterReferencingTheExternalFile(
   WidgetTester tester,
 ) async {
   // Command string verification handled by FFmpegFilterGraphBuilder integration.

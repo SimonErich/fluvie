@@ -141,10 +141,10 @@ class AnimatedChart extends StatelessWidget {
     this.showValues = true,
     this.showLabels = true,
     this.barWidth = 40,
-  }) : type = ChartType.bar,
-       lineWidth = 2,
-       dotRadius = 4,
-       innerRadiusRatio = 0;
+  })  : type = ChartType.bar,
+        lineWidth = 2,
+        dotRadius = 4,
+        innerRadiusRatio = 0;
 
   /// Creates a line chart.
   AnimatedChart.line({
@@ -161,10 +161,10 @@ class AnimatedChart extends StatelessWidget {
     this.showLabels = true,
     this.lineWidth = 2,
     this.dotRadius = 4,
-  }) : type = ChartType.line,
-       colors = [color],
-       barWidth = 40,
-       innerRadiusRatio = 0;
+  })  : type = ChartType.line,
+        colors = [color],
+        barWidth = 40,
+        innerRadiusRatio = 0;
 
   /// Creates a pie chart.
   const AnimatedChart.pie({
@@ -186,12 +186,12 @@ class AnimatedChart extends StatelessWidget {
     this.showValues = true,
     this.showLabels = true,
     double donutRatio = 0,
-  }) : type = ChartType.pie,
-       axisColor = null,
-       barWidth = 40,
-       lineWidth = 2,
-       dotRadius = 4,
-       innerRadiusRatio = donutRatio;
+  })  : type = ChartType.pie,
+        axisColor = null,
+        barWidth = 40,
+        lineWidth = 2,
+        dotRadius = 4,
+        innerRadiusRatio = donutRatio;
 
   /// Creates a donut chart.
   const AnimatedChart.donut({
@@ -213,12 +213,12 @@ class AnimatedChart extends StatelessWidget {
     this.showValues = true,
     this.showLabels = true,
     double innerRatio = 0.6,
-  }) : type = ChartType.pie,
-       axisColor = null,
-       barWidth = 40,
-       lineWidth = 2,
-       dotRadius = 4,
-       innerRadiusRatio = innerRatio;
+  })  : type = ChartType.pie,
+        axisColor = null,
+        barWidth = 40,
+        lineWidth = 2,
+        dotRadius = 4,
+        innerRadiusRatio = innerRatio;
 
   @override
   Widget build(BuildContext context) {

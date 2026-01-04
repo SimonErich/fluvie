@@ -72,8 +72,8 @@ class VSizedBox extends StatelessWidget with VideoTimingMixin {
     this.fadeOutFrames = VideoTimingDefaults.fadeOutFrames,
     this.fadeInCurve = VideoTimingDefaults.fadeInCurve,
     this.fadeOutCurve = VideoTimingDefaults.fadeOutCurve,
-  }) : width = size.width,
-       height = size.height;
+  })  : width = size.width,
+        height = size.height;
 
   /// Creates a video-aware SizedBox that is as large as its parent allows.
   const VSizedBox.expand({
@@ -86,8 +86,8 @@ class VSizedBox extends StatelessWidget with VideoTimingMixin {
     this.fadeOutFrames = VideoTimingDefaults.fadeOutFrames,
     this.fadeInCurve = VideoTimingDefaults.fadeInCurve,
     this.fadeOutCurve = VideoTimingDefaults.fadeOutCurve,
-  }) : width = double.infinity,
-       height = double.infinity;
+  })  : width = double.infinity,
+        height = double.infinity;
 
   /// Creates a video-aware SizedBox that will become as small as its parent allows.
   const VSizedBox.shrink({
@@ -100,8 +100,8 @@ class VSizedBox extends StatelessWidget with VideoTimingMixin {
     this.fadeOutFrames = VideoTimingDefaults.fadeOutFrames,
     this.fadeInCurve = VideoTimingDefaults.fadeInCurve,
     this.fadeOutCurve = VideoTimingDefaults.fadeOutCurve,
-  }) : width = 0.0,
-       height = 0.0;
+  })  : width = 0.0,
+        height = 0.0;
 
   /// Creates a square video-aware SizedBox.
   const VSizedBox.square({
@@ -115,8 +115,8 @@ class VSizedBox extends StatelessWidget with VideoTimingMixin {
     this.fadeOutFrames = VideoTimingDefaults.fadeOutFrames,
     this.fadeInCurve = VideoTimingDefaults.fadeInCurve,
     this.fadeOutCurve = VideoTimingDefaults.fadeOutCurve,
-  }) : width = dimension,
-       height = dimension;
+  })  : width = dimension,
+        height = dimension;
 
   @override
   Widget build(BuildContext context) {

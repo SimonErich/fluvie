@@ -89,9 +89,9 @@ class VPadding extends StatelessWidget with VideoTimingMixin {
     this.fadeInCurve = VideoTimingDefaults.fadeInCurve,
     this.fadeOutCurve = VideoTimingDefaults.fadeOutCurve,
   }) : padding = EdgeInsets.symmetric(
-         horizontal: horizontal,
-         vertical: vertical,
-       );
+          horizontal: horizontal,
+          vertical: vertical,
+        );
 
   /// Creates a video-aware Padding with only the given values non-zero.
   ///
@@ -112,11 +112,11 @@ class VPadding extends StatelessWidget with VideoTimingMixin {
     this.fadeInCurve = VideoTimingDefaults.fadeInCurve,
     this.fadeOutCurve = VideoTimingDefaults.fadeOutCurve,
   }) : padding = EdgeInsets.only(
-         left: left,
-         top: top,
-         right: right,
-         bottom: bottom,
-       );
+          left: left,
+          top: top,
+          right: right,
+          bottom: bottom,
+        );
 
   @override
   Widget build(BuildContext context) {

@@ -41,7 +41,7 @@ class ProcessFFmpegProvider implements FFmpegProvider {
 
   /// Factory function for creating processes, used for testing.
   final Future<Process> Function(String executable, List<String> arguments)?
-  processFactory;
+      processFactory;
 
   /// Factory function for creating temporary directories, used for testing.
   final Future<Directory> Function()? tempDirProvider;
@@ -195,17 +195,15 @@ class _ProcessFFmpegSession implements FFmpegSession {
 
   void _setupListeners() {
     // Listen to stderr for progress and errors
-    process.stderr
-        .transform(utf8.decoder)
-        .listen(
-          (data) {
-            _stderrBuffer.write(data);
-            _parseProgress(data);
-          },
-          onError: (error) {
-            // Handle stderr errors
-          },
-        );
+    process.stderr.transform(utf8.decoder).listen(
+      (data) {
+        _stderrBuffer.write(data);
+        _parseProgress(data);
+      },
+      onError: (error) {
+        // Handle stderr errors
+      },
+    );
 
     // Handle process exit
     process.exitCode.then((exitCode) {

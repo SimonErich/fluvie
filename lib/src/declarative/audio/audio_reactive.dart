@@ -98,7 +98,7 @@ class AudioReactiveBuilder extends StatefulWidget {
 
   /// Builder called when the provider is ready.
   final Widget Function(BuildContext context, AudioDataProvider provider)
-  builder;
+      builder;
 
   /// Builder called while the provider is initializing.
   final Widget Function(BuildContext context)? loadingBuilder;
@@ -411,9 +411,8 @@ class FrequencyBars extends StatelessWidget with AudioReactiveMixin {
                   width: barWidth,
                   height: height.clamp(2.0, maxHeight) / 2,
                   decoration: BoxDecoration(
-                    color: gradient == null
-                        ? color.withValues(alpha: 0.5)
-                        : null,
+                    color:
+                        gradient == null ? color.withValues(alpha: 0.5) : null,
                     gradient: gradient,
                     borderRadius:
                         borderRadius ?? BorderRadius.circular(barWidth / 4),

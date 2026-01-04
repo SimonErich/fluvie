@@ -162,9 +162,8 @@ class BpmDetector {
     final median = bpmValues[bpmValues.length ~/ 2];
 
     // Average values close to median
-    final closeValues = bpmValues
-        .where((bpm) => (bpm - median).abs() < 10)
-        .toList();
+    final closeValues =
+        bpmValues.where((bpm) => (bpm - median).abs() < 10).toList();
     if (closeValues.isEmpty) return median;
 
     return closeValues.reduce((a, b) => a + b) / closeValues.length;

@@ -192,7 +192,7 @@ class TheNeonGate extends WrappedTemplate with TemplateAnimationMixin {
               introData.logoPath!,
               width: 120,
               height: 120,
-              errorBuilder: (_, _, _) => Icon(
+              errorBuilder: (_, __, ___) => Icon(
                 Icons.auto_awesome,
                 size: 80,
                 color: colors.primaryColor,

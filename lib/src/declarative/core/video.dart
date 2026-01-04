@@ -342,8 +342,7 @@ class Video extends StatelessWidget {
       // Get transitions
       final transitionIn =
           scene.transitionIn ?? (i > 0 ? defaultTransition : null);
-      final transitionOut =
-          scene.transitionOut ??
+      final transitionOut = scene.transitionOut ??
           (i < scenes.length - 1 ? defaultTransition : null);
 
       // Calculate fade frames from transitions
@@ -550,8 +549,7 @@ class _TransitionAnimator extends StatelessWidget {
         final maxZoom = transition.maxZoom;
         final scale = isEntry
             ? 1.0 +
-                  (maxZoom - 1.0) *
-                      (1.0 - progress) // Zoom out from maxZoom to 1
+                (maxZoom - 1.0) * (1.0 - progress) // Zoom out from maxZoom to 1
             : 1.0 + (maxZoom - 1.0) * progress; // Zoom in from 1 to maxZoom
         final opacity = isEntry ? progress : 1.0 - progress;
         return Opacity(

@@ -189,9 +189,7 @@ class TheSignature extends WrappedTemplate with TemplateAnimationMixin {
               ),
             ),
           ),
-
         const SizedBox(height: 20),
-
         AnimatedProp(
           startFrame: 180,
           duration: 20,

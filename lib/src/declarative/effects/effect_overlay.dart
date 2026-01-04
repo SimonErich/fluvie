@@ -64,34 +64,34 @@ class EffectOverlay extends StatelessWidget {
 
   /// Creates a scanlines effect.
   const EffectOverlay.scanlines({super.key, this.intensity = 0.02})
-    : type = EffectType.scanlines,
-      color = null,
-      randomSeed = null;
+      : type = EffectType.scanlines,
+        color = null,
+        randomSeed = null;
 
   /// Creates a film grain effect.
   const EffectOverlay.grain({super.key, this.intensity = 0.06, this.randomSeed})
-    : type = EffectType.grain,
-      color = null;
+      : type = EffectType.grain,
+        color = null;
 
   /// Creates a vignette effect.
   const EffectOverlay.vignette({super.key, this.intensity = 0.4})
-    : type = EffectType.vignette,
-      color = null,
-      randomSeed = null;
+      : type = EffectType.vignette,
+        color = null,
+        randomSeed = null;
 
   /// Creates a grid overlay effect.
   const EffectOverlay.grid({
     super.key,
     this.intensity = 0.05,
     this.color = const Color(0xFFFFFFFF),
-  }) : type = EffectType.grid,
-       randomSeed = null;
+  })  : type = EffectType.grid,
+        randomSeed = null;
 
   /// Creates a CRT monitor effect.
   const EffectOverlay.crt({super.key, this.intensity = 0.3})
-    : type = EffectType.crt,
-      color = null,
-      randomSeed = null;
+      : type = EffectType.crt,
+        color = null,
+        randomSeed = null;
 
   @override
   Widget build(BuildContext context) {

@@ -212,8 +212,8 @@ class TheSummaryPoster extends WrappedTemplate with TemplateAnimationMixin {
               // Stats list
               ...summaryData.stats.entries.take(4).map((entry) {
                 final index = summaryData.stats.keys.toList().indexOf(
-                  entry.key,
-                );
+                      entry.key,
+                    );
                 return AnimatedProp(
                   startFrame: 60 + index * 15,
                   duration: 25,
@@ -433,7 +433,6 @@ class TheSummaryPoster extends WrappedTemplate with TemplateAnimationMixin {
                 color: colors.backgroundColor,
               ),
             ),
-
           Column(
             crossAxisAlignment: layout == PosterLayout.centered
                 ? CrossAxisAlignment.center

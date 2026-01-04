@@ -164,9 +164,8 @@ class AsymmetricLayout extends StatelessWidget {
                     ? effectivePositions[i].dy
                     : 0,
                 child: Transform.rotate(
-                  angle: i < effectiveRotations.length
-                      ? effectiveRotations[i]
-                      : 0,
+                  angle:
+                      i < effectiveRotations.length ? effectiveRotations[i] : 0,
                   child: photos[i],
                 ),
               ),

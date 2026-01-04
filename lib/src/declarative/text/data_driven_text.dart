@@ -151,20 +151,21 @@ class DataAnimation {
     int startValue = 0,
     String Function(dynamic)? formatter,
   }) : this._(
-         type: DataAnimationType.countUp,
-         duration: duration,
-         curve: curve,
-         startValue: startValue,
-         formatter: formatter,
-       );
+          type: DataAnimationType.countUp,
+          duration: duration,
+          curve: curve,
+          startValue: startValue,
+          formatter: formatter,
+        );
 
   /// Creates a reveal animation (shows full value at end).
   const DataAnimation.reveal({int duration = 30, Curve curve = Curves.easeOut})
-    : this._(type: DataAnimationType.reveal, duration: duration, curve: curve);
+      : this._(
+            type: DataAnimationType.reveal, duration: duration, curve: curve);
 
   /// Creates a typewriter animation for string values.
   const DataAnimation.typewriter({int duration = 60})
-    : this._(type: DataAnimationType.typewriter, duration: duration);
+      : this._(type: DataAnimationType.typewriter, duration: duration);
 
   /// Animates the value based on the current frame.
   dynamic animate(dynamic originalValue, int frame) {

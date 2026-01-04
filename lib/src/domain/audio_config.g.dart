@@ -62,8 +62,7 @@ AudioSyncConfig _$AudioSyncConfigFromJson(Map<String, dynamic> json) =>
       syncEndWithAnchor: json['syncEndWithAnchor'] as String?,
       startOffset: (json['startOffset'] as num?)?.toInt() ?? 0,
       endOffset: (json['endOffset'] as num?)?.toInt() ?? 0,
-      behavior:
-          $enumDecodeNullable(_$SyncBehaviorEnumMap, json['behavior']) ??
+      behavior: $enumDecodeNullable(_$SyncBehaviorEnumMap, json['behavior']) ??
           SyncBehavior.stopWhenEnds,
     );
 

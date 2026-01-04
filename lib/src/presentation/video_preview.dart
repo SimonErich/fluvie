@@ -371,9 +371,9 @@ class _VideoPreviewState extends State<VideoPreview>
 
   void _onAnimationTick() {
     final newFrame = (_animationController.value * _totalFrames).floor().clamp(
-      0,
-      _totalFrames > 0 ? _totalFrames - 1 : 0,
-    );
+          0,
+          _totalFrames > 0 ? _totalFrames - 1 : 0,
+        );
 
     if (newFrame != _controller._currentFrame) {
       _controller.updateFrame(newFrame);
@@ -608,8 +608,7 @@ class _VideoPreviewControls extends StatelessWidget {
 
     return Text(
       '${currentSeconds}s / ${totalSeconds}s',
-      style:
-          style.textStyle ??
+      style: style.textStyle ??
           TextStyle(
             color: style.iconColor.withValues(alpha: 0.8),
             fontSize: 12,

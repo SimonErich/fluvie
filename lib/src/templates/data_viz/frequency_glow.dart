@@ -282,18 +282,17 @@ class _FrequencyBarsPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
 
       final barPaint = Paint()
-        ..shader =
-            LinearGradient(
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              colors: [
-                color,
-                color.withValues(alpha: 0.8),
-                color.withValues(alpha: 0.6),
-              ],
-            ).createShader(
-              Rect.fromLTWH(x, centerY - height, barWidth - 2, height),
-            );
+        ..shader = LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [
+            color,
+            color.withValues(alpha: 0.8),
+            color.withValues(alpha: 0.6),
+          ],
+        ).createShader(
+          Rect.fromLTWH(x, centerY - height, barWidth - 2, height),
+        );
 
       // Draw glow
       canvas.drawRRect(

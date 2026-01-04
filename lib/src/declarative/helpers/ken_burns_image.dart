@@ -168,11 +168,9 @@ class KenBurnsImage extends StatelessWidget {
         final scale = startScale + (endScale - startScale) * curvedProgress;
 
         // Interpolate alignment
-        final alignX =
-            startAlignment.x +
+        final alignX = startAlignment.x +
             (endAlignment.x - startAlignment.x) * curvedProgress;
-        final alignY =
-            startAlignment.y +
+        final alignY = startAlignment.y +
             (endAlignment.y - startAlignment.y) * curvedProgress;
         final alignment = Alignment(alignX, alignY);
 
@@ -189,12 +187,11 @@ class KenBurnsImage extends StatelessWidget {
                 width: width * scale,
                 height: height * scale,
                 fit: fit,
-                errorBuilder:
-                    errorBuilder ??
+                errorBuilder: errorBuilder ??
                     (context, error, stack) => Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.image, color: Colors.grey),
-                    ),
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.image, color: Colors.grey),
+                        ),
               ),
             ),
           ),

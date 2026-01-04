@@ -73,83 +73,83 @@ class SceneTransition {
 
   /// No transition (instant cut).
   const SceneTransition.none()
-    : type = SceneTransitionType.none,
-      durationInFrames = 0,
-      curve = Curves.linear,
-      wipeDirection = null,
-      maxZoom = 1.0,
-      zoomTarget = null,
-      bleedColor = null;
+      : type = SceneTransitionType.none,
+        durationInFrames = 0,
+        curve = Curves.linear,
+        wipeDirection = null,
+        maxZoom = 1.0,
+        zoomTarget = null,
+        bleedColor = null;
 
   /// Cross-fade transition.
   const SceneTransition.crossFade({
     this.durationInFrames = 15,
     this.curve = Curves.easeInOut,
-  }) : type = SceneTransitionType.crossFade,
-       wipeDirection = null,
-       maxZoom = 1.0,
-       zoomTarget = null,
-       bleedColor = null;
+  })  : type = SceneTransitionType.crossFade,
+        wipeDirection = null,
+        maxZoom = 1.0,
+        zoomTarget = null,
+        bleedColor = null;
 
   /// Slide in from the left.
   const SceneTransition.slideLeft({
     this.durationInFrames = 20,
     this.curve = Curves.easeInOut,
-  }) : type = SceneTransitionType.slideLeft,
-       wipeDirection = null,
-       maxZoom = 1.0,
-       zoomTarget = null,
-       bleedColor = null;
+  })  : type = SceneTransitionType.slideLeft,
+        wipeDirection = null,
+        maxZoom = 1.0,
+        zoomTarget = null,
+        bleedColor = null;
 
   /// Slide in from the right.
   const SceneTransition.slideRight({
     this.durationInFrames = 20,
     this.curve = Curves.easeInOut,
-  }) : type = SceneTransitionType.slideRight,
-       wipeDirection = null,
-       maxZoom = 1.0,
-       zoomTarget = null,
-       bleedColor = null;
+  })  : type = SceneTransitionType.slideRight,
+        wipeDirection = null,
+        maxZoom = 1.0,
+        zoomTarget = null,
+        bleedColor = null;
 
   /// Slide in from the top.
   const SceneTransition.slideUp({
     this.durationInFrames = 20,
     this.curve = Curves.easeInOut,
-  }) : type = SceneTransitionType.slideUp,
-       wipeDirection = null,
-       maxZoom = 1.0,
-       zoomTarget = null,
-       bleedColor = null;
+  })  : type = SceneTransitionType.slideUp,
+        wipeDirection = null,
+        maxZoom = 1.0,
+        zoomTarget = null,
+        bleedColor = null;
 
   /// Slide in from the bottom.
   const SceneTransition.slideDown({
     this.durationInFrames = 20,
     this.curve = Curves.easeInOut,
-  }) : type = SceneTransitionType.slideDown,
-       wipeDirection = null,
-       maxZoom = 1.0,
-       zoomTarget = null,
-       bleedColor = null;
+  })  : type = SceneTransitionType.slideDown,
+        wipeDirection = null,
+        maxZoom = 1.0,
+        zoomTarget = null,
+        bleedColor = null;
 
   /// Scale in from center.
   const SceneTransition.scale({
     this.durationInFrames = 20,
     this.curve = Curves.easeInOut,
-  }) : type = SceneTransitionType.scale,
-       wipeDirection = null,
-       maxZoom = 1.0,
-       zoomTarget = null,
-       bleedColor = null;
+  })  : type = SceneTransitionType.scale,
+        wipeDirection = null,
+        maxZoom = 1.0,
+        zoomTarget = null,
+        bleedColor = null;
 
   /// Wipe transition.
   const SceneTransition.wipe({
     this.durationInFrames = 20,
     this.curve = Curves.easeInOut,
     this.wipeDirection = WipeDirection.leftToRight,
-  }) : type = SceneTransitionType.wipe,
-       maxZoom = 1.0,
-       bleedColor = null,
-       zoomTarget = null;
+  })  : type = SceneTransitionType.wipe,
+        maxZoom = 1.0,
+        bleedColor = null,
+        zoomTarget = null;
 
   /// Zoom warp transition.
   ///
@@ -164,9 +164,9 @@ class SceneTransition {
     this.curve = Curves.easeInOutCubic,
     this.maxZoom = 3.0,
     this.zoomTarget,
-  }) : type = SceneTransitionType.zoomWarp,
-       wipeDirection = null,
-       bleedColor = null;
+  })  : type = SceneTransitionType.zoomWarp,
+        wipeDirection = null,
+        bleedColor = null;
 
   /// Color bleed transition.
   ///
@@ -178,10 +178,10 @@ class SceneTransition {
     this.durationInFrames = 25,
     this.curve = Curves.easeInOut,
     this.bleedColor,
-  }) : type = SceneTransitionType.colorBleed,
-       wipeDirection = null,
-       maxZoom = 1.0,
-       zoomTarget = null;
+  })  : type = SceneTransitionType.colorBleed,
+        wipeDirection = null,
+        maxZoom = 1.0,
+        zoomTarget = null;
 
   /// Calculates the progress of this transition at the given frame.
   ///

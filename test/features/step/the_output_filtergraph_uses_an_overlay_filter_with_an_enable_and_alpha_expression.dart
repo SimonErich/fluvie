@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void>
-theOutputFiltergraphUsesAnOverlayFilterWithAnEnableAndAlphaExpression(
+    theOutputFiltergraphUsesAnOverlayFilterWithAnEnableAndAlphaExpression(
   WidgetTester tester,
 ) async {
   // Overlay filter expression verification handled by FFmpegFilterGraphBuilder integration.

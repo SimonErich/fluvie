@@ -126,11 +126,11 @@ class TheSpotlight extends WrappedTemplate with TemplateAnimationMixin {
             // Calculate which item the spotlight is on
             final elapsed = frame - startFrame;
             final currentItemIndex = (elapsed / framesPerItem).floor().clamp(
-              0,
-              items.length - 1,
-            );
-            final progressInItem = ((elapsed % framesPerItem) / framesPerItem)
-                .clamp(0.0, 1.0);
+                  0,
+                  items.length - 1,
+                );
+            final progressInItem =
+                ((elapsed % framesPerItem) / framesPerItem).clamp(0.0, 1.0);
 
             // Spotlight position interpolation
             Offset spotlightCenter;
@@ -177,8 +177,7 @@ class TheSpotlight extends WrappedTemplate with TemplateAnimationMixin {
                 ...List.generate(items.length, (index) {
                   final item = items[index];
                   final pos = itemPositions[index];
-                  final isLit =
-                      index <= currentItemIndex &&
+                  final isLit = index <= currentItemIndex &&
                       (index < currentItemIndex || progressInItem > 0.2);
                   final isWinner = index == items.length - 1;
                   final isCurrentlyLit = index == currentItemIndex;
@@ -189,8 +188,7 @@ class TheSpotlight extends WrappedTemplate with TemplateAnimationMixin {
                       progressInItem > 0.2 &&
                       progressInItem < 0.5) {
                     final bounceProgress = (progressInItem - 0.2) / 0.3;
-                    scale =
-                        1.0 +
+                    scale = 1.0 +
                         0.1 * Curves.easeOutBack.transform(bounceProgress);
                   }
                   if (isWinner && isOnWinner) {
@@ -215,8 +213,7 @@ class TheSpotlight extends WrappedTemplate with TemplateAnimationMixin {
                   ...List.generate(items.length, (index) {
                     final item = items[index];
                     final pos = itemPositions[index];
-                    final showLabel =
-                        index < currentItemIndex ||
+                    final showLabel = index < currentItemIndex ||
                         (index == currentItemIndex && progressInItem > 0.6);
 
                     if (!showLabel) return const SizedBox.shrink();
@@ -276,7 +273,7 @@ class TheSpotlight extends WrappedTemplate with TemplateAnimationMixin {
                 ? Image.asset(
                     item.imagePath!,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) =>
+                    errorBuilder: (_, __, ___) =>
                         _buildPlaceholder(colors, item.rank),
                   )
                 : _buildPlaceholder(colors, item.rank),

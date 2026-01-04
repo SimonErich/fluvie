@@ -34,7 +34,7 @@ class AnimatedLayer extends StatelessWidget {
   /// The `progress` is a value from 0.0 to 1.0 representing the
   /// position within the layer's duration.
   final Widget Function(BuildContext context, int frame, double progress)
-  builder;
+      builder;
 
   /// Frame at which this layer becomes visible.
   final int? startFrame;

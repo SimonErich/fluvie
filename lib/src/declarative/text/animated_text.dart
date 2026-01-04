@@ -86,9 +86,9 @@ class AnimatedText extends StatelessWidget {
     this.overflow,
     double distance = 30,
   }) : animation = TranslateAnimation(
-         start: Offset(0, distance),
-         end: Offset.zero,
-       );
+          start: Offset(0, distance),
+          end: Offset.zero,
+        );
 
   /// Creates a slide-up with fade animated text.
   AnimatedText.slideUpFade(
@@ -103,9 +103,9 @@ class AnimatedText extends StatelessWidget {
     this.overflow,
     double distance = 30,
   }) : animation = CombinedAnimation([
-         TranslateAnimation(start: Offset(0, distance), end: Offset.zero),
-         const FadeAnimation(start: 0.0, end: 1.0),
-       ]);
+          TranslateAnimation(start: Offset(0, distance), end: Offset.zero),
+          const FadeAnimation(start: 0.0, end: 1.0),
+        ]);
 
   /// Creates a scale animated text.
   AnimatedText.scale(
@@ -134,9 +134,9 @@ class AnimatedText extends StatelessWidget {
     this.overflow,
     double startScale = 0.8,
   }) : animation = CombinedAnimation([
-         ScaleAnimation(start: startScale, end: 1.0),
-         const FadeAnimation(start: 0.0, end: 1.0),
-       ]);
+          ScaleAnimation(start: startScale, end: 1.0),
+          const FadeAnimation(start: 0.0, end: 1.0),
+        ]);
 
   @override
   Widget build(BuildContext context) {

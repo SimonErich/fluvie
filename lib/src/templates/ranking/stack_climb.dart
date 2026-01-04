@@ -157,8 +157,7 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
             if (!isWinner) {
               // Cards slide off in reverse order (5 first, then 4, etc.)
               final reverseIndex = items.length - 1 - index;
-              final slideStart =
-                  entryStart +
+              final slideStart = entryStart +
                   (items.length * 8) +
                   30 +
                   (reverseIndex * slideDelay);
@@ -176,8 +175,7 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
             // Winner celebration
             double winnerScale = 1.0;
             if (isWinner) {
-              final celebrationStart =
-                  entryStart +
+              final celebrationStart = entryStart +
                   (items.length * 8) +
                   30 +
                   ((items.length - 1) * slideDelay) +
@@ -188,8 +186,7 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
                 30,
               );
               if (celebrationProgress > 0) {
-                winnerScale =
-                    1.0 +
+                winnerScale = 1.0 +
                     (0.2 * Curves.easeOutBack.transform(celebrationProgress));
               }
             }
@@ -250,9 +247,8 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
       decoration: BoxDecoration(
         color: colors.secondaryColor,
         borderRadius: BorderRadius.circular(20),
-        border: isWinner
-            ? Border.all(color: colors.accentColor, width: 4)
-            : null,
+        border:
+            isWinner ? Border.all(color: colors.accentColor, width: 4) : null,
         boxShadow: [
           BoxShadow(
             color: isWinner
@@ -276,7 +272,8 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
                       item.imagePath!,
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      errorBuilder: (_, _, _) => _buildPlaceholderImage(colors),
+                      errorBuilder: (_, __, ___) =>
+                          _buildPlaceholderImage(colors),
                     )
                   : _buildPlaceholderImage(colors),
             ),
@@ -325,8 +322,7 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
                     '${item.value}',
                     style: TextStyle(
                       fontSize: 14,
-                      color:
-                          colors.mutedColor ??
+                      color: colors.mutedColor ??
                           colors.textColor.withValues(alpha: 0.7),
                     ),
                   ),

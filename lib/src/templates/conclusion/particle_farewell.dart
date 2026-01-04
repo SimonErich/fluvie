@@ -264,9 +264,9 @@ class _ParticleExplosionPainter extends CustomPainter {
       // Apply start delay
       final adjustedProgress =
           ((progress - particle.startDelay) / (1 - particle.startDelay)).clamp(
-            0.0,
-            1.0,
-          );
+        0.0,
+        1.0,
+      );
 
       if (adjustedProgress <= 0) continue;
 

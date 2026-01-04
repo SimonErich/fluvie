@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 // Platform-specific imports
-import 'file_saver_io.dart'
-    if (dart.library.html) 'file_saver_web.dart'
+import 'file_saver_io.dart' if (dart.library.html) 'file_saver_web.dart'
     as platform;
 
 /// Platform-agnostic file save utility.

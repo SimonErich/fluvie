@@ -113,12 +113,12 @@ class FrameAnimatedPositioned extends StatelessWidget {
     this.exitAnimation,
     this.autoReverseExit = true,
     this.childAnimationOffset = 0,
-  }) : left = 0,
-       top = 0,
-       right = 0,
-       bottom = 0,
-       width = null,
-       height = null;
+  })  : left = 0,
+        top = 0,
+        right = 0,
+        bottom = 0,
+        width = null,
+        height = null;
 
   /// Creates a FrameAnimatedPositioned from an offset.
   factory FrameAnimatedPositioned.fromOffset({
@@ -133,20 +133,21 @@ class FrameAnimatedPositioned extends StatelessWidget {
     PositionedAnimation? exitAnimation,
     bool autoReverseExit = true,
     int childAnimationOffset = 0,
-  }) => FrameAnimatedPositioned(
-    key: key,
-    left: offset.dx,
-    top: offset.dy,
-    width: width,
-    height: height,
-    startFrame: startFrame,
-    endFrame: endFrame,
-    entryAnimation: entryAnimation,
-    exitAnimation: exitAnimation,
-    autoReverseExit: autoReverseExit,
-    childAnimationOffset: childAnimationOffset,
-    child: child,
-  );
+  }) =>
+      FrameAnimatedPositioned(
+        key: key,
+        left: offset.dx,
+        top: offset.dy,
+        width: width,
+        height: height,
+        startFrame: startFrame,
+        endFrame: endFrame,
+        entryAnimation: entryAnimation,
+        exitAnimation: exitAnimation,
+        autoReverseExit: autoReverseExit,
+        childAnimationOffset: childAnimationOffset,
+        child: child,
+      );
 
   /// Creates a FrameAnimatedPositioned centered in its parent.
   factory FrameAnimatedPositioned.centered({
@@ -160,22 +161,23 @@ class FrameAnimatedPositioned extends StatelessWidget {
     PositionedAnimation? exitAnimation,
     bool autoReverseExit = true,
     int childAnimationOffset = 0,
-  }) => FrameAnimatedPositioned(
-    key: key,
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: width,
-    height: height,
-    startFrame: startFrame,
-    endFrame: endFrame,
-    entryAnimation: entryAnimation,
-    exitAnimation: exitAnimation,
-    autoReverseExit: autoReverseExit,
-    childAnimationOffset: childAnimationOffset,
-    child: Center(child: child),
-  );
+  }) =>
+      FrameAnimatedPositioned(
+        key: key,
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        width: width,
+        height: height,
+        startFrame: startFrame,
+        endFrame: endFrame,
+        entryAnimation: entryAnimation,
+        exitAnimation: exitAnimation,
+        autoReverseExit: autoReverseExit,
+        childAnimationOffset: childAnimationOffset,
+        child: Center(child: child),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -190,8 +192,7 @@ class FrameAnimatedPositioned extends StatelessWidget {
     }
 
     final entryDuration = entryAnimation?.duration ?? 0;
-    final resolvedExitAnimation =
-        exitAnimation ??
+    final resolvedExitAnimation = exitAnimation ??
         (autoReverseExit && entryAnimation != null
             ? entryAnimation!.reversed
             : null);
@@ -225,9 +226,8 @@ class FrameAnimatedPositioned extends StatelessWidget {
         }
 
         // Wrap with AnimationContext for children
-        final exitStartFrame = exitDuration > 0
-            ? endFrameResolved - exitDuration
-            : null;
+        final exitStartFrame =
+            exitDuration > 0 ? endFrameResolved - exitDuration : null;
 
         animatedChild = AnimationContext(
           contextStartFrame: effectiveStartFrame,

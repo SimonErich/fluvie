@@ -193,17 +193,14 @@ class FloatingPolaroids extends WrappedTemplate with TemplateAnimationMixin {
                     // Winner moves to center and scales up
                     final centerX = constraints.maxWidth / 2 - 150;
                     final centerY = constraints.maxHeight / 2 - 180;
-                    x =
-                        baseX +
+                    x = baseX +
                         (centerX - baseX) *
                             Curves.easeInOutCubic.transform(revealProgress);
-                    y =
-                        baseY +
+                    y = baseY +
                         (centerY - baseY) *
                             Curves.easeInOutCubic.transform(revealProgress);
                     rotation = baseRotation * (1 - revealProgress);
-                    scale =
-                        1.0 +
+                    scale = 1.0 +
                         (0.6 * Curves.easeOutCubic.transform(revealProgress));
                   } else {
                     // Others fade out and drift away
@@ -286,7 +283,7 @@ class FloatingPolaroids extends WrappedTemplate with TemplateAnimationMixin {
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: double.infinity,
-                        errorBuilder: (_, _, _) =>
+                        errorBuilder: (_, __, ___) =>
                             _buildPlaceholderImage(colors, item.rank),
                       )
                     : _buildPlaceholderImage(colors, item.rank),

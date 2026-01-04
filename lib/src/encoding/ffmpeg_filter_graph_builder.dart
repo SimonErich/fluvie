@@ -239,9 +239,8 @@ class FFmpegFilterGraphBuilder {
 
     // Convert frames to seconds for FFmpeg
     final trimStartSeconds = track.trimStartFrame / fps;
-    final trimEndSeconds = track.trimEndFrame != null
-        ? track.trimEndFrame! / fps
-        : null;
+    final trimEndSeconds =
+        track.trimEndFrame != null ? track.trimEndFrame! / fps : null;
     final durationSeconds = track.durationInFrames / fps;
 
     final desiredEndSeconds = trimStartSeconds + durationSeconds;

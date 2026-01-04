@@ -99,10 +99,10 @@ class EmbeddedVideoController extends ChangeNotifier {
     FrameExtractionService? extractionService,
     VideoFrameCache? cache,
     VideoPathResolver? pathResolver,
-  }) : _probeService = probeService ?? VideoProbeService(),
-       _extractionService = extractionService ?? FrameExtractionService(),
-       _cache = cache ?? VideoFrameCacheManager.instance,
-       _pathResolver = pathResolver ?? VideoPathResolver();
+  })  : _probeService = probeService ?? VideoProbeService(),
+        _extractionService = extractionService ?? FrameExtractionService(),
+        _cache = cache ?? VideoFrameCacheManager.instance,
+        _pathResolver = pathResolver ?? VideoPathResolver();
 
   /// Current extraction state.
   ExtractionState get state => _state;
@@ -481,8 +481,8 @@ class EmbeddedVideoController extends ChangeNotifier {
     }
 
     // Convert trim to frames
-    final trimFrames = (trimStart.inMicroseconds * _compositionFps! / 1000000)
-        .round();
+    final trimFrames =
+        (trimStart.inMicroseconds * _compositionFps! / 1000000).round();
 
     // Determine source type based on path format
     final AudioSourceType sourceType;

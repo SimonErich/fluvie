@@ -131,9 +131,9 @@ class ImpellerChecker {
           Text(
             'Renderer Warning',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: const Color(0xFFFF3333),
-              fontWeight: FontWeight.bold,
-            ),
+                  color: const Color(0xFFFF3333),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ],
       ),
@@ -244,18 +244,21 @@ class ImpellerChecker {
     final isImpeller = isImpellerEnabled();
 
     if (isImpeller == false) {
-      FluvieLogger.box('⚠️  RENDERER WARNING ⚠️', [
-        '',
-        'Fluvie requires Impeller for proper video rendering.',
-        'Skia renderer detected - this will cause rendering artifacts!',
-        '',
-        'To fix this, restart your app with:',
-        '  flutter run --enable-impeller',
-        '',
-        'Or add to launch.json:',
-        '  "args": ["--enable-impeller"]',
-        '',
-      ], module: 'impeller');
+      FluvieLogger.box(
+          '⚠️  RENDERER WARNING ⚠️',
+          [
+            '',
+            'Fluvie requires Impeller for proper video rendering.',
+            'Skia renderer detected - this will cause rendering artifacts!',
+            '',
+            'To fix this, restart your app with:',
+            '  flutter run --enable-impeller',
+            '',
+            'Or add to launch.json:',
+            '  "args": ["--enable-impeller"]',
+            '',
+          ],
+          module: 'impeller');
     }
   }
 

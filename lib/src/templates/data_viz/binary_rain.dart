@@ -235,8 +235,7 @@ class _DigitalRainPainter extends CustomPainter {
       final streamLength = 15 + colRandom.nextInt(20);
 
       // Calculate current position
-      final baseY =
-          ((frame * speed * 3) + startOffset) %
+      final baseY = ((frame * speed * 3) + startOffset) %
           (size.height + streamLength * charHeight);
 
       // Draw stream of characters
@@ -275,7 +274,8 @@ class _DigitalRainPainter extends CustomPainter {
             primaryColor,
             secondaryColor,
             fadeProgress,
-          )!.withValues(alpha: opacity * 0.9);
+          )!
+              .withValues(alpha: opacity * 0.9);
         }
 
         // Draw character

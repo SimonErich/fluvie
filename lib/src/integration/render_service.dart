@@ -36,7 +36,7 @@ class RenderService {
   ///
   /// An optional [encoderService] can be provided for testing.
   RenderService({VideoEncoderService? encoderService})
-    : _encoderService = encoderService ?? VideoEncoderService();
+      : _encoderService = encoderService ?? VideoEncoderService();
 
   /// Creates a [RenderConfig] from a [VideoComposition] in the widget tree.
   ///

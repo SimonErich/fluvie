@@ -144,8 +144,8 @@ class TheGrowthTree extends WrappedTemplate with TemplateAnimationMixin {
             // Calculate vine growth progress
             final growthStart = 40;
             final growthDuration = 100;
-            final growthProgress = ((frame - growthStart) / growthDuration)
-                .clamp(0.0, 1.0);
+            final growthProgress =
+                ((frame - growthStart) / growthDuration).clamp(0.0, 1.0);
             final easedGrowth = Curves.easeInOutCubic.transform(growthProgress);
 
             return CustomPaint(

@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 
 Future<void>
-iUseATextclipAndAnimateItsOpacityUsingInterpolateBasedOnTheFrameNumber(
+    iUseATextclipAndAnimateItsOpacityUsingInterpolateBasedOnTheFrameNumber(
   WidgetTester tester,
 ) async {
   await tester.pumpWidget(

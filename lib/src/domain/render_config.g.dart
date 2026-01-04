@@ -7,24 +7,24 @@ part of 'render_config.dart';
 // **************************************************************************
 
 RenderConfig _$RenderConfigFromJson(Map<String, dynamic> json) => RenderConfig(
-  timeline: TimelineConfig.fromJson(json['timeline'] as Map<String, dynamic>),
-  sequences: (json['sequences'] as List<dynamic>)
-      .map((e) => SequenceConfig.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  audioTracks:
-      (json['audioTracks'] as List<dynamic>?)
-          ?.map((e) => AudioTrackConfig.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const [],
-  embeddedVideos:
-      (json['embeddedVideos'] as List<dynamic>?)
-          ?.map((e) => EmbeddedVideoConfig.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const [],
-  encoding: json['encoding'] == null
-      ? null
-      : EncodingConfig.fromJson(json['encoding'] as Map<String, dynamic>),
-);
+      timeline:
+          TimelineConfig.fromJson(json['timeline'] as Map<String, dynamic>),
+      sequences: (json['sequences'] as List<dynamic>)
+          .map((e) => SequenceConfig.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      audioTracks: (json['audioTracks'] as List<dynamic>?)
+              ?.map((e) => AudioTrackConfig.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      embeddedVideos: (json['embeddedVideos'] as List<dynamic>?)
+              ?.map((e) =>
+                  EmbeddedVideoConfig.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      encoding: json['encoding'] == null
+          ? null
+          : EncodingConfig.fromJson(json['encoding'] as Map<String, dynamic>),
+    );
 
 Map<String, dynamic> _$RenderConfigToJson(RenderConfig instance) =>
     <String, dynamic>{
@@ -60,8 +60,7 @@ const _$SequenceTypeEnumMap = {
 
 SequenceConfig _$SequenceConfigFromJson(Map<String, dynamic> json) =>
     SequenceConfig(
-      type:
-          $enumDecodeNullable(_$SequenceTypeEnumMap, json['type']) ??
+      type: $enumDecodeNullable(_$SequenceTypeEnumMap, json['type']) ??
           SequenceType.base,
       startFrame: (json['startFrame'] as num).toInt(),
       durationInFrames: (json['durationInFrames'] as num).toInt(),
@@ -106,14 +105,13 @@ const _$RenderQualityEnumMap = {
 
 EncodingConfig _$EncodingConfigFromJson(Map<String, dynamic> json) =>
     EncodingConfig(
-      quality:
-          $enumDecodeNullable(_$RenderQualityEnumMap, json['quality']) ??
+      quality: $enumDecodeNullable(_$RenderQualityEnumMap, json['quality']) ??
           RenderQuality.medium,
       crfOverride: (json['crfOverride'] as num?)?.toInt(),
       presetOverride: json['presetOverride'] as String?,
       frameFormat:
           $enumDecodeNullable(_$FrameFormatEnumMap, json['frameFormat']) ??
-          FrameFormat.rawRgba,
+              FrameFormat.rawRgba,
     );
 
 Map<String, dynamic> _$EncodingConfigToJson(EncodingConfig instance) =>

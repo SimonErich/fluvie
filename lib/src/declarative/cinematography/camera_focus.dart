@@ -65,9 +65,9 @@ class CameraFocus extends StatelessWidget {
     required int endFrame,
     this.alignment = Alignment.center,
     this.curve = Curves.easeInOut,
-  }) : zoomKeyframes = {startFrame: startZoom, endFrame: endZoom},
-       positionKeyframes = null,
-       rotationKeyframes = null;
+  })  : zoomKeyframes = {startFrame: startZoom, endFrame: endZoom},
+        positionKeyframes = null,
+        rotationKeyframes = null;
 
   /// Creates a simple pan effect.
   ///
@@ -89,9 +89,9 @@ class CameraFocus extends StatelessWidget {
     required int endFrame,
     this.alignment = Alignment.center,
     this.curve = Curves.easeInOut,
-  }) : zoomKeyframes = null,
-       positionKeyframes = {startFrame: startPosition, endFrame: endPosition},
-       rotationKeyframes = null;
+  })  : zoomKeyframes = null,
+        positionKeyframes = {startFrame: startPosition, endFrame: endPosition},
+        rotationKeyframes = null;
 
   @override
   Widget build(BuildContext context) {

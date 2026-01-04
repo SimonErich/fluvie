@@ -144,9 +144,8 @@ class StatCard extends StatelessWidget {
           displayValue = (value * curvedProgress).round();
         }
 
-        final displayText = formatter != null
-            ? formatter!(displayValue)
-            : '$displayValue';
+        final displayText =
+            formatter != null ? formatter!(displayValue) : '$displayValue';
 
         return Container(
           width: size?.width,
@@ -163,8 +162,7 @@ class StatCard extends StatelessWidget {
               // Value
               FadeText(
                 displayText,
-                style:
-                    valueStyle ??
+                style: valueStyle ??
                     TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
@@ -176,8 +174,7 @@ class StatCard extends StatelessWidget {
               // Label
               FadeText(
                 label,
-                style:
-                    labelStyle ??
+                style: labelStyle ??
                     const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
@@ -190,8 +187,7 @@ class StatCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 FadeText(
                   sublabel!,
-                  style:
-                      sublabelStyle ??
+                  style: sublabelStyle ??
                       TextStyle(
                         fontSize: 14,
                         color: const Color(0xFFFFFFFF).withValues(alpha: 0.7),

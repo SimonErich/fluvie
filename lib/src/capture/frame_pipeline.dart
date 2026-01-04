@@ -23,7 +23,7 @@ class FramePipeline {
   /// uses more memory. For 1080p video at 4 bytes per pixel, each
   /// frame is ~8MB, so a buffer of 5 frames uses ~40MB.
   FramePipeline({this.maxBufferSize = 5})
-    : _frameController = StreamController<Uint8List>();
+      : _frameController = StreamController<Uint8List>();
 
   /// Stream of frame bytes for the consumer to process.
   Stream<Uint8List> get frames => _frameController.stream;

@@ -25,18 +25,19 @@ EmbeddedVideoConfig _$EmbeddedVideoConfigFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$EmbeddedVideoConfigToJson(
   EmbeddedVideoConfig instance,
-) => <String, dynamic>{
-  'videoPath': instance.videoPath,
-  'startFrame': instance.startFrame,
-  'durationInFrames': instance.durationInFrames,
-  'trimStartSeconds': instance.trimStartSeconds,
-  'width': instance.width,
-  'height': instance.height,
-  'positionX': instance.positionX,
-  'positionY': instance.positionY,
-  'includeAudio': instance.includeAudio,
-  'audioVolume': instance.audioVolume,
-  'audioFadeInFrames': instance.audioFadeInFrames,
-  'audioFadeOutFrames': instance.audioFadeOutFrames,
-  'id': instance.id,
-};
+) =>
+    <String, dynamic>{
+      'videoPath': instance.videoPath,
+      'startFrame': instance.startFrame,
+      'durationInFrames': instance.durationInFrames,
+      'trimStartSeconds': instance.trimStartSeconds,
+      'width': instance.width,
+      'height': instance.height,
+      'positionX': instance.positionX,
+      'positionY': instance.positionY,
+      'includeAudio': instance.includeAudio,
+      'audioVolume': instance.audioVolume,
+      'audioFadeInFrames': instance.audioFadeInFrames,
+      'audioFadeOutFrames': instance.audioFadeOutFrames,
+      'id': instance.id,
+    };

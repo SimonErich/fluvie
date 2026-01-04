@@ -128,12 +128,12 @@ class Layer extends StatelessWidget {
     this.fadeOutFrames = 0,
     this.opacity = 1.0,
     this.enabled = true,
-  }) : blendMode = BlendMode.srcOver,
-       zIndex = -1000,
-       fadeInCurve = Curves.easeOut,
-       fadeOutCurve = Curves.easeIn,
-       transform = null,
-       transformAlignment = Alignment.center;
+  })  : blendMode = BlendMode.srcOver,
+        zIndex = -1000,
+        fadeInCurve = Curves.easeOut,
+        fadeOutCurve = Curves.easeIn,
+        transform = null,
+        transformAlignment = Alignment.center;
 
   /// Creates an overlay layer that is always on top of other layers.
   ///
@@ -149,11 +149,11 @@ class Layer extends StatelessWidget {
     this.opacity = 1.0,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
-  }) : zIndex = 1000,
-       fadeInCurve = Curves.easeOut,
-       fadeOutCurve = Curves.easeIn,
-       transform = null,
-       transformAlignment = Alignment.center;
+  })  : zIndex = 1000,
+        fadeInCurve = Curves.easeOut,
+        fadeOutCurve = Curves.easeIn,
+        transform = null,
+        transformAlignment = Alignment.center;
 
   /// Creates a layer with explicit timing and no fade transitions.
   ///
@@ -176,14 +176,14 @@ class Layer extends StatelessWidget {
     required this.child,
     this.opacity = 1.0,
     this.enabled = true,
-  }) : fadeInFrames = 0,
-       fadeOutFrames = 0,
-       blendMode = BlendMode.srcOver,
-       zIndex = null,
-       fadeInCurve = Curves.easeOut,
-       fadeOutCurve = Curves.easeIn,
-       transform = null,
-       transformAlignment = Alignment.center;
+  })  : fadeInFrames = 0,
+        fadeOutFrames = 0,
+        blendMode = BlendMode.srcOver,
+        zIndex = null,
+        fadeInCurve = Curves.easeOut,
+        fadeOutCurve = Curves.easeIn,
+        transform = null,
+        transformAlignment = Alignment.center;
 
   /// Creates a layer with symmetric fade in and fade out transitions.
   ///
@@ -208,15 +208,15 @@ class Layer extends StatelessWidget {
     int fadeFrames = 15,
     this.enabled = true,
     Curve fadeCurve = Curves.easeInOut,
-  }) : fadeInFrames = fadeFrames,
-       fadeOutFrames = fadeFrames,
-       opacity = 1.0,
-       blendMode = BlendMode.srcOver,
-       zIndex = null,
-       fadeInCurve = fadeCurve,
-       fadeOutCurve = fadeCurve,
-       transform = null,
-       transformAlignment = Alignment.center;
+  })  : fadeInFrames = fadeFrames,
+        fadeOutFrames = fadeFrames,
+        opacity = 1.0,
+        blendMode = BlendMode.srcOver,
+        zIndex = null,
+        fadeInCurve = fadeCurve,
+        fadeOutCurve = fadeCurve,
+        transform = null,
+        transformAlignment = Alignment.center;
 
   /// Creates a layer that is visible for the full composition duration.
   ///
@@ -235,16 +235,16 @@ class Layer extends StatelessWidget {
     required this.child,
     this.opacity = 1.0,
     this.enabled = true,
-  }) : startFrame = null,
-       endFrame = null,
-       fadeInFrames = 0,
-       fadeOutFrames = 0,
-       blendMode = BlendMode.srcOver,
-       zIndex = null,
-       fadeInCurve = Curves.easeOut,
-       fadeOutCurve = Curves.easeIn,
-       transform = null,
-       transformAlignment = Alignment.center;
+  })  : startFrame = null,
+        endFrame = null,
+        fadeInFrames = 0,
+        fadeOutFrames = 0,
+        blendMode = BlendMode.srcOver,
+        zIndex = null,
+        fadeInCurve = Curves.easeOut,
+        fadeOutCurve = Curves.easeIn,
+        transform = null,
+        transformAlignment = Alignment.center;
 
   @override
   Widget build(BuildContext context) {

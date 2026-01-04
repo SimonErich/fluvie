@@ -228,9 +228,8 @@ class SlideIn extends StatelessWidget {
         final opacity = fadeIn ? curvedProgress : 1.0;
 
         // Calculate scale
-        final scale = scaleIn
-            ? startScale + (1.0 - startScale) * curvedProgress
-            : 1.0;
+        final scale =
+            scaleIn ? startScale + (1.0 - startScale) * curvedProgress : 1.0;
 
         Widget result = child;
 

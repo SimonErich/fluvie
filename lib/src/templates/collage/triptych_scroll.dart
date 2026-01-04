@@ -94,7 +94,7 @@ class TriptychScroll extends WrappedTemplate with TemplateAnimationMixin {
           builder: (context, constraints) {
             final columnWidth =
                 (constraints.maxWidth - (columnCount - 1) * imageGap) /
-                columnCount;
+                    columnCount;
             final imageHeight = columnWidth * 1.5; // 2:3 aspect ratio
 
             return Row(
@@ -178,7 +178,7 @@ class TriptychScroll extends WrappedTemplate with TemplateAnimationMixin {
                       ? Image.asset(
                           imagePath,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) =>
+                          errorBuilder: (_, __, ___) =>
                               _buildPlaceholder(columnIndex, index, colors),
                         )
                       : _buildPlaceholder(columnIndex, index, colors),

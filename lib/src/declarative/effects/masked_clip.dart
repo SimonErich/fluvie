@@ -92,10 +92,10 @@ class MaskedClip extends StatelessWidget {
     this.animation,
     this.alignment = Alignment.center,
     this.startFrame = 0,
-  }) : shape = MaskShape.circle,
-       borderRadius = null,
-       starPoints = 5,
-       customPath = null;
+  })  : shape = MaskShape.circle,
+        borderRadius = null,
+        starPoints = 5,
+        customPath = null;
 
   /// Creates a rectangle mask.
   const MaskedClip.rectangle({
@@ -105,10 +105,10 @@ class MaskedClip extends StatelessWidget {
     this.animation,
     this.alignment = Alignment.center,
     this.startFrame = 0,
-  }) : shape = MaskShape.rectangle,
-       radius = null,
-       starPoints = 5,
-       customPath = null;
+  })  : shape = MaskShape.rectangle,
+        radius = null,
+        starPoints = 5,
+        customPath = null;
 
   /// Creates a star mask.
   const MaskedClip.star({
@@ -119,9 +119,9 @@ class MaskedClip extends StatelessWidget {
     this.animation,
     this.alignment = Alignment.center,
     this.startFrame = 0,
-  }) : shape = MaskShape.star,
-       borderRadius = null,
-       customPath = null;
+  })  : shape = MaskShape.star,
+        borderRadius = null,
+        customPath = null;
 
   /// Creates a heart mask.
   const MaskedClip.heart({
@@ -131,10 +131,10 @@ class MaskedClip extends StatelessWidget {
     this.animation,
     this.alignment = Alignment.center,
     this.startFrame = 0,
-  }) : shape = MaskShape.heart,
-       borderRadius = null,
-       starPoints = 5,
-       customPath = null;
+  })  : shape = MaskShape.heart,
+        borderRadius = null,
+        starPoints = 5,
+        customPath = null;
 
   /// Creates a custom path mask.
   const MaskedClip.path({
@@ -144,11 +144,11 @@ class MaskedClip extends StatelessWidget {
     this.animation,
     this.alignment = Alignment.center,
     this.startFrame = 0,
-  }) : shape = MaskShape.custom,
-       customPath = path,
-       radius = null,
-       borderRadius = null,
-       starPoints = 5;
+  })  : shape = MaskShape.custom,
+        customPath = path,
+        radius = null,
+        borderRadius = null,
+        starPoints = 5;
 
   @override
   Widget build(BuildContext context) {
@@ -327,11 +327,12 @@ class MaskAnimation {
 
   /// Creates a reveal animation (expands from center).
   const MaskAnimation.reveal({int duration = 30, Curve curve = Curves.easeOut})
-    : this._(type: MaskAnimationType.reveal, duration: duration, curve: curve);
+      : this._(
+            type: MaskAnimationType.reveal, duration: duration, curve: curve);
 
   /// Creates a hide animation (contracts to center).
   const MaskAnimation.hide({int duration = 30, Curve curve = Curves.easeIn})
-    : this._(type: MaskAnimationType.hide, duration: duration, curve: curve);
+      : this._(type: MaskAnimationType.hide, duration: duration, curve: curve);
 
   /// Calculates the progress at the given frame.
   double progressAt(int frame) {

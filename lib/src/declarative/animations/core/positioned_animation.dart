@@ -135,13 +135,14 @@ class PositionedAnimation {
     int duration = 30,
     Curve curve = Curves.easeOutCubic,
     bool withFade = true,
-  }) => PositionedAnimation.slideFromEdge(
-    edge: EdgeDirection.top,
-    distance: distance,
-    duration: duration,
-    curve: curve,
-    withFade: withFade,
-  );
+  }) =>
+      PositionedAnimation.slideFromEdge(
+        edge: EdgeDirection.top,
+        distance: distance,
+        duration: duration,
+        curve: curve,
+        withFade: withFade,
+      );
 
   /// Creates a slide-in animation from the bottom.
   factory PositionedAnimation.slideFromBottom({
@@ -149,13 +150,14 @@ class PositionedAnimation {
     int duration = 30,
     Curve curve = Curves.easeOutCubic,
     bool withFade = true,
-  }) => PositionedAnimation.slideFromEdge(
-    edge: EdgeDirection.bottom,
-    distance: distance,
-    duration: duration,
-    curve: curve,
-    withFade: withFade,
-  );
+  }) =>
+      PositionedAnimation.slideFromEdge(
+        edge: EdgeDirection.bottom,
+        distance: distance,
+        duration: duration,
+        curve: curve,
+        withFade: withFade,
+      );
 
   /// Creates a slide-in animation from the left.
   factory PositionedAnimation.slideFromLeft({
@@ -163,13 +165,14 @@ class PositionedAnimation {
     int duration = 30,
     Curve curve = Curves.easeOutCubic,
     bool withFade = true,
-  }) => PositionedAnimation.slideFromEdge(
-    edge: EdgeDirection.left,
-    distance: distance,
-    duration: duration,
-    curve: curve,
-    withFade: withFade,
-  );
+  }) =>
+      PositionedAnimation.slideFromEdge(
+        edge: EdgeDirection.left,
+        distance: distance,
+        duration: duration,
+        curve: curve,
+        withFade: withFade,
+      );
 
   /// Creates a slide-in animation from the right.
   factory PositionedAnimation.slideFromRight({
@@ -177,13 +180,14 @@ class PositionedAnimation {
     int duration = 30,
     Curve curve = Curves.easeOutCubic,
     bool withFade = true,
-  }) => PositionedAnimation.slideFromEdge(
-    edge: EdgeDirection.right,
-    distance: distance,
-    duration: duration,
-    curve: curve,
-    withFade: withFade,
-  );
+  }) =>
+      PositionedAnimation.slideFromEdge(
+        edge: EdgeDirection.right,
+        distance: distance,
+        duration: duration,
+        curve: curve,
+        withFade: withFade,
+      );
 
   /// Creates a scale-in animation with optional fade.
   factory PositionedAnimation.scaleIn({
@@ -192,15 +196,16 @@ class PositionedAnimation {
     Curve curve = Curves.easeOutCubic,
     Alignment alignment = Alignment.center,
     bool withFade = true,
-  }) => PositionedAnimation(
-    scaleFrom: startScale,
-    scaleTo: 1.0,
-    opacityFrom: withFade ? 0.0 : null,
-    opacityTo: withFade ? 1.0 : null,
-    duration: duration,
-    curve: curve,
-    alignment: alignment,
-  );
+  }) =>
+      PositionedAnimation(
+        scaleFrom: startScale,
+        scaleTo: 1.0,
+        opacityFrom: withFade ? 0.0 : null,
+        opacityTo: withFade ? 1.0 : null,
+        duration: duration,
+        curve: curve,
+        alignment: alignment,
+      );
 
   /// Creates a scale-out animation with optional fade.
   factory PositionedAnimation.scaleOut({
@@ -209,37 +214,40 @@ class PositionedAnimation {
     Curve curve = Curves.easeInCubic,
     Alignment alignment = Alignment.center,
     bool withFade = true,
-  }) => PositionedAnimation(
-    scaleFrom: 1.0,
-    scaleTo: endScale,
-    opacityFrom: withFade ? 1.0 : null,
-    opacityTo: withFade ? 0.0 : null,
-    duration: duration,
-    curve: curve,
-    alignment: alignment,
-  );
+  }) =>
+      PositionedAnimation(
+        scaleFrom: 1.0,
+        scaleTo: endScale,
+        opacityFrom: withFade ? 1.0 : null,
+        opacityTo: withFade ? 0.0 : null,
+        duration: duration,
+        curve: curve,
+        alignment: alignment,
+      );
 
   /// Creates a fade-in animation.
   factory PositionedAnimation.fadeIn({
     int duration = 30,
     Curve curve = Curves.easeOut,
-  }) => PositionedAnimation(
-    opacityFrom: 0.0,
-    opacityTo: 1.0,
-    duration: duration,
-    curve: curve,
-  );
+  }) =>
+      PositionedAnimation(
+        opacityFrom: 0.0,
+        opacityTo: 1.0,
+        duration: duration,
+        curve: curve,
+      );
 
   /// Creates a fade-out animation.
   factory PositionedAnimation.fadeOut({
     int duration = 30,
     Curve curve = Curves.easeIn,
-  }) => PositionedAnimation(
-    opacityFrom: 1.0,
-    opacityTo: 0.0,
-    duration: duration,
-    curve: curve,
-  );
+  }) =>
+      PositionedAnimation(
+        opacityFrom: 1.0,
+        opacityTo: 0.0,
+        duration: duration,
+        curve: curve,
+      );
 
   /// Creates a zoom-in animation (scale from larger).
   factory PositionedAnimation.zoomIn({
@@ -248,15 +256,16 @@ class PositionedAnimation {
     Curve curve = Curves.easeOutCubic,
     Alignment alignment = Alignment.center,
     bool withFade = true,
-  }) => PositionedAnimation(
-    scaleFrom: startScale,
-    scaleTo: 1.0,
-    opacityFrom: withFade ? 0.0 : null,
-    opacityTo: withFade ? 1.0 : null,
-    duration: duration,
-    curve: curve,
-    alignment: alignment,
-  );
+  }) =>
+      PositionedAnimation(
+        scaleFrom: startScale,
+        scaleTo: 1.0,
+        opacityFrom: withFade ? 0.0 : null,
+        opacityTo: withFade ? 1.0 : null,
+        duration: duration,
+        curve: curve,
+        alignment: alignment,
+      );
 
   /// Creates a rotation-in animation.
   factory PositionedAnimation.rotateIn({
@@ -265,62 +274,63 @@ class PositionedAnimation {
     Curve curve = Curves.easeOutCubic,
     Alignment alignment = Alignment.center,
     bool withFade = true,
-  }) => PositionedAnimation(
-    rotateFrom: startAngle,
-    rotateTo: 0.0,
-    opacityFrom: withFade ? 0.0 : null,
-    opacityTo: withFade ? 1.0 : null,
-    duration: duration,
-    curve: curve,
-    alignment: alignment,
-  );
+  }) =>
+      PositionedAnimation(
+        rotateFrom: startAngle,
+        rotateTo: 0.0,
+        opacityFrom: withFade ? 0.0 : null,
+        opacityTo: withFade ? 1.0 : null,
+        duration: duration,
+        curve: curve,
+        alignment: alignment,
+      );
 
   /// Returns the inverse animation (for exit).
   ///
   /// Swaps the from/to values and flips the curve.
   PositionedAnimation get reversed => PositionedAnimation(
-    translateFrom: translateTo,
-    translateTo: translateFrom,
-    scaleFrom: scaleTo,
-    scaleTo: scaleFrom,
-    rotateFrom: rotateTo,
-    rotateTo: rotateFrom,
-    opacityFrom: opacityTo,
-    opacityTo: opacityFrom,
-    duration: duration,
-    curve: curve.flipped,
-    alignment: alignment,
-  );
+        translateFrom: translateTo,
+        translateTo: translateFrom,
+        scaleFrom: scaleTo,
+        scaleTo: scaleFrom,
+        rotateFrom: rotateTo,
+        rotateTo: rotateFrom,
+        opacityFrom: opacityTo,
+        opacityTo: opacityFrom,
+        duration: duration,
+        curve: curve.flipped,
+        alignment: alignment,
+      );
 
   /// Creates a copy with different duration.
   PositionedAnimation withDuration(int newDuration) => PositionedAnimation(
-    translateFrom: translateFrom,
-    translateTo: translateTo,
-    scaleFrom: scaleFrom,
-    scaleTo: scaleTo,
-    rotateFrom: rotateFrom,
-    rotateTo: rotateTo,
-    opacityFrom: opacityFrom,
-    opacityTo: opacityTo,
-    duration: newDuration,
-    curve: curve,
-    alignment: alignment,
-  );
+        translateFrom: translateFrom,
+        translateTo: translateTo,
+        scaleFrom: scaleFrom,
+        scaleTo: scaleTo,
+        rotateFrom: rotateFrom,
+        rotateTo: rotateTo,
+        opacityFrom: opacityFrom,
+        opacityTo: opacityTo,
+        duration: newDuration,
+        curve: curve,
+        alignment: alignment,
+      );
 
   /// Creates a copy with different curve.
   PositionedAnimation withCurve(Curve newCurve) => PositionedAnimation(
-    translateFrom: translateFrom,
-    translateTo: translateTo,
-    scaleFrom: scaleFrom,
-    scaleTo: scaleTo,
-    rotateFrom: rotateFrom,
-    rotateTo: rotateTo,
-    opacityFrom: opacityFrom,
-    opacityTo: opacityTo,
-    duration: duration,
-    curve: newCurve,
-    alignment: alignment,
-  );
+        translateFrom: translateFrom,
+        translateTo: translateTo,
+        scaleFrom: scaleFrom,
+        scaleTo: scaleTo,
+        rotateFrom: rotateFrom,
+        rotateTo: rotateTo,
+        opacityFrom: opacityFrom,
+        opacityTo: opacityTo,
+        duration: duration,
+        curve: newCurve,
+        alignment: alignment,
+      );
 
   /// Applies the animation at the given progress (0.0 to 1.0).
   ///
@@ -359,9 +369,9 @@ class PositionedAnimation {
     if (opacityFrom != null && opacityTo != null) {
       final opacity =
           (opacityFrom! + (opacityTo! - opacityFrom!) * curvedProgress).clamp(
-            0.0,
-            1.0,
-          );
+        0.0,
+        1.0,
+      );
       result = Opacity(opacity: opacity, child: result);
     }
 

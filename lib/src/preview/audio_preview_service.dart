@@ -216,9 +216,8 @@ class _PreviewAudioTrack {
     // Convert trim frames to milliseconds for audio player
     final trimStartMs = config.trimStartFrameToMs(fps.round());
     final trimEndMs = config.trimEndFrameToMs(fps.round());
-    final maxPlayableMs = trimEndMs != null
-        ? math.max(0, trimEndMs - trimStartMs)
-        : null;
+    final maxPlayableMs =
+        trimEndMs != null ? math.max(0, trimEndMs - trimStartMs) : null;
     if (maxPlayableMs != null) {
       playbackMs = math.min(playbackMs, maxPlayableMs);
     }

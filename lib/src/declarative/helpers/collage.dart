@@ -77,8 +77,8 @@ class Collage extends StatelessWidget {
     this.animationDuration = 20,
     this.startFrame = 0,
     this.itemBorderRadius = 0,
-  }) : _left = null,
-       _right = null;
+  })  : _left = null,
+        _right = null;
 
   /// Creates a 2x2 grid collage.
   const Collage.grid2x2({
@@ -90,9 +90,9 @@ class Collage extends StatelessWidget {
     this.animationDuration = 20,
     this.startFrame = 0,
     this.itemBorderRadius = 0,
-  }) : layout = CollageLayout.grid2x2,
-       _left = null,
-       _right = null;
+  })  : layout = CollageLayout.grid2x2,
+        _left = null,
+        _right = null;
 
   /// Creates a 3x3 grid collage.
   const Collage.grid3x3({
@@ -104,9 +104,9 @@ class Collage extends StatelessWidget {
     this.animationDuration = 20,
     this.startFrame = 0,
     this.itemBorderRadius = 0,
-  }) : layout = CollageLayout.grid3x3,
-       _left = null,
-       _right = null;
+  })  : layout = CollageLayout.grid3x3,
+        _left = null,
+        _right = null;
 
   /// Creates a horizontal split collage.
   const Collage.splitHorizontal({
@@ -119,11 +119,11 @@ class Collage extends StatelessWidget {
     this.animationDuration = 20,
     this.startFrame = 0,
     this.itemBorderRadius = 0,
-  }) : children = const [],
-       layout = CollageLayout.splitHorizontal,
-       // Store left and right in children via the build method
-       _left = left,
-       _right = right;
+  })  : children = const [],
+        layout = CollageLayout.splitHorizontal,
+        // Store left and right in children via the build method
+        _left = left,
+        _right = right;
 
   /// Creates a vertical split collage.
   const Collage.splitVertical({
@@ -136,10 +136,10 @@ class Collage extends StatelessWidget {
     this.animationDuration = 20,
     this.startFrame = 0,
     this.itemBorderRadius = 0,
-  }) : children = const [],
-       layout = CollageLayout.splitVertical,
-       _left = top, // Reuse _left for top
-       _right = bottom; // Reuse _right for bottom
+  })  : children = const [],
+        layout = CollageLayout.splitVertical,
+        _left = top, // Reuse _left for top
+        _right = bottom; // Reuse _right for bottom
 
   /// Creates a featured collage with one main item and thumbnails.
   const Collage.featured({
@@ -152,10 +152,10 @@ class Collage extends StatelessWidget {
     this.animationDuration = 20,
     this.startFrame = 0,
     this.itemBorderRadius = 0,
-  }) : children = thumbnails,
-       layout = CollageLayout.featured,
-       _left = main,
-       _right = null;
+  })  : children = thumbnails,
+        layout = CollageLayout.featured,
+        _left = main,
+        _right = null;
 
   // Internal storage for split layouts
   final Widget? _left;
@@ -184,40 +184,39 @@ class Collage extends StatelessWidget {
     final wrappedChildren = _wrapWithAnimations(children);
 
     return Column(
-      children:
-          List.generate(rows, (rowIndex) {
-                final startIndex = rowIndex * columns;
-                final endIndex = (startIndex + columns).clamp(
-                  0,
-                  wrappedChildren.length,
-                );
-                final rowChildren = wrappedChildren.sublist(
-                  startIndex,
-                  endIndex,
-                );
+      children: List.generate(rows, (rowIndex) {
+        final startIndex = rowIndex * columns;
+        final endIndex = (startIndex + columns).clamp(
+          0,
+          wrappedChildren.length,
+        );
+        final rowChildren = wrappedChildren.sublist(
+          startIndex,
+          endIndex,
+        );
 
-                return Expanded(
-                  child: Row(
-                    children: [
-                      for (int i = 0; i < rowChildren.length; i++) ...[
-                        if (i > 0) SizedBox(width: spacing),
-                        Expanded(child: _wrapItem(rowChildren[i])),
-                      ],
-                      // Fill empty cells
-                      for (int i = rowChildren.length; i < columns; i++) ...[
-                        if (i > 0) SizedBox(width: spacing),
-                        const Expanded(child: SizedBox()),
-                      ],
-                    ],
-                  ),
-                );
-              })
-              .expand((row) sync* {
-                yield row;
-                yield SizedBox(height: spacing);
-              })
-              .take(rows * 2 - 1)
-              .toList(),
+        return Expanded(
+          child: Row(
+            children: [
+              for (int i = 0; i < rowChildren.length; i++) ...[
+                if (i > 0) SizedBox(width: spacing),
+                Expanded(child: _wrapItem(rowChildren[i])),
+              ],
+              // Fill empty cells
+              for (int i = rowChildren.length; i < columns; i++) ...[
+                if (i > 0) SizedBox(width: spacing),
+                const Expanded(child: SizedBox()),
+              ],
+            ],
+          ),
+        );
+      })
+          .expand((row) sync* {
+            yield row;
+            yield SizedBox(height: spacing);
+          })
+          .take(rows * 2 - 1)
+          .toList(),
     );
   }
 

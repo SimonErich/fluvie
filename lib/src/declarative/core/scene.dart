@@ -124,17 +124,17 @@ class Scene extends StatelessWidget {
     Curve fadeInCurve = Curves.easeOut,
     Curve fadeOutCurve = Curves.easeIn,
   }) : this(
-         key: key,
-         durationInFrames: durationInFrames,
-         background: Background.solid(color),
-         children: children,
-         transitionIn: transitionIn,
-         transitionOut: transitionOut,
-         fadeInFrames: fadeInFrames,
-         fadeOutFrames: fadeOutFrames,
-         fadeInCurve: fadeInCurve,
-         fadeOutCurve: fadeOutCurve,
-       );
+          key: key,
+          durationInFrames: durationInFrames,
+          background: Background.solid(color),
+          children: children,
+          transitionIn: transitionIn,
+          transitionOut: transitionOut,
+          fadeInFrames: fadeInFrames,
+          fadeOutFrames: fadeOutFrames,
+          fadeInCurve: fadeInCurve,
+          fadeOutCurve: fadeOutCurve,
+        );
 
   /// Creates a scene with a gradient background.
   ///
@@ -159,20 +159,20 @@ class Scene extends StatelessWidget {
     int fadeInFrames = 0,
     int fadeOutFrames = 0,
   }) : this(
-         key: key,
-         durationInFrames: durationInFrames,
-         background: Background.gradient(
-           colors: colors,
-           type: type,
-           begin: begin,
-           end: end,
-         ),
-         children: children,
-         transitionIn: transitionIn,
-         transitionOut: transitionOut,
-         fadeInFrames: fadeInFrames,
-         fadeOutFrames: fadeOutFrames,
-       );
+          key: key,
+          durationInFrames: durationInFrames,
+          background: Background.gradient(
+            colors: colors,
+            type: type,
+            begin: begin,
+            end: end,
+          ),
+          children: children,
+          transitionIn: transitionIn,
+          transitionOut: transitionOut,
+          fadeInFrames: fadeInFrames,
+          fadeOutFrames: fadeOutFrames,
+        );
 
   /// Creates a scene with crossfade transitions preset.
   ///
@@ -193,10 +193,10 @@ class Scene extends StatelessWidget {
     int transitionFrames = 15,
     this.fadeInCurve = Curves.easeOut,
     this.fadeOutCurve = Curves.easeIn,
-  }) : transitionIn = const SceneTransition.crossFade(durationInFrames: 15),
-       transitionOut = const SceneTransition.crossFade(durationInFrames: 15),
-       fadeInFrames = transitionFrames,
-       fadeOutFrames = transitionFrames;
+  })  : transitionIn = const SceneTransition.crossFade(durationInFrames: 15),
+        transitionOut = const SceneTransition.crossFade(durationInFrames: 15),
+        fadeInFrames = transitionFrames,
+        fadeOutFrames = transitionFrames;
 
   /// Creates an empty scene (useful for spacing or transition-only scenes).
   ///
@@ -209,12 +209,12 @@ class Scene extends StatelessWidget {
     required this.durationInFrames,
     this.transitionIn,
     this.transitionOut,
-  }) : background = null,
-       children = const [],
-       fadeInFrames = 0,
-       fadeOutFrames = 0,
-       fadeInCurve = Curves.easeOut,
-       fadeOutCurve = Curves.easeIn;
+  })  : background = null,
+        children = const [],
+        fadeInFrames = 0,
+        fadeOutFrames = 0,
+        fadeInCurve = Curves.easeOut,
+        fadeOutCurve = Curves.easeIn;
 
   @override
   Widget build(BuildContext context) {

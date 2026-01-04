@@ -91,8 +91,7 @@ class SplitPersonality extends WrappedTemplate with TemplateAnimationMixin {
     return TimeConsumer(
       builder: (context, frame, _) {
         final entryProgress = ((frame - 10) / 40).clamp(0.0, 1.0);
-        final slideOffset =
-            (1 - Curves.easeOutCubic.transform(entryProgress)) *
+        final slideOffset = (1 - Curves.easeOutCubic.transform(entryProgress)) *
             (imageOnLeft ? -200 : 200);
 
         return Transform.translate(
@@ -109,7 +108,7 @@ class SplitPersonality extends WrappedTemplate with TemplateAnimationMixin {
                     Image.asset(
                       collageData.images.first,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _buildImageGradient(colors),
+                      errorBuilder: (_, __, ___) => _buildImageGradient(colors),
                     )
                   else
                     _buildImageGradient(colors),
@@ -156,8 +155,7 @@ class SplitPersonality extends WrappedTemplate with TemplateAnimationMixin {
     return TimeConsumer(
       builder: (context, frame, _) {
         final entryProgress = ((frame - 30) / 40).clamp(0.0, 1.0);
-        final slideOffset =
-            (1 - Curves.easeOutCubic.transform(entryProgress)) *
+        final slideOffset = (1 - Curves.easeOutCubic.transform(entryProgress)) *
             (imageOnLeft ? 200 : -200);
 
         return Transform.translate(
@@ -183,9 +181,8 @@ class SplitPersonality extends WrappedTemplate with TemplateAnimationMixin {
         bottom: 80,
       ),
       child: Column(
-        crossAxisAlignment: imageOnLeft
-            ? CrossAxisAlignment.start
-            : CrossAxisAlignment.end,
+        crossAxisAlignment:
+            imageOnLeft ? CrossAxisAlignment.start : CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Title
@@ -261,9 +258,8 @@ class SplitPersonality extends WrappedTemplate with TemplateAnimationMixin {
   Widget _buildTypewriterText(String text, TemplateTheme colors, int frame) {
     final typeStart = 60;
     final charsPerFrame = 0.5;
-    final visibleChars = ((frame - typeStart) * charsPerFrame)
-        .clamp(0, text.length)
-        .toInt();
+    final visibleChars =
+        ((frame - typeStart) * charsPerFrame).clamp(0, text.length).toInt();
 
     return Text(
       text.substring(0, visibleChars) + (visibleChars < text.length ? '_' : ''),

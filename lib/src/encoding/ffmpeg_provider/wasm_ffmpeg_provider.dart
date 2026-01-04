@@ -3,8 +3,7 @@ import 'ffmpeg_provider.dart';
 // Conditional import for web support
 // ignore: uri_does_not_exist
 import 'wasm_ffmpeg_provider_stub.dart'
-    if (dart.library.js_interop) 'wasm_ffmpeg_provider_web.dart'
-    as impl;
+    if (dart.library.js_interop) 'wasm_ffmpeg_provider_web.dart' as impl;
 
 /// FFmpeg provider that uses WebAssembly for browser support.
 ///

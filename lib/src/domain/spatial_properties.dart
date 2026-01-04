@@ -66,16 +66,16 @@ class SpatialProperties {
 
   /// Creates spatial properties with all values set to their defaults.
   const SpatialProperties.identity()
-    : x = 0,
-      y = 0,
-      width = null,
-      height = null,
-      rotation = 0,
-      scaleX = 1.0,
-      scaleY = 1.0,
-      opacity = 1.0,
-      anchorX = 0.5,
-      anchorY = 0.5;
+      : x = 0,
+        y = 0,
+        width = null,
+        height = null,
+        rotation = 0,
+        scaleX = 1.0,
+        scaleY = 1.0,
+        opacity = 1.0,
+        anchorX = 0.5,
+        anchorY = 0.5;
 
   /// Creates spatial properties centered in the frame.
   const SpatialProperties.centered({
@@ -85,10 +85,10 @@ class SpatialProperties {
     this.scaleX,
     this.scaleY,
     this.opacity,
-  }) : x = null,
-       y = null,
-       anchorX = 0.5,
-       anchorY = 0.5;
+  })  : x = null,
+        y = null,
+        anchorX = 0.5,
+        anchorY = 0.5;
 
   /// Creates a copy with the given values replaced.
   SpatialProperties copyWith({

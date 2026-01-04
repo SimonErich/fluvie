@@ -114,14 +114,14 @@ class ParticleEffect extends StatelessWidget {
     this.color = const Color(0xFFFFD700), // Gold
     this.opacity = 0.8,
     this.randomSeed = 42,
-  }) : type = ParticleType.star,
-       colors = null,
-       minSize = 2,
-       maxSize = 8,
-       minSpeed = 0.5,
-       maxSpeed = 2,
-       direction = ParticleDirection.random,
-       fadeOut = true;
+  })  : type = ParticleType.star,
+        colors = null,
+        minSize = 2,
+        maxSize = 8,
+        minSpeed = 0.5,
+        maxSpeed = 2,
+        direction = ParticleDirection.random,
+        fadeOut = true;
 
   /// Creates a confetti particle effect.
   const ParticleEffect.confetti({
@@ -130,24 +130,23 @@ class ParticleEffect extends StatelessWidget {
     List<Color>? colors,
     this.opacity = 1.0,
     this.randomSeed = 42,
-  }) : type = ParticleType.confetti,
-       color = const Color(0xFFFFFFFF),
-       colors =
-           colors ??
-           const [
-             Color(0xFFFF6B6B),
-             Color(0xFF4ECDC4),
-             Color(0xFFFFE66D),
-             Color(0xFF95E1D3),
-             Color(0xFFF38181),
-             Color(0xFFAA96DA),
-           ],
-       minSize = 6,
-       maxSize = 12,
-       minSpeed = 2,
-       maxSpeed = 5,
-       direction = ParticleDirection.down,
-       fadeOut = false;
+  })  : type = ParticleType.confetti,
+        color = const Color(0xFFFFFFFF),
+        colors = colors ??
+            const [
+              Color(0xFFFF6B6B),
+              Color(0xFF4ECDC4),
+              Color(0xFFFFE66D),
+              Color(0xFF95E1D3),
+              Color(0xFFF38181),
+              Color(0xFFAA96DA),
+            ],
+        minSize = 6,
+        maxSize = 12,
+        minSpeed = 2,
+        maxSpeed = 5,
+        direction = ParticleDirection.down,
+        fadeOut = false;
 
   /// Creates a snow particle effect.
   const ParticleEffect.snow({
@@ -156,14 +155,14 @@ class ParticleEffect extends StatelessWidget {
     this.color = const Color(0xFFFFFFFF),
     this.opacity = 0.8,
     this.randomSeed = 42,
-  }) : type = ParticleType.circle,
-       colors = null,
-       minSize = 2,
-       maxSize = 6,
-       minSpeed = 1,
-       maxSpeed = 2,
-       direction = ParticleDirection.down,
-       fadeOut = false;
+  })  : type = ParticleType.circle,
+        colors = null,
+        minSize = 2,
+        maxSize = 6,
+        minSpeed = 1,
+        maxSpeed = 2,
+        direction = ParticleDirection.down,
+        fadeOut = false;
 
   /// Creates a rising bubbles effect.
   const ParticleEffect.bubbles({
@@ -172,14 +171,14 @@ class ParticleEffect extends StatelessWidget {
     this.color = const Color(0xFFFFFFFF),
     this.opacity = 0.5,
     this.randomSeed = 42,
-  }) : type = ParticleType.circle,
-       colors = null,
-       minSize = 4,
-       maxSize = 12,
-       minSpeed = 1,
-       maxSpeed = 3,
-       direction = ParticleDirection.up,
-       fadeOut = false;
+  })  : type = ParticleType.circle,
+        colors = null,
+        minSize = 4,
+        maxSize = 12,
+        minSpeed = 1,
+        maxSpeed = 3,
+        direction = ParticleDirection.up,
+        fadeOut = false;
 
   @override
   Widget build(BuildContext context) {

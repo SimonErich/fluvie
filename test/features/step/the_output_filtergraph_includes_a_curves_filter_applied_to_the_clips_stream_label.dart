@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void>
-theOutputFiltergraphIncludesACurvesFilterAppliedToTheClipsStreamLabel(
+    theOutputFiltergraphIncludesACurvesFilterAppliedToTheClipsStreamLabel(
   WidgetTester tester,
 ) async {
   // Filter string verification handled by FFmpegFilterGraphBuilder integration.

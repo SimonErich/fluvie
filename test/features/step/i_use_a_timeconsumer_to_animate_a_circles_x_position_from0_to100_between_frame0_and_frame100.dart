@@ -4,7 +4,7 @@ import 'package:fluvie/fluvie.dart';
 // Import for FrameProvider
 
 Future<void>
-iUseATimeconsumerToAnimateACirclesXPositionFrom0To100BetweenFrame0AndFrame100(
+    iUseATimeconsumerToAnimateACirclesXPositionFrom0To100BetweenFrame0AndFrame100(
   WidgetTester tester,
 ) async {
   // We start at frame 0

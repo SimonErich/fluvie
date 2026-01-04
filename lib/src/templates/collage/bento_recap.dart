@@ -212,15 +212,14 @@ class BentoRecap extends WrappedTemplate with TemplateAnimationMixin {
 
   Widget _buildImageCell(int index, TemplateTheme colors) {
     final imageIndex = index % (collageData.images.length.clamp(1, 10));
-    final imagePath = collageData.images.isNotEmpty
-        ? collageData.images[imageIndex]
-        : null;
+    final imagePath =
+        collageData.images.isNotEmpty ? collageData.images[imageIndex] : null;
 
     if (imagePath != null) {
       return Image.asset(
         imagePath,
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => _buildPlaceholder(index, colors),
+        errorBuilder: (_, __, ___) => _buildPlaceholder(index, colors),
       );
     }
 

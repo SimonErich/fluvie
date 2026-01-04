@@ -147,9 +147,8 @@ class FrameSequencer {
   }
 
   Future<RenderRepaintBoundary> _resolveBoundary() async {
-    final RenderRepaintBoundary? boundary =
-        repaintBoundaryKey.currentContext?.findRenderObject()
-            as RenderRepaintBoundary?;
+    final RenderRepaintBoundary? boundary = repaintBoundaryKey.currentContext
+        ?.findRenderObject() as RenderRepaintBoundary?;
 
     if (boundary == null) {
       FluvieLogger.error('RepaintBoundary not found!', module: 'capture');

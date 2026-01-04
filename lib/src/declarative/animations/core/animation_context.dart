@@ -157,9 +157,8 @@ class AnimationContext extends InheritedWidget {
       entryDuration: childEntryDuration,
       exitDuration: childExitDuration,
       contextEndFrame: childEndFrame,
-      exitStartFrame: childEndFrame != null
-          ? childEndFrame - childExitDuration
-          : null,
+      exitStartFrame:
+          childEndFrame != null ? childEndFrame - childExitDuration : null,
       inheritedOffset: inheritedOffset + additionalOffset,
       child: child,
     );

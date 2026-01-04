@@ -106,7 +106,7 @@ class MosaicReveal extends WrappedTemplate with TemplateAnimationMixin {
                       child: Image.asset(
                         collageData.images.first,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const SizedBox(),
+                        errorBuilder: (_, __, ___) => const SizedBox(),
                       ),
                     ),
                   ),
@@ -221,7 +221,7 @@ class MosaicReveal extends WrappedTemplate with TemplateAnimationMixin {
         fit: BoxFit.cover,
         width: tileWidth * tilesPerRow,
         height: tileHeight * rowCount,
-        errorBuilder: (_, _, _) => Container(),
+        errorBuilder: (_, __, ___) => Container(),
       ),
     );
   }

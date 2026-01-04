@@ -107,8 +107,8 @@ class VPositioned extends StatelessWidget with VideoTimingMixin {
     this.fadeInCurve = VideoTimingDefaults.fadeInCurve,
     this.fadeOutCurve = VideoTimingDefaults.fadeOutCurve,
     this.heroKey,
-  }) : width = null,
-       height = null;
+  })  : width = null,
+        height = null;
 
   /// Creates a VPositioned from an Offset.
   VPositioned.fromOffset({
@@ -125,10 +125,10 @@ class VPositioned extends StatelessWidget with VideoTimingMixin {
     this.fadeInCurve = VideoTimingDefaults.fadeInCurve,
     this.fadeOutCurve = VideoTimingDefaults.fadeOutCurve,
     this.heroKey,
-  }) : left = offset.dx,
-       top = offset.dy,
-       right = null,
-       bottom = null;
+  })  : left = offset.dx,
+        top = offset.dy,
+        right = null,
+        bottom = null;
 
   /// Creates a VPositioned from a Rect.
   VPositioned.fromRect({
@@ -143,12 +143,12 @@ class VPositioned extends StatelessWidget with VideoTimingMixin {
     this.fadeInCurve = VideoTimingDefaults.fadeInCurve,
     this.fadeOutCurve = VideoTimingDefaults.fadeOutCurve,
     this.heroKey,
-  }) : left = rect.left,
-       top = rect.top,
-       width = rect.width,
-       height = rect.height,
-       right = null,
-       bottom = null;
+  })  : left = rect.left,
+        top = rect.top,
+        width = rect.width,
+        height = rect.height,
+        right = null,
+        bottom = null;
 
   @override
   Widget build(BuildContext context) {

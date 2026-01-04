@@ -283,7 +283,7 @@ class TheGridShuffle extends WrappedTemplate with TemplateAnimationMixin {
                 fit: BoxFit.cover,
                 width: width,
                 height: height,
-                errorBuilder: (_, _, _) => _buildPlaceholder(index, colors),
+                errorBuilder: (_, __, ___) => _buildPlaceholder(index, colors),
               )
             : _buildPlaceholder(index, colors),
       ),

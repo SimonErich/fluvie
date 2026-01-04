@@ -383,7 +383,7 @@ Widget buildImage(String? path) {
   return Image.asset(
     path,
     fit: BoxFit.cover,
-    errorBuilder: (_, _, _) => _buildPlaceholder(),
+    errorBuilder: (_, __, ___) => _buildPlaceholder(),
   );
 }
 

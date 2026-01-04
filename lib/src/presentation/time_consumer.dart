@@ -16,7 +16,7 @@ import 'video_composition.dart';
 class TimeConsumer extends StatelessWidget {
   /// Builder function called with the current context, frame number, and progress (0.0 to 1.0).
   final Widget Function(BuildContext context, int frame, double progress)
-  builder;
+      builder;
 
   const TimeConsumer({super.key, required this.builder});
 

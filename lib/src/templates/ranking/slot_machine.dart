@@ -262,7 +262,7 @@ class SlotMachine extends WrappedTemplate with TemplateAnimationMixin {
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
+                      errorBuilder: (_, __, ___) => Container(
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(

@@ -170,8 +170,8 @@ class MockAudioDataProvider implements AudioDataProvider {
         final strength = (i % 4 == 0)
             ? 1.0
             : (i % 2 == 0)
-            ? 0.7
-            : 0.5;
+                ? 0.7
+                : 0.5;
         _beatStrengths[beatSample] = strength;
 
         // Add some decay after the beat

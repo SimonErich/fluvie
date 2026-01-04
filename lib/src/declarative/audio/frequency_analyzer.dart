@@ -30,11 +30,11 @@ class FrequencyAnalyzer {
     this.bandCount = 8,
     this.fftSize = 1024,
     this.smoothing = 0.3,
-  }) : assert(bandCount > 0),
-       assert(
-         fftSize > 0 && (fftSize & (fftSize - 1)) == 0,
-         'fftSize must be power of 2',
-       );
+  })  : assert(bandCount > 0),
+        assert(
+          fftSize > 0 && (fftSize & (fftSize - 1)) == 0,
+          'fftSize must be power of 2',
+        );
 
   /// Analyzes a window of audio samples and returns frequency band data.
   ///
@@ -166,13 +166,13 @@ class FrequencyAnalyzer {
       final highFreq = math.exp(logMin + (i + 1) * logStep);
 
       final lowBin = (lowFreq / binWidth).floor().clamp(
-        0,
-        magnitudes.length - 1,
-      );
+            0,
+            magnitudes.length - 1,
+          );
       final highBin = (highFreq / binWidth).ceil().clamp(
-        0,
-        magnitudes.length - 1,
-      );
+            0,
+            magnitudes.length - 1,
+          );
 
       if (highBin > lowBin) {
         var sum = 0.0;
