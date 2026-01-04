@@ -33,7 +33,7 @@ class FileSaver {
   /// On mobile, presents the platform share sheet.
   /// On web, triggers a browser download.
   ///
-  /// Throws [FileSystemException] if the operation fails.
+  /// Throws `FileSystemException` if the operation fails.
   static Future<void> save(String filePath, {String? suggestedName}) async {
     await platform.saveFile(filePath, suggestedName: suggestedName);
   }
