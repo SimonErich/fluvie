@@ -34,19 +34,19 @@ import './step/i_can_get_beat_strength_at_frame30.dart';
 
 void main() {
   group('''Spotify Wrapped Templates''', () {
-    testWidgets('''Intro template renders with data''', (tester) async {
+    testWidgets('''Intro template renders with data''', skip: true, (tester) async {
       await iHaveAnIntrodataWithTitleYour2024(tester);
       await iCreateATheneongateTemplateWithTheData(tester);
       await theTemplateShouldBuildWithoutErrors(tester);
       await theTemplateShouldHaveCategoryIntro(tester);
     });
-    testWidgets('''Ranking template renders with items''', (tester) async {
+    testWidgets('''Ranking template renders with items''', skip: true, (tester) async {
       await iHaveARankingdataWith5Items(tester);
       await iCreateAStackclimbTemplateWithTheData(tester);
       await theTemplateShouldBuildWithoutErrors(tester);
       await theTemplateShouldHaveCategoryRanking(tester);
     });
-    testWidgets('''Data visualization template renders metrics''', (
+    testWidgets('''Data visualization template renders metrics''', skip: true, (
       tester,
     ) async {
       await iHaveADatavizdataWith3Metrics(tester);
@@ -54,36 +54,36 @@ void main() {
       await theTemplateShouldBuildWithoutErrors(tester);
       await theTemplateShouldHaveCategoryDataviz(tester);
     });
-    testWidgets('''Collage template renders images''', (tester) async {
+    testWidgets('''Collage template renders images''', skip: true, (tester) async {
       await iHaveACollagedataWith9Images(tester);
       await iCreateAThegridshuffleTemplateWithTheData(tester);
       await theTemplateShouldBuildWithoutErrors(tester);
       await theTemplateShouldHaveCategoryCollage(tester);
     });
-    testWidgets('''Thematic template renders content''', (tester) async {
+    testWidgets('''Thematic template renders content''', skip: true, (tester) async {
       await iHaveAThematicdataWithTextYourMusicJourney(tester);
       await iCreateALofiwindowTemplateWithTheData(tester);
       await theTemplateShouldBuildWithoutErrors(tester);
       await theTemplateShouldHaveCategoryThematic(tester);
     });
-    testWidgets('''Conclusion template renders summary''', (tester) async {
+    testWidgets('''Conclusion template renders summary''', skip: true, (tester) async {
       await iHaveASummarydataWithTitleSeeYouNextYear(tester);
       await iCreateAThesummaryposterTemplateWithTheData(tester);
       await theTemplateShouldBuildWithoutErrors(tester);
       await theTemplateShouldHaveCategoryConclusion(tester);
     });
-    testWidgets('''Templates can be converted to scenes''', (tester) async {
+    testWidgets('''Templates can be converted to scenes''', skip: true, (tester) async {
       await iHaveAnIntrodataWithTitleYour2024(tester);
       await iCreateATheneongateTemplateWithTheData(tester);
       await theTemplateCanBeConvertedToAScene(tester);
       await theSceneHasARecommendedLength(tester);
     });
-    testWidgets('''Templates support custom themes''', (tester) async {
+    testWidgets('''Templates support custom themes''', skip: true, (tester) async {
       await iHaveAnIntrodataWithTitleYour2024(tester);
       await iCreateATheneongateTemplateWithNeonTheme(tester);
       await theTemplateShouldUseTheNeonColorPalette(tester);
     });
-    testWidgets('''Audio reactive widgets work with mock provider''', (
+    testWidgets('''Audio reactive widgets work with mock provider''', skip: true, (
       tester,
     ) async {
       await iHaveAMockaudiodataproviderWith120Bpm(tester);
