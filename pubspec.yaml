@@ -1,6 +1,6 @@
 name: fluvie
 description: A Flutter package for programmatic video generation using declarative widgets and FFmpeg. Create animated videos from Flutter widgets with frame-level control.
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/simonerich/fluvie
 repository: https://github.com/simonerich/fluvie
 issue_tracker: https://github.com/simonerich/fluvie/issues
