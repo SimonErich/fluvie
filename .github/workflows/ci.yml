@@ -47,7 +47,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        flutter-version: ['3.27.0', '3.29.0']
+        flutter-version: ['3.29.0', '3.32.0']
 
     steps:
       - uses: actions/checkout@v4
@@ -98,7 +98,7 @@ jobs:
         run: flutter test --coverage
 
       - name: Check coverage threshold (Ubuntu only)
-        if: runner.os == 'Linux' && matrix.flutter-version == '3.27.0'
+        if: runner.os == 'Linux' && matrix.flutter-version == '3.29.0'
         run: |
           sudo apt-get install -y lcov
           COVERAGE=$(lcov --summary coverage/lcov.info 2>&1 | grep "lines" | grep -oP '\d+\.\d+' | head -1 || echo "0.0")
@@ -110,7 +110,7 @@ jobs:
           echo "✅ Coverage $COVERAGE% meets 20% requirement"
 
       - name: Upload coverage (Ubuntu latest version only)
-        if: runner.os == 'Linux' && matrix.flutter-version == '3.27.0'
+        if: runner.os == 'Linux' && matrix.flutter-version == '3.29.0'
         uses: codecov/codecov-action@v4
         with:
           files: coverage/lcov.info
@@ -127,7 +127,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
+          flutter-version: '3.29.0'
           channel: 'stable'
           cache: true
 
@@ -155,7 +155,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
+          flutter-version: '3.29.0'
           channel: 'stable'
           cache: true
 
@@ -182,7 +182,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
+          flutter-version: '3.29.0'
           channel: 'stable'
           cache: true
 
