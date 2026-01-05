@@ -244,8 +244,8 @@ class EncodingConfig {
 
   /// Frame capture format.
   ///
-  /// Use [FrameFormat.rawRgba] for fastest capture (default).
-  /// Use [FrameFormat.png] when transparency is needed in the output.
+  /// Use `FrameFormat.rawRgba` for fastest capture (default).
+  /// Use `FrameFormat.png` when transparency is needed in the output.
   final FrameFormat frameFormat;
 
   /// Creates encoding configuration.

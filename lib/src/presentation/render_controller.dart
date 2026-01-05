@@ -242,7 +242,7 @@ class RenderableComposition extends StatefulWidget {
   /// from the available display area. The composition is always captured
   /// at full resolution regardless of this setting.
   ///
-  /// Defaults to [PreviewMode.fit] which scales the composition to fit
+  /// Defaults to `PreviewMode.fit` which scales the composition to fit
   /// within the available space.
   final PreviewMode previewMode;
 

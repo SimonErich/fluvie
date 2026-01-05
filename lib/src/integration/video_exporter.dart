@@ -130,13 +130,13 @@ class VideoExporter {
 
   /// Sets the render quality preset.
   ///
-  /// Defaults to [RenderQuality.medium].
+  /// Defaults to `RenderQuality.medium`.
   ///
   /// Quality presets:
-  /// - [RenderQuality.low]: CRF 30, smaller file, faster
-  /// - [RenderQuality.medium]: CRF 23, balanced
-  /// - [RenderQuality.high]: CRF 18, larger file, slower
-  /// - [RenderQuality.lossless]: CRF 0, maximum quality
+  /// - `RenderQuality.low`: CRF 30, smaller file, faster
+  /// - `RenderQuality.medium`: CRF 23, balanced
+  /// - `RenderQuality.high`: CRF 18, larger file, slower
+  /// - `RenderQuality.lossless`: CRF 0, maximum quality
   VideoExporter withQuality(RenderQuality quality) {
     _quality = quality;
     return this;
