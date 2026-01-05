@@ -141,7 +141,7 @@ jobs:
 
       - name: Run integration tests
         working-directory: example
-        run: flutter test integration_test/
+        run: flutter test integration_test/ -d linux
         env:
           FLUTTER_ENABLE_IMPELLER: true
 
