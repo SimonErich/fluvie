@@ -99,10 +99,10 @@ class SlotMachine extends WrappedTemplate with TemplateAnimationMixin {
     return TimeConsumer(
       builder: (context, frame, _) {
         // Animation phases
-        final spinStart = 30;
-        final spinDuration = 90;
-        final settleStart = spinStart + spinDuration;
-        final settleDuration = 40;
+        const spinStart = 30;
+        const spinDuration = 90;
+        const settleStart = spinStart + spinDuration;
+        const settleDuration = 40;
 
         // Spin progress with easeOut for deceleration
         double scrollOffset = 0;
@@ -237,7 +237,7 @@ class SlotMachine extends WrappedTemplate with TemplateAnimationMixin {
     // Ensure winner is last
     displayItems.add(winner);
 
-    final itemHeight = 120.0;
+    const itemHeight = 120.0;
     final totalHeight = displayItems.length * itemHeight;
 
     // Calculate offset to show items centered

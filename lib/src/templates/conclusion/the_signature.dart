@@ -120,8 +120,8 @@ class TheSignature extends WrappedTemplate with TemplateAnimationMixin {
     return TimeConsumer(
       builder: (context, frame, _) {
         // Signature animation progress
-        final signatureStart = 60;
-        final signatureDuration = 80;
+        const signatureStart = 60;
+        const signatureDuration = 80;
         final progress = ((frame - signatureStart) / signatureDuration).clamp(
           0.0,
           1.0,
@@ -269,7 +269,7 @@ class _SignaturePainter extends CustomPainter {
   Path _generateSignaturePath(String text, Size size) {
     final path = Path();
     final centerY = size.height / 2;
-    final startX = 25.0;
+    const startX = 25.0;
     final charWidth = (size.width - 50) / text.length;
 
     path.moveTo(startX, centerY);
@@ -297,7 +297,7 @@ class _SignaturePainter extends CustomPainter {
     double width,
   ) {
     // Simplified cursive-style character paths
-    final amplitude = 30.0;
+    const amplitude = 30.0;
     final isVowel = 'aeiouAEIOU'.contains(char);
     final isUpper = char.toUpperCase() == char && char.toLowerCase() != char;
 

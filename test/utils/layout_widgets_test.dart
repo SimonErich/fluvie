@@ -399,7 +399,7 @@ void main() {
 
   group('StaggerConfig', () {
     test('calculates start frame for index', () {
-      final config = StaggerConfig(delay: 15);
+      const config = StaggerConfig(delay: 15);
       expect(config.startFrameForIndex(0), 0);
       expect(config.startFrameForIndex(1), 15);
       expect(config.startFrameForIndex(2), 30);
@@ -407,7 +407,7 @@ void main() {
     });
 
     test('calculates end frame for index', () {
-      final config = StaggerConfig(delay: 15, duration: 30);
+      const config = StaggerConfig(delay: 15, duration: 30);
       expect(config.endFrameForIndex(0), 30);
       expect(config.endFrameForIndex(1), 45);
       expect(config.endFrameForIndex(2), 60);
@@ -445,14 +445,14 @@ void main() {
     });
 
     test('fade creates fade config', () {
-      final config = StaggerConfig.fade(delay: 10);
+      const config = StaggerConfig.fade(delay: 10);
       expect(config.fadeIn, true);
       expect(config.slideIn, false);
       expect(config.scaleIn, false);
     });
 
     test('calculates total duration for children', () {
-      final config = StaggerConfig(delay: 15, duration: 30);
+      const config = StaggerConfig(delay: 15, duration: 30);
       expect(config.totalDuration(0), 0);
       expect(config.totalDuration(1), 30); // Just the animation duration
       expect(config.totalDuration(3), 60); // 2*15 + 30 = 60

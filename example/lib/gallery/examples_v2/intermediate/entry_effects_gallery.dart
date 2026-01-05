@@ -72,8 +72,8 @@ class EntryEffectsGalleryExample extends InteractiveExample {
       (
         'Slide Down',
         PropAnimation.combine([
-          PropAnimation.translate(
-            start: const Offset(0, -100),
+          const PropAnimation.translate(
+            start: Offset(0, -100),
             end: Offset.zero,
           ),
           PropAnimation.fadeIn(),
@@ -82,14 +82,14 @@ class EntryEffectsGalleryExample extends InteractiveExample {
       (
         'Scale In',
         PropAnimation.combine([
-          PropAnimation.scale(start: 0.0, end: 1.0),
+          const PropAnimation.scale(start: 0.0, end: 1.0),
           PropAnimation.fadeIn(),
         ]),
       ),
       (
         'Rotate In',
         PropAnimation.combine([
-          PropAnimation.rotate(start: -1.57, end: 0), // -π/2 to 0
+          const PropAnimation.rotate(start: -1.57, end: 0), // -π/2 to 0
           PropAnimation.fadeIn(),
         ]),
       ),

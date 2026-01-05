@@ -85,7 +85,7 @@ void main() {
 
   group('VideoPreview', () {
     Video buildTestVideo() {
-      return Video(
+      return const Video(
         fps: 30,
         width: 640,
         height: 480,
@@ -93,7 +93,7 @@ void main() {
           Scene(
             durationInFrames: 60,
             background: Background.solid(Colors.blue),
-            children: const [Center(child: Text('Test'))],
+            children: [Center(child: Text('Test'))],
           ),
         ],
       );

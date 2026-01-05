@@ -221,8 +221,8 @@ class _DigitalRainPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final columnWidth = size.width / columnCount;
-    final fontSize = 14.0;
-    final charHeight = fontSize * 1.5;
+    const fontSize = 14.0;
+    const charHeight = fontSize * 1.5;
 
     // Generate columns
     for (var col = 0; col < columnCount; col++) {

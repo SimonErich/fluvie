@@ -14,7 +14,7 @@ void main() {
         scenes: [
           Scene(
             durationInFrames: durationInFrames,
-            background: Background.solid(Colors.blue),
+            background: const Background.solid(Colors.blue),
             children: const [Center(child: Text('Test'))],
           ),
         ],
@@ -46,7 +46,7 @@ void main() {
 
     test('applies custom encoding config', () {
       final video = buildTestVideo();
-      final customEncoding = EncodingConfig(
+      const customEncoding = EncodingConfig(
         quality: RenderQuality.lossless,
         frameFormat: FrameFormat.png,
       );
@@ -62,7 +62,7 @@ void main() {
       final video = buildTestVideo();
       final exporter = VideoExporter(video)
           .withQuality(RenderQuality.low)
-          .withEncoding(EncodingConfig(quality: RenderQuality.high));
+          .withEncoding(const EncodingConfig(quality: RenderQuality.high));
 
       final config = exporter.buildConfig();
 
@@ -89,7 +89,7 @@ void main() {
 
     test('extracts embedded video configs from Video', () {
       // Create a video with an embedded video
-      final video = Video(
+      const video = Video(
         fps: 30,
         width: 1080,
         height: 1920,

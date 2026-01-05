@@ -8,7 +8,7 @@ void main() {
       tester,
     ) async {
       const color = Color(0xFF123456);
-      final background = Background.solid(color);
+      const background = Background.solid(color);
 
       expect(background, isA<SolidBackground>());
       expect((background as SolidBackground).color, equals(color));
@@ -19,7 +19,7 @@ void main() {
         MaterialApp(
           home: Builder(
             builder: (context) {
-              return Background.solid(Colors.red).build(context, 100);
+              return const Background.solid(Colors.red).build(context, 100);
             },
           ),
         ),

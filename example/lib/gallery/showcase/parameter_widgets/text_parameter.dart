@@ -69,18 +69,18 @@ class _TextParameterWidgetState extends ConsumerState<TextParameterWidget> {
               fillColor: GalleryTheme.deepBackground,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: GalleryTheme.glassBorder),
+                borderSide: const BorderSide(color: GalleryTheme.glassBorder),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: GalleryTheme.glassBorder,
                   width: 1.5,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: GalleryTheme.accentPink,
                   width: 2,
                 ),

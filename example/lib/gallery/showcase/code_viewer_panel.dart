@@ -21,7 +21,7 @@ class CodeViewerPanel extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.code, size: 64, color: GalleryTheme.textTertiary),
+            const Icon(Icons.code, size: 64, color: GalleryTheme.textTertiary),
             const SizedBox(height: 16),
             Text(
               'Select an example to view code',

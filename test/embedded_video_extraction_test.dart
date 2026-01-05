@@ -29,7 +29,7 @@ void main() {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: EmbeddedVideo(
+                      child: const EmbeddedVideo(
                         assetPath: 'assets/test_video.mp4',
                         width: 900,
                         height: 500,
@@ -57,7 +57,7 @@ void main() {
     );
 
     test('extracts EmbeddedVideo directly in scene children', () {
-      final video = Video(
+      const video = Video(
         fps: 30,
         width: 1080,
         height: 1920,
@@ -93,25 +93,25 @@ void main() {
             durationInFrames: 240,
             children: [
               // Film grain effect
-              EffectOverlay.grain(intensity: 0.06),
+              const EffectOverlay.grain(intensity: 0.06),
               // Vignette
-              EffectOverlay.vignette(intensity: 0.4),
+              const EffectOverlay.vignette(intensity: 0.4),
               // Play button indicator - VPositioned without EmbeddedVideo
-              VPositioned(
+              const VPositioned(
                 top: 300,
                 left: 0,
                 right: 0,
                 startFrame: 5,
                 fadeInFrames: 20,
-                child: const Center(child: SizedBox(width: 120, height: 120)),
+                child: Center(child: SizedBox(width: 120, height: 120)),
               ),
               // Title - VPositioned with Column
-              VPositioned(
+              const VPositioned(
                 top: 500,
                 left: 0,
                 right: 0,
                 child: Column(
-                  children: const [
+                  children: [
                     Text('YOUR TOP'),
                     SizedBox(height: 8),
                     Text('VIDEO MOMENT'),
@@ -149,13 +149,13 @@ void main() {
                 ),
               ),
               // View count
-              VPositioned(
+              const VPositioned(
                 bottom: 220,
                 left: 0,
                 right: 0,
                 startFrame: 130,
                 fadeInFrames: 20,
-                child: const Text('58'),
+                child: Text('58'),
               ),
             ],
           ),

@@ -256,8 +256,8 @@ class SplitPersonality extends WrappedTemplate with TemplateAnimationMixin {
   }
 
   Widget _buildTypewriterText(String text, TemplateTheme colors, int frame) {
-    final typeStart = 60;
-    final charsPerFrame = 0.5;
+    const typeStart = 60;
+    const charsPerFrame = 0.5;
     final visibleChars =
         ((frame - typeStart) * charsPerFrame).clamp(0, text.length).toInt();
 
@@ -275,8 +275,8 @@ class SplitPersonality extends WrappedTemplate with TemplateAnimationMixin {
 
   Widget _buildWordByWordText(String text, TemplateTheme colors, int frame) {
     final words = text.split(' ');
-    final wordDelay = 15;
-    final startFrame = 60;
+    const wordDelay = 15;
+    const startFrame = 60;
 
     return Wrap(
       alignment: imageOnLeft ? WrapAlignment.start : WrapAlignment.end,

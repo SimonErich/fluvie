@@ -599,10 +599,10 @@ void main() {
     });
 
     test('totalDuration calculates correctly', () {
-      final stagger = Stagger(
+      const stagger = Stagger(
         staggerDelay: 15,
         animationDuration: 30,
-        children: const [SizedBox(), SizedBox(), SizedBox()],
+        children: [SizedBox(), SizedBox(), SizedBox()],
       );
 
       // 3 children: (3-1) * 15 + 30 = 60
@@ -610,10 +610,10 @@ void main() {
     });
 
     test('totalDuration is 0 for empty children', () {
-      final stagger = Stagger(
+      const stagger = Stagger(
         staggerDelay: 15,
         animationDuration: 30,
-        children: const [],
+        children: [],
       );
 
       expect(stagger.totalDuration, 0);

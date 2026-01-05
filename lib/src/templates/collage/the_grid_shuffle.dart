@@ -143,7 +143,7 @@ class TheGridShuffle extends WrappedTemplate with TemplateAnimationMixin {
         // Shuffle phase: 30-90
         // Settle phase: 90+
 
-        final shuffleStart = 30;
+        const shuffleStart = 30;
         final settleStart = shuffleStart + shuffleDuration;
 
         return LayoutBuilder(

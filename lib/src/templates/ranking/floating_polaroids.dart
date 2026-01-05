@@ -245,8 +245,8 @@ class FloatingPolaroids extends WrappedTemplate with TemplateAnimationMixin {
     bool isHighlighted,
     double highlightProgress,
   ) {
-    final polaroidWidth = 200.0;
-    final polaroidHeight = 260.0;
+    const polaroidWidth = 200.0;
+    const polaroidHeight = 260.0;
 
     return Container(
       width: polaroidWidth,
@@ -310,7 +310,7 @@ class FloatingPolaroids extends WrappedTemplate with TemplateAnimationMixin {
                   child: Center(
                     child: Text(
                       '${item.rank}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,

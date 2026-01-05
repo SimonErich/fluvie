@@ -142,8 +142,8 @@ class _VHSPainter extends CustomPainter {
   void _drawScanlines(Canvas canvas, Size size) {
     final linePaint = Paint()
       ..color = const Color(0xFF000000).withValues(alpha: 0.1 * intensity);
-    final lineHeight = 2.0;
-    final gap = 2.0;
+    const lineHeight = 2.0;
+    const gap = 2.0;
 
     for (var y = 0.0; y < size.height; y += lineHeight + gap) {
       canvas.drawRect(Rect.fromLTWH(0, y, size.width, lineHeight), linePaint);

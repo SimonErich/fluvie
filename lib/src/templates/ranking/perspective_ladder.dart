@@ -215,8 +215,8 @@ class PerspectiveLadder extends WrappedTemplate with TemplateAnimationMixin {
     double glowIntensity,
     double depthFactor,
   ) {
-    final rungWidth = 350.0;
-    final rungHeight = 70.0;
+    const rungWidth = 350.0;
+    const rungHeight = 70.0;
 
     return Container(
       width: rungWidth,

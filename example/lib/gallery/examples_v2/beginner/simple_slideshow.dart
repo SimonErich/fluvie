@@ -120,11 +120,11 @@ class SimpleSlideshowExample extends InteractiveExample {
           durationInFrames: sceneDuration,
           background: Background.solid(color1),
           transitionOut: transition,
-          children: [
+          children: const [
             VCenter(
               child: Text(
                 'Scene 1',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 72,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -139,11 +139,11 @@ class SimpleSlideshowExample extends InteractiveExample {
           durationInFrames: sceneDuration,
           background: Background.solid(color2),
           transitionOut: transition,
-          children: [
+          children: const [
             VCenter(
               child: Text(
                 'Scene 2',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 72,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -157,11 +157,11 @@ class SimpleSlideshowExample extends InteractiveExample {
         Scene(
           durationInFrames: sceneDuration,
           background: Background.solid(color3),
-          children: [
+          children: const [
             VCenter(
               child: Text(
                 'Scene 3',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 72,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -180,7 +180,7 @@ class SimpleSlideshowExample extends InteractiveExample {
         return SceneTransition.crossFade(durationInFrames: duration);
       case 'none':
       default:
-        return SceneTransition.none();
+        return const SceneTransition.none();
     }
   }
 

@@ -8,5 +8,5 @@ Future<void> theIntersectionShouldBeFrom50To100(WidgetTester tester) async {
   final range2 = getAnotherRange();
   final intersection = range1.intersection(range2);
   expect(intersection, isNotNull);
-  expect(intersection, equals(FrameRange(50, 100)));
+  expect(intersection, equals(const FrameRange(50, 100)));
 }

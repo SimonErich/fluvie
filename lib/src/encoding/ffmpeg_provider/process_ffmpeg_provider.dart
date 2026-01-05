@@ -79,7 +79,7 @@ class ProcessFFmpegProvider implements FFmpegProvider {
   Future<FFmpegSession> startSession(FFmpegSessionConfig config) async {
     final available = await isAvailable();
     if (!available) {
-      throw FFmpegNotAvailableException(
+      throw const FFmpegNotAvailableException(
         'FFmpeg executable not found in PATH',
         installationInstructions: '''
 FFmpeg must be installed and available in your system PATH.
@@ -275,7 +275,7 @@ class _ProcessFFmpegSession implements FFmpegSession {
 
     if (!_completedCompleter.isCompleted) {
       _completedCompleter.completeError(
-        FFmpegEncodingException('Encoding cancelled by user'),
+        const FFmpegEncodingException('Encoding cancelled by user'),
       );
     }
     _progressController.close();

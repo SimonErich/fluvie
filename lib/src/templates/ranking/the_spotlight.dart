@@ -121,7 +121,7 @@ class TheSpotlight extends WrappedTemplate with TemplateAnimationMixin {
 
         return TimeConsumer(
           builder: (context, frame, _) {
-            final startFrame = 30;
+            const startFrame = 30;
 
             // Calculate which item the spotlight is on
             final elapsed = frame - startFrame;

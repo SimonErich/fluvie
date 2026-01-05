@@ -183,7 +183,7 @@ class _GrainPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final random = math.Random(seed);
-    final grainSize = 4.0; // Size of grain blocks
+    const grainSize = 4.0; // Size of grain blocks
 
     for (double x = 0; x < size.width; x += grainSize) {
       for (double y = 0; y < size.height; y += grainSize) {

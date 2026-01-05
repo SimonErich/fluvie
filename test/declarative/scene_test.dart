@@ -23,11 +23,11 @@ void main() {
 
     testWidgets('supports background property', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scene(
             durationInFrames: 90,
             background: Background.solid(Colors.red),
-            children: const [],
+            children: [],
           ),
         ),
       );
@@ -38,14 +38,14 @@ void main() {
 
     testWidgets('supports fade properties', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scene(
             durationInFrames: 90,
             fadeInFrames: 15,
             fadeOutFrames: 20,
             fadeInCurve: Curves.easeIn,
             fadeOutCurve: Curves.easeOut,
-            children: const [],
+            children: [],
           ),
         ),
       );
@@ -59,14 +59,14 @@ void main() {
 
     testWidgets('supports transition properties', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scene(
             durationInFrames: 90,
-            transitionIn: const SceneTransition.crossFade(durationInFrames: 15),
-            transitionOut: const SceneTransition.crossFade(
+            transitionIn: SceneTransition.crossFade(durationInFrames: 15),
+            transitionOut: SceneTransition.crossFade(
               durationInFrames: 10,
             ),
-            children: const [],
+            children: [],
           ),
         ),
       );
@@ -138,7 +138,7 @@ void main() {
         MaterialApp(
           home: Scene.gradient(
             durationInFrames: 120,
-            colors: {0: Colors.blue, 120: Colors.purple},
+            colors: const {0: Colors.blue, 120: Colors.purple},
             children: [Container(key: const Key('child'))],
           ),
         ),
@@ -155,7 +155,7 @@ void main() {
         MaterialApp(
           home: Scene.gradient(
             durationInFrames: 120,
-            colors: {0: Colors.red, 120: Colors.orange},
+            colors: const {0: Colors.red, 120: Colors.orange},
             type: GradientType.radial,
           ),
         ),
@@ -171,7 +171,7 @@ void main() {
         MaterialApp(
           home: Scene.gradient(
             durationInFrames: 120,
-            colors: {0: Colors.red, 120: Colors.orange},
+            colors: const {0: Colors.red, 120: Colors.orange},
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
@@ -207,11 +207,11 @@ void main() {
 
     testWidgets('supports optional background', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scene.crossFade(
             durationInFrames: 120,
             background: Background.solid(Colors.black),
-            children: const [],
+            children: [],
           ),
         ),
       );

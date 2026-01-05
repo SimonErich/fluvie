@@ -9,7 +9,7 @@ import 'ffmpeg_provider.dart';
 Future<bool> isAvailable() async => false;
 
 Future<FFmpegSession> startSession(FFmpegSessionConfig config) async {
-  throw FFmpegNotAvailableException(
+  throw const FFmpegNotAvailableException(
     'WASM FFmpeg is only available on web platforms',
     installationInstructions: '''
 To use FFmpeg on native platforms, use ProcessFFmpegProvider instead.

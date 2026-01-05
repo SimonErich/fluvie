@@ -142,8 +142,8 @@ class TheGrowthTree extends WrappedTemplate with TemplateAnimationMixin {
             final centerY = height * 0.55;
 
             // Calculate vine growth progress
-            final growthStart = 40;
-            final growthDuration = 100;
+            const growthStart = 40;
+            const growthDuration = 100;
             final growthProgress =
                 ((frame - growthStart) / growthDuration).clamp(0.0, 1.0);
             final easedGrowth = Curves.easeInOutCubic.transform(growthProgress);
@@ -206,7 +206,7 @@ class _GrowthVinePainter extends CustomPainter {
     if (metrics.isEmpty) return;
 
     final random = math.Random(seed);
-    final padding = 80.0;
+    const padding = 80.0;
     final usableWidth = size.width - padding * 2;
     final segmentWidth =
         usableWidth / (metrics.length - 1).clamp(1, metrics.length);

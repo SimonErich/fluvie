@@ -175,10 +175,10 @@ class RetroPostcard extends WrappedTemplate with TemplateAnimationMixin {
       animation: PropAnimation.fadeIn(),
       child: Text(
         thematicData.title ?? 'GREETINGS FROM',
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w500,
-          color: const Color(0xFF8B7355),
+          color: Color(0xFF8B7355),
           letterSpacing: 8,
         ),
       ),
@@ -190,7 +190,7 @@ class RetroPostcard extends WrappedTemplate with TemplateAnimationMixin {
       startFrame: 70,
       duration: 40,
       animation: PropAnimation.combine([
-        PropAnimation.scale(start: 0.9, end: 1.0),
+        const PropAnimation.scale(start: 0.9, end: 1.0),
         PropAnimation.fadeIn(),
       ]),
       child: Column(
@@ -198,10 +198,10 @@ class RetroPostcard extends WrappedTemplate with TemplateAnimationMixin {
         children: [
           Text(
             thematicData.subtitle ?? 'Your City',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 72,
               fontWeight: FontWeight.w900,
-              color: const Color(0xFF4A3728),
+              color: Color(0xFF4A3728),
               height: 1.0,
               fontFamily: 'serif',
             ),
@@ -216,7 +216,7 @@ class RetroPostcard extends WrappedTemplate with TemplateAnimationMixin {
               ),
               child: Text(
                 '${thematicData.value}',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
@@ -238,10 +238,10 @@ class RetroPostcard extends WrappedTemplate with TemplateAnimationMixin {
       animation: PropAnimation.slideUpFade(distance: 15),
       child: Text(
         thematicData.description!,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 18,
           fontStyle: FontStyle.italic,
-          color: const Color(0xFF6B5344),
+          color: Color(0xFF6B5344),
         ),
       ),
     );
@@ -252,7 +252,7 @@ class RetroPostcard extends WrappedTemplate with TemplateAnimationMixin {
       startFrame: 90,
       duration: 25,
       animation: PropAnimation.combine([
-        PropAnimation.scale(start: 0.5, end: 1.0),
+        const PropAnimation.scale(start: 0.5, end: 1.0),
         PropAnimation.fadeIn(),
       ]),
       child: Transform.rotate(
@@ -267,11 +267,11 @@ class RetroPostcard extends WrappedTemplate with TemplateAnimationMixin {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.music_note, size: 40, color: Colors.white),
+              const Icon(Icons.music_note, size: 40, color: Colors.white),
               const SizedBox(height: 8),
               Text(
                 thematicData.metadata?['stamp'] ?? '2024',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,

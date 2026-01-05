@@ -4,5 +4,5 @@ import 'utilities_context.dart';
 
 /// Usage: I create a FrameRange from 30 to 120
 Future<void> iCreateAFramerangeFrom30To120(WidgetTester tester) async {
-  setCurrentRange(FrameRange(30, 120));
+  setCurrentRange(const FrameRange(30, 120));
 }

@@ -261,7 +261,7 @@ class _CityBackgroundPainter extends CustomPainter {
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), skyPaint);
 
     // Draw buildings
-    final buildingCount = 15;
+    const buildingCount = 15;
     final buildingPaint = Paint()..color = buildingColor.withValues(alpha: 0.6);
 
     for (var i = 0; i < buildingCount; i++) {
@@ -275,8 +275,8 @@ class _CityBackgroundPainter extends CustomPainter {
       // Windows
       if (showLights) {
         final windowPaint = Paint()..color = lightColor;
-        final windowSize = 6.0;
-        final windowGap = 12.0;
+        const windowSize = 6.0;
+        const windowGap = 12.0;
 
         for (var wx = x + 8; wx < x + width - 8; wx += windowGap) {
           for (var wy = y + 10; wy < size.height - 10; wy += windowGap) {
@@ -336,7 +336,7 @@ class _RainPainter extends CustomPainter {
       final y = (baseY + frame * speed) % (size.height + length) - length;
 
       // Slight angle for wind effect
-      final angle = 0.1;
+      const angle = 0.1;
       final endX = x + length * math.sin(angle);
       final endY = y + length * math.cos(angle);
 

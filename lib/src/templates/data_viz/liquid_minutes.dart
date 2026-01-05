@@ -116,8 +116,8 @@ class LiquidMinutes extends WrappedTemplate with TemplateAnimationMixin {
         final time = frame / 30.0;
 
         // Fill animation
-        final fillStart = 30;
-        final fillDuration = 100;
+        const fillStart = 30;
+        const fillDuration = 100;
         final fillProgress = ((frame - fillStart) / fillDuration).clamp(
           0.0,
           1.0,
@@ -156,7 +156,7 @@ class LiquidMinutes extends WrappedTemplate with TemplateAnimationMixin {
           startFrame: 80,
           duration: 40,
           animation: PropAnimation.combine([
-            PropAnimation.scale(start: 0.8, end: 1.0),
+            const PropAnimation.scale(start: 0.8, end: 1.0),
             PropAnimation.fadeIn(),
           ]),
           child: Column(
@@ -362,8 +362,8 @@ class _LiquidContainerPainter extends CustomPainter {
     final liquidTop = size.height * (1 - fillLevel);
 
     // Wave effect at top of liquid
-    final waveHeight = 8.0;
-    final waveFreq = 3.0;
+    const waveHeight = 8.0;
+    const waveFreq = 3.0;
 
     path.moveTo(0, size.height);
     path.lineTo(0, liquidTop);
@@ -390,7 +390,7 @@ class _LiquidContainerPainter extends CustomPainter {
       ..strokeWidth = 2;
 
     final wavePath = Path();
-    final waveHeight = 5.0;
+    const waveHeight = 5.0;
 
     wavePath.moveTo(0, liquidTop);
     for (var x = 0.0; x <= size.width; x += 5) {
@@ -405,7 +405,7 @@ class _LiquidContainerPainter extends CustomPainter {
 
   void _drawBubbles(Canvas canvas, Size size) {
     final random = math.Random(42);
-    final bubbleCount = 10;
+    const bubbleCount = 10;
     final liquidTop = size.height * (1 - fillLevel);
 
     final bubblePaint = Paint()

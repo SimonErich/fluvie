@@ -122,7 +122,7 @@ class MinimalistBeat extends WrappedTemplate with TemplateAnimationMixin {
           startFrame: 20,
           duration: 40,
           animation: PropAnimation.combine([
-            PropAnimation.scale(start: 0.5, end: 1.0),
+            const PropAnimation.scale(start: 0.5, end: 1.0),
             PropAnimation.fadeIn(),
           ]),
           child: Text(

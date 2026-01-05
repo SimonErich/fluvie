@@ -374,21 +374,21 @@ class BentoRecap extends WrappedTemplate with TemplateAnimationMixin {
       case BentoLayout.balanced:
         return [
           // Row 1
-          BentoCell(
+          const BentoCell(
             x: 0,
             y: 0,
             width: 0.6,
             height: 0.5,
             type: BentoCellType.hero,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.6,
             y: 0,
             width: 0.4,
             height: 0.25,
             type: BentoCellType.stat,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.6,
             y: 0.25,
             width: 0.4,
@@ -396,21 +396,21 @@ class BentoRecap extends WrappedTemplate with TemplateAnimationMixin {
             type: BentoCellType.image,
           ),
           // Row 2
-          BentoCell(
+          const BentoCell(
             x: 0,
             y: 0.5,
             width: 0.33,
             height: 0.25,
             type: BentoCellType.stat,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.33,
             y: 0.5,
             width: 0.33,
             height: 0.25,
             type: BentoCellType.icon,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.66,
             y: 0.5,
             width: 0.34,
@@ -418,14 +418,14 @@ class BentoRecap extends WrappedTemplate with TemplateAnimationMixin {
             type: BentoCellType.stat,
           ),
           // Row 3
-          BentoCell(
+          const BentoCell(
             x: 0,
             y: 0.75,
             width: 0.5,
             height: 0.25,
             type: BentoCellType.image,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.5,
             y: 0.75,
             width: 0.5,
@@ -435,42 +435,42 @@ class BentoRecap extends WrappedTemplate with TemplateAnimationMixin {
         ];
       case BentoLayout.heroFocused:
         return [
-          BentoCell(
+          const BentoCell(
             x: 0,
             y: 0,
             width: 0.7,
             height: 0.6,
             type: BentoCellType.hero,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.7,
             y: 0,
             width: 0.3,
             height: 0.3,
             type: BentoCellType.stat,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.7,
             y: 0.3,
             width: 0.3,
             height: 0.3,
             type: BentoCellType.stat,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0,
             y: 0.6,
             width: 0.35,
             height: 0.4,
             type: BentoCellType.image,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.35,
             y: 0.6,
             width: 0.35,
             height: 0.4,
             type: BentoCellType.stat,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.7,
             y: 0.6,
             width: 0.3,
@@ -480,56 +480,56 @@ class BentoRecap extends WrappedTemplate with TemplateAnimationMixin {
         ];
       case BentoLayout.gridFocused:
         return [
-          BentoCell(
+          const BentoCell(
             x: 0,
             y: 0,
             width: 0.5,
             height: 0.33,
             type: BentoCellType.hero,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.5,
             y: 0,
             width: 0.25,
             height: 0.33,
             type: BentoCellType.stat,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.75,
             y: 0,
             width: 0.25,
             height: 0.33,
             type: BentoCellType.stat,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0,
             y: 0.33,
             width: 0.33,
             height: 0.34,
             type: BentoCellType.image,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.33,
             y: 0.33,
             width: 0.34,
             height: 0.34,
             type: BentoCellType.image,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.67,
             y: 0.33,
             width: 0.33,
             height: 0.34,
             type: BentoCellType.image,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0,
             y: 0.67,
             width: 0.5,
             height: 0.33,
             type: BentoCellType.text,
           ),
-          BentoCell(
+          const BentoCell(
             x: 0.5,
             y: 0.67,
             width: 0.5,

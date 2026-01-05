@@ -94,7 +94,7 @@ class LayeredCompositionExample extends InteractiveExample {
                   animationDuration: 50,
                   animation: PropAnimation.combine([
                     PropAnimation.slideUp(distance: 80),
-                    PropAnimation.scale(start: 0.5, end: 1.0),
+                    const PropAnimation.scale(start: 0.5, end: 1.0),
                     PropAnimation.fadeIn(),
                   ]),
                   curve: Curves.elasticOut,

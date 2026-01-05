@@ -31,7 +31,7 @@ Future<void> saveFile(String filePath, {String? suggestedName}) async {
 
   final downloadsPath = await getDownloadsPath();
   if (downloadsPath == null) {
-    throw FileSystemException('Could not determine downloads directory');
+    throw const FileSystemException('Could not determine downloads directory');
   }
 
   final downloadsDir = Directory(downloadsPath);
@@ -53,7 +53,7 @@ Future<void> saveBytes(
 }) async {
   final downloadsPath = await getDownloadsPath();
   if (downloadsPath == null) {
-    throw FileSystemException('Could not determine downloads directory');
+    throw const FileSystemException('Could not determine downloads directory');
   }
 
   final downloadsDir = Directory(downloadsPath);

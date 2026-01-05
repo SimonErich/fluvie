@@ -231,7 +231,7 @@ class MosaicReveal extends WrappedTemplate with TemplateAnimationMixin {
       startFrame: 150,
       duration: 35,
       animation: PropAnimation.combine([
-        PropAnimation.scale(start: 0.9, end: 1.0),
+        const PropAnimation.scale(start: 0.9, end: 1.0),
         PropAnimation.fadeIn(),
       ]),
       child: Container(

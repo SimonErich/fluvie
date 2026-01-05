@@ -86,7 +86,7 @@ class _NoisePainter extends CustomPainter {
     final paint = Paint();
 
     // Calculate grain density based on intensity
-    final step = 3.0;
+    const step = 3.0;
     final maxOpacity = intensity.clamp(0.0, 0.3);
 
     for (var x = 0.0; x < size.width; x += step) {

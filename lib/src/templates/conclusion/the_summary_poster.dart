@@ -288,7 +288,7 @@ class TheSummaryPoster extends WrappedTemplate with TemplateAnimationMixin {
           startFrame: 50 + index * 12,
           duration: 30,
           animation: PropAnimation.combine([
-            PropAnimation.scale(start: 0.9, end: 1.0),
+            const PropAnimation.scale(start: 0.9, end: 1.0),
             PropAnimation.fadeIn(),
           ]),
           child: _buildStatCard(stat.key, stat.value, colors, index),
@@ -376,7 +376,7 @@ class TheSummaryPoster extends WrappedTemplate with TemplateAnimationMixin {
       startFrame: 100,
       duration: 35,
       animation: PropAnimation.combine([
-        PropAnimation.scale(start: 0.8, end: 1.0),
+        const PropAnimation.scale(start: 0.8, end: 1.0),
         PropAnimation.fadeIn(),
       ]),
       child: Column(

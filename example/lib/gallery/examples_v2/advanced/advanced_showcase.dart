@@ -93,7 +93,7 @@ class AdvancedShowcaseExample extends InteractiveExample {
         },
         type: GradientType.radial,
       ),
-      transitionOut: SceneTransition.crossFade(durationInFrames: 15),
+      transitionOut: const SceneTransition.crossFade(durationInFrames: 15),
       children: [
         // Animated background elements
         VStack(
@@ -102,7 +102,7 @@ class AdvancedShowcaseExample extends InteractiveExample {
               startFrame: i * 3,
               duration: 50,
               animation: PropAnimation.combine([
-                PropAnimation.scale(start: 0.0, end: 1.0),
+                const PropAnimation.scale(start: 0.0, end: 1.0),
                 PropAnimation.fadeIn(),
               ]),
               curve: Curves.elasticOut,
@@ -167,7 +167,7 @@ class AdvancedShowcaseExample extends InteractiveExample {
       background: Background.gradient(
         colors: {0: const Color(0xFF24243E), 90: const Color(0xFF0F0C29)},
       ),
-      transitionOut: SceneTransition.crossFade(durationInFrames: 15),
+      transitionOut: const SceneTransition.crossFade(durationInFrames: 15),
       children: [
         VCenter(
           child: VColumn(

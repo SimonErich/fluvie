@@ -271,7 +271,7 @@ class TriptychScroll extends WrappedTemplate with TemplateAnimationMixin {
       startFrame: 30,
       duration: 40,
       animation: PropAnimation.combine([
-        PropAnimation.scale(start: 0.9, end: 1.0),
+        const PropAnimation.scale(start: 0.9, end: 1.0),
         PropAnimation.fadeIn(),
       ]),
       child: Container(

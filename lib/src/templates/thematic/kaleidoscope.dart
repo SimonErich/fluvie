@@ -137,7 +137,7 @@ class Kaleidoscope extends WrappedTemplate with TemplateAnimationMixin {
           startFrame: 60,
           duration: 40,
           animation: PropAnimation.combine([
-            PropAnimation.scale(start: 0.8, end: 1.0),
+            const PropAnimation.scale(start: 0.8, end: 1.0),
             PropAnimation.fadeIn(),
           ]),
           child: Container(
@@ -252,7 +252,7 @@ class _KaleidoscopePainter extends CustomPainter {
     canvas.clipPath(path);
 
     // Draw layered shapes within segment
-    final layers = 8;
+    const layers = 8;
     for (var layer = layers; layer > 0; layer--) {
       final layerRadius = (layer / layers) * maxRadius * 0.8;
       final layerProgress = layer / layers;
@@ -290,7 +290,7 @@ class _KaleidoscopePainter extends CustomPainter {
     int layer,
   ) {
     final path = Path();
-    final sides = 6;
+    const sides = 6;
 
     for (var i = 0; i < sides; i++) {
       final angle = (i / sides) * 2 * math.pi - math.pi / 2 + time * 0.5;

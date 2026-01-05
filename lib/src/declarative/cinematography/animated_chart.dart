@@ -371,7 +371,7 @@ class _ChartPainter extends CustomPainter {
       final animatedValue = d.value * progress;
       final barWidth = (animatedValue / maxValue) * chartWidth;
 
-      final x = 60.0;
+      const x = 60.0;
       final y = spacing + i * (barHeight + spacing);
 
       final paint = Paint()

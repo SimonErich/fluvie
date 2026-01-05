@@ -7,7 +7,7 @@ import 'layout_context.dart';
 /// Usage: I have a VColumn with stagger delay 15
 Future<void> iHaveAVcolumnWithStaggerDelay15(WidgetTester tester) async {
   final widget = VColumn(
-    stagger: StaggerConfig(delay: 15),
+    stagger: const StaggerConfig(delay: 15),
     children: [
       Container(
         key: const Key('child1'),

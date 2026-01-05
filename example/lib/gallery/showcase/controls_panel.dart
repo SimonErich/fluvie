@@ -27,7 +27,7 @@ class ControlsPanel extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.tune, size: 64, color: GalleryTheme.textTertiary),
+            const Icon(Icons.tune, size: 64, color: GalleryTheme.textTertiary),
             const SizedBox(height: 16),
             Text(
               'Select an example to see controls',

@@ -280,8 +280,8 @@ class _ScanlinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = color;
-    final lineHeight = 2.0;
-    final gap = 4.0;
+    const lineHeight = 2.0;
+    const gap = 4.0;
 
     for (var y = 0.0; y < size.height; y += lineHeight + gap) {
       canvas.drawRect(Rect.fromLTWH(0, y, size.width, lineHeight), paint);

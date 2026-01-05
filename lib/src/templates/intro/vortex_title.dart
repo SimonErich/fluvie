@@ -163,7 +163,7 @@ class VortexTitle extends WrappedTemplate with TemplateAnimationMixin {
             final currentY = math.sin(spiralAngle) * currentRadius;
 
             // Final position (centered, stacked horizontally)
-            final letterWidth = 80.0;
+            const letterWidth = 80.0;
             final totalWidth = letters.length * letterWidth * 0.6;
             final finalX = -totalWidth / 2 + index * letterWidth * 0.6;
 

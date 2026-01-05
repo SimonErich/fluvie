@@ -175,7 +175,7 @@ class DataVisualizationExample extends InteractiveExample {
           const SizedBox(height: 20),
           AnimatedProp(
             duration: 50,
-            animation: PropAnimation.scale(
+            animation: const PropAnimation.scale(
               start: 0.0,
               end: 1.0,
               alignment: Alignment.centerLeft,

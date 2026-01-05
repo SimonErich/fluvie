@@ -178,7 +178,7 @@ class GalleryTheme {
     useMaterial3: true,
     brightness: Brightness.dark,
     scaffoldBackgroundColor: deepBackground,
-    colorScheme: ColorScheme.dark(
+    colorScheme: const ColorScheme.dark(
       primary: gradientStart,
       secondary: accentPink,
       surface: surfaceBackground,
@@ -194,18 +194,18 @@ class GalleryTheme {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: glassBorder),
+        side: const BorderSide(color: glassBorder),
       ),
     ),
     iconTheme: const IconThemeData(color: textPrimary),
-    dividerTheme: DividerThemeData(color: glassBorder, thickness: 1),
+    dividerTheme: const DividerThemeData(color: glassBorder, thickness: 1),
     chipTheme: ChipThemeData(
       backgroundColor: glassBackground,
       labelStyle: const TextStyle(color: textPrimary, fontSize: 12),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: glassBorder),
+        side: const BorderSide(color: glassBorder),
       ),
     ),
   );

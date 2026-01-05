@@ -155,7 +155,7 @@ class FrequencyAnalyzer {
     final binWidth = nyquist / magnitudes.length;
 
     // Logarithmic frequency bands
-    final minFreq = 20.0;
+    const minFreq = 20.0;
     final maxFreq = nyquist.toDouble();
     final logMin = math.log(minFreq);
     final logMax = math.log(maxFreq);

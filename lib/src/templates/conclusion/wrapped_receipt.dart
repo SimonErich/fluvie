@@ -96,7 +96,7 @@ class WrappedReceipt extends WrappedTemplate with TemplateAnimationMixin {
             opacity: entryProgress,
             child: Container(
               width: 400,
-              constraints: BoxConstraints(maxHeight: 700),
+              constraints: const BoxConstraints(maxHeight: 700),
               decoration: BoxDecoration(
                 color: const Color(0xFFFFFDF0), // Thermal paper color
                 borderRadius: BorderRadius.circular(4),
@@ -170,7 +170,7 @@ class WrappedReceipt extends WrappedTemplate with TemplateAnimationMixin {
           child: Text(
             summaryData.title ?? 'YOUR WRAPPED RECEIPT',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
               color: receiptTextColor,

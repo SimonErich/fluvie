@@ -119,7 +119,7 @@ class TheNeonGate extends WrappedTemplate with TemplateAnimationMixin {
             final pulseScale = 1.0 + math.sin(time * 2 + pulsePhase) * 0.05;
 
             // Entry animation - rings expand from center
-            final entryDuration = 40.0;
+            const entryDuration = 40.0;
             final entryDelay = index * 5.0;
             final entryProgress = ((frame - entryDelay) / entryDuration).clamp(
               0.0,
@@ -207,11 +207,11 @@ class TheNeonGate extends WrappedTemplate with TemplateAnimationMixin {
           startFrame: 45,
           duration: 50,
           animation: PropAnimation.combine([
-            PropAnimation.translate(
-              start: const Offset(0, 100),
+            const PropAnimation.translate(
+              start: Offset(0, 100),
               end: Offset.zero,
             ),
-            PropAnimation.scale(start: 0.5, end: 1.0),
+            const PropAnimation.scale(start: 0.5, end: 1.0),
             PropAnimation.fadeIn(),
           ]),
           curve: Easing.easeOutCubic,

@@ -132,7 +132,7 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
   Widget _buildStackedCards(TemplateTheme colors, List<RankingItem> items) {
     return TimeConsumer(
       builder: (context, frame, _) {
-        final entryStart = 30;
+        const entryStart = 30;
 
         return Stack(
           alignment: Alignment.center,

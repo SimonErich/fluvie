@@ -318,7 +318,7 @@ class VideoExporter {
       final sequencer = FrameSequencer(renderController.boundaryKey);
 
       // Calculate pixel ratio
-      final pixelRatio = 1.0; // Using exact dimensions
+      const pixelRatio = 1.0; // Using exact dimensions
 
       // Capture frames
       for (int frame = 0; frame < totalFrames; frame++) {

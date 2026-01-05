@@ -57,7 +57,7 @@ Future<bool> isAvailable() async {
 Future<FFmpegSession> startSession(FFmpegSessionConfig config) async {
   final available = await isAvailable();
   if (!available) {
-    throw FFmpegNotAvailableException(
+    throw const FFmpegNotAvailableException(
       'ffmpeg.wasm is not available',
       installationInstructions: '''
 To use FFmpeg on the web:
@@ -255,7 +255,7 @@ class _WasmFFmpegSession implements FFmpegSession {
 
     if (!_completedCompleter.isCompleted) {
       _completedCompleter.completeError(
-        FFmpegEncodingException('Encoding cancelled by user'),
+        const FFmpegEncodingException('Encoding cancelled by user'),
       );
     }
     _progressController.close();

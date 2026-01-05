@@ -42,7 +42,8 @@ void main() {
     });
 
     testWidgets('confetti constructor creates particle effect', (tester) async {
-      await tester.pumpWidget(wrapWithApp(ParticleEffect.confetti(count: 20)));
+      await tester
+          .pumpWidget(wrapWithApp(const ParticleEffect.confetti(count: 20)));
 
       expect(find.byType(CustomPaint), findsOneWidget);
     });

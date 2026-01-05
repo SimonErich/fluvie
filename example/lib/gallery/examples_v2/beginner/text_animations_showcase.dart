@@ -143,7 +143,7 @@ class TextAnimationsShowcaseExample extends InteractiveExample {
           duration: 40,
         );
       case 'fadeIn':
-        return AnimatedText.fadeIn(
+        return const AnimatedText.fadeIn(
           'Create amazing videos',
           style: textStyle,
           duration: 40,

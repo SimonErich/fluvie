@@ -69,7 +69,7 @@ class ParticleFarewell extends WrappedTemplate with TemplateAnimationMixin {
       color: colors.backgroundColor,
       child: TimeConsumer(
         builder: (context, frame, _) {
-          final explosionStart = 80;
+          const explosionStart = 80;
           final explosionProgress =
               ((frame - explosionStart) / explosionDuration).clamp(0.0, 1.0);
           final beforeExplosion = frame < explosionStart;

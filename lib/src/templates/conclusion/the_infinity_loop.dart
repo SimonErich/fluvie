@@ -74,7 +74,7 @@ class TheInfinityLoop extends WrappedTemplate with TemplateAnimationMixin {
         // Phase calculations
         // Phase 1: Content display (frames 0-120)
         // Phase 2: Loop transition (frames 120-180)
-        final loopStartFrame = 120;
+        const loopStartFrame = 120;
         final loopProgress = ((frame - loopStartFrame) / 60).clamp(0.0, 1.0);
 
         return Container(
@@ -126,7 +126,7 @@ class TheInfinityLoop extends WrappedTemplate with TemplateAnimationMixin {
                 startFrame: 20,
                 duration: 40,
                 animation: PropAnimation.combine([
-                  PropAnimation.scale(start: 0.9, end: 1.0),
+                  const PropAnimation.scale(start: 0.9, end: 1.0),
                   PropAnimation.fadeIn(),
                 ]),
                 child: Text(

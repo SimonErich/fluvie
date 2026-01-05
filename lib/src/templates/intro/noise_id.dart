@@ -273,7 +273,7 @@ class _NoiseTexturePainter extends CustomPainter {
     final r = math.Random(seed);
     final paint = Paint();
 
-    final step = 4.0;
+    const step = 4.0;
     for (var x = 0.0; x < size.width; x += step) {
       for (var y = 0.0; y < size.height; y += step) {
         if (r.nextDouble() < intensity) {

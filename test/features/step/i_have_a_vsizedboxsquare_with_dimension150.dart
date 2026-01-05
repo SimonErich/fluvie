@@ -5,7 +5,7 @@ import 'layout_context.dart';
 
 /// Usage: I have a VSizedBox.square with dimension 150
 Future<void> iHaveAVsizedboxsquareWithDimension150(WidgetTester tester) async {
-  final widget = const VSizedBox.square(
+  const widget = VSizedBox.square(
     dimension: 150,
     child: ColoredBox(key: Key('child'), color: Colors.blue),
   );

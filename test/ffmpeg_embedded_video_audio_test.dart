@@ -17,7 +17,7 @@ void main() {
         sequences: [],
         audioTracks: [],
         embeddedVideos: [
-          EmbeddedVideoConfig(
+          const EmbeddedVideoConfig(
             videoPath: 'test.mp4',
             startFrame: 100,
             durationInFrames: 150,
@@ -56,7 +56,7 @@ void main() {
         sequences: [],
         audioTracks: [],
         embeddedVideos: [
-          EmbeddedVideoConfig(
+          const EmbeddedVideoConfig(
             videoPath: 'test.mp4',
             startFrame: 60,
             durationInFrames: 120,
@@ -92,7 +92,7 @@ void main() {
         ),
         sequences: [],
         audioTracks: [
-          AudioTrackConfig(
+          const AudioTrackConfig(
             source: AudioSourceConfig(
               type: AudioSourceType.asset,
               uri: 'assets/music.mp3',
@@ -102,7 +102,7 @@ void main() {
           ),
         ],
         embeddedVideos: [
-          EmbeddedVideoConfig(
+          const EmbeddedVideoConfig(
             videoPath: 'test.mp4',
             startFrame: 100,
             durationInFrames: 150,
@@ -139,7 +139,7 @@ void main() {
         sequences: [],
         audioTracks: [],
         embeddedVideos: [
-          EmbeddedVideoConfig(
+          const EmbeddedVideoConfig(
             videoPath: 'test.mp4',
             startFrame: 100,
             durationInFrames: 150,
@@ -174,7 +174,7 @@ void main() {
         sequences: [],
         audioTracks: [],
         embeddedVideos: [
-          EmbeddedVideoConfig(
+          const EmbeddedVideoConfig(
             videoPath: 'test.mp4',
             startFrame: 100,
             durationInFrames: 0, // Zero duration
