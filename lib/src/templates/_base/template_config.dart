@@ -339,4 +339,15 @@ class TemplateTiming {
     entryCurve: Curves.easeOutQuad,
     exitCurve: Curves.easeInQuad,
   );
+
+  /// Smooth timing with gentle easing for fluid animations.
+  static const TemplateTiming smooth = TemplateTiming(
+    entryDelay: 5,
+    staggerDelay: 6,
+    entryDuration: 40,
+    holdDuration: 70,
+    exitDuration: 25,
+    entryCurve: Curves.easeInOutCubic,
+    exitCurve: Curves.easeInOutCubic,
+  );
 }
