@@ -14,15 +14,15 @@ class MockProcess implements Process {
   final int exitCodeValue;
   final List<int> stdoutData;
   final List<int> stderrData;
-  final StreamController<List<int>> _stdinController;
   final List<List<int>> stdinWritten = [];
+  // ignore: unused_field
   bool _killed = false;
 
   MockProcess({
     this.exitCodeValue = 0,
     this.stdoutData = const [],
     this.stderrData = const [],
-  }) : _stdinController = StreamController<List<int>>();
+  });
 
   @override
   Future<int> get exitCode async {

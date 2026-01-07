@@ -129,7 +129,7 @@ class FakeProcess implements Process {
 /// A mock [FFmpegProvider] for testing without actual FFmpeg execution.
 class MockFFmpegProvider implements FFmpegProvider {
   /// Whether FFmpeg should be reported as available.
-  final bool isAvailable;
+  final bool _isAvailable;
 
   /// The version string to return.
   final String version;
@@ -147,46 +147,33 @@ class MockFFmpegProvider implements FFmpegProvider {
   String failureMessage = 'Mock failure';
 
   MockFFmpegProvider({
-    this.isAvailable = true,
+    bool isAvailable = true,
     this.version = 'ffmpeg version 5.0.0-mock',
     this.processFactory,
-  });
+  }) : _isAvailable = isAvailable;
 
   @override
-  Future<bool> checkAvailability() async => isAvailable;
+  Future<bool> isAvailable() async => _isAvailable;
 
   @override
-  Future<String> getVersion() async => version;
-
-  @override
-  Future<Process> startProcess(List<String> args) async {
-    executedCommands.add(args);
+  Future<FFmpegSession> startSession(FFmpegSessionConfig config) async {
+    executedCommands.add(['session', config.outputFileName]);
 
     if (failNextCommand) {
       failNextCommand = false;
-      final process = FakeProcess();
-      process.emitStderr(failureMessage);
-      process.complete(1);
-      return process;
+      throw FFmpegEncodingException(failureMessage);
     }
 
-    if (processFactory != null) {
-      return processFactory!(args);
-    }
+    return MockFFmpegSession(config: config);
+  }
 
-    // Return a successful mock process by default
-    final process = FakeProcess();
-    Future.delayed(const Duration(milliseconds: 10), () {
-      process.complete(0);
-    });
-    return process;
+  @override
+  Future<void> dispose() async {
+    // No-op for mock
   }
 
   @override
   String get name => 'mock';
-
-  @override
-  int get priority => 0;
 
   /// Clears the list of executed commands.
   void clearCommands() {
@@ -197,6 +184,49 @@ class MockFFmpegProvider implements FFmpegProvider {
   void setNextCommandToFail([String message = 'Mock failure']) {
     failNextCommand = true;
     failureMessage = message;
+  }
+}
+
+/// A mock FFmpeg session for testing.
+class MockFFmpegSession implements FFmpegSession {
+  final FFmpegSessionConfig config;
+  final _progressController = StreamController<double>.broadcast();
+  final _completedCompleter = Completer<String>();
+  int _framesAdded = 0;
+  bool _cancelled = false;
+
+  MockFFmpegSession({required this.config});
+
+  @override
+  Stream<double> get progress => _progressController.stream;
+
+  @override
+  Future<String> get completed => _completedCompleter.future;
+
+  @override
+  Future<void> addFrame(Uint8List rgbaBytes) async {
+    if (_cancelled) return;
+    _framesAdded++;
+    final progressValue = _framesAdded / config.totalFrames;
+    _progressController.add(progressValue.clamp(0.0, 1.0));
+  }
+
+  @override
+  Future<void> finalize() async {
+    if (_cancelled) return;
+    _progressController.add(1.0);
+    await _progressController.close();
+    _completedCompleter.complete(config.outputFileName);
+  }
+
+  @override
+  Future<void> cancel() async {
+    _cancelled = true;
+    await _progressController.close();
+    if (!_completedCompleter.isCompleted) {
+      _completedCompleter
+          .completeError(const FFmpegEncodingException('Cancelled'));
+    }
   }
 }
 
@@ -285,6 +315,12 @@ class _FakeDirectory implements Directory {
 
   @override
   void createSync({bool recursive = false}) {}
+
+  @override
+  Directory createTempSync([String? prefix]) {
+    return _FakeDirectory(
+        '$path/${prefix ?? 'temp'}_${DateTime.now().millisecondsSinceEpoch}');
+  }
 
   @override
   bool existsSync() => true;

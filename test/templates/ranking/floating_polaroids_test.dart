@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/templates/ranking/floating_polaroids.dart';
 import 'package:fluvie/src/templates/_base/template_base.dart';

@@ -398,8 +398,6 @@ void main() {
         ));
 
         // Should not find a KeyedSubtree that wraps our content
-        final keyedSubtrees =
-            tester.widgetList<KeyedSubtree>(find.byType(KeyedSubtree));
         // There might be other KeyedSubtrees in the tree, so just check VPositioned doesn't add one
         final vPositioned =
             tester.widget<VPositioned>(find.byType(VPositioned));

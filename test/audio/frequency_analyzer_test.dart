@@ -127,7 +127,7 @@ void main() {
 
         // First analysis with signal
         final samples1 = _generateSineWave(440, 44100, 1024);
-        final bands1 = analyzer.analyze(samples1, sampleRate: 44100);
+        analyzer.analyze(samples1, sampleRate: 44100);
 
         // Second analysis with silence
         final samples2 = Float64List(1024);
