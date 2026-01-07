@@ -101,7 +101,8 @@ void main() {
         expect(find.text('|'), findsOneWidget);
       });
 
-      testWidgets('shows nothing before start when cursor disabled', (tester) async {
+      testWidgets('shows nothing before start when cursor disabled',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           const TypewriterText(
             'Hello',

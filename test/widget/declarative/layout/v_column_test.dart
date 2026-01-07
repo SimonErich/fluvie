@@ -119,7 +119,8 @@ void main() {
     });
 
     group('spacing', () {
-      testWidgets('adds SizedBox between children when spacing > 0', (tester) async {
+      testWidgets('adds SizedBox between children when spacing > 0',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           const VColumn(
             spacing: 20,
@@ -288,7 +289,8 @@ void main() {
         expect(find.text('Third'), findsOneWidget);
       });
 
-      testWidgets('stagger with fade in shows first child first', (tester) async {
+      testWidgets('stagger with fade in shows first child first',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           VColumn(
             stagger: const StaggerConfig.fade(delay: 15, duration: 10),
@@ -333,7 +335,8 @@ void main() {
         expect(find.byType(Transform), findsWidgets);
       });
 
-      testWidgets('stagger with spacing adds both transforms and spacers', (tester) async {
+      testWidgets('stagger with spacing adds both transforms and spacers',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           VColumn(
             spacing: 20,
@@ -390,7 +393,8 @@ void main() {
     });
 
     group('edge cases', () {
-      testWidgets('handles zero duration (startFrame == endFrame)', (tester) async {
+      testWidgets('handles zero duration (startFrame == endFrame)',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           const VColumn(
             startFrame: 50,

@@ -370,7 +370,8 @@ void main() {
         hasAudio: false,
       );
 
-      final calculatedFrames = (metadata.durationSeconds * metadata.fps).round();
+      final calculatedFrames =
+          (metadata.durationSeconds * metadata.fps).round();
       expect(calculatedFrames, metadata.frameCount);
     });
 

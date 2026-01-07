@@ -6,15 +6,21 @@ void main() {
   group('SceneTransitionType', () {
     test('has all expected types', () {
       expect(SceneTransitionType.values, contains(SceneTransitionType.none));
-      expect(SceneTransitionType.values, contains(SceneTransitionType.crossFade));
-      expect(SceneTransitionType.values, contains(SceneTransitionType.slideLeft));
-      expect(SceneTransitionType.values, contains(SceneTransitionType.slideRight));
+      expect(
+          SceneTransitionType.values, contains(SceneTransitionType.crossFade));
+      expect(
+          SceneTransitionType.values, contains(SceneTransitionType.slideLeft));
+      expect(
+          SceneTransitionType.values, contains(SceneTransitionType.slideRight));
       expect(SceneTransitionType.values, contains(SceneTransitionType.slideUp));
-      expect(SceneTransitionType.values, contains(SceneTransitionType.slideDown));
+      expect(
+          SceneTransitionType.values, contains(SceneTransitionType.slideDown));
       expect(SceneTransitionType.values, contains(SceneTransitionType.scale));
       expect(SceneTransitionType.values, contains(SceneTransitionType.wipe));
-      expect(SceneTransitionType.values, contains(SceneTransitionType.zoomWarp));
-      expect(SceneTransitionType.values, contains(SceneTransitionType.colorBleed));
+      expect(
+          SceneTransitionType.values, contains(SceneTransitionType.zoomWarp));
+      expect(
+          SceneTransitionType.values, contains(SceneTransitionType.colorBleed));
     });
   });
 

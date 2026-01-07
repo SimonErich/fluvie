@@ -480,7 +480,7 @@ void ignoreOverflowErrors() {
     final exception = details.exception;
     final isOverflowError = exception is FlutterError &&
         (exception.message.contains('overflowed') ||
-         exception.message.contains('OVERFLOWING'));
+            exception.message.contains('OVERFLOWING'));
     if (!isOverflowError) {
       if (originalOnError != null) {
         originalOnError(details);
@@ -502,7 +502,7 @@ Future<void> withIgnoredOverflowErrors(Future<void> Function() test) async {
     final exception = details.exception;
     final isOverflowError = exception is FlutterError &&
         (exception.message.contains('overflowed') ||
-         exception.message.contains('OVERFLOWING'));
+            exception.message.contains('OVERFLOWING'));
     if (!isOverflowError) {
       if (originalHandler != null) {
         originalHandler(details);

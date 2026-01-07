@@ -22,10 +22,12 @@ void main() {
         );
 
         expect(size.width, 0);
-        expect(size.height, greaterThan(0)); // Height is still based on font size
+        expect(
+            size.height, greaterThan(0)); // Height is still based on font size
       });
 
-      testWidgets('larger font size results in larger dimensions', (tester) async {
+      testWidgets('larger font size results in larger dimensions',
+          (tester) async {
         final smallSize = TextLayoutUtils.measureText(
           'Test',
           const TextStyle(fontSize: 12),

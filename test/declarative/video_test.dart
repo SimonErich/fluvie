@@ -233,7 +233,8 @@ void main() {
                 Scene(
                   durationInFrames: 100,
                   children: [
-                    Container(key: const Key('scene-content'), color: Colors.blue),
+                    Container(
+                        key: const Key('scene-content'), color: Colors.blue),
                   ],
                 ),
               ],

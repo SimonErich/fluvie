@@ -6,7 +6,6 @@ import '../../../helpers/test_helpers.dart';
 
 void main() {
   group('Stagger', () {
-
     group('construction', () {
       test('creates with required children', () {
         const widget = Stagger(
@@ -247,7 +246,8 @@ void main() {
         expect(find.text('Item 3'), findsOneWidget);
       });
 
-      testWidgets('renders correctly after all animations complete', (tester) async {
+      testWidgets('renders correctly after all animations complete',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           const Stagger(
             staggerDelay: 10,
@@ -407,7 +407,8 @@ void main() {
             ]),
             children: const [Text('Combined')],
           ),
-          frame: 30, // Render at end of animation so combined effects are visible
+          frame:
+              30, // Render at end of animation so combined effects are visible
         ));
 
         expect(find.text('Combined'), findsOneWidget);

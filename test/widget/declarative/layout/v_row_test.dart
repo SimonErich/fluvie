@@ -107,7 +107,8 @@ void main() {
     });
 
     group('spacing', () {
-      testWidgets('adds SizedBox between children when spacing > 0', (tester) async {
+      testWidgets('adds SizedBox between children when spacing > 0',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           const VRow(
             spacing: 15,
@@ -290,7 +291,8 @@ void main() {
         expect(find.byType(Transform), findsWidgets);
       });
 
-      testWidgets('stagger with spacing adds both transforms and spacers', (tester) async {
+      testWidgets('stagger with spacing adds both transforms and spacers',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           VRow(
             spacing: 10,
@@ -346,7 +348,8 @@ void main() {
     });
 
     group('edge cases', () {
-      testWidgets('handles zero duration (startFrame == endFrame)', (tester) async {
+      testWidgets('handles zero duration (startFrame == endFrame)',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           const VRow(
             startFrame: 50,

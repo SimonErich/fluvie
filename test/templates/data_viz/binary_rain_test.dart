@@ -255,7 +255,8 @@ void main() {
         expect(find.byType(BinaryRain), findsOneWidget);
       });
 
-      testWidgets('handles empty items list with empty metrics', (tester) async {
+      testWidgets('handles empty items list with empty metrics',
+          (tester) async {
         final emptyData = DataVizData(
           title: 'Empty',
           metrics: const [],

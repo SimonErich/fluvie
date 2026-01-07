@@ -14,8 +14,16 @@ void main() {
       subtitle: 'A journey in music',
       description: '1,234 moments captured',
       images: [
-        'img1.jpg', 'img2.jpg', 'img3.jpg', 'img4.jpg', 'img5.jpg',
-        'img6.jpg', 'img7.jpg', 'img8.jpg', 'img9.jpg', 'img10.jpg',
+        'img1.jpg',
+        'img2.jpg',
+        'img3.jpg',
+        'img4.jpg',
+        'img5.jpg',
+        'img6.jpg',
+        'img7.jpg',
+        'img8.jpg',
+        'img9.jpg',
+        'img10.jpg',
       ],
     );
 
@@ -34,12 +42,17 @@ void main() {
       test('applies default values correctly', () {
         final template = TriptychScroll(data: testData);
 
-        expect(template.columnCount, 3, reason: 'Default column count should be 3');
-        expect(template.scrollSpeed, 1.0, reason: 'Default scroll speed should be 1.0');
-        expect(template.showTitle, isTrue, reason: 'Title should be shown by default');
+        expect(template.columnCount, 3,
+            reason: 'Default column count should be 3');
+        expect(template.scrollSpeed, 1.0,
+            reason: 'Default scroll speed should be 1.0');
+        expect(template.showTitle, isTrue,
+            reason: 'Title should be shown by default');
         expect(template.imageGap, 8, reason: 'Default image gap should be 8');
-        expect(template.theme, isNull, reason: 'Theme should be null by default');
-        expect(template.timing, isNull, reason: 'Timing should be null by default');
+        expect(template.theme, isNull,
+            reason: 'Theme should be null by default');
+        expect(template.timing, isNull,
+            reason: 'Timing should be null by default');
       });
 
       test('accepts and stores custom values', () {
@@ -291,13 +304,15 @@ void main() {
         'midnight': TemplateTheme.midnight,
         'sunset': TemplateTheme.sunset,
       }.entries) {
-        testWidgets('renders correctly with ${entry.key} theme', (tester) async {
+        testWidgets('renders correctly with ${entry.key} theme',
+            (tester) async {
           ignoreOverflowErrors();
           final template = TriptychScroll(data: testData, theme: entry.value);
           await tester.pumpWidget(wrapWithApp(template));
 
           expect(find.byType(TriptychScroll), findsOneWidget);
-          final containers = tester.widgetList<Container>(find.byType(Container));
+          final containers =
+              tester.widgetList<Container>(find.byType(Container));
           expect(containers, isNotEmpty);
         });
       }

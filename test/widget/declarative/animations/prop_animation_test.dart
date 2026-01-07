@@ -404,7 +404,8 @@ void main() {
       });
 
       test('slideUpScale creates combined animation', () {
-        final animation = PropAnimation.slideUpScale(distance: 30, startScale: 0.8);
+        final animation =
+            PropAnimation.slideUpScale(distance: 30, startScale: 0.8);
         expect(animation, isA<CombinedAnimation>());
         final combined = animation as CombinedAnimation;
         expect(combined.animations.length, 2);
@@ -432,7 +433,8 @@ void main() {
       });
 
       test('float creates correct animation', () {
-        final animation = PropAnimation.float(amplitude: const Offset(5, 15), phase: 0.25);
+        final animation =
+            PropAnimation.float(amplitude: const Offset(5, 15), phase: 0.25);
         expect(animation, isA<FloatAnimation>());
         final float = animation as FloatAnimation;
         expect(float.amplitude, const Offset(5, 15));

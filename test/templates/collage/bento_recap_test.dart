@@ -92,7 +92,8 @@ void main() {
         final template = BentoRecap(data: testData);
         expect(template.collageData, testData);
         expect(template.collageData.title, 'Your 2024');
-        expect(template.collageData.stats, {'Hours': '1,234', 'Songs': '5,678'});
+        expect(
+            template.collageData.stats, {'Hours': '1,234', 'Songs': '5,678'});
       });
     });
 
@@ -291,8 +292,16 @@ void main() {
         final manyImagesData = CollageData(
           title: 'Gallery',
           images: [
-            'img1.jpg', 'img2.jpg', 'img3.jpg', 'img4.jpg', 'img5.jpg',
-            'img6.jpg', 'img7.jpg', 'img8.jpg', 'img9.jpg', 'img10.jpg',
+            'img1.jpg',
+            'img2.jpg',
+            'img3.jpg',
+            'img4.jpg',
+            'img5.jpg',
+            'img6.jpg',
+            'img7.jpg',
+            'img8.jpg',
+            'img9.jpg',
+            'img10.jpg',
           ],
           stats: {'Hours': '100'},
         );

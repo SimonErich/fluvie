@@ -323,7 +323,8 @@ void main() {
           pipeline.frameConsumed();
         });
 
-        final originalFrame = Uint8List.fromList([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        final originalFrame =
+            Uint8List.fromList([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
         await pipeline.addFrame(originalFrame);
 
         await Future.delayed(const Duration(milliseconds: 10));
@@ -402,8 +403,10 @@ void main() {
         });
 
         // Try to add 3 frames to buffer of 2
-        final add1 = pipeline.addFrame(Uint8List.fromList([1])).then((_) => addCount++);
-        final add2 = pipeline.addFrame(Uint8List.fromList([2])).then((_) => addCount++);
+        final add1 =
+            pipeline.addFrame(Uint8List.fromList([1])).then((_) => addCount++);
+        final add2 =
+            pipeline.addFrame(Uint8List.fromList([2])).then((_) => addCount++);
 
         // Let first two frames be queued
         await add1;
@@ -411,7 +414,8 @@ void main() {
         expect(addCount, 2);
 
         // Third frame should wait for consumption
-        final add3Future = pipeline.addFrame(Uint8List.fromList([3])).then((_) => addCount++);
+        final add3Future =
+            pipeline.addFrame(Uint8List.fromList([3])).then((_) => addCount++);
 
         // Give it time for the delayed consumer to make room
         await Future.delayed(const Duration(milliseconds: 50));

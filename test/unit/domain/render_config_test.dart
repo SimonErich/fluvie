@@ -148,7 +148,8 @@ void main() {
       final restored = RenderConfig.fromJson(json);
 
       expect(restored.timeline.fps, original.timeline.fps);
-      expect(restored.timeline.durationInFrames, original.timeline.durationInFrames);
+      expect(restored.timeline.durationInFrames,
+          original.timeline.durationInFrames);
       expect(restored.sequences.length, original.sequences.length);
       expect(restored.sequences.first.type, original.sequences.first.type);
       expect(restored.audioTracks.length, original.audioTracks.length);

@@ -397,7 +397,8 @@ void main() {
           data: testData,
           items: const [
             ReceiptItem(
-              label: 'This is a very long song title that might need truncation',
+              label:
+                  'This is a very long song title that might need truncation',
               value: '100',
             ),
           ],

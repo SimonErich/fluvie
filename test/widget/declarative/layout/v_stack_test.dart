@@ -11,7 +11,8 @@ void main() {
         await tester.pumpWidget(wrapWithApp(
           const VStack(
             children: [
-              ColoredBox(color: Colors.red, child: SizedBox(width: 100, height: 100)),
+              ColoredBox(
+                  color: Colors.red, child: SizedBox(width: 100, height: 100)),
               Text('Overlay'),
             ],
           ),
@@ -260,7 +261,8 @@ void main() {
     });
 
     group('layering', () {
-      testWidgets('children are rendered in order (first at bottom)', (tester) async {
+      testWidgets('children are rendered in order (first at bottom)',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           const VStack(
             children: [
@@ -301,7 +303,8 @@ void main() {
     });
 
     group('edge cases', () {
-      testWidgets('handles zero duration (startFrame == endFrame)', (tester) async {
+      testWidgets('handles zero duration (startFrame == endFrame)',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           const VStack(
             startFrame: 50,

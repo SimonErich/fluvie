@@ -15,7 +15,8 @@ void main() {
     });
 
     test('error is most verbose', () {
-      expect(FluvieLogLevel.error.index, greaterThan(FluvieLogLevel.warning.index));
+      expect(FluvieLogLevel.error.index,
+          greaterThan(FluvieLogLevel.warning.index));
     });
   });
 

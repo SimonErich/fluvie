@@ -11,7 +11,8 @@ void main() {
     final testData = RankingData(
       title: 'Your Top 5',
       items: [
-        const RankingItem(rank: 1, label: 'First Place', imagePath: 'assets/1.jpg'),
+        const RankingItem(
+            rank: 1, label: 'First Place', imagePath: 'assets/1.jpg'),
         const RankingItem(rank: 2, label: 'Second Place'),
         const RankingItem(rank: 3, label: 'Third Place'),
         const RankingItem(rank: 4, label: 'Fourth Place'),
@@ -136,7 +137,8 @@ void main() {
         expect(find.byType(TheSpotlight), findsOneWidget);
       });
 
-      testWidgets('renders with default title when none provided', (tester) async {
+      testWidgets('renders with default title when none provided',
+          (tester) async {
         final noTitleData = RankingData(
           items: const [
             RankingItem(rank: 1, label: 'Winner'),
@@ -182,7 +184,8 @@ void main() {
         expect(find.byType(TheSpotlight), findsOneWidget);
       });
 
-      testWidgets('renders correctly during spotlight movement', (tester) async {
+      testWidgets('renders correctly during spotlight movement',
+          (tester) async {
         final template = TheSpotlight(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 80));
 

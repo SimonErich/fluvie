@@ -36,7 +36,8 @@ class TestTemplate extends WrappedTemplate {
   }
 }
 
-class TestTemplateWithMixin extends WrappedTemplate with TemplateAnimationMixin {
+class TestTemplateWithMixin extends WrappedTemplate
+    with TemplateAnimationMixin {
   const TestTemplateWithMixin({
     super.key,
     required super.data,
@@ -428,10 +429,14 @@ void main() {
   group('TransitionSlideDirection', () {
     test('has all expected directions', () {
       expect(TransitionSlideDirection.values, hasLength(4));
-      expect(TransitionSlideDirection.values, contains(TransitionSlideDirection.left));
-      expect(TransitionSlideDirection.values, contains(TransitionSlideDirection.right));
-      expect(TransitionSlideDirection.values, contains(TransitionSlideDirection.up));
-      expect(TransitionSlideDirection.values, contains(TransitionSlideDirection.down));
+      expect(TransitionSlideDirection.values,
+          contains(TransitionSlideDirection.left));
+      expect(TransitionSlideDirection.values,
+          contains(TransitionSlideDirection.right));
+      expect(TransitionSlideDirection.values,
+          contains(TransitionSlideDirection.up));
+      expect(TransitionSlideDirection.values,
+          contains(TransitionSlideDirection.down));
     });
   });
 }

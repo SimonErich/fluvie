@@ -6,7 +6,6 @@ import '../../../helpers/test_helpers.dart';
 
 void main() {
   group('AnimatedProp', () {
-
     group('construction', () {
       test('creates with required parameters', () {
         const widget = AnimatedProp(
@@ -205,7 +204,8 @@ void main() {
     });
 
     group('heroKey', () {
-      testWidgets('wraps with KeyedSubtree when heroKey provided', (tester) async {
+      testWidgets('wraps with KeyedSubtree when heroKey provided',
+          (tester) async {
         final heroKey = GlobalKey();
         await tester.pumpWidget(wrapWithApp(
           AnimatedProp(

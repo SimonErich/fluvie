@@ -71,14 +71,22 @@ void main() {
 
         final process = await Process.start('ffmpeg', [
           '-y',
-          '-f', 'rawvideo',
-          '-pix_fmt', 'rgba',
-          '-s', '${frameWidth}x$frameHeight',
-          '-r', '30',
-          '-i', '-',
-          '-frames:v', '$totalFrames',
-          '-c:v', 'libx264',
-          '-pix_fmt', 'yuv420p',
+          '-f',
+          'rawvideo',
+          '-pix_fmt',
+          'rgba',
+          '-s',
+          '${frameWidth}x$frameHeight',
+          '-r',
+          '30',
+          '-i',
+          '-',
+          '-frames:v',
+          '$totalFrames',
+          '-c:v',
+          'libx264',
+          '-pix_fmt',
+          'yuv420p',
           outputPath,
         ]);
 
@@ -98,10 +106,14 @@ void main() {
 
         // Probe the output to verify properties
         final probeResult = await Process.run('ffprobe', [
-          '-v', 'error',
-          '-select_streams', 'v:0',
-          '-show_entries', 'stream=width,height,nb_frames',
-          '-of', 'csv=s=,:p=0',
+          '-v',
+          'error',
+          '-select_streams',
+          'v:0',
+          '-show_entries',
+          'stream=width,height,nb_frames',
+          '-of',
+          'csv=s=,:p=0',
           outputPath,
         ]);
 
@@ -125,14 +137,22 @@ void main() {
 
         final process = await Process.start('ffmpeg', [
           '-y',
-          '-f', 'rawvideo',
-          '-pix_fmt', 'rgba',
-          '-s', '${frameWidth}x$frameHeight',
-          '-r', '30',
-          '-i', '-',
-          '-frames:v', '$totalFrames',
-          '-c:v', 'libx264',
-          '-pix_fmt', 'yuv420p',
+          '-f',
+          'rawvideo',
+          '-pix_fmt',
+          'rgba',
+          '-s',
+          '${frameWidth}x$frameHeight',
+          '-r',
+          '30',
+          '-i',
+          '-',
+          '-frames:v',
+          '$totalFrames',
+          '-c:v',
+          'libx264',
+          '-pix_fmt',
+          'yuv420p',
           outputPath,
         ]);
 
@@ -182,13 +202,20 @@ void main() {
         // Use filter_complex to combine generated video and audio
         final result = await Process.run('ffmpeg', [
           '-y',
-          '-f', 'lavfi',
-          '-i', 'color=blue:size=200x200:duration=2:rate=30',
-          '-f', 'lavfi',
-          '-i', 'sine=frequency=440:duration=2',
-          '-c:v', 'libx264',
-          '-c:a', 'aac',
-          '-pix_fmt', 'yuv420p',
+          '-f',
+          'lavfi',
+          '-i',
+          'color=blue:size=200x200:duration=2:rate=30',
+          '-f',
+          'lavfi',
+          '-i',
+          'sine=frequency=440:duration=2',
+          '-c:v',
+          'libx264',
+          '-c:a',
+          'aac',
+          '-pix_fmt',
+          'yuv420p',
           '-shortest',
           outputPath,
         ]);
@@ -197,9 +224,12 @@ void main() {
 
         // Verify both streams exist
         final probeResult = await Process.run('ffprobe', [
-          '-v', 'error',
-          '-show_entries', 'stream=codec_type',
-          '-of', 'csv=p=0',
+          '-v',
+          'error',
+          '-show_entries',
+          'stream=codec_type',
+          '-of',
+          'csv=p=0',
           outputPath,
         ]);
 
@@ -218,14 +248,22 @@ void main() {
 
         final result = await Process.run('ffmpeg', [
           '-y',
-          '-f', 'lavfi',
-          '-i', 'color=green:size=100x100:duration=3:rate=30',
-          '-f', 'lavfi',
-          '-i', 'sine=frequency=880:duration=3',
-          '-af', 'afade=t=in:st=0:d=1,afade=t=out:st=2:d=1',
-          '-c:v', 'libx264',
-          '-c:a', 'aac',
-          '-pix_fmt', 'yuv420p',
+          '-f',
+          'lavfi',
+          '-i',
+          'color=green:size=100x100:duration=3:rate=30',
+          '-f',
+          'lavfi',
+          '-i',
+          'sine=frequency=880:duration=3',
+          '-af',
+          'afade=t=in:st=0:d=1,afade=t=out:st=2:d=1',
+          '-c:v',
+          'libx264',
+          '-c:a',
+          'aac',
+          '-pix_fmt',
+          'yuv420p',
           '-shortest',
           outputPath,
         ]);
@@ -321,10 +359,14 @@ void main() {
 
           final result = await Process.run('ffmpeg', [
             '-y',
-            '-f', 'lavfi',
-            '-i', 'color=orange:size=${res['width']}x${res['height']}:duration=0.5:rate=30',
-            '-c:v', 'libx264',
-            '-pix_fmt', 'yuv420p',
+            '-f',
+            'lavfi',
+            '-i',
+            'color=orange:size=${res['width']}x${res['height']}:duration=0.5:rate=30',
+            '-c:v',
+            'libx264',
+            '-pix_fmt',
+            'yuv420p',
             outputPath,
           ]);
 
@@ -332,10 +374,14 @@ void main() {
 
           // Verify dimensions
           final probeResult = await Process.run('ffprobe', [
-            '-v', 'error',
-            '-select_streams', 'v:0',
-            '-show_entries', 'stream=width,height',
-            '-of', 'csv=s=x:p=0',
+            '-v',
+            'error',
+            '-select_streams',
+            'v:0',
+            '-show_entries',
+            'stream=width,height',
+            '-of',
+            'csv=s=x:p=0',
             outputPath,
           ]);
 
@@ -360,10 +406,14 @@ void main() {
         // libx264 requires even dimensions for yuv420p
         final result = await Process.run('ffmpeg', [
           '-y',
-          '-f', 'lavfi',
-          '-i', 'color=red:size=101x101:duration=0.1:rate=30',
-          '-c:v', 'libx264',
-          '-pix_fmt', 'yuv420p',
+          '-f',
+          'lavfi',
+          '-i',
+          'color=red:size=101x101:duration=0.1:rate=30',
+          '-c:v',
+          'libx264',
+          '-pix_fmt',
+          'yuv420p',
           outputPath,
         ]);
 
@@ -381,13 +431,20 @@ void main() {
 
         final process = await Process.start('ffmpeg', [
           '-y',
-          '-f', 'rawvideo',
-          '-pix_fmt', 'rgba',
-          '-s', '100x100',
-          '-r', '30',
-          '-i', '-',
-          '-c:v', 'libx264',
-          '-pix_fmt', 'yuv420p',
+          '-f',
+          'rawvideo',
+          '-pix_fmt',
+          'rgba',
+          '-s',
+          '100x100',
+          '-r',
+          '30',
+          '-i',
+          '-',
+          '-c:v',
+          'libx264',
+          '-pix_fmt',
+          'yuv420p',
           outputPath,
         ]);
 
@@ -423,10 +480,14 @@ void main() {
         // Create source video for extraction
         await Process.run('ffmpeg', [
           '-y',
-          '-f', 'lavfi',
-          '-i', 'testsrc=size=200x200:duration=1:rate=30',
-          '-c:v', 'libx264',
-          '-pix_fmt', 'yuv420p',
+          '-f',
+          'lavfi',
+          '-i',
+          'testsrc=size=200x200:duration=1:rate=30',
+          '-c:v',
+          'libx264',
+          '-pix_fmt',
+          'yuv420p',
           testVideoPath,
         ]);
       });
@@ -442,7 +503,8 @@ void main() {
         final result = await Process.run('ffmpeg', [
           '-y',
           '-i', testVideoPath,
-          '-vf', 'select=eq(n\\,0)+eq(n\\,15)+eq(n\\,29)', // Extract frames 0, 15, 29
+          '-vf',
+          'select=eq(n\\,0)+eq(n\\,15)+eq(n\\,29)', // Extract frames 0, 15, 29
           '-vsync', 'vfr',
           framePattern,
         ]);
@@ -459,14 +521,21 @@ void main() {
           return;
         }
 
-        final result = await Process.run('ffmpeg', [
-          '-y',
-          '-i', testVideoPath,
-          '-frames:v', '1',
-          '-f', 'rawvideo',
-          '-pix_fmt', 'rgba',
-          '-',
-        ], stdoutEncoding: null);
+        final result = await Process.run(
+            'ffmpeg',
+            [
+              '-y',
+              '-i',
+              testVideoPath,
+              '-frames:v',
+              '1',
+              '-f',
+              'rawvideo',
+              '-pix_fmt',
+              'rgba',
+              '-',
+            ],
+            stdoutEncoding: null);
 
         expect(result.exitCode, 0);
 
@@ -507,14 +576,20 @@ void main() {
 
         final result = await Process.run('ffmpeg', [
           '-y',
-          '-f', 'lavfi',
-          '-i', 'color=red:size=200x200:duration=2:rate=30',
-          '-f', 'lavfi',
-          '-i', 'color=blue:size=200x200:duration=2:rate=30',
+          '-f',
+          'lavfi',
+          '-i',
+          'color=red:size=200x200:duration=2:rate=30',
+          '-f',
+          'lavfi',
+          '-i',
+          'color=blue:size=200x200:duration=2:rate=30',
           '-filter_complex',
           '[0][1]xfade=transition=fade:duration=1:offset=1',
-          '-c:v', 'libx264',
-          '-pix_fmt', 'yuv420p',
+          '-c:v',
+          'libx264',
+          '-pix_fmt',
+          'yuv420p',
           outputPath,
         ]);
 
@@ -523,9 +598,12 @@ void main() {
 
         // Check duration is about 3 seconds (2 + 2 - 1 overlap)
         final probeResult = await Process.run('ffprobe', [
-          '-v', 'error',
-          '-show_entries', 'format=duration',
-          '-of', 'default=noprint_wrappers=1:nokey=1',
+          '-v',
+          'error',
+          '-show_entries',
+          'format=duration',
+          '-of',
+          'default=noprint_wrappers=1:nokey=1',
           outputPath,
         ]);
 
@@ -543,14 +621,20 @@ void main() {
 
         final result = await Process.run('ffmpeg', [
           '-y',
-          '-f', 'lavfi',
-          '-i', 'color=green:size=200x200:duration=2:rate=30',
-          '-f', 'lavfi',
-          '-i', 'color=yellow:size=200x200:duration=2:rate=30',
+          '-f',
+          'lavfi',
+          '-i',
+          'color=green:size=200x200:duration=2:rate=30',
+          '-f',
+          'lavfi',
+          '-i',
+          'color=yellow:size=200x200:duration=2:rate=30',
           '-filter_complex',
           '[0][1]xfade=transition=slideleft:duration=0.5:offset=1.5',
-          '-c:v', 'libx264',
-          '-pix_fmt', 'yuv420p',
+          '-c:v',
+          'libx264',
+          '-pix_fmt',
+          'yuv420p',
           outputPath,
         ]);
 

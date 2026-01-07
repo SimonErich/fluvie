@@ -60,7 +60,8 @@ void main() {
         expect(vPadding.padding, const EdgeInsets.all(24));
       });
 
-      testWidgets('VPadding.symmetric creates symmetric padding', (tester) async {
+      testWidgets('VPadding.symmetric creates symmetric padding',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           VPadding.symmetric(
             horizontal: 16,
@@ -106,7 +107,8 @@ void main() {
         );
       });
 
-      testWidgets('VPadding.only creates specific edge padding', (tester) async {
+      testWidgets('VPadding.only creates specific edge padding',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           VPadding.only(
             left: 5,
@@ -317,7 +319,8 @@ void main() {
         expect(padding.padding, const EdgeInsets.all(500));
       });
 
-      testWidgets('handles zero duration (startFrame == endFrame)', (tester) async {
+      testWidgets('handles zero duration (startFrame == endFrame)',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           const VPadding(
             padding: EdgeInsets.all(10),

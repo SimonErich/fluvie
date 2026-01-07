@@ -13,7 +13,12 @@ void main() {
       name: 'John Doe',
       subtitle: 'A year of music',
       year: 2024,
-      stats: {'Hours': '1,234', 'Songs': '5,678', 'Artists': '456', 'Genres': '23'},
+      stats: {
+        'Hours': '1,234',
+        'Songs': '5,678',
+        'Artists': '456',
+        'Genres': '23'
+      },
     );
 
     group('construction', () {

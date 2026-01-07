@@ -227,14 +227,16 @@ void main() {
         expect(find.byType(TheInfinityLoop), findsOneWidget);
       });
 
-      testWidgets('renders correctly during loop transition start', (tester) async {
+      testWidgets('renders correctly during loop transition start',
+          (tester) async {
         final template = TheInfinityLoop(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 125));
 
         expect(find.byType(TheInfinityLoop), findsOneWidget);
       });
 
-      testWidgets('renders correctly during replay icon appearance', (tester) async {
+      testWidgets('renders correctly during replay icon appearance',
+          (tester) async {
         final template = TheInfinityLoop(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 160));
 

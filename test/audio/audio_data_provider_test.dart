@@ -239,8 +239,7 @@ void main() {
 
         // Bass should be average of first third of bands
         final third = bands.length ~/ 3;
-        final expectedBass =
-            bands.take(third).reduce((a, b) => a + b) / third;
+        final expectedBass = bands.take(third).reduce((a, b) => a + b) / third;
 
         expect(bass, closeTo(expectedBass, 0.01));
       });

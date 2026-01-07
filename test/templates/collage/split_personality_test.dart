@@ -314,8 +314,10 @@ void main() {
   group('TextAnimationStyle', () {
     test('has all expected styles', () {
       expect(TextAnimationStyle.values, hasLength(3));
-      expect(TextAnimationStyle.values, contains(TextAnimationStyle.typewriter));
-      expect(TextAnimationStyle.values, contains(TextAnimationStyle.wordByWord));
+      expect(
+          TextAnimationStyle.values, contains(TextAnimationStyle.typewriter));
+      expect(
+          TextAnimationStyle.values, contains(TextAnimationStyle.wordByWord));
       expect(TextAnimationStyle.values, contains(TextAnimationStyle.fadeIn));
     });
   });

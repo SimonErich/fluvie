@@ -158,7 +158,8 @@ void main() {
         expect(positioned.top, 125);
       });
 
-      testWidgets('VPositioned.fromOffset with width and height', (tester) async {
+      testWidgets('VPositioned.fromOffset with width and height',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           VStack(
             children: [
@@ -333,7 +334,8 @@ void main() {
           ),
         ));
 
-        final vPositioned = tester.widget<VPositioned>(find.byType(VPositioned));
+        final vPositioned =
+            tester.widget<VPositioned>(find.byType(VPositioned));
         expect(vPositioned.fadeInCurve, Curves.ease);
         expect(vPositioned.fadeOutCurve, Curves.easeInOut);
       });
@@ -353,7 +355,8 @@ void main() {
           frame: 50,
         ));
 
-        final vPositioned = tester.widget<VPositioned>(find.byType(VPositioned));
+        final vPositioned =
+            tester.widget<VPositioned>(find.byType(VPositioned));
         expect(vPositioned.startFrame, 20);
         expect(vPositioned.endFrame, 80);
         expect(vPositioned.fadeInFrames, 10);
@@ -361,7 +364,8 @@ void main() {
     });
 
     group('heroKey', () {
-      testWidgets('wraps with KeyedSubtree when heroKey is provided', (tester) async {
+      testWidgets('wraps with KeyedSubtree when heroKey is provided',
+          (tester) async {
         final heroKey = GlobalKey();
 
         await tester.pumpWidget(wrapWithApp(
@@ -394,9 +398,11 @@ void main() {
         ));
 
         // Should not find a KeyedSubtree that wraps our content
-        final keyedSubtrees = tester.widgetList<KeyedSubtree>(find.byType(KeyedSubtree));
+        final keyedSubtrees =
+            tester.widgetList<KeyedSubtree>(find.byType(KeyedSubtree));
         // There might be other KeyedSubtrees in the tree, so just check VPositioned doesn't add one
-        final vPositioned = tester.widget<VPositioned>(find.byType(VPositioned));
+        final vPositioned =
+            tester.widget<VPositioned>(find.byType(VPositioned));
         expect(vPositioned.heroKey, isNull);
       });
 
@@ -416,7 +422,8 @@ void main() {
           ),
         ));
 
-        final vPositioned = tester.widget<VPositioned>(find.byType(VPositioned));
+        final vPositioned =
+            tester.widget<VPositioned>(find.byType(VPositioned));
         expect(vPositioned.heroKey, heroKey);
       });
     });
@@ -506,7 +513,8 @@ void main() {
         expect(positioned.top, 10000);
       });
 
-      testWidgets('handles zero duration (startFrame == endFrame)', (tester) async {
+      testWidgets('handles zero duration (startFrame == endFrame)',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           const VStack(
             children: [

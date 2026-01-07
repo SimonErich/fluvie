@@ -7,10 +7,14 @@ void main() {
     group('EntrySlideDirection', () {
       test('has all expected directions', () {
         expect(EntrySlideDirection.values, hasLength(4));
-        expect(EntrySlideDirection.values, contains(EntrySlideDirection.fromLeft));
-        expect(EntrySlideDirection.values, contains(EntrySlideDirection.fromRight));
-        expect(EntrySlideDirection.values, contains(EntrySlideDirection.fromTop));
-        expect(EntrySlideDirection.values, contains(EntrySlideDirection.fromBottom));
+        expect(
+            EntrySlideDirection.values, contains(EntrySlideDirection.fromLeft));
+        expect(EntrySlideDirection.values,
+            contains(EntrySlideDirection.fromRight));
+        expect(
+            EntrySlideDirection.values, contains(EntrySlideDirection.fromTop));
+        expect(EntrySlideDirection.values,
+            contains(EntrySlideDirection.fromBottom));
       });
     });
 
@@ -131,7 +135,8 @@ void main() {
       });
 
       test('opacity increases over animation', () {
-        const animation = StrobeRevealAnimation(flickerCount: 0, flickerIntensity: 0);
+        const animation =
+            StrobeRevealAnimation(flickerCount: 0, flickerIntensity: 0);
         const child = SizedBox();
         // Without flicker, opacity should simply increase from 0 to 1
         expect(() => animation.apply(child, 0.0), returnsNormally);

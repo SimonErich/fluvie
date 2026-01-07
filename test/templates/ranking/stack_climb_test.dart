@@ -11,8 +11,10 @@ void main() {
     final testData = RankingData(
       title: 'Your Top Artists',
       items: [
-        const RankingItem(rank: 1, label: 'Taylor Swift', imagePath: 'assets/taylor.jpg'),
-        const RankingItem(rank: 2, label: 'Drake', imagePath: 'assets/drake.jpg'),
+        const RankingItem(
+            rank: 1, label: 'Taylor Swift', imagePath: 'assets/taylor.jpg'),
+        const RankingItem(
+            rank: 2, label: 'Drake', imagePath: 'assets/drake.jpg'),
         const RankingItem(rank: 3, label: 'The Weeknd'),
         const RankingItem(rank: 4, label: 'Beyoncé'),
         const RankingItem(rank: 5, label: 'Bad Bunny'),

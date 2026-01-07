@@ -32,8 +32,7 @@ void main() {
 
       await tester.pumpWidget(const ProviderScope(child: MyApp()));
 
-      final materialApp =
-          tester.widget<MaterialApp>(find.byType(MaterialApp));
+      final materialApp = tester.widget<MaterialApp>(find.byType(MaterialApp));
       expect(materialApp.title, 'Fluvie Interactive Gallery');
     });
 
@@ -43,8 +42,7 @@ void main() {
 
       await tester.pumpWidget(const ProviderScope(child: MyApp()));
 
-      final materialApp =
-          tester.widget<MaterialApp>(find.byType(MaterialApp));
+      final materialApp = tester.widget<MaterialApp>(find.byType(MaterialApp));
       expect(materialApp.debugShowCheckedModeBanner, false);
     });
   });

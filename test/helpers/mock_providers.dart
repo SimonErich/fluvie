@@ -79,7 +79,8 @@ class FakeProcess implements Process {
         '${minutes.toString().padLeft(2, '0')}:'
         '${seconds.toStringAsFixed(2).padLeft(5, '0')}';
 
-    emitStderr('frame=$frame fps=$fps q=$q size=${sizeKb}kB time=$timeStr speed=1x\n');
+    emitStderr(
+        'frame=$frame fps=$fps q=$q size=${sizeKb}kB time=$timeStr speed=1x\n');
   }
 
   /// Completes the process with the given exit code.
@@ -247,7 +248,8 @@ class _FakeDirectory implements Directory {
 
   @override
   Future<Directory> createTemp([String? prefix]) async {
-    return _FakeDirectory('$path/${prefix ?? 'temp'}_${DateTime.now().millisecondsSinceEpoch}');
+    return _FakeDirectory(
+        '$path/${prefix ?? 'temp'}_${DateTime.now().millisecondsSinceEpoch}');
   }
 
   @override
@@ -264,15 +266,19 @@ class _FakeDirectory implements Directory {
   Directory get absolute => this;
 
   @override
-  Stream<FileSystemEntity> list({bool recursive = false, bool followLinks = true}) {
+  Stream<FileSystemEntity> list(
+      {bool recursive = false, bool followLinks = true}) {
     return const Stream.empty();
   }
 
   @override
-  List<FileSystemEntity> listSync({bool recursive = false, bool followLinks = true}) => [];
+  List<FileSystemEntity> listSync(
+          {bool recursive = false, bool followLinks = true}) =>
+      [];
 
   @override
-  Directory get parent => _FakeDirectory(path.substring(0, path.lastIndexOf('/')));
+  Directory get parent =>
+      _FakeDirectory(path.substring(0, path.lastIndexOf('/')));
 
   @override
   Uri get uri => Uri.file(path);
@@ -302,7 +308,8 @@ class _FakeDirectory implements Directory {
   Stream<FileSystemEvent> watch({
     int events = FileSystemEvent.all,
     bool recursive = false,
-  }) => throw UnimplementedError();
+  }) =>
+      throw UnimplementedError();
 
   @override
   Future<Directory> rename(String newPath) async => _FakeDirectory(newPath);

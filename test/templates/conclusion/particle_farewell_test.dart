@@ -305,7 +305,8 @@ void main() {
       testWidgets('handles long message', (tester) async {
         final longMessageData = SummaryData(
           title: 'Thanks',
-          message: 'This is a very long farewell message that might wrap to multiple lines',
+          message:
+              'This is a very long farewell message that might wrap to multiple lines',
           year: 2024,
           stats: {},
         );

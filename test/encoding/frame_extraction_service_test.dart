@@ -211,7 +211,8 @@ void main() {
       });
 
       test('handles transparent pixels', () {
-        final rgba = Uint8List.fromList([255, 255, 255, 0]); // Transparent white
+        final rgba =
+            Uint8List.fromList([255, 255, 255, 0]); // Transparent white
         final frame = ExtractedFrame(
           frameNumber: 0,
           rgba: rgba,

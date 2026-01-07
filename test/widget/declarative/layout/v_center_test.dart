@@ -184,7 +184,8 @@ void main() {
     });
 
     group('edge cases', () {
-      testWidgets('handles zero duration (startFrame == endFrame)', (tester) async {
+      testWidgets('handles zero duration (startFrame == endFrame)',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           const VCenter(
             startFrame: 50,

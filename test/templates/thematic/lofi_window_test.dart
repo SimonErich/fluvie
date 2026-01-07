@@ -200,7 +200,8 @@ void main() {
         expect(find.byType(LofiWindow), findsOneWidget);
       });
 
-      testWidgets('renders correctly during description reveal', (tester) async {
+      testWidgets('renders correctly during description reveal',
+          (tester) async {
         const template = LofiWindow(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 120));
 
@@ -318,7 +319,8 @@ void main() {
           text: 'Long content',
           title: 'This is a very long title that might wrap to multiple lines',
           subtitle: 'This is also a lengthy subtitle with many characters',
-          description: 'And here is an even longer description that describes the content in great detail',
+          description:
+              'And here is an even longer description that describes the content in great detail',
         );
         const template = LofiWindow(data: longData);
         await tester.pumpWidget(wrapWithApp(template, frame: 120));

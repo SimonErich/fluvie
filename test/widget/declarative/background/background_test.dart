@@ -97,7 +97,8 @@ void main() {
         expect(find.byType(Container), findsWidgets);
       });
 
-      testWidgets('builds animated gradient for multiple colors', (tester) async {
+      testWidgets('builds animated gradient for multiple colors',
+          (tester) async {
         final background = GradientBackground(
           colors: {0: Colors.red, 60: Colors.blue},
         );

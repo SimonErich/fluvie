@@ -304,7 +304,8 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.textContaining('Audio initialization error'), findsOneWidget);
+        expect(
+            find.textContaining('Audio initialization error'), findsOneWidget);
       });
     });
   });

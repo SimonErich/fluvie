@@ -11,7 +11,8 @@ void main() {
     final testData = RankingData(
       title: 'Your #1 Song',
       items: [
-        const RankingItem(rank: 1, label: 'Blinding Lights', imagePath: 'assets/song1.jpg'),
+        const RankingItem(
+            rank: 1, label: 'Blinding Lights', imagePath: 'assets/song1.jpg'),
         const RankingItem(rank: 2, label: 'Shape of You'),
         const RankingItem(rank: 3, label: 'Dance Monkey'),
         const RankingItem(rank: 4, label: 'Rockstar'),
@@ -123,7 +124,8 @@ void main() {
         expect(find.byType(SlotMachine), findsOneWidget);
       });
 
-      testWidgets('renders with default title when none provided', (tester) async {
+      testWidgets('renders with default title when none provided',
+          (tester) async {
         ignoreOverflowErrors();
         final noTitleData = RankingData(
           items: const [RankingItem(rank: 1, label: 'Winner')],

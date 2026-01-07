@@ -219,7 +219,8 @@ void main() {
         expect(find.byType(MinimalistBeat), findsOneWidget);
       });
 
-      testWidgets('renders correctly during subtitle animation', (tester) async {
+      testWidgets('renders correctly during subtitle animation',
+          (tester) async {
         const template = MinimalistBeat(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 60));
 
@@ -233,7 +234,8 @@ void main() {
         expect(find.byType(MinimalistBeat), findsOneWidget);
       });
 
-      testWidgets('renders correctly during description animation', (tester) async {
+      testWidgets('renders correctly during description animation',
+          (tester) async {
         const template = MinimalistBeat(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 95));
 

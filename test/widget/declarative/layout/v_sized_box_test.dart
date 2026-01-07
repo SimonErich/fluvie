@@ -331,7 +331,8 @@ void main() {
         expect(vSizedBox.height, 10000);
       });
 
-      testWidgets('handles zero duration (startFrame == endFrame)', (tester) async {
+      testWidgets('handles zero duration (startFrame == endFrame)',
+          (tester) async {
         await tester.pumpWidget(wrapWithApp(
           const VSizedBox(
             width: 100,

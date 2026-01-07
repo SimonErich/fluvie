@@ -196,7 +196,8 @@ void main() {
         expect(find.byType(RetroPostcard), findsOneWidget);
       });
 
-      testWidgets('renders correctly during location text animation', (tester) async {
+      testWidgets('renders correctly during location text animation',
+          (tester) async {
         const template = RetroPostcard(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 90));
 

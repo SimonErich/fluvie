@@ -11,8 +11,10 @@ void main() {
     final testData = RankingData(
       title: 'Your Year in Photos',
       items: [
-        const RankingItem(rank: 1, label: 'Summer Trip', imagePath: 'assets/summer.jpg'),
-        const RankingItem(rank: 2, label: 'Concert Night', imagePath: 'assets/concert.jpg'),
+        const RankingItem(
+            rank: 1, label: 'Summer Trip', imagePath: 'assets/summer.jpg'),
+        const RankingItem(
+            rank: 2, label: 'Concert Night', imagePath: 'assets/concert.jpg'),
         const RankingItem(rank: 3, label: 'Beach Day'),
         const RankingItem(rank: 4, label: 'Mountain Hike'),
         const RankingItem(rank: 5, label: 'City Lights'),
@@ -138,7 +140,8 @@ void main() {
         expect(find.byType(FloatingPolaroids), findsOneWidget);
       });
 
-      testWidgets('renders with default title when none provided', (tester) async {
+      testWidgets('renders with default title when none provided',
+          (tester) async {
         final noTitleData = RankingData(
           items: const [
             RankingItem(rank: 1, label: 'Photo 1'),
@@ -330,7 +333,8 @@ void main() {
           items: const [
             RankingItem(
               rank: 1,
-              label: 'This Is A Very Long Photo Caption That Might Need Truncation',
+              label:
+                  'This Is A Very Long Photo Caption That Might Need Truncation',
             ),
           ],
         );

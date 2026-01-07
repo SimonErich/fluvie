@@ -11,7 +11,8 @@ void main() {
     final testData = RankingData(
       title: 'Top Genres',
       items: [
-        const RankingItem(rank: 1, label: 'Pop', value: '45%', subtitle: 'Genre'),
+        const RankingItem(
+            rank: 1, label: 'Pop', value: '45%', subtitle: 'Genre'),
         const RankingItem(rank: 2, label: 'Hip-Hop', value: '28%'),
         const RankingItem(rank: 3, label: 'Rock', value: '15%'),
         const RankingItem(rank: 4, label: 'EDM', value: '8%'),
@@ -148,7 +149,8 @@ void main() {
         expect(find.byType(PerspectiveLadder), findsOneWidget);
       });
 
-      testWidgets('renders with default title when none provided', (tester) async {
+      testWidgets('renders with default title when none provided',
+          (tester) async {
         final noTitleData = RankingData(
           items: const [
             RankingItem(rank: 1, label: 'First'),
