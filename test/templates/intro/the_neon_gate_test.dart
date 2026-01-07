@@ -44,7 +44,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = TheNeonGate(
+        const template = TheNeonGate(
           data: testData,
           theme: TemplateTheme.neon,
         );
@@ -268,7 +268,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with neon theme', (tester) async {
-        final template = TheNeonGate(
+        const template = TheNeonGate(
           data: testData,
           theme: TemplateTheme.neon,
         );
@@ -278,7 +278,7 @@ void main() {
       });
 
       testWidgets('renders with spotify theme', (tester) async {
-        final template = TheNeonGate(
+        const template = TheNeonGate(
           data: testData,
           theme: TemplateTheme.spotify,
         );
@@ -288,7 +288,7 @@ void main() {
       });
 
       testWidgets('renders with minimal theme', (tester) async {
-        final template = TheNeonGate(
+        const template = TheNeonGate(
           data: testData,
           theme: TemplateTheme.minimal,
         );

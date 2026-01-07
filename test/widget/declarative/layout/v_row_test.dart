@@ -294,10 +294,10 @@ void main() {
       testWidgets('stagger with spacing adds both transforms and spacers',
           (tester) async {
         await tester.pumpWidget(wrapWithApp(
-          VRow(
+          const VRow(
             spacing: 10,
-            stagger: const StaggerConfig.fade(delay: 10),
-            children: const [
+            stagger: StaggerConfig.fade(delay: 10),
+            children: [
               Text('First'),
               Text('Second'),
             ],

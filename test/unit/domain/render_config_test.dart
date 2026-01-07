@@ -39,8 +39,8 @@ void main() {
           SequenceConfig.base(startFrame: 0, durationInFrames: 90),
         ],
         audioTracks: [
-          AudioTrackConfig(
-            source: const AudioSourceConfig(
+          const AudioTrackConfig(
+            source: AudioSourceConfig(
               type: AudioSourceType.file,
               uri: 'test.mp3',
             ),
@@ -126,8 +126,8 @@ void main() {
           ),
         ],
         audioTracks: [
-          AudioTrackConfig(
-            source: const AudioSourceConfig(
+          const AudioTrackConfig(
+            source: AudioSourceConfig(
               type: AudioSourceType.asset,
               uri: 'audio.mp3',
             ),

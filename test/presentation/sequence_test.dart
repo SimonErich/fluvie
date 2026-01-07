@@ -238,7 +238,7 @@ void main() {
 
   group('SequenceConfig.base', () {
     test('creates config with required fields', () {
-      final config = SequenceConfig.base(
+      const config = SequenceConfig.base(
         startFrame: 0,
         durationInFrames: 100,
       );
@@ -248,7 +248,7 @@ void main() {
     });
 
     test('has correct type', () {
-      final config = SequenceConfig.base(
+      const config = SequenceConfig.base(
         startFrame: 30,
         durationInFrames: 60,
       );
@@ -257,7 +257,7 @@ void main() {
     });
 
     test('serializes to JSON', () {
-      final config = SequenceConfig.base(
+      const config = SequenceConfig.base(
         startFrame: 10,
         durationInFrames: 50,
       );

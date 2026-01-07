@@ -25,7 +25,7 @@ class DropdownParameterWidget extends ConsumerWidget {
         Text(parameter.label, style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: value,
+          initialValue: value,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,

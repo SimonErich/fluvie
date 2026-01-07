@@ -78,8 +78,8 @@ void main() {
       test('builds filter for single audio track', () {
         final config = createConfig(
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music.mp3',
               ),
@@ -98,8 +98,8 @@ void main() {
         final config = createConfig(
           fps: 30,
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music.mp3',
               ),
@@ -120,8 +120,8 @@ void main() {
         final config = createConfig(
           fps: 30,
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music.mp3',
               ),
@@ -142,8 +142,8 @@ void main() {
         final config = createConfig(
           fps: 30,
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music.mp3',
               ),
@@ -164,8 +164,8 @@ void main() {
       test('applies volume filter when not 1.0', () {
         final config = createConfig(
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music.mp3',
               ),
@@ -183,8 +183,8 @@ void main() {
       test('does not apply volume filter when 1.0', () {
         final config = createConfig(
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music.mp3',
               ),
@@ -204,8 +204,8 @@ void main() {
         final config = createConfig(
           fps: 30,
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music.mp3',
               ),
@@ -223,8 +223,8 @@ void main() {
       test('applies loop filter when loop is true', () {
         final config = createConfig(
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music.mp3',
               ),
@@ -244,16 +244,16 @@ void main() {
       test('uses amix for multiple tracks', () {
         final config = createConfig(
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music1.mp3',
               ),
               startFrame: 0,
               durationInFrames: 300,
             ),
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music2.mp3',
               ),
@@ -272,16 +272,16 @@ void main() {
       test('correct input indices for multiple tracks', () {
         final config = createConfig(
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music1.mp3',
               ),
               startFrame: 0,
               durationInFrames: 300,
             ),
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music2.mp3',
               ),
@@ -467,8 +467,8 @@ void main() {
             ),
           ],
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music.mp3',
               ),
@@ -511,8 +511,8 @@ void main() {
             ),
           ],
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music.mp3',
               ),
@@ -552,8 +552,8 @@ void main() {
       test('handles zero fade duration', () {
         final config = createConfig(
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music.mp3',
               ),
@@ -574,8 +574,8 @@ void main() {
         final config = createConfig(
           fps: 30,
           audioTracks: [
-            AudioTrackConfig(
-              source: const AudioSourceConfig(
+            const AudioTrackConfig(
+              source: AudioSourceConfig(
                 type: AudioSourceType.file,
                 uri: '/path/to/music.mp3',
               ),

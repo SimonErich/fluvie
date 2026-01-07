@@ -29,7 +29,6 @@ void main() {
 
       test('accepts custom values', () {
         const widget = FloatingElement(
-          child: SizedBox(),
           position: Offset(100, 200),
           floatAmplitude: Offset(5, 15),
           floatFrequency: 0.8,
@@ -40,6 +39,7 @@ void main() {
           shadowBlur: 20,
           shadowOffset: Offset(5, 10),
           shadowColor: Colors.black54,
+          child: SizedBox(),
         );
 
         expect(widget.position, const Offset(100, 200));
@@ -58,8 +58,8 @@ void main() {
     group('factory constructor', () {
       test('withRotation creates with rotation amplitude', () {
         const widget = FloatingElement.withRotation(
-          child: SizedBox(),
           rotationDegrees: 5.0,
+          child: SizedBox(),
         );
 
         // 5 degrees in radians
@@ -75,11 +75,11 @@ void main() {
 
       test('withRotation accepts custom values', () {
         const widget = FloatingElement.withRotation(
-          child: SizedBox(),
           position: Offset(50, 100),
           floatAmplitude: Offset(10, 20),
           rotationDegrees: 10.0,
           showShadow: true,
+          child: SizedBox(),
         );
 
         expect(widget.position, const Offset(50, 100));
@@ -256,9 +256,9 @@ void main() {
 
       testWidgets('handles full rotation (2*pi)', (tester) async {
         await tester.pumpWidget(wrapWithApp(
-          FloatingElement(
+          const FloatingElement(
             rotation: 2 * math.pi,
-            child: const Text('FullRotation'),
+            child: Text('FullRotation'),
           ),
         ));
 

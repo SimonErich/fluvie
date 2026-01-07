@@ -84,8 +84,8 @@ void main() {
 
       test('accepts optional theme', () {
         const data = IntroData(title: 'Test');
-        final theme = TemplateTheme.neon;
-        final template = TestTemplate(data: data, theme: theme);
+        const theme = TemplateTheme.neon;
+        const template = TestTemplate(data: data, theme: theme);
 
         expect(template.theme, theme);
       });
@@ -148,8 +148,8 @@ void main() {
 
       test('merges provided theme with default', () {
         const data = IntroData(title: 'Test');
-        final customTheme = TemplateTheme.neon;
-        final template = TestTemplate(data: data, theme: customTheme);
+        const customTheme = TemplateTheme.neon;
+        const template = TestTemplate(data: data, theme: customTheme);
 
         expect(template.effectiveTheme, isNotNull);
       });

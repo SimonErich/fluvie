@@ -8,27 +8,27 @@ import '../../helpers/test_helpers.dart';
 
 void main() {
   group('TheGrowthTree', () {
-    final testData = DataVizData(
+    const testData = DataVizData(
       title: 'Your Year in Music',
       metrics: [
-        const MetricData(label: 'Jan', value: 20),
-        const MetricData(label: 'Feb', value: 35),
-        const MetricData(label: 'Mar', value: 45),
-        const MetricData(label: 'Apr', value: 30),
-        const MetricData(label: 'May', value: 55),
+        MetricData(label: 'Jan', value: 20),
+        MetricData(label: 'Feb', value: 35),
+        MetricData(label: 'Mar', value: 45),
+        MetricData(label: 'Apr', value: 30),
+        MetricData(label: 'May', value: 55),
       ],
     );
 
     group('construction', () {
       test('creates with required data', () {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
 
         expect(template.data, testData);
         expect(template.dataVizData, testData);
       });
 
       test('has default values', () {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
 
         expect(template.maxVineHeight, 300);
         expect(template.vineColor, isNull);
@@ -37,7 +37,7 @@ void main() {
       });
 
       test('accepts custom values', () {
-        final template = TheGrowthTree(
+        const template = TheGrowthTree(
           data: testData,
           maxVineHeight: 400,
           vineColor: Colors.green,
@@ -52,7 +52,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = TheGrowthTree(
+        const template = TheGrowthTree(
           data: testData,
           theme: TemplateTheme.pastel,
         );
@@ -61,7 +61,7 @@ void main() {
       });
 
       test('accepts timing', () {
-        final template = TheGrowthTree(
+        const template = TheGrowthTree(
           data: testData,
           timing: TemplateTiming.elastic,
         );
@@ -72,30 +72,30 @@ void main() {
 
     group('template properties', () {
       test('recommendedLength is 200 frames', () {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         expect(template.recommendedLength, 200);
       });
 
       test('category is dataViz', () {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         expect(template.category, TemplateCategory.dataViz);
       });
 
       test('description is set', () {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         expect(template.description, isNotEmpty);
         expect(template.description.toLowerCase(), contains('vine'));
       });
 
       test('defaultTheme is pastel', () {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         expect(template.defaultTheme, TemplateTheme.pastel);
       });
     });
 
     group('dataVizData getter', () {
       test('returns data cast to DataVizData', () {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         expect(template.dataVizData, testData);
         expect(template.dataVizData.metrics.length, 5);
         expect(template.dataVizData.title, 'Your Year in Music');
@@ -104,21 +104,21 @@ void main() {
 
     group('widget rendering', () {
       testWidgets('renders without error', (tester) async {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(TheGrowthTree), findsOneWidget);
       });
 
       testWidgets('displays title', (tester) async {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 30));
 
         expect(find.text('Your Year in Music'), findsWidgets);
       });
 
       testWidgets('renders without flowers', (tester) async {
-        final template = TheGrowthTree(
+        const template = TheGrowthTree(
           data: testData,
           showFlowers: false,
         );
@@ -128,7 +128,7 @@ void main() {
       });
 
       testWidgets('renders with custom vine color', (tester) async {
-        final template = TheGrowthTree(
+        const template = TheGrowthTree(
           data: testData,
           vineColor: Colors.teal,
         );
@@ -138,7 +138,7 @@ void main() {
       });
 
       testWidgets('renders with different seed', (tester) async {
-        final template = TheGrowthTree(
+        const template = TheGrowthTree(
           data: testData,
           seed: 999,
         );
@@ -150,21 +150,21 @@ void main() {
 
     group('toScene', () {
       test('creates scene with correct duration', () {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         final scene = template.toScene();
 
         expect(scene.durationInFrames, 200);
       });
 
       test('creates scene with custom duration', () {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         final scene = template.toScene(durationInFrames: 300);
 
         expect(scene.durationInFrames, 300);
       });
 
       test('creates scene with transitions', () {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         final scene = template.toSceneWithCrossFade();
 
         expect(scene.transitionIn, isNotNull);
@@ -174,21 +174,21 @@ void main() {
 
     group('animation frames', () {
       testWidgets('renders correctly at frame 0', (tester) async {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 0));
 
         expect(find.byType(TheGrowthTree), findsOneWidget);
       });
 
       testWidgets('renders correctly at mid frame', (tester) async {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 100));
 
         expect(find.byType(TheGrowthTree), findsOneWidget);
       });
 
       testWidgets('renders correctly at end frame', (tester) async {
-        final template = TheGrowthTree(data: testData);
+        const template = TheGrowthTree(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 200));
 
         expect(find.byType(TheGrowthTree), findsOneWidget);
@@ -197,7 +197,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with pastel theme', (tester) async {
-        final template = TheGrowthTree(
+        const template = TheGrowthTree(
           data: testData,
           theme: TemplateTheme.pastel,
         );
@@ -207,7 +207,7 @@ void main() {
       });
 
       testWidgets('renders with ocean theme', (tester) async {
-        final template = TheGrowthTree(
+        const template = TheGrowthTree(
           data: testData,
           theme: TemplateTheme.ocean,
         );
@@ -217,7 +217,7 @@ void main() {
       });
 
       testWidgets('renders with minimal theme', (tester) async {
-        final template = TheGrowthTree(
+        const template = TheGrowthTree(
           data: testData,
           theme: TemplateTheme.minimal,
         );
@@ -229,22 +229,22 @@ void main() {
 
     group('edge cases', () {
       testWidgets('handles empty metrics', (tester) async {
-        final emptyData = DataVizData(
+        const emptyData = DataVizData(
           title: 'Empty',
-          metrics: const [],
+          metrics: [],
         );
-        final template = TheGrowthTree(data: emptyData);
+        const template = TheGrowthTree(data: emptyData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(TheGrowthTree), findsOneWidget);
       });
 
       testWidgets('handles single metric', (tester) async {
-        final singleData = DataVizData(
+        const singleData = DataVizData(
           title: 'Single',
-          metrics: const [MetricData(label: 'Only', value: 100)],
+          metrics: [MetricData(label: 'Only', value: 100)],
         );
-        final template = TheGrowthTree(data: singleData);
+        const template = TheGrowthTree(data: singleData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(TheGrowthTree), findsOneWidget);
@@ -265,22 +265,22 @@ void main() {
       });
 
       testWidgets('handles data with subtitle', (tester) async {
-        final subtitleData = DataVizData(
+        const subtitleData = DataVizData(
           title: 'Growth',
           subtitle: 'Total: 500 hours',
-          metrics: const [
+          metrics: [
             MetricData(label: 'A', value: 100),
             MetricData(label: 'B', value: 200),
           ],
         );
-        final template = TheGrowthTree(data: subtitleData);
+        const template = TheGrowthTree(data: subtitleData);
         await tester.pumpWidget(wrapWithApp(template, frame: 180));
 
         expect(find.byType(TheGrowthTree), findsOneWidget);
       });
 
       testWidgets('handles very small max vine height', (tester) async {
-        final template = TheGrowthTree(
+        const template = TheGrowthTree(
           data: testData,
           maxVineHeight: 50,
         );

@@ -44,7 +44,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = TheMixtape(
+        const template = TheMixtape(
           data: testData,
           theme: TemplateTheme.retro,
         );
@@ -223,7 +223,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with retro theme', (tester) async {
-        final template = TheMixtape(
+        const template = TheMixtape(
           data: testData,
           theme: TemplateTheme.retro,
         );
@@ -233,7 +233,7 @@ void main() {
       });
 
       testWidgets('renders with neon theme', (tester) async {
-        final template = TheMixtape(
+        const template = TheMixtape(
           data: testData,
           theme: TemplateTheme.neon,
         );
@@ -243,7 +243,7 @@ void main() {
       });
 
       testWidgets('renders with minimal theme', (tester) async {
-        final template = TheMixtape(
+        const template = TheMixtape(
           data: testData,
           theme: TemplateTheme.minimal,
         );

@@ -15,7 +15,8 @@ void main() {
           tester,
           Builder(
             builder: (context) {
-              return Background.solid(Colors.deepPurple).build(context, 60);
+              return const Background.solid(Colors.deepPurple)
+                  .build(context, 60);
             },
           ),
           name: 'widgets/background/solid',
@@ -66,7 +67,7 @@ void main() {
       testWidgets('at frame 0', (tester) async {
         await expectGolden(
           tester,
-          AnimatedGradient(
+          const AnimatedGradient(
             startColors: {0: Colors.red, 60: Colors.blue},
             endColors: {0: Colors.orange, 60: Colors.purple},
           ),
@@ -80,7 +81,7 @@ void main() {
       testWidgets('at frame 30', (tester) async {
         await expectGolden(
           tester,
-          AnimatedGradient(
+          const AnimatedGradient(
             startColors: {0: Colors.red, 60: Colors.blue},
             endColors: {0: Colors.orange, 60: Colors.purple},
           ),
@@ -94,7 +95,7 @@ void main() {
       testWidgets('at frame 60', (tester) async {
         await expectGolden(
           tester,
-          AnimatedGradient(
+          const AnimatedGradient(
             startColors: {0: Colors.red, 60: Colors.blue},
             endColors: {0: Colors.orange, 60: Colors.purple},
           ),
@@ -108,7 +109,7 @@ void main() {
       testWidgets('radial type', (tester) async {
         await expectGolden(
           tester,
-          AnimatedGradient(
+          const AnimatedGradient(
             startColors: {0: Colors.cyan, 60: Colors.teal},
             endColors: {0: Colors.blue, 60: Colors.indigo},
             type: AnimatedGradientType.radial,
@@ -124,7 +125,7 @@ void main() {
       testWidgets('sweep type', (tester) async {
         await expectGolden(
           tester,
-          AnimatedGradient(
+          const AnimatedGradient(
             startColors: {0: Colors.pink, 60: Colors.purple},
             endColors: {0: Colors.amber, 60: Colors.deepOrange},
             type: AnimatedGradientType.sweep,
@@ -143,7 +144,7 @@ void main() {
           tester,
           Builder(
             builder: (context) {
-              return Background.noise().build(context, 60);
+              return const Background.noise().build(context, 60);
             },
           ),
           name: 'widgets/background/noise_default',
@@ -156,7 +157,7 @@ void main() {
           tester,
           Builder(
             builder: (context) {
-              return Background.noise(
+              return const Background.noise(
                 intensity: 0.3,
                 color: Colors.white,
               ).build(context, 60);
@@ -174,7 +175,7 @@ void main() {
           tester,
           Builder(
             builder: (context) {
-              return Background.vhs().build(context, 60);
+              return const Background.vhs().build(context, 60);
             },
           ),
           name: 'widgets/background/vhs_default',
@@ -187,7 +188,7 @@ void main() {
           tester,
           Builder(
             builder: (context) {
-              return Background.vhs(
+              return const Background.vhs(
                 showScanlines: true,
                 showChromatic: true,
                 showTracking: true,

@@ -47,7 +47,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = Kaleidoscope(
+        const template = Kaleidoscope(
           data: testData,
           theme: TemplateTheme.neon,
         );
@@ -226,7 +226,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with neon theme', (tester) async {
-        final template = Kaleidoscope(
+        const template = Kaleidoscope(
           data: testData,
           theme: TemplateTheme.neon,
         );
@@ -236,7 +236,7 @@ void main() {
       });
 
       testWidgets('renders with spotify theme', (tester) async {
-        final template = Kaleidoscope(
+        const template = Kaleidoscope(
           data: testData,
           theme: TemplateTheme.spotify,
         );
@@ -246,7 +246,7 @@ void main() {
       });
 
       testWidgets('renders with pastel theme', (tester) async {
-        final template = Kaleidoscope(
+        const template = Kaleidoscope(
           data: testData,
           theme: TemplateTheme.pastel,
         );

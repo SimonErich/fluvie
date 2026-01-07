@@ -44,7 +44,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = NoiseID(
+        const template = NoiseID(
           data: testData,
           theme: TemplateTheme.minimal,
         );
@@ -237,7 +237,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with minimal theme', (tester) async {
-        final template = NoiseID(
+        const template = NoiseID(
           data: testData,
           theme: TemplateTheme.minimal,
         );
@@ -247,7 +247,7 @@ void main() {
       });
 
       testWidgets('renders with neon theme', (tester) async {
-        final template = NoiseID(
+        const template = NoiseID(
           data: testData,
           theme: TemplateTheme.neon,
         );
@@ -257,7 +257,7 @@ void main() {
       });
 
       testWidgets('renders with retro theme', (tester) async {
-        final template = NoiseID(
+        const template = NoiseID(
           data: testData,
           theme: TemplateTheme.retro,
         );

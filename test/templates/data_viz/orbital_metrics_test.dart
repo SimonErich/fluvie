@@ -8,26 +8,26 @@ import '../../helpers/test_helpers.dart';
 
 void main() {
   group('OrbitalMetrics', () {
-    final testData = DataVizData(
+    const testData = DataVizData(
       title: 'Your Music Universe',
       metrics: [
-        const MetricData(label: 'Pop', value: 45, color: Colors.pink),
-        const MetricData(label: 'Rock', value: 25, color: Colors.red),
-        const MetricData(label: 'Hip Hop', value: 20, color: Colors.purple),
-        const MetricData(label: 'Jazz', value: 10, color: Colors.blue),
+        MetricData(label: 'Pop', value: 45, color: Colors.pink),
+        MetricData(label: 'Rock', value: 25, color: Colors.red),
+        MetricData(label: 'Hip Hop', value: 20, color: Colors.purple),
+        MetricData(label: 'Jazz', value: 10, color: Colors.blue),
       ],
     );
 
     group('construction', () {
       test('creates with required data', () {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
 
         expect(template.data, testData);
         expect(template.dataVizData, testData);
       });
 
       test('has default values', () {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
 
         expect(template.orbitRadius, 200);
         expect(template.orbitSpeed, 0.3);
@@ -36,7 +36,7 @@ void main() {
       });
 
       test('accepts custom values', () {
-        final template = OrbitalMetrics(
+        const template = OrbitalMetrics(
           data: testData,
           orbitRadius: 300,
           orbitSpeed: 0.5,
@@ -51,7 +51,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = OrbitalMetrics(
+        const template = OrbitalMetrics(
           data: testData,
           theme: TemplateTheme.midnight,
         );
@@ -60,7 +60,7 @@ void main() {
       });
 
       test('accepts timing', () {
-        final template = OrbitalMetrics(
+        const template = OrbitalMetrics(
           data: testData,
           timing: TemplateTiming.dramatic,
         );
@@ -71,30 +71,30 @@ void main() {
 
     group('template properties', () {
       test('recommendedLength is 180 frames', () {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         expect(template.recommendedLength, 180);
       });
 
       test('category is dataViz', () {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         expect(template.category, TemplateCategory.dataViz);
       });
 
       test('description is set', () {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         expect(template.description, isNotEmpty);
         expect(template.description, contains('planet'));
       });
 
       test('defaultTheme is midnight', () {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         expect(template.defaultTheme, TemplateTheme.midnight);
       });
     });
 
     group('dataVizData getter', () {
       test('returns data cast to DataVizData', () {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         expect(template.dataVizData, testData);
         expect(template.dataVizData.metrics.length, 4);
         expect(template.dataVizData.title, 'Your Music Universe');
@@ -103,21 +103,21 @@ void main() {
 
     group('widget rendering', () {
       testWidgets('renders without error', (tester) async {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(OrbitalMetrics), findsOneWidget);
       });
 
       testWidgets('displays title', (tester) async {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 50));
 
         expect(find.text('Your Music Universe'), findsWidgets);
       });
 
       testWidgets('renders with center label', (tester) async {
-        final template = OrbitalMetrics(
+        const template = OrbitalMetrics(
           data: testData,
           centerLabel: 'Total',
           centerValue: '100',
@@ -128,7 +128,7 @@ void main() {
       });
 
       testWidgets('renders with custom orbit radius', (tester) async {
-        final template = OrbitalMetrics(
+        const template = OrbitalMetrics(
           data: testData,
           orbitRadius: 150,
         );
@@ -138,7 +138,7 @@ void main() {
       });
 
       testWidgets('renders with custom orbit speed', (tester) async {
-        final template = OrbitalMetrics(
+        const template = OrbitalMetrics(
           data: testData,
           orbitSpeed: 0.8,
         );
@@ -150,21 +150,21 @@ void main() {
 
     group('toScene', () {
       test('creates scene with correct duration', () {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         final scene = template.toScene();
 
         expect(scene.durationInFrames, 180);
       });
 
       test('creates scene with custom duration', () {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         final scene = template.toScene(durationInFrames: 250);
 
         expect(scene.durationInFrames, 250);
       });
 
       test('creates scene with transitions', () {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         final scene = template.toSceneWithCrossFade();
 
         expect(scene.transitionIn, isNotNull);
@@ -174,21 +174,21 @@ void main() {
 
     group('animation frames', () {
       testWidgets('renders correctly at frame 0', (tester) async {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 0));
 
         expect(find.byType(OrbitalMetrics), findsOneWidget);
       });
 
       testWidgets('renders correctly at mid frame', (tester) async {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 90));
 
         expect(find.byType(OrbitalMetrics), findsOneWidget);
       });
 
       testWidgets('renders correctly at end frame', (tester) async {
-        final template = OrbitalMetrics(data: testData);
+        const template = OrbitalMetrics(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 180));
 
         expect(find.byType(OrbitalMetrics), findsOneWidget);
@@ -197,7 +197,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with midnight theme', (tester) async {
-        final template = OrbitalMetrics(
+        const template = OrbitalMetrics(
           data: testData,
           theme: TemplateTheme.midnight,
         );
@@ -207,7 +207,7 @@ void main() {
       });
 
       testWidgets('renders with neon theme', (tester) async {
-        final template = OrbitalMetrics(
+        const template = OrbitalMetrics(
           data: testData,
           theme: TemplateTheme.neon,
         );
@@ -217,7 +217,7 @@ void main() {
       });
 
       testWidgets('renders with spotify theme', (tester) async {
-        final template = OrbitalMetrics(
+        const template = OrbitalMetrics(
           data: testData,
           theme: TemplateTheme.spotify,
         );
@@ -229,11 +229,11 @@ void main() {
 
     group('edge cases', () {
       testWidgets('handles single metric', (tester) async {
-        final singleData = DataVizData(
+        const singleData = DataVizData(
           title: 'Single Metric',
-          metrics: const [MetricData(label: 'Only One', value: 100)],
+          metrics: [MetricData(label: 'Only One', value: 100)],
         );
-        final template = OrbitalMetrics(data: singleData);
+        const template = OrbitalMetrics(data: singleData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(OrbitalMetrics), findsOneWidget);
@@ -254,41 +254,41 @@ void main() {
       });
 
       testWidgets('handles metrics without colors', (tester) async {
-        final noColorData = DataVizData(
+        const noColorData = DataVizData(
           title: 'No Colors',
-          metrics: const [
+          metrics: [
             MetricData(label: 'A', value: 50),
             MetricData(label: 'B', value: 30),
             MetricData(label: 'C', value: 20),
           ],
         );
-        final template = OrbitalMetrics(data: noColorData);
+        const template = OrbitalMetrics(data: noColorData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(OrbitalMetrics), findsOneWidget);
       });
 
       testWidgets('handles long metric labels', (tester) async {
-        final longLabelData = DataVizData(
+        const longLabelData = DataVizData(
           title: 'Long Labels',
-          metrics: const [
+          metrics: [
             MetricData(
               label: 'This is a very long metric label',
               value: 100,
             ),
           ],
         );
-        final template = OrbitalMetrics(data: longLabelData);
+        const template = OrbitalMetrics(data: longLabelData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(OrbitalMetrics), findsOneWidget);
       });
 
       testWidgets('handles data without title', (tester) async {
-        final noTitleData = DataVizData(
-          metrics: const [MetricData(label: 'Test', value: 100)],
+        const noTitleData = DataVizData(
+          metrics: [MetricData(label: 'Test', value: 100)],
         );
-        final template = OrbitalMetrics(data: noTitleData);
+        const template = OrbitalMetrics(data: noTitleData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(OrbitalMetrics), findsOneWidget);

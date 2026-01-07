@@ -292,9 +292,9 @@ void main() {
       testWidgets('stagger with fade in shows first child first',
           (tester) async {
         await tester.pumpWidget(wrapWithApp(
-          VColumn(
-            stagger: const StaggerConfig.fade(delay: 15, duration: 10),
-            children: const [
+          const VColumn(
+            stagger: StaggerConfig.fade(delay: 15, duration: 10),
+            children: [
               Text('First'),
               Text('Second'),
             ],
@@ -338,10 +338,10 @@ void main() {
       testWidgets('stagger with spacing adds both transforms and spacers',
           (tester) async {
         await tester.pumpWidget(wrapWithApp(
-          VColumn(
+          const VColumn(
             spacing: 20,
-            stagger: const StaggerConfig.fade(delay: 10),
-            children: const [
+            stagger: StaggerConfig.fade(delay: 10),
+            children: [
               Text('First'),
               Text('Second'),
               Text('Third'),

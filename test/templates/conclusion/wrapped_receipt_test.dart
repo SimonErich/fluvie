@@ -7,7 +7,7 @@ import '../../helpers/test_helpers.dart';
 
 void main() {
   group('WrappedReceipt', () {
-    final testData = SummaryData(
+    const testData = SummaryData(
       title: 'YOUR WRAPPED RECEIPT',
       name: 'JOHN DOE',
       subtitle: 'SEE YOU NEXT YEAR',
@@ -22,14 +22,14 @@ void main() {
 
     group('construction', () {
       test('creates with required data', () {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
 
         expect(template.data, testData);
         expect(template.summaryData, testData);
       });
 
       test('has default values', () {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
 
         expect(template.items, isNull);
         expect(template.showTexture, isTrue);
@@ -37,9 +37,9 @@ void main() {
       });
 
       test('accepts custom values', () {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
-          items: const [
+          items: [
             ReceiptItem(label: 'Item 1', value: '100'),
             ReceiptItem(label: 'Item 2', value: '200'),
           ],
@@ -53,7 +53,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
           theme: TemplateTheme.minimal,
         );
@@ -62,7 +62,7 @@ void main() {
       });
 
       test('accepts timing', () {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
           timing: TemplateTiming.smooth,
         );
@@ -73,30 +73,30 @@ void main() {
 
     group('template properties', () {
       test('recommendedLength is 250 frames', () {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         expect(template.recommendedLength, 250);
       });
 
       test('category is conclusion', () {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         expect(template.category, TemplateCategory.conclusion);
       });
 
       test('description is set', () {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         expect(template.description, isNotEmpty);
         expect(template.description, contains('receipt'));
       });
 
       test('defaultTheme is minimal', () {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         expect(template.defaultTheme, TemplateTheme.minimal);
       });
     });
 
     group('summaryData getter', () {
       test('returns data cast to SummaryData', () {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         expect(template.summaryData, testData);
         expect(template.summaryData.stats.length, 4);
         expect(template.summaryData.name, 'JOHN DOE');
@@ -105,9 +105,9 @@ void main() {
 
     group('effectiveItems getter', () {
       test('uses provided items when available', () {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
-          items: const [
+          items: [
             ReceiptItem(label: 'Custom', value: '999'),
           ],
         );
@@ -116,21 +116,21 @@ void main() {
       });
 
       test('generates items from stats when items not provided', () {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         expect(template.effectiveItems, hasLength(4));
       });
     });
 
     group('widget rendering', () {
       testWidgets('renders without error', (tester) async {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('renders without texture', (tester) async {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
           showTexture: false,
         );
@@ -140,9 +140,9 @@ void main() {
       });
 
       testWidgets('renders with custom items', (tester) async {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
-          items: const [
+          items: [
             ReceiptItem(label: 'Song A', value: '100 plays'),
             ReceiptItem(label: 'Song B', value: '90 plays'),
             ReceiptItem(label: 'Song C', value: '80 plays'),
@@ -154,7 +154,7 @@ void main() {
       });
 
       testWidgets('renders with fast scroll speed', (tester) async {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
           scrollSpeed: 2.0,
         );
@@ -164,7 +164,7 @@ void main() {
       });
 
       testWidgets('renders with slow scroll speed', (tester) async {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
           scrollSpeed: 0.5,
         );
@@ -176,21 +176,21 @@ void main() {
 
     group('toScene', () {
       test('creates scene with correct duration', () {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         final scene = template.toScene();
 
         expect(scene.durationInFrames, 250);
       });
 
       test('creates scene with custom duration', () {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         final scene = template.toScene(durationInFrames: 300);
 
         expect(scene.durationInFrames, 300);
       });
 
       test('creates scene with transitions', () {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         final scene = template.toSceneWithCrossFade();
 
         expect(scene.transitionIn, isNotNull);
@@ -200,56 +200,56 @@ void main() {
 
     group('animation frames', () {
       testWidgets('renders correctly at frame 0', (tester) async {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 0));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('renders correctly during entry animation', (tester) async {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 35));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('renders correctly during header display', (tester) async {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 55));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('renders correctly during title display', (tester) async {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 75));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('renders correctly during items display', (tester) async {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 100));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('renders correctly during summary display', (tester) async {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 170));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('renders correctly during footer display', (tester) async {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 220));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('renders correctly at end frame', (tester) async {
-        final template = WrappedReceipt(data: testData);
+        const template = WrappedReceipt(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 250));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
@@ -258,7 +258,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with minimal theme', (tester) async {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
           theme: TemplateTheme.minimal,
         );
@@ -268,7 +268,7 @@ void main() {
       });
 
       testWidgets('renders with spotify theme', (tester) async {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
           theme: TemplateTheme.spotify,
         );
@@ -278,7 +278,7 @@ void main() {
       });
 
       testWidgets('renders with pastel theme', (tester) async {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
           theme: TemplateTheme.pastel,
         );
@@ -290,58 +290,58 @@ void main() {
 
     group('edge cases', () {
       testWidgets('handles data without title', (tester) async {
-        final noTitleData = SummaryData(
+        const noTitleData = SummaryData(
           name: 'USER',
           year: 2024,
           stats: {'Hours': '100'},
         );
-        final template = WrappedReceipt(data: noTitleData);
+        const template = WrappedReceipt(data: noTitleData);
         await tester.pumpWidget(wrapWithApp(template, frame: 75));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('handles data without name', (tester) async {
-        final noNameData = SummaryData(
+        const noNameData = SummaryData(
           title: 'RECEIPT',
           year: 2024,
           stats: {'Hours': '100'},
         );
-        final template = WrappedReceipt(data: noNameData);
+        const template = WrappedReceipt(data: noNameData);
         await tester.pumpWidget(wrapWithApp(template, frame: 55));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('handles data without subtitle', (tester) async {
-        final noSubtitleData = SummaryData(
+        const noSubtitleData = SummaryData(
           title: 'RECEIPT',
           name: 'USER',
           year: 2024,
           stats: {'Hours': '100'},
         );
-        final template = WrappedReceipt(data: noSubtitleData);
+        const template = WrappedReceipt(data: noSubtitleData);
         await tester.pumpWidget(wrapWithApp(template, frame: 220));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('handles empty stats', (tester) async {
-        final emptyStatsData = SummaryData(
+        const emptyStatsData = SummaryData(
           title: 'RECEIPT',
           name: 'USER',
           stats: {},
         );
-        final template = WrappedReceipt(data: emptyStatsData);
+        const template = WrappedReceipt(data: emptyStatsData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('handles empty items list', (tester) async {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
-          items: const [],
+          items: [],
         );
         await tester.pumpWidget(wrapWithApp(template));
 
@@ -349,7 +349,7 @@ void main() {
       });
 
       testWidgets('handles many items', (tester) async {
-        final manyItemsData = SummaryData(
+        const manyItemsData = SummaryData(
           title: 'RECEIPT',
           name: 'USER',
           stats: {
@@ -365,24 +365,24 @@ void main() {
             'Song 10': '10',
           },
         );
-        final template = WrappedReceipt(data: manyItemsData);
+        const template = WrappedReceipt(data: manyItemsData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('handles minimal data', (tester) async {
-        final minimalData = SummaryData(stats: {});
-        final template = WrappedReceipt(data: minimalData);
+        const minimalData = SummaryData(stats: {});
+        const template = WrappedReceipt(data: minimalData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(WrappedReceipt), findsOneWidget);
       });
 
       testWidgets('handles item with subtitle', (tester) async {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
-          items: const [
+          items: [
             ReceiptItem(label: 'Song', value: '100', subtitle: 'By Artist'),
           ],
         );
@@ -392,9 +392,9 @@ void main() {
       });
 
       testWidgets('handles long item labels', (tester) async {
-        final template = WrappedReceipt(
+        const template = WrappedReceipt(
           data: testData,
-          items: const [
+          items: [
             ReceiptItem(
               label:
                   'This is a very long song title that might need truncation',

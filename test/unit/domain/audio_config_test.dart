@@ -4,8 +4,8 @@ import 'package:fluvie/src/domain/audio_config.dart';
 void main() {
   group('AudioTrackConfig', () {
     test('creates with required fields', () {
-      final config = AudioTrackConfig(
-        source: const AudioSourceConfig(
+      const config = AudioTrackConfig(
+        source: AudioSourceConfig(
           type: AudioSourceType.file,
           uri: 'audio.mp3',
         ),
@@ -20,8 +20,8 @@ void main() {
     });
 
     test('default values', () {
-      final config = AudioTrackConfig(
-        source: const AudioSourceConfig(
+      const config = AudioTrackConfig(
+        source: AudioSourceConfig(
           type: AudioSourceType.file,
           uri: 'test.mp3',
         ),
@@ -39,8 +39,8 @@ void main() {
     });
 
     test('creates with all optional fields', () {
-      final config = AudioTrackConfig(
-        source: const AudioSourceConfig(
+      const config = AudioTrackConfig(
+        source: AudioSourceConfig(
           type: AudioSourceType.asset,
           uri: 'assets/music.mp3',
         ),
@@ -52,7 +52,7 @@ void main() {
         fadeInFrames: 10,
         fadeOutFrames: 20,
         loop: true,
-        sync: const AudioSyncConfig(
+        sync: AudioSyncConfig(
           syncStartWithAnchor: 'anchor1',
           startOffset: 5,
         ),
@@ -69,8 +69,8 @@ void main() {
 
     group('trimStartFrameToMs', () {
       test('converts frames to milliseconds at 30fps', () {
-        final config = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const config = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.file,
             uri: 'test.mp3',
           ),
@@ -83,8 +83,8 @@ void main() {
       });
 
       test('converts frames to milliseconds at 60fps', () {
-        final config = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const config = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.file,
             uri: 'test.mp3',
           ),
@@ -97,8 +97,8 @@ void main() {
       });
 
       test('handles zero frames', () {
-        final config = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const config = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.file,
             uri: 'test.mp3',
           ),
@@ -113,8 +113,8 @@ void main() {
 
     group('trimEndFrameToMs', () {
       test('converts end frame to milliseconds', () {
-        final config = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const config = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.file,
             uri: 'test.mp3',
           ),
@@ -127,8 +127,8 @@ void main() {
       });
 
       test('returns null when trimEndFrame is null', () {
-        final config = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const config = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.file,
             uri: 'test.mp3',
           ),
@@ -142,8 +142,8 @@ void main() {
 
     group('copyWith', () {
       test('copies with new values', () {
-        final original = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const original = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.file,
             uri: 'original.mp3',
           ),
@@ -164,14 +164,14 @@ void main() {
       });
 
       test('can clear sync config', () {
-        final original = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const original = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.file,
             uri: 'test.mp3',
           ),
           startFrame: 0,
           durationInFrames: 90,
-          sync: const AudioSyncConfig(syncStartWithAnchor: 'anchor'),
+          sync: AudioSyncConfig(syncStartWithAnchor: 'anchor'),
         );
 
         expect(original.sync, isNotNull);
@@ -184,8 +184,8 @@ void main() {
 
     group('resolveSync', () {
       test('returns unchanged when no sync config', () {
-        final config = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const config = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.file,
             uri: 'test.mp3',
           ),
@@ -200,14 +200,14 @@ void main() {
       });
 
       test('resolves start frame from anchor', () {
-        final config = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const config = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.file,
             uri: 'test.mp3',
           ),
           startFrame: 0,
           durationInFrames: 50,
-          sync: const AudioSyncConfig(
+          sync: AudioSyncConfig(
             syncStartWithAnchor: 'intro',
             startOffset: 5,
           ),
@@ -222,14 +222,14 @@ void main() {
       });
 
       test('resolves duration from end anchor', () {
-        final config = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const config = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.file,
             uri: 'test.mp3',
           ),
           startFrame: 10,
           durationInFrames: 50,
-          sync: const AudioSyncConfig(
+          sync: AudioSyncConfig(
             syncStartWithAnchor: 'scene',
             syncEndWithAnchor: 'scene',
             startOffset: 0,
@@ -246,15 +246,15 @@ void main() {
       });
 
       test('sets loop when behavior is loopToMatch', () {
-        final config = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const config = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.file,
             uri: 'test.mp3',
           ),
           startFrame: 0,
           durationInFrames: 30,
           loop: false,
-          sync: const AudioSyncConfig(
+          sync: AudioSyncConfig(
             syncStartWithAnchor: 'long_scene',
             syncEndWithAnchor: 'long_scene',
             behavior: SyncBehavior.loopToMatch,
@@ -269,14 +269,14 @@ void main() {
       });
 
       test('returns unchanged when anchor not found', () {
-        final config = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const config = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.file,
             uri: 'test.mp3',
           ),
           startFrame: 10,
           durationInFrames: 50,
-          sync: const AudioSyncConfig(
+          sync: AudioSyncConfig(
             syncStartWithAnchor: 'missing',
           ),
         );
@@ -291,8 +291,8 @@ void main() {
 
     group('serialization', () {
       test('roundtrip with all fields', () {
-        final original = AudioTrackConfig(
-          source: const AudioSourceConfig(
+        const original = AudioTrackConfig(
+          source: AudioSourceConfig(
             type: AudioSourceType.url,
             uri: 'https://example.com/audio.mp3',
           ),
@@ -304,7 +304,7 @@ void main() {
           fadeInFrames: 15,
           fadeOutFrames: 20,
           loop: true,
-          sync: const AudioSyncConfig(
+          sync: AudioSyncConfig(
             syncStartWithAnchor: 'anchor',
             startOffset: 5,
           ),

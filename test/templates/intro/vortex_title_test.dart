@@ -46,7 +46,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = VortexTitle(
+        const template = VortexTitle(
           data: testData,
           theme: TemplateTheme.neon,
         );
@@ -236,7 +236,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with neon theme', (tester) async {
-        final template = VortexTitle(
+        const template = VortexTitle(
           data: testData,
           theme: TemplateTheme.neon,
         );
@@ -246,7 +246,7 @@ void main() {
       });
 
       testWidgets('renders with spotify theme', (tester) async {
-        final template = VortexTitle(
+        const template = VortexTitle(
           data: testData,
           theme: TemplateTheme.spotify,
         );
@@ -256,7 +256,7 @@ void main() {
       });
 
       testWidgets('renders with midnight theme', (tester) async {
-        final template = VortexTitle(
+        const template = VortexTitle(
           data: testData,
           theme: TemplateTheme.midnight,
         );

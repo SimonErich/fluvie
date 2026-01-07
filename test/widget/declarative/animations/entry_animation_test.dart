@@ -96,7 +96,7 @@ void main() {
           startScale: 0.0,
         );
         expect(animation, isA<ElasticPopAnimation>());
-        final elastic = animation as ElasticPopAnimation;
+        const elastic = animation as ElasticPopAnimation;
         expect(elastic.overshoot, 1.15);
       });
     });
@@ -150,7 +150,7 @@ void main() {
           flickerIntensity: 0.6,
         );
         expect(animation, isA<StrobeRevealAnimation>());
-        final strobe = animation as StrobeRevealAnimation;
+        const strobe = animation as StrobeRevealAnimation;
         expect(strobe.flickerCount, 8);
       });
     });
@@ -215,7 +215,7 @@ void main() {
           distance: 150,
         );
         expect(animation, isA<GlitchSlideAnimation>());
-        final glitch = animation as GlitchSlideAnimation;
+        const glitch = animation as GlitchSlideAnimation;
         expect(glitch.direction, EntrySlideDirection.fromBottom);
       });
     });
@@ -286,7 +286,7 @@ void main() {
           origin: Alignment.bottomLeft,
         );
         expect(animation, isA<MaskedWipeAnimation>());
-        final masked = animation as MaskedWipeAnimation;
+        const masked = animation as MaskedWipeAnimation;
         expect(masked.shape, WipeShape.diamond);
       });
     });

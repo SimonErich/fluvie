@@ -44,7 +44,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = DigitalMirror(
+        const template = DigitalMirror(
           data: testData,
           theme: TemplateTheme.midnight,
         );
@@ -231,7 +231,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with midnight theme', (tester) async {
-        final template = DigitalMirror(
+        const template = DigitalMirror(
           data: testData,
           theme: TemplateTheme.midnight,
         );
@@ -241,7 +241,7 @@ void main() {
       });
 
       testWidgets('renders with neon theme', (tester) async {
-        final template = DigitalMirror(
+        const template = DigitalMirror(
           data: testData,
           theme: TemplateTheme.neon,
         );

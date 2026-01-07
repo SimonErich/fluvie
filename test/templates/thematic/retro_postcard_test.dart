@@ -50,7 +50,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = RetroPostcard(
+        const template = RetroPostcard(
           data: testData,
           theme: TemplateTheme.pastel,
         );
@@ -221,7 +221,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with pastel theme', (tester) async {
-        final template = RetroPostcard(
+        const template = RetroPostcard(
           data: testData,
           theme: TemplateTheme.pastel,
         );
@@ -231,7 +231,7 @@ void main() {
       });
 
       testWidgets('renders with retro theme', (tester) async {
-        final template = RetroPostcard(
+        const template = RetroPostcard(
           data: testData,
           theme: TemplateTheme.retro,
         );
@@ -241,7 +241,7 @@ void main() {
       });
 
       testWidgets('renders with minimal theme', (tester) async {
-        final template = RetroPostcard(
+        const template = RetroPostcard(
           data: testData,
           theme: TemplateTheme.minimal,
         );

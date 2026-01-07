@@ -30,7 +30,6 @@ void main() {
 
       test('accepts custom values', () {
         const widget = Stagger(
-          children: [],
           staggerDelay: 15,
           animationDuration: 45,
           curve: Curves.bounceOut,
@@ -39,6 +38,7 @@ void main() {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
+          children: [],
         );
 
         expect(widget.staggerDelay, 15);

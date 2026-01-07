@@ -8,7 +8,7 @@ import '../../helpers/test_helpers.dart';
 
 void main() {
   group('TheSignature', () {
-    final testData = SummaryData(
+    const testData = SummaryData(
       title: 'Thank You',
       name: 'John Doe',
       subtitle: 'See you next year!',
@@ -18,14 +18,14 @@ void main() {
 
     group('construction', () {
       test('creates with required data', () {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
 
         expect(template.data, testData);
         expect(template.summaryData, testData);
       });
 
       test('has default values', () {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
 
         expect(template.strokeWidth, 4.0);
         expect(template.showPen, isTrue);
@@ -33,7 +33,7 @@ void main() {
       });
 
       test('accepts custom values', () {
-        final template = TheSignature(
+        const template = TheSignature(
           data: testData,
           strokeWidth: 6.0,
           showPen: false,
@@ -46,7 +46,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = TheSignature(
+        const template = TheSignature(
           data: testData,
           theme: TemplateTheme.minimal,
         );
@@ -55,7 +55,7 @@ void main() {
       });
 
       test('accepts timing', () {
-        final template = TheSignature(
+        const template = TheSignature(
           data: testData,
           timing: TemplateTiming.smooth,
         );
@@ -66,30 +66,30 @@ void main() {
 
     group('template properties', () {
       test('recommendedLength is 200 frames', () {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         expect(template.recommendedLength, 200);
       });
 
       test('category is conclusion', () {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         expect(template.category, TemplateCategory.conclusion);
       });
 
       test('description is set', () {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         expect(template.description, isNotEmpty);
         expect(template.description, contains('handwritten'));
       });
 
       test('defaultTheme is minimal', () {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         expect(template.defaultTheme, TemplateTheme.minimal);
       });
     });
 
     group('summaryData getter', () {
       test('returns data cast to SummaryData', () {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         expect(template.summaryData, testData);
         expect(template.summaryData.name, 'John Doe');
         expect(template.summaryData.title, 'Thank You');
@@ -98,21 +98,21 @@ void main() {
 
     group('widget rendering', () {
       testWidgets('renders without error', (tester) async {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('displays title', (tester) async {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 40));
 
         expect(find.text('Thank You'), findsWidgets);
       });
 
       testWidgets('renders without pen', (tester) async {
-        final template = TheSignature(
+        const template = TheSignature(
           data: testData,
           showPen: false,
         );
@@ -122,7 +122,7 @@ void main() {
       });
 
       testWidgets('renders with custom stroke width', (tester) async {
-        final template = TheSignature(
+        const template = TheSignature(
           data: testData,
           strokeWidth: 8.0,
         );
@@ -132,7 +132,7 @@ void main() {
       });
 
       testWidgets('renders with custom signature color', (tester) async {
-        final template = TheSignature(
+        const template = TheSignature(
           data: testData,
           signatureColor: Colors.purple,
         );
@@ -144,21 +144,21 @@ void main() {
 
     group('toScene', () {
       test('creates scene with correct duration', () {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         final scene = template.toScene();
 
         expect(scene.durationInFrames, 200);
       });
 
       test('creates scene with custom duration', () {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         final scene = template.toScene(durationInFrames: 250);
 
         expect(scene.durationInFrames, 250);
       });
 
       test('creates scene with transitions', () {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         final scene = template.toSceneWithCrossFade();
 
         expect(scene.transitionIn, isNotNull);
@@ -168,49 +168,49 @@ void main() {
 
     group('animation frames', () {
       testWidgets('renders correctly at frame 0', (tester) async {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 0));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('renders correctly during thank you entry', (tester) async {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 35));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('renders correctly at signature start', (tester) async {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 65));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('renders correctly during signature drawing', (tester) async {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 100));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('renders correctly at signature end', (tester) async {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 140));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('renders correctly during ending entry', (tester) async {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 170));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('renders correctly at end frame', (tester) async {
-        final template = TheSignature(data: testData);
+        const template = TheSignature(data: testData);
         await tester.pumpWidget(wrapWithApp(template, frame: 200));
 
         expect(find.byType(TheSignature), findsOneWidget);
@@ -219,7 +219,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with minimal theme', (tester) async {
-        final template = TheSignature(
+        const template = TheSignature(
           data: testData,
           theme: TemplateTheme.minimal,
         );
@@ -229,7 +229,7 @@ void main() {
       });
 
       testWidgets('renders with spotify theme', (tester) async {
-        final template = TheSignature(
+        const template = TheSignature(
           data: testData,
           theme: TemplateTheme.spotify,
         );
@@ -239,7 +239,7 @@ void main() {
       });
 
       testWidgets('renders with pastel theme', (tester) async {
-        final template = TheSignature(
+        const template = TheSignature(
           data: testData,
           theme: TemplateTheme.pastel,
         );
@@ -251,90 +251,90 @@ void main() {
 
     group('edge cases', () {
       testWidgets('handles data without name', (tester) async {
-        final noNameData = SummaryData(
+        const noNameData = SummaryData(
           title: 'Thank You',
           subtitle: 'Goodbye!',
           year: 2024,
           stats: {},
         );
-        final template = TheSignature(data: noNameData);
+        const template = TheSignature(data: noNameData);
         await tester.pumpWidget(wrapWithApp(template, frame: 100));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('handles data without title', (tester) async {
-        final noTitleData = SummaryData(
+        const noTitleData = SummaryData(
           name: 'John',
           subtitle: 'Goodbye!',
           year: 2024,
           stats: {},
         );
-        final template = TheSignature(data: noTitleData);
+        const template = TheSignature(data: noTitleData);
         await tester.pumpWidget(wrapWithApp(template, frame: 40));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('handles data without subtitle', (tester) async {
-        final noSubtitleData = SummaryData(
+        const noSubtitleData = SummaryData(
           title: 'Thanks',
           name: 'User',
           year: 2024,
           stats: {},
         );
-        final template = TheSignature(data: noSubtitleData);
+        const template = TheSignature(data: noSubtitleData);
         await tester.pumpWidget(wrapWithApp(template, frame: 170));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('handles data without year', (tester) async {
-        final noYearData = SummaryData(
+        const noYearData = SummaryData(
           title: 'Thanks',
           name: 'User',
           stats: {},
         );
-        final template = TheSignature(data: noYearData);
+        const template = TheSignature(data: noYearData);
         await tester.pumpWidget(wrapWithApp(template, frame: 190));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('handles long name', (tester) async {
-        final longNameData = SummaryData(
+        const longNameData = SummaryData(
           title: 'Thank You',
           name: 'Dr. Alexander Bartholomew Fitzgerald III',
           stats: {},
         );
-        final template = TheSignature(data: longNameData);
+        const template = TheSignature(data: longNameData);
         await tester.pumpWidget(wrapWithApp(template, frame: 100));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('handles short name', (tester) async {
-        final shortNameData = SummaryData(
+        const shortNameData = SummaryData(
           title: 'Thanks',
           name: 'Jo',
           stats: {},
         );
-        final template = TheSignature(data: shortNameData);
+        const template = TheSignature(data: shortNameData);
         await tester.pumpWidget(wrapWithApp(template, frame: 100));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('handles minimal data', (tester) async {
-        final minimalData = SummaryData(stats: {});
-        final template = TheSignature(data: minimalData);
+        const minimalData = SummaryData(stats: {});
+        const template = TheSignature(data: minimalData);
         await tester.pumpWidget(wrapWithApp(template));
 
         expect(find.byType(TheSignature), findsOneWidget);
       });
 
       testWidgets('handles thin stroke width', (tester) async {
-        final template = TheSignature(
+        const template = TheSignature(
           data: testData,
           strokeWidth: 1.0,
         );
@@ -344,7 +344,7 @@ void main() {
       });
 
       testWidgets('handles thick stroke width', (tester) async {
-        final template = TheSignature(
+        const template = TheSignature(
           data: testData,
           strokeWidth: 12.0,
         );

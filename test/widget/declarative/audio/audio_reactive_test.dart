@@ -320,7 +320,7 @@ void main() {
 
     group('getAudioProvider', () {
       testWidgets('returns provider from context', (tester) async {
-        final widget = _MixinTestWidget();
+        const widget = _MixinTestWidget();
 
         await tester.pumpWidget(MaterialApp(
           home: AudioReactive(
@@ -337,9 +337,9 @@ void main() {
       });
 
       testWidgets('returns null when no AudioReactive', (tester) async {
-        final widget = _MixinTestWidget();
+        const widget = _MixinTestWidget();
 
-        await tester.pumpWidget(MaterialApp(home: widget));
+        await tester.pumpWidget(const MaterialApp(home: widget));
 
         final state = tester.state<_MixinTestWidgetState>(
           find.byType(_MixinTestWidget),
@@ -351,7 +351,7 @@ void main() {
 
     group('getBpm', () {
       testWidgets('returns bpm from provider', (tester) async {
-        final widget = _MixinTestWidget();
+        const widget = _MixinTestWidget();
 
         await tester.pumpWidget(MaterialApp(
           home: AudioReactive(
@@ -368,9 +368,9 @@ void main() {
       });
 
       testWidgets('returns 0 when no provider', (tester) async {
-        final widget = _MixinTestWidget();
+        const widget = _MixinTestWidget();
 
-        await tester.pumpWidget(MaterialApp(home: widget));
+        await tester.pumpWidget(const MaterialApp(home: widget));
 
         final state = tester.state<_MixinTestWidgetState>(
           find.byType(_MixinTestWidget),
@@ -382,7 +382,7 @@ void main() {
 
     group('getAmplitude', () {
       testWidgets('returns amplitude from provider', (tester) async {
-        final widget = _MixinTestWidget();
+        const widget = _MixinTestWidget();
 
         await tester.pumpWidget(MaterialApp(
           home: AudioReactive(
@@ -401,9 +401,9 @@ void main() {
       });
 
       testWidgets('returns 0 when no provider', (tester) async {
-        final widget = _MixinTestWidget();
+        const widget = _MixinTestWidget();
 
-        await tester.pumpWidget(MaterialApp(home: widget));
+        await tester.pumpWidget(const MaterialApp(home: widget));
 
         final state = tester.state<_MixinTestWidgetState>(
           find.byType(_MixinTestWidget),
@@ -415,7 +415,7 @@ void main() {
 
     group('getBeatStrength', () {
       testWidgets('returns beat strength from provider', (tester) async {
-        final widget = _MixinTestWidget();
+        const widget = _MixinTestWidget();
 
         await tester.pumpWidget(MaterialApp(
           home: AudioReactive(
@@ -436,7 +436,7 @@ void main() {
 
     group('isBeat', () {
       testWidgets('returns boolean from provider', (tester) async {
-        final widget = _MixinTestWidget();
+        const widget = _MixinTestWidget();
 
         await tester.pumpWidget(MaterialApp(
           home: AudioReactive(
@@ -453,9 +453,9 @@ void main() {
       });
 
       testWidgets('returns false when no provider', (tester) async {
-        final widget = _MixinTestWidget();
+        const widget = _MixinTestWidget();
 
-        await tester.pumpWidget(MaterialApp(home: widget));
+        await tester.pumpWidget(const MaterialApp(home: widget));
 
         final state = tester.state<_MixinTestWidgetState>(
           find.byType(_MixinTestWidget),
@@ -467,7 +467,7 @@ void main() {
 
     group('getFrequencyBands', () {
       testWidgets('returns bands from provider', (tester) async {
-        final widget = _MixinTestWidget();
+        const widget = _MixinTestWidget();
 
         await tester.pumpWidget(MaterialApp(
           home: AudioReactive(
@@ -485,9 +485,9 @@ void main() {
       });
 
       testWidgets('returns zeros when no provider', (tester) async {
-        final widget = _MixinTestWidget();
+        const widget = _MixinTestWidget();
 
-        await tester.pumpWidget(MaterialApp(home: widget));
+        await tester.pumpWidget(const MaterialApp(home: widget));
 
         final state = tester.state<_MixinTestWidgetState>(
           find.byType(_MixinTestWidget),
@@ -501,7 +501,7 @@ void main() {
 
     group('getBass, getMid, getTreble', () {
       testWidgets('all return values from provider', (tester) async {
-        final widget = _MixinTestWidget();
+        const widget = _MixinTestWidget();
 
         await tester.pumpWidget(MaterialApp(
           home: AudioReactive(
@@ -547,12 +547,12 @@ void main() {
 
       test('accepts custom values', () {
         const widget = BeatPulse(
-          child: SizedBox(),
           minScale: 0.9,
           maxScale: 1.3,
           threshold: 0.5,
           frame: 10,
           fps: 60,
+          child: SizedBox(),
         );
 
         expect(widget.minScale, 0.9);
@@ -748,8 +748,6 @@ class _MixinTestWidget extends StatefulWidget {
 
 class _MixinTestWidgetState extends State<_MixinTestWidget>
     with AudioReactiveMixin {
-  BuildContext get context => super.context;
-
   @override
   Widget build(BuildContext context) {
     return const SizedBox();

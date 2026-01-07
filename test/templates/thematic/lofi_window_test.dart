@@ -47,7 +47,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = LofiWindow(
+        const template = LofiWindow(
           data: testData,
           theme: TemplateTheme.midnight,
         );
@@ -217,7 +217,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with midnight theme', (tester) async {
-        final template = LofiWindow(
+        const template = LofiWindow(
           data: testData,
           theme: TemplateTheme.midnight,
         );
@@ -227,7 +227,7 @@ void main() {
       });
 
       testWidgets('renders with ocean theme', (tester) async {
-        final template = LofiWindow(
+        const template = LofiWindow(
           data: testData,
           theme: TemplateTheme.ocean,
         );
@@ -237,7 +237,7 @@ void main() {
       });
 
       testWidgets('renders with neon theme', (tester) async {
-        final template = LofiWindow(
+        const template = LofiWindow(
           data: testData,
           theme: TemplateTheme.neon,
         );

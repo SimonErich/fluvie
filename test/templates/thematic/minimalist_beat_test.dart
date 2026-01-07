@@ -51,7 +51,7 @@ void main() {
       });
 
       test('accepts theme', () {
-        final template = MinimalistBeat(
+        const template = MinimalistBeat(
           data: testData,
           theme: TemplateTheme.minimal,
         );
@@ -252,7 +252,7 @@ void main() {
 
     group('theme variations', () {
       testWidgets('renders with minimal theme', (tester) async {
-        final template = MinimalistBeat(
+        const template = MinimalistBeat(
           data: testData,
           theme: TemplateTheme.minimal,
         );
@@ -262,7 +262,7 @@ void main() {
       });
 
       testWidgets('renders with midnight theme', (tester) async {
-        final template = MinimalistBeat(
+        const template = MinimalistBeat(
           data: testData,
           theme: TemplateTheme.midnight,
         );
@@ -272,7 +272,7 @@ void main() {
       });
 
       testWidgets('renders with neon theme', (tester) async {
-        final template = MinimalistBeat(
+        const template = MinimalistBeat(
           data: testData,
           theme: TemplateTheme.neon,
         );

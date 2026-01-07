@@ -180,9 +180,9 @@ void main() {
 
     group('rgba data integrity', () {
       test('rgba data matches expected size', () {
-        final width = 100;
-        final height = 50;
-        final expectedSize = width * height * 4;
+        const width = 100;
+        const height = 50;
+        const expectedSize = width * height * 4;
 
         final frame = ExtractedFrame(
           frameNumber: 0,
@@ -355,9 +355,9 @@ void main() {
       // 1920 * 1080 * 4 bytes per frame = 8,294,400 bytes
       // Total: 900 * 8,294,400 = ~7.5 GB uncompressed
 
-      final framesCount = 30 * 30;
-      final bytesPerFrame = 1920 * 1080 * 4;
-      final totalBytes = framesCount * bytesPerFrame;
+      const framesCount = 30 * 30;
+      const bytesPerFrame = 1920 * 1080 * 4;
+      const totalBytes = framesCount * bytesPerFrame;
 
       expect(totalBytes, 7464960000);
       expect(totalBytes / (1024 * 1024 * 1024), closeTo(6.95, 0.1));
@@ -365,7 +365,7 @@ void main() {
 
     test('calculates memory for 4K frame', () {
       // 3840 * 2160 * 4 = 33,177,600 bytes (~33 MB)
-      final bytesPerFrame = 3840 * 2160 * 4;
+      const bytesPerFrame = 3840 * 2160 * 4;
 
       expect(bytesPerFrame, 33177600);
       expect(bytesPerFrame / (1024 * 1024), closeTo(31.6, 0.1));
@@ -376,9 +376,9 @@ void main() {
       // 90 * 8,294,400 = ~746 MB
       // This is why maxMemoryBytes defaults to 500MB
 
-      final cachedFrames = 90;
-      final bytesPerFrame = 1920 * 1080 * 4;
-      final totalCacheBytes = cachedFrames * bytesPerFrame;
+      const cachedFrames = 90;
+      const bytesPerFrame = 1920 * 1080 * 4;
+      const totalCacheBytes = cachedFrames * bytesPerFrame;
 
       expect(totalCacheBytes / (1024 * 1024), closeTo(711.9, 1.0));
     });
