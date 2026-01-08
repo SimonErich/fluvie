@@ -1,0 +1,18 @@
+# Configuration for dart test runner
+# See: https://github.com/dart-lang/test/blob/master/pkgs/test/doc/configuration.md
+
+# Define tags used in tests
+tags:
+  # Golden tests require exact pixel matching and are
+  # platform/Flutter-version specific. They may fail in CI
+  # due to minor rendering differences.
+  golden:
+    timeout: 2x
+
+  # Integration tests that require external dependencies like FFmpeg
+  integration:
+    timeout: 5x
+
+  # Tests that specifically require FFmpeg to be installed
+  ffmpeg:
+    timeout: 5x
