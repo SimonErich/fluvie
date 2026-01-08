@@ -95,7 +95,35 @@ jobs:
         run: flutter pub get
 
       - name: Run tests
-        run: flutter test --coverage
+        run: flutter test --coverage --reporter expanded 2>&1 | tee test-output.txt || true
+
+      - name: Show test failures
+        if: always()
+        shell: bash
+        run: |
+          echo "=== Test Summary ==="
+          if grep -q "Some tests failed" test-output.txt 2>/dev/null; then
+            echo "❌ Some tests failed. Showing failure details:"
+            echo ""
+            # Show lines around failures
+            grep -B 5 -A 20 "FAILED\|Expected:\|Actual:\|══╡ EXCEPTION" test-output.txt || true
+            echo ""
+            echo "=== Full failed test names ==="
+            grep -E "^.*FAILED" test-output.txt || true
+            exit 1
+          elif grep -q "All tests passed" test-output.txt 2>/dev/null; then
+            echo "✅ All tests passed"
+          else
+            # Check exit status from test output
+            PASSED=$(grep -oP '\+\d+' test-output.txt | tail -1 | tr -d '+' || echo "0")
+            FAILED=$(grep -oP '\-\d+' test-output.txt | tail -1 | tr -d '-' || echo "0")
+            echo "Tests completed: $PASSED passed, $FAILED failed"
+            if [ "$FAILED" != "0" ] && [ "$FAILED" != "" ]; then
+              echo "❌ $FAILED tests failed"
+              grep -B 5 -A 20 "FAILED\|Expected:\|Actual:\|══╡ EXCEPTION" test-output.txt || true
+              exit 1
+            fi
+          fi
 
       - name: Check coverage threshold (Ubuntu only)
         if: runner.os == 'Linux' && matrix.flutter-version == '3.29.0'
