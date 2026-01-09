@@ -49,8 +49,43 @@ abstract class Background {
   }) = GradientBackground;
 
   /// Creates an image background.
-  const factory Background.image({required String assetPath, BoxFit fit}) =
-      ImageBackground;
+  ///
+  /// You can provide either a [child] widget (recommended) or an [assetPath]
+  /// string. The [child] parameter allows maximum flexibility, supporting
+  /// [Image.asset], [Image.network], SVGs, or any custom widget.
+  ///
+  /// Example with child (recommended):
+  /// ```dart
+  /// Background.image(
+  ///   child: Image.network('https://example.com/bg.jpg', fit: BoxFit.cover),
+  /// )
+  /// ```
+  ///
+  /// Example with assetPath (legacy):
+  /// ```dart
+  /// Background.image(assetPath: 'assets/bg.jpg')
+  /// ```
+  const factory Background.image({
+    Widget? child,
+    @Deprecated('Use child parameter instead') String? assetPath,
+    BoxFit fit,
+  }) = ImageBackground;
+
+  /// Creates a widget background.
+  ///
+  /// This is an alias for [Background.image] with [child] parameter.
+  /// Use this when you want to use a custom widget as the background.
+  ///
+  /// Example:
+  /// ```dart
+  /// Background.widget(
+  ///   child: Image.network('https://example.com/bg.jpg', fit: BoxFit.cover),
+  /// )
+  /// ```
+  factory Background.widget(
+      {required Widget child, BoxFit fit = BoxFit.cover}) {
+    return ImageBackground(child: child, fit: fit);
+  }
 
   /// Creates a video background.
   const factory Background.video({required String assetPath, BoxFit fit}) =
@@ -268,19 +303,52 @@ class GradientBackground extends Background {
 }
 
 /// An image background.
+///
+/// You can provide either a [child] widget (recommended) or an [assetPath]
+/// string. The [child] parameter allows maximum flexibility, supporting
+/// [Image.asset], [Image.network], SVGs, or any custom widget.
 class ImageBackground extends Background {
+  /// The child widget to display as background.
+  ///
+  /// If provided, [assetPath] must be null. This is the recommended approach
+  /// as it supports any widget type including [Image.network], SVGs, etc.
+  final Widget? child;
+
   /// Path to the image asset.
-  final String assetPath;
+  ///
+  /// Deprecated: Use [child] instead for more flexibility.
+  @Deprecated('Use child parameter instead. '
+      'Example: child: Image.asset("assets/bg.jpg", fit: BoxFit.cover)')
+  final String? assetPath;
 
   /// How the image should fit.
   final BoxFit fit;
 
-  const ImageBackground({required this.assetPath, this.fit = BoxFit.cover});
+  const ImageBackground({
+    this.child,
+    @Deprecated('Use child parameter instead') this.assetPath,
+    this.fit = BoxFit.cover,
+  })  : assert(
+          child != null || assetPath != null,
+          'Either child or assetPath must be provided',
+        ),
+        assert(
+          !(child != null && assetPath != null),
+          'Cannot provide both child and assetPath',
+        );
 
   @override
   Widget build(BuildContext context, int sceneLength) {
+    if (child != null) {
+      return SizedBox.expand(
+        child: FittedBox(
+          fit: fit,
+          child: child,
+        ),
+      );
+    }
     return Image.asset(
-      assetPath,
+      assetPath!,
       fit: fit,
       width: double.infinity,
       height: double.infinity,

@@ -222,6 +222,7 @@ class FloatingPolaroids extends WrappedTemplate with TemplateAnimationMixin {
                       child: Opacity(
                         opacity: (easedEntry * opacity).clamp(0.0, 1.0),
                         child: _buildPolaroid(
+                          context,
                           item,
                           colors,
                           isWinner && isRevealPhase,
@@ -240,6 +241,7 @@ class FloatingPolaroids extends WrappedTemplate with TemplateAnimationMixin {
   }
 
   Widget _buildPolaroid(
+    BuildContext context,
     RankingItem item,
     TemplateTheme colors,
     bool isHighlighted,
@@ -247,6 +249,8 @@ class FloatingPolaroids extends WrappedTemplate with TemplateAnimationMixin {
   ) {
     const polaroidWidth = 200.0;
     const polaroidHeight = 260.0;
+
+    final imageWidget = item.buildImage(context);
 
     return Container(
       width: polaroidWidth,
@@ -277,15 +281,8 @@ class FloatingPolaroids extends WrappedTemplate with TemplateAnimationMixin {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(2),
-                child: item.imagePath != null
-                    ? Image.asset(
-                        item.imagePath!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                        errorBuilder: (_, __, ___) =>
-                            _buildPlaceholderImage(colors, item.rank),
-                      )
+                child: imageWidget != null
+                    ? SizedBox.expand(child: imageWidget)
                     : _buildPlaceholderImage(colors, item.rank),
               ),
             ),

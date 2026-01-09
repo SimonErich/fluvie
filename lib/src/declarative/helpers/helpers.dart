@@ -9,6 +9,7 @@ library;
 
 export 'collage.dart';
 export 'embedded_video.dart';
+export 'media_types.dart';
 export 'floating_element.dart';
 export 'ken_burns_image.dart';
 export 'photo_card.dart';

@@ -95,7 +95,8 @@ class TheNeonGate extends WrappedTemplate with TemplateAnimationMixin {
           Positioned.fill(child: Center(child: _buildPortalRings(colors))),
 
           // Main content
-          Positioned.fill(child: Center(child: _buildContent(colors, timing))),
+          Positioned.fill(
+              child: Center(child: _buildContent(context, colors, timing))),
         ],
       ),
     );
@@ -174,12 +175,13 @@ class TheNeonGate extends WrappedTemplate with TemplateAnimationMixin {
     );
   }
 
-  Widget _buildContent(TemplateTheme colors, TemplateTiming timing) {
+  Widget _buildContent(
+      BuildContext context, TemplateTheme colors, TemplateTiming timing) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         // Logo if provided
-        if (introData.logoPath != null) ...[
+        if (introData.logoPath != null || introData.logoBuilder != null) ...[
           AnimatedProp(
             startFrame: 30,
             duration: 40,
@@ -188,16 +190,7 @@ class TheNeonGate extends WrappedTemplate with TemplateAnimationMixin {
               PropAnimation.fadeIn(),
             ]),
             curve: Easing.easeOutBack,
-            child: Image.asset(
-              introData.logoPath!,
-              width: 120,
-              height: 120,
-              errorBuilder: (_, __, ___) => Icon(
-                Icons.auto_awesome,
-                size: 80,
-                color: colors.primaryColor,
-              ),
-            ),
+            child: _buildLogo(context, colors),
           ),
           const SizedBox(height: 30),
         ],
@@ -287,6 +280,25 @@ class TheNeonGate extends WrappedTemplate with TemplateAnimationMixin {
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildLogo(BuildContext context, TemplateTheme colors) {
+    final logoWidget = introData.buildLogo(context);
+    if (logoWidget != null) {
+      return SizedBox(
+        width: 120,
+        height: 120,
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: logoWidget,
+        ),
+      );
+    }
+    return Icon(
+      Icons.auto_awesome,
+      size: 80,
+      color: colors.primaryColor,
     );
   }
 

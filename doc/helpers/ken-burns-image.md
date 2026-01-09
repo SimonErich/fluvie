@@ -19,6 +19,18 @@
 Create cinematic image movement:
 
 ```dart
+// Using child parameter (recommended - supports any image source)
+KenBurnsImage(
+  child: Image.network('https://example.com/landscape.jpg', fit: BoxFit.cover),
+  width: 800,
+  height: 600,
+  startScale: 1.0,
+  endScale: 1.3,
+  startAlignment: Alignment.centerLeft,
+  endAlignment: Alignment.centerRight,
+)
+
+// Using assetPath (legacy - for local assets only)
 KenBurnsImage(
   assetPath: 'assets/landscape.jpg',
   width: 800,
@@ -38,7 +50,8 @@ The image slowly zooms and pans over the scene duration.
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `assetPath` | `String` | **required** | Path to image asset |
+| `child` | `Widget?` | `null` | Image widget (recommended) |
+| `assetPath` | `String?` | `null` | Path to image asset (deprecated) |
 | `width` | `double` | **required** | Container width |
 | `height` | `double` | **required** | Container height |
 | `startScale` | `double` | `1.0` | Initial zoom level |
@@ -50,6 +63,9 @@ The image slowly zooms and pans over the scene duration.
 | `curve` | `Curve` | `linear` | Animation curve |
 | `errorBuilder` | `Function?` | `null` | Error widget builder |
 
+> **Note:** Either `child` or `assetPath` must be provided, but not both.
+> The `child` parameter is recommended as it supports any widget type including `Image.network`, `Image.asset`, SVGs, and custom widgets.
+
 ---
 
 ## Constructors
@@ -59,6 +75,19 @@ The image slowly zooms and pans over the scene duration.
 Full control over zoom and pan:
 
 ```dart
+// Using child (recommended - any image source)
+KenBurnsImage(
+  child: Image.network('https://example.com/photo.jpg', fit: BoxFit.cover),
+  width: 800,
+  height: 600,
+  startScale: 1.0,
+  endScale: 1.3,
+  startAlignment: Alignment.topLeft,
+  endAlignment: Alignment.bottomRight,
+  curve: Curves.easeInOut,
+)
+
+// Using assetPath (legacy - local assets only)
 KenBurnsImage(
   assetPath: 'assets/photo.jpg',
   width: 800,

@@ -137,7 +137,7 @@ class TheGridShuffle extends WrappedTemplate with TemplateAnimationMixin {
     return TimeConsumer(
       builder: (context, frame, _) {
         final totalCells = gridSize * gridSize;
-        final images = collageData.images;
+        final imageCount = collageData.count;
 
         // Entry phase: 0-30
         // Shuffle phase: 30-90
@@ -233,14 +233,15 @@ class TheGridShuffle extends WrappedTemplate with TemplateAnimationMixin {
               clipBehavior: Clip.none,
               children: List.generate(totalCells, (index) {
                 final position = positions[index] ?? targetPositions[index]!;
-                final imagePath = index < images.length ? images[index] : null;
+                final hasImage = index < imageCount;
 
                 return Positioned(
                   left: position.dx,
                   top: position.dy,
                   child: _buildCell(
+                    context,
                     index,
-                    imagePath,
+                    hasImage,
                     cellWidth,
                     cellHeight,
                     colors,
@@ -255,8 +256,9 @@ class TheGridShuffle extends WrappedTemplate with TemplateAnimationMixin {
   }
 
   Widget _buildCell(
+    BuildContext context,
     int index,
-    String? imagePath,
+    bool hasImage,
     double width,
     double height,
     TemplateTheme colors,
@@ -277,13 +279,11 @@ class TheGridShuffle extends WrappedTemplate with TemplateAnimationMixin {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: imagePath != null
-            ? Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
+        child: hasImage
+            ? SizedBox(
                 width: width,
                 height: height,
-                errorBuilder: (_, __, ___) => _buildPlaceholder(index, colors),
+                child: collageData.buildImage(context, index),
               )
             : _buildPlaceholder(index, colors),
       ),

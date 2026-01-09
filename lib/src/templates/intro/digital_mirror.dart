@@ -156,16 +156,18 @@ class DigitalMirror extends WrappedTemplate with TemplateAnimationMixin {
 
         Widget profileWidget;
 
-        if (introData.profileImagePath != null) {
+        final profileImage = introData.buildProfileImage(context);
+        if (profileImage != null) {
           profileWidget = ClipPath(
             clipper: _ProfileShapeClipper(profileShape),
-            child: Image.asset(
-              introData.profileImagePath!,
+            child: SizedBox(
               width: size,
               height: size,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) =>
-                  _buildPlaceholderProfile(size, colors),
+              child: FittedBox(
+                fit: BoxFit.cover,
+                clipBehavior: Clip.hardEdge,
+                child: profileImage,
+              ),
             ),
           );
         } else {

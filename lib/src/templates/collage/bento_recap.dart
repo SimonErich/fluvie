@@ -102,6 +102,7 @@ class BentoRecap extends WrappedTemplate with TemplateAnimationMixin {
                   left: x,
                   top: y,
                   child: _buildCell(
+                    context,
                     index,
                     cell,
                     width,
@@ -119,6 +120,7 @@ class BentoRecap extends WrappedTemplate with TemplateAnimationMixin {
   }
 
   Widget _buildCell(
+    BuildContext context,
     int index,
     BentoCell cell,
     double width,
@@ -149,19 +151,20 @@ class BentoRecap extends WrappedTemplate with TemplateAnimationMixin {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
-            child: _buildCellContent(index, cell, colors),
+            child: _buildCellContent(context, index, cell, colors),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildCellContent(int index, BentoCell cell, TemplateTheme colors) {
+  Widget _buildCellContent(
+      BuildContext context, int index, BentoCell cell, TemplateTheme colors) {
     switch (cell.type) {
       case BentoCellType.hero:
         return _buildHeroCell(colors);
       case BentoCellType.image:
-        return _buildImageCell(index, colors);
+        return _buildImageCell(context, index, colors);
       case BentoCellType.stat:
         return _buildStatCell(index, colors);
       case BentoCellType.icon:
@@ -210,20 +213,15 @@ class BentoRecap extends WrappedTemplate with TemplateAnimationMixin {
     );
   }
 
-  Widget _buildImageCell(int index, TemplateTheme colors) {
-    final imageIndex = index % (collageData.images.length.clamp(1, 10));
-    final imagePath =
-        collageData.images.isNotEmpty ? collageData.images[imageIndex] : null;
-
-    if (imagePath != null) {
-      return Image.asset(
-        imagePath,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _buildPlaceholder(index, colors),
-      );
+  Widget _buildImageCell(
+      BuildContext context, int index, TemplateTheme colors) {
+    final imageCount = collageData.count;
+    if (imageCount == 0) {
+      return _buildPlaceholder(index, colors);
     }
 
-    return _buildPlaceholder(index, colors);
+    final imageIndex = index % imageCount.clamp(1, 10);
+    return collageData.buildImage(context, imageIndex);
   }
 
   Widget _buildStatCell(int index, TemplateTheme colors) {

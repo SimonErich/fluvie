@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../presentation/time_consumer.dart';
 
-/// A widget that applies the Ken Burns effect to an image.
+/// A widget that applies the Ken Burns effect to an image or any widget.
 ///
 /// The Ken Burns effect is a slow zoom and pan that creates cinematic
 /// movement on still images, commonly used in documentaries.
 ///
-/// Example:
+/// You can provide either a [child] widget (recommended) or an [assetPath]
+/// string. The [child] parameter allows maximum flexibility, supporting
+/// [Image.asset], [Image.network], SVGs, or any custom widget.
+///
+/// Example with child (recommended):
 /// ```dart
 /// KenBurnsImage(
-///   assetPath: 'assets/photo.jpg',
+///   child: Image.network('https://example.com/photo.jpg', fit: BoxFit.cover),
 ///   width: 800,
 ///   height: 600,
 ///   startScale: 1.0,
@@ -18,9 +22,29 @@ import '../../presentation/time_consumer.dart';
 ///   endAlignment: Alignment.centerRight,
 /// )
 /// ```
+///
+/// Example with assetPath (legacy):
+/// ```dart
+/// KenBurnsImage(
+///   assetPath: 'assets/photo.jpg',
+///   width: 800,
+///   height: 600,
+/// )
+/// ```
 class KenBurnsImage extends StatelessWidget {
+  /// The child widget to apply the Ken Burns effect to.
+  ///
+  /// If provided, [assetPath] must be null. This is the recommended approach
+  /// as it supports any widget type including [Image.network], SVGs, etc.
+  final Widget? child;
+
   /// Path to the image asset.
-  final String assetPath;
+  ///
+  /// Deprecated: Use [child] instead for more flexibility.
+  /// Example: `child: Image.asset('assets/photo.jpg', fit: BoxFit.cover)`
+  @Deprecated('Use child parameter instead. '
+      'Example: child: Image.asset("assets/photo.jpg", fit: BoxFit.cover)')
+  final String? assetPath;
 
   /// Width of the image container.
   final double width;
@@ -50,12 +74,20 @@ class KenBurnsImage extends StatelessWidget {
   final Curve curve;
 
   /// Optional error builder for when image fails to load.
+  ///
+  /// Only applies when using [assetPath]. When using [child], handle
+  /// errors in your widget directly (e.g., Image.network's errorBuilder).
   final Widget Function(BuildContext, Object, StackTrace?)? errorBuilder;
 
   /// Creates a Ken Burns image widget.
+  ///
+  /// Either [child] or [assetPath] must be provided, but not both.
   const KenBurnsImage({
     super.key,
-    required this.assetPath,
+    this.child,
+    @Deprecated('Use child parameter instead. '
+        'Example: child: Image.asset("assets/photo.jpg", fit: BoxFit.cover)')
+    this.assetPath,
     required this.width,
     required this.height,
     this.startScale = 1.0,
@@ -66,12 +98,22 @@ class KenBurnsImage extends StatelessWidget {
     this.borderRadius,
     this.curve = Curves.linear,
     this.errorBuilder,
-  });
+  })  : assert(
+          child != null || assetPath != null,
+          'Either child or assetPath must be provided',
+        ),
+        assert(
+          !(child != null && assetPath != null),
+          'Cannot provide both child and assetPath',
+        );
 
   /// Creates a Ken Burns image with a zoom-in effect.
+  ///
+  /// Either [child] or [assetPath] must be provided, but not both.
   factory KenBurnsImage.zoomIn({
     Key? key,
-    required String assetPath,
+    Widget? child,
+    @Deprecated('Use child parameter instead') String? assetPath,
     required double width,
     required double height,
     double zoomAmount = 0.2,
@@ -83,6 +125,7 @@ class KenBurnsImage extends StatelessWidget {
   }) {
     return KenBurnsImage(
       key: key,
+      child: child,
       assetPath: assetPath,
       width: width,
       height: height,
@@ -98,9 +141,12 @@ class KenBurnsImage extends StatelessWidget {
   }
 
   /// Creates a Ken Burns image with a pan effect (no zoom).
+  ///
+  /// Either [child] or [assetPath] must be provided, but not both.
   factory KenBurnsImage.pan({
     Key? key,
-    required String assetPath,
+    Widget? child,
+    @Deprecated('Use child parameter instead') String? assetPath,
     required double width,
     required double height,
     required Alignment from,
@@ -113,6 +159,7 @@ class KenBurnsImage extends StatelessWidget {
   }) {
     return KenBurnsImage(
       key: key,
+      child: child,
       assetPath: assetPath,
       width: width,
       height: height,
@@ -128,9 +175,12 @@ class KenBurnsImage extends StatelessWidget {
   }
 
   /// Creates a Ken Burns image with zoom and pan.
+  ///
+  /// Either [child] or [assetPath] must be provided, but not both.
   factory KenBurnsImage.zoomAndPan({
     Key? key,
-    required String assetPath,
+    Widget? child,
+    @Deprecated('Use child parameter instead') String? assetPath,
     required double width,
     required double height,
     double startScale = 1.0,
@@ -144,6 +194,7 @@ class KenBurnsImage extends StatelessWidget {
   }) {
     return KenBurnsImage(
       key: key,
+      child: child,
       assetPath: assetPath,
       width: width,
       height: height,
@@ -174,26 +225,43 @@ class KenBurnsImage extends StatelessWidget {
             (endAlignment.y - startAlignment.y) * curvedProgress;
         final alignment = Alignment(alignX, alignY);
 
+        // Build the media widget
+        Widget mediaWidget;
+        if (child != null) {
+          // Use provided child widget wrapped in FittedBox for proper scaling
+          mediaWidget = SizedBox(
+            width: width * scale,
+            height: height * scale,
+            child: FittedBox(
+              fit: fit,
+              child: SizedBox(
+                width: width,
+                height: height,
+                child: child,
+              ),
+            ),
+          );
+        } else {
+          // Use asset path (legacy)
+          mediaWidget = Image.asset(
+            assetPath!,
+            width: width * scale,
+            height: height * scale,
+            fit: fit,
+            errorBuilder: errorBuilder ??
+                (context, error, stack) => Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image, color: Colors.grey),
+                    ),
+          );
+        }
+
         return ClipRect(
           child: OverflowBox(
             maxWidth: width * scale,
             maxHeight: height * scale,
             alignment: alignment,
-            child: SizedBox(
-              width: width * scale,
-              height: height * scale,
-              child: Image.asset(
-                assetPath,
-                width: width * scale,
-                height: height * scale,
-                fit: fit,
-                errorBuilder: errorBuilder ??
-                    (context, error, stack) => Container(
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.image, color: Colors.grey),
-                        ),
-              ),
-            ),
+            child: mediaWidget,
           ),
         );
       },

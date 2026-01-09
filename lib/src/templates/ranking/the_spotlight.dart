@@ -202,7 +202,8 @@ class TheSpotlight extends WrappedTemplate with TemplateAnimationMixin {
                       scale: scale,
                       child: Opacity(
                         opacity: isLit ? 1.0 : 0.15,
-                        child: _buildItem(item, colors, isWinner && isOnWinner),
+                        child: _buildItem(
+                            context, item, colors, isWinner && isOnWinner),
                       ),
                     ),
                   );
@@ -243,7 +244,8 @@ class TheSpotlight extends WrappedTemplate with TemplateAnimationMixin {
     );
   }
 
-  Widget _buildItem(RankingItem item, TemplateTheme colors, bool isWinner) {
+  Widget _buildItem(BuildContext context, RankingItem item,
+      TemplateTheme colors, bool isWinner) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -269,14 +271,7 @@ class TheSpotlight extends WrappedTemplate with TemplateAnimationMixin {
                 : null,
           ),
           child: ClipOval(
-            child: item.imagePath != null
-                ? Image.asset(
-                    item.imagePath!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
-                        _buildPlaceholder(colors, item.rank),
-                  )
-                : _buildPlaceholder(colors, item.rank),
+            child: _buildItemImage(context, item, colors),
           ),
         ),
 
@@ -300,6 +295,21 @@ class TheSpotlight extends WrappedTemplate with TemplateAnimationMixin {
         ),
       ],
     );
+  }
+
+  Widget _buildItemImage(
+      BuildContext context, RankingItem item, TemplateTheme colors) {
+    final imageWidget = item.buildImage(context);
+    if (imageWidget != null) {
+      return SizedBox.expand(
+        child: FittedBox(
+          fit: BoxFit.cover,
+          clipBehavior: Clip.hardEdge,
+          child: imageWidget,
+        ),
+      );
+    }
+    return _buildPlaceholder(colors, item.rank);
   }
 
   Widget _buildPlaceholder(TemplateTheme colors, int rank) {

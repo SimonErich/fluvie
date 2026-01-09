@@ -104,12 +104,8 @@ class SplitPersonality extends WrappedTemplate with TemplateAnimationMixin {
                 fit: StackFit.expand,
                 children: [
                   // Image or gradient
-                  if (collageData.images.isNotEmpty)
-                    Image.asset(
-                      collageData.images.first,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _buildImageGradient(colors),
-                    )
+                  if (collageData.count > 0)
+                    collageData.buildImage(context, 0)
                   else
                     _buildImageGradient(colors),
 

@@ -7,10 +7,14 @@ import 'ken_burns_image.dart';
 /// This widget provides a clean, professional way to display photos with
 /// optional Ken Burns effect, rotation, and shadow.
 ///
-/// Example:
+/// You can provide either a [child] widget (recommended) or an [assetPath]
+/// string. The [child] parameter allows maximum flexibility, supporting
+/// [Image.asset], [Image.network], SVGs, or any custom widget.
+///
+/// Example with child (recommended):
 /// ```dart
 /// PhotoCard(
-///   assetPath: 'assets/photo.jpg',
+///   child: Image.network('https://example.com/photo.jpg', fit: BoxFit.cover),
 ///   width: 400,
 ///   height: 300,
 ///   rotation: -0.05,
@@ -18,9 +22,28 @@ import 'ken_burns_image.dart';
 ///   kenBurns: true,
 /// )
 /// ```
+///
+/// Example with assetPath (legacy):
+/// ```dart
+/// PhotoCard(
+///   assetPath: 'assets/photo.jpg',
+///   width: 400,
+///   height: 300,
+/// )
+/// ```
 class PhotoCard extends StatelessWidget {
+  /// The child widget to display.
+  ///
+  /// If provided, [assetPath] must be null. This is the recommended approach
+  /// as it supports any widget type including [Image.network], SVGs, etc.
+  final Widget? child;
+
   /// Path to the image asset.
-  final String assetPath;
+  ///
+  /// Deprecated: Use [child] instead for more flexibility.
+  @Deprecated('Use child parameter instead. '
+      'Example: child: Image.asset("assets/photo.jpg", fit: BoxFit.cover)')
+  final String? assetPath;
 
   /// Width of the card.
   final double width;
@@ -71,12 +94,20 @@ class PhotoCard extends StatelessWidget {
   final TextStyle? captionStyle;
 
   /// Optional error builder for when image fails to load.
+  ///
+  /// Only applies when using [assetPath]. When using [child], handle
+  /// errors in your widget directly (e.g., Image.network's errorBuilder).
   final Widget Function(BuildContext, Object, StackTrace?)? errorBuilder;
 
   /// Creates a photo card widget.
+  ///
+  /// Either [child] or [assetPath] must be provided, but not both.
   const PhotoCard({
     super.key,
-    required this.assetPath,
+    this.child,
+    @Deprecated('Use child parameter instead. '
+        'Example: child: Image.asset("assets/photo.jpg", fit: BoxFit.cover)')
+    this.assetPath,
     required this.width,
     required this.height,
     this.rotation = 0,
@@ -94,12 +125,22 @@ class PhotoCard extends StatelessWidget {
     this.caption,
     this.captionStyle,
     this.errorBuilder,
-  });
+  })  : assert(
+          child != null || assetPath != null,
+          'Either child or assetPath must be provided',
+        ),
+        assert(
+          !(child != null && assetPath != null),
+          'Cannot provide both child and assetPath',
+        );
 
   /// Creates a photo card with Ken Burns zoom effect.
+  ///
+  /// Either [child] or [assetPath] must be provided, but not both.
   factory PhotoCard.withKenBurns({
     Key? key,
-    required String assetPath,
+    Widget? child,
+    @Deprecated('Use child parameter instead') String? assetPath,
     required double width,
     required double height,
     double rotation = 0,
@@ -114,6 +155,7 @@ class PhotoCard extends StatelessWidget {
   }) {
     return PhotoCard(
       key: key,
+      child: child,
       assetPath: assetPath,
       width: width,
       height: height,
@@ -133,9 +175,12 @@ class PhotoCard extends StatelessWidget {
   }
 
   /// Creates a photo card with Ken Burns pan effect.
+  ///
+  /// Either [child] or [assetPath] must be provided, but not both.
   factory PhotoCard.withPan({
     Key? key,
-    required String assetPath,
+    Widget? child,
+    @Deprecated('Use child parameter instead') String? assetPath,
     required double width,
     required double height,
     double rotation = 0,
@@ -151,6 +196,7 @@ class PhotoCard extends StatelessWidget {
   }) {
     return PhotoCard(
       key: key,
+      child: child,
       assetPath: assetPath,
       width: width,
       height: height,
@@ -170,9 +216,12 @@ class PhotoCard extends StatelessWidget {
   }
 
   /// Creates a simple photo card without effects.
+  ///
+  /// Either [child] or [assetPath] must be provided, but not both.
   factory PhotoCard.simple({
     Key? key,
-    required String assetPath,
+    Widget? child,
+    @Deprecated('Use child parameter instead') String? assetPath,
     required double width,
     required double height,
     double borderRadius = 12,
@@ -182,6 +231,7 @@ class PhotoCard extends StatelessWidget {
   }) {
     return PhotoCard(
       key: key,
+      child: child,
       assetPath: assetPath,
       width: width,
       height: height,
@@ -200,6 +250,7 @@ class PhotoCard extends StatelessWidget {
 
     if (kenBurns) {
       imageWidget = KenBurnsImage(
+        child: child,
         assetPath: assetPath,
         width: width,
         height: imageHeight,
@@ -210,9 +261,18 @@ class PhotoCard extends StatelessWidget {
         fit: fit,
         errorBuilder: errorBuilder,
       );
+    } else if (child != null) {
+      imageWidget = SizedBox(
+        width: width,
+        height: imageHeight,
+        child: FittedBox(
+          fit: fit,
+          child: child,
+        ),
+      );
     } else {
       imageWidget = Image.asset(
-        assetPath,
+        assetPath!,
         width: width,
         height: imageHeight,
         fit: fit,
@@ -290,10 +350,14 @@ class PhotoCard extends StatelessWidget {
 
 /// A photo card that animates in with optional entry effects.
 ///
+/// You can provide either a [child] widget (recommended) or an [assetPath]
+/// string. The [child] parameter allows maximum flexibility, supporting
+/// [Image.asset], [Image.network], SVGs, or any custom widget.
+///
 /// Example:
 /// ```dart
 /// AnimatedPhotoCard(
-///   assetPath: 'assets/photo.jpg',
+///   child: Image.network('https://example.com/photo.jpg', fit: BoxFit.cover),
 ///   width: 400,
 ///   height: 300,
 ///   startFrame: 30,
@@ -302,8 +366,18 @@ class PhotoCard extends StatelessWidget {
 /// )
 /// ```
 class AnimatedPhotoCard extends StatelessWidget {
+  /// The child widget to display.
+  ///
+  /// If provided, [assetPath] must be null. This is the recommended approach
+  /// as it supports any widget type including [Image.network], SVGs, etc.
+  final Widget? child;
+
   /// Path to the image asset.
-  final String assetPath;
+  ///
+  /// Deprecated: Use [child] instead for more flexibility.
+  @Deprecated('Use child parameter instead. '
+      'Example: child: Image.asset("assets/photo.jpg", fit: BoxFit.cover)')
+  final String? assetPath;
 
   /// Width of the card.
   final double width;
@@ -342,9 +416,14 @@ class AnimatedPhotoCard extends StatelessWidget {
   final String? caption;
 
   /// Creates an animated photo card.
+  ///
+  /// Either [child] or [assetPath] must be provided, but not both.
   const AnimatedPhotoCard({
     super.key,
-    required this.assetPath,
+    this.child,
+    @Deprecated('Use child parameter instead. '
+        'Example: child: Image.asset("assets/photo.jpg", fit: BoxFit.cover)')
+    this.assetPath,
     required this.width,
     required this.height,
     this.startFrame = 0,
@@ -357,7 +436,14 @@ class AnimatedPhotoCard extends StatelessWidget {
     this.kenBurns = true,
     this.curve = Curves.easeOutCubic,
     this.caption,
-  });
+  })  : assert(
+          child != null || assetPath != null,
+          'Either child or assetPath must be provided',
+        ),
+        assert(
+          !(child != null && assetPath != null),
+          'Cannot provide both child and assetPath',
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -405,6 +491,7 @@ class AnimatedPhotoCard extends StatelessWidget {
             child: Transform.scale(
               scale: scale,
               child: PhotoCard(
+                child: child,
                 assetPath: assetPath,
                 width: width,
                 height: height,

@@ -214,6 +214,18 @@ The Ken Burns effect creates cinematic movement on still images:
 ### Using KenBurnsImage
 
 ```dart
+// With network images (recommended - flexible)
+KenBurnsImage(
+  child: Image.network('https://example.com/landscape.jpg', fit: BoxFit.cover),
+  width: 800,
+  height: 600,
+  startScale: 1.0,
+  endScale: 1.3,
+  startAlignment: Alignment.centerLeft,
+  endAlignment: Alignment.centerRight,
+)
+
+// With asset images (legacy)
 KenBurnsImage(
   assetPath: 'assets/landscape.jpg',
   width: 800,
@@ -228,6 +240,16 @@ KenBurnsImage(
 ### Zoom In
 
 ```dart
+// Using child parameter
+KenBurnsImage.zoomIn(
+  child: Image.asset('assets/portrait.jpg', fit: BoxFit.cover),
+  width: 600,
+  height: 800,
+  zoomAmount: 0.2,
+  focus: Alignment.center,
+)
+
+// Using assetPath (legacy)
 KenBurnsImage.zoomIn(
   assetPath: 'assets/portrait.jpg',
   width: 600,
@@ -241,7 +263,7 @@ KenBurnsImage.zoomIn(
 
 ```dart
 KenBurnsImage.pan(
-  assetPath: 'assets/panorama.jpg',
+  child: Image.network('https://example.com/panorama.jpg', fit: BoxFit.cover),
   width: 1200,
   height: 400,
   from: Alignment.centerLeft,

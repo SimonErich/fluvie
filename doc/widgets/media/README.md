@@ -81,6 +81,32 @@ For animated image effects, use helper widgets like:
 - [PhotoCard](../helpers/photo-card.md) - Styled photo frame
 - [PolaroidFrame](../helpers/polaroid-frame.md) - Polaroid-style frame
 
+### Flexible Image Sources
+
+Fluvie helpers support both asset paths and custom widgets:
+
+```dart
+// Using child parameter (recommended - any image source)
+KenBurnsImage(
+  child: Image.network('https://example.com/photo.jpg', fit: BoxFit.cover),
+  width: 800,
+  height: 600,
+)
+
+PhotoCard(
+  child: Image.network('https://example.com/photo.jpg', fit: BoxFit.cover),
+  width: 400,
+  height: 300,
+)
+
+// Using assetPath (legacy - local assets only)
+KenBurnsImage(
+  assetPath: 'assets/photo.jpg',
+  width: 800,
+  height: 600,
+)
+```
+
 ---
 
 ## Related

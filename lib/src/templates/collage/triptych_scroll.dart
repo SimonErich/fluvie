@@ -115,6 +115,7 @@ class TriptychScroll extends WrappedTemplate with TemplateAnimationMixin {
                       right: colIndex == columnCount - 1 ? 0 : imageGap / 2,
                     ),
                     child: _buildColumn(
+                      context,
                       colIndex,
                       columnWidth,
                       imageHeight,
@@ -133,6 +134,7 @@ class TriptychScroll extends WrappedTemplate with TemplateAnimationMixin {
   }
 
   Widget _buildColumn(
+    BuildContext context,
     int columnIndex,
     double imageWidth,
     double imageHeight,
@@ -140,28 +142,26 @@ class TriptychScroll extends WrappedTemplate with TemplateAnimationMixin {
     double viewportHeight,
     TemplateTheme colors,
   ) {
-    final images = collageData.images;
+    final imageCount = collageData.count;
     final imagesPerColumn =
         (viewportHeight / (imageHeight + imageGap)).ceil() + 2;
 
-    // Distribute images across columns
-    final columnImages = <String>[];
-    for (var i = columnIndex; i < images.length; i += columnCount) {
-      columnImages.add(images[i]);
+    // Distribute image indices across columns
+    final columnImageIndices = <int>[];
+    for (var i = columnIndex; i < imageCount; i += columnCount) {
+      columnImageIndices.add(i);
     }
 
-    if (columnImages.isEmpty) {
-      // Use placeholder colors if no images
-      columnImages.addAll(List.generate(imagesPerColumn, (i) => ''));
-    }
+    final hasImages = columnImageIndices.isNotEmpty;
 
     return ClipRect(
       child: Transform.translate(
         offset: Offset(0, scrollOffset),
         child: Column(
           children: List.generate(imagesPerColumn * 2, (index) {
-            final imageIndex = index % columnImages.length;
-            final imagePath = columnImages[imageIndex];
+            final actualIndex = hasImages
+                ? columnImageIndices[index % columnImageIndices.length]
+                : -1;
 
             return Padding(
               padding: EdgeInsets.only(bottom: imageGap),
@@ -174,13 +174,8 @@ class TriptychScroll extends WrappedTemplate with TemplateAnimationMixin {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: imagePath.isNotEmpty
-                      ? Image.asset(
-                          imagePath,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              _buildPlaceholder(columnIndex, index, colors),
-                        )
+                  child: hasImages && actualIndex >= 0
+                      ? collageData.buildImage(context, actualIndex)
                       : _buildPlaceholder(columnIndex, index, colors),
                 ),
               ),

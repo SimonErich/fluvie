@@ -99,15 +99,11 @@ class MosaicReveal extends WrappedTemplate with TemplateAnimationMixin {
             return Stack(
               children: [
                 // Background main image (slightly visible at start)
-                if (collageData.images.isNotEmpty)
+                if (collageData.count > 0)
                   Positioned.fill(
                     child: Opacity(
                       opacity: 0.15,
-                      child: Image.asset(
-                        collageData.images.first,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const SizedBox(),
-                      ),
+                      child: collageData.buildImage(context, 0),
                     ),
                   ),
 
@@ -134,6 +130,7 @@ class MosaicReveal extends WrappedTemplate with TemplateAnimationMixin {
                     left: x,
                     top: y,
                     child: _buildTile(
+                      context,
                       index,
                       tileWidth,
                       tileHeight,
@@ -151,6 +148,7 @@ class MosaicReveal extends WrappedTemplate with TemplateAnimationMixin {
   }
 
   Widget _buildTile(
+    BuildContext context,
     int index,
     double width,
     double height,
@@ -186,9 +184,9 @@ class MosaicReveal extends WrappedTemplate with TemplateAnimationMixin {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(2),
-            child: collageData.images.isNotEmpty
+            child: collageData.count > 0
                 ? _buildImageTile(
-                    collageData.images.first,
+                    context,
                     row,
                     col,
                     width,
@@ -202,7 +200,7 @@ class MosaicReveal extends WrappedTemplate with TemplateAnimationMixin {
   }
 
   Widget _buildImageTile(
-    String imagePath,
+    BuildContext context,
     int row,
     int col,
     double tileWidth,
@@ -216,12 +214,10 @@ class MosaicReveal extends WrappedTemplate with TemplateAnimationMixin {
         -1 + (col * 2 / (tilesPerRow - 1)),
         -1 + (row * 2 / (rowCount - 1)),
       ),
-      child: Image.asset(
-        imagePath,
-        fit: BoxFit.cover,
+      child: SizedBox(
         width: tileWidth * tilesPerRow,
         height: tileHeight * rowCount,
-        errorBuilder: (_, __, ___) => Container(),
+        child: collageData.buildImage(context, 0),
       ),
     );
   }

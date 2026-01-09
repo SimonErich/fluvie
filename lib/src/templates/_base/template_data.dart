@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import '../../declarative/helpers/media_types.dart';
 
 /// Base data contract for all templates.
 ///
@@ -11,6 +12,19 @@ abstract class TemplateData {
 /// Data for intro/identity templates.
 ///
 /// Used by templates like TheNeonGate, DigitalMirror, TheMixtape, etc.
+///
+/// You can provide images either via asset paths (legacy) or via builders
+/// (recommended). Builders allow maximum flexibility for network images,
+/// SVGs, or custom widgets.
+///
+/// Example with builders (recommended):
+/// ```dart
+/// IntroData(
+///   title: 'Your 2024',
+///   logoBuilder: (ctx) => Image.network('https://example.com/logo.png'),
+///   profileImageBuilder: (ctx) => Image.network('https://example.com/profile.jpg'),
+/// )
+/// ```
 class IntroData extends TemplateData {
   /// Main title text (e.g., "Your 2024").
   final String title;
@@ -19,7 +33,16 @@ class IntroData extends TemplateData {
   final String? subtitle;
 
   /// Path to logo asset.
+  ///
+  /// Deprecated: Use [logoBuilder] instead for more flexibility.
+  @Deprecated('Use logoBuilder instead for network images, SVGs, etc.')
   final String? logoPath;
+
+  /// Builder for the logo widget.
+  ///
+  /// This allows maximum flexibility - use [Image.asset], [Image.network],
+  /// SVGs, or any custom widget.
+  final MediaBuilder? logoBuilder;
 
   /// Year to display.
   final int? year;
@@ -28,19 +51,67 @@ class IntroData extends TemplateData {
   final String? userName;
 
   /// User's profile image path.
+  ///
+  /// Deprecated: Use [profileImageBuilder] instead for more flexibility.
+  @Deprecated('Use profileImageBuilder instead for network images, SVGs, etc.')
   final String? profileImagePath;
+
+  /// Builder for the profile image widget.
+  ///
+  /// This allows maximum flexibility - use [Image.asset], [Image.network],
+  /// SVGs, or any custom widget.
+  final MediaBuilder? profileImageBuilder;
 
   const IntroData({
     required this.title,
     this.subtitle,
-    this.logoPath,
+    @Deprecated('Use logoBuilder instead') this.logoPath,
+    this.logoBuilder,
     this.year,
     this.userName,
-    this.profileImagePath,
+    @Deprecated('Use profileImageBuilder instead') this.profileImagePath,
+    this.profileImageBuilder,
   });
+
+  /// Builds the logo widget.
+  ///
+  /// Returns the widget from [logoBuilder] if provided, otherwise creates
+  /// an [Image.asset] from [logoPath], or null if neither is provided.
+  Widget? buildLogo(BuildContext context) {
+    if (logoBuilder != null) return logoBuilder!(context);
+    if (logoPath != null) {
+      return Image.asset(
+        logoPath!,
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      );
+    }
+    return null;
+  }
+
+  /// Builds the profile image widget.
+  ///
+  /// Returns the widget from [profileImageBuilder] if provided, otherwise
+  /// creates an [Image.asset] from [profileImagePath], or null if neither
+  /// is provided.
+  Widget? buildProfileImage(BuildContext context) {
+    if (profileImageBuilder != null) return profileImageBuilder!(context);
+    if (profileImagePath != null) {
+      return Image.asset(
+        profileImagePath!,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      );
+    }
+    return null;
+  }
 }
 
 /// A single item in a ranking list.
+///
+/// You can provide images either via asset paths (legacy) or via builders
+/// (recommended). Builders allow maximum flexibility for network images,
+/// SVGs, or custom widgets.
 class RankingItem {
   /// The rank number (1 = first place).
   final int rank;
@@ -55,7 +126,16 @@ class RankingItem {
   final dynamic value;
 
   /// Path to image asset for this item.
+  ///
+  /// Deprecated: Use [imageBuilder] instead for more flexibility.
+  @Deprecated('Use imageBuilder instead for network images, SVGs, etc.')
   final String? imagePath;
+
+  /// Builder for the image widget.
+  ///
+  /// This allows maximum flexibility - use [Image.asset], [Image.network],
+  /// SVGs, or any custom widget.
+  final MediaBuilder? imageBuilder;
 
   /// Additional metadata (e.g., play count, duration).
   final Map<String, dynamic>? metadata;
@@ -65,9 +145,26 @@ class RankingItem {
     required this.label,
     this.subtitle,
     this.value,
-    this.imagePath,
+    @Deprecated('Use imageBuilder instead') this.imagePath,
+    this.imageBuilder,
     this.metadata,
   });
+
+  /// Builds the image widget.
+  ///
+  /// Returns the widget from [imageBuilder] if provided, otherwise creates
+  /// an [Image.asset] from [imagePath], or null if neither is provided.
+  Widget? buildImage(BuildContext context) {
+    if (imageBuilder != null) return imageBuilder!(context);
+    if (imagePath != null) {
+      return Image.asset(
+        imagePath!,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      );
+    }
+    return null;
+  }
 
   /// Creates a copy with updated fields.
   RankingItem copyWith({
@@ -76,6 +173,7 @@ class RankingItem {
     String? subtitle,
     dynamic value,
     String? imagePath,
+    MediaBuilder? imageBuilder,
     Map<String, dynamic>? metadata,
   }) {
     return RankingItem(
@@ -84,6 +182,7 @@ class RankingItem {
       subtitle: subtitle ?? this.subtitle,
       value: value ?? this.value,
       imagePath: imagePath ?? this.imagePath,
+      imageBuilder: imageBuilder ?? this.imageBuilder,
       metadata: metadata ?? this.metadata,
     );
   }
@@ -257,9 +356,33 @@ class DataVizData extends TemplateData {
 /// Data for collage/grid templates.
 ///
 /// Used by templates like TheGridShuffle, MosaicReveal, TriptychScroll, etc.
+///
+/// You can provide images either via asset paths (legacy) or via builders
+/// (recommended). Builders allow maximum flexibility for network images,
+/// SVGs, or custom widgets.
+///
+/// Example with builders (recommended):
+/// ```dart
+/// CollageData(
+///   imageBuilders: [
+///     (ctx) => Image.network('https://example.com/photo1.jpg', fit: BoxFit.cover),
+///     (ctx) => Image.network('https://example.com/photo2.jpg', fit: BoxFit.cover),
+///   ],
+///   title: 'Your Year in Photos',
+/// )
+/// ```
 class CollageData extends TemplateData {
   /// List of image asset paths.
+  ///
+  /// Deprecated: Use [imageBuilders] instead for more flexibility.
+  @Deprecated('Use imageBuilders instead for network images, SVGs, etc.')
   final List<String> images;
+
+  /// Builders for the image widgets.
+  ///
+  /// This allows maximum flexibility - use [Image.asset], [Image.network],
+  /// SVGs, or any custom widget.
+  final List<MediaBuilder>? imageBuilders;
 
   /// Optional title.
   final String? title;
@@ -283,7 +406,8 @@ class CollageData extends TemplateData {
   final Map<String, dynamic> stats;
 
   const CollageData({
-    required this.images,
+    @Deprecated('Use imageBuilders instead') this.images = const [],
+    this.imageBuilders,
     this.title,
     this.subtitle,
     this.description,
@@ -291,14 +415,77 @@ class CollageData extends TemplateData {
     this.featuredIndex,
     this.layout = TemplateCollageLayout.grid,
     this.stats = const {},
-  }) : assert(images.length > 0, 'CollageData must have at least 1 image');
+  }) : assert(
+          images.length > 0 ||
+              (imageBuilders != null && imageBuilders.length > 0),
+          'CollageData must have at least 1 image',
+        );
 
   /// Number of images.
-  int get count => images.length;
+  int get count => imageBuilders?.length ?? images.length;
+
+  /// Builds all image widgets.
+  ///
+  /// Returns widgets from [imageBuilders] if provided, otherwise creates
+  /// [Image.asset] widgets from [images].
+  List<Widget> buildImages(BuildContext context) {
+    if (imageBuilders != null) {
+      return imageBuilders!.map((b) => b(context)).toList();
+    }
+    return images
+        .map(
+          (path) => Image.asset(
+            path,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          ),
+        )
+        .toList();
+  }
+
+  /// Builds the image widget at the given index.
+  ///
+  /// Returns the widget from [imageBuilders] if provided, otherwise creates
+  /// an [Image.asset] from [images].
+  Widget buildImage(BuildContext context, int index) {
+    if (imageBuilders != null && index < imageBuilders!.length) {
+      return imageBuilders![index](context);
+    }
+    if (index < images.length) {
+      return Image.asset(
+        images[index],
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      );
+    }
+    throw RangeError.index(index, this, 'image');
+  }
 
   /// Returns the featured image path, or the first image if not specified.
-  String get featuredImage =>
-      featuredIndex != null ? images[featuredIndex!] : images.first;
+  ///
+  /// Note: This returns the path string. For the widget, use [buildFeaturedImage].
+  @Deprecated('Use buildFeaturedImage instead')
+  String get featuredImage => featuredIndex != null && images.isNotEmpty
+      ? images[featuredIndex!]
+      : images.isNotEmpty
+          ? images.first
+          : '';
+
+  /// Builds the featured image widget.
+  Widget? buildFeaturedImage(BuildContext context) {
+    final index = featuredIndex ?? 0;
+    if (imageBuilders != null && imageBuilders!.isNotEmpty) {
+      return imageBuilders![index.clamp(0, imageBuilders!.length - 1)](context);
+    }
+    if (images.isNotEmpty) {
+      return Image.asset(
+        images[index.clamp(0, images.length - 1)],
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      );
+    }
+    return null;
+  }
 }
 
 /// Layout hints for collage templates.
@@ -320,6 +507,10 @@ enum TemplateCollageLayout {
 }
 
 /// A single highlight or achievement.
+///
+/// You can provide images either via asset paths (legacy) or via builders
+/// (recommended). Builders allow maximum flexibility for network images,
+/// SVGs, or custom widgets.
 class HighlightItem {
   /// Title of the highlight.
   final String title;
@@ -331,7 +522,16 @@ class HighlightItem {
   final IconData? icon;
 
   /// Optional image path.
+  ///
+  /// Deprecated: Use [imageBuilder] instead for more flexibility.
+  @Deprecated('Use imageBuilder instead for network images, SVGs, etc.')
   final String? imagePath;
+
+  /// Builder for the image widget.
+  ///
+  /// This allows maximum flexibility - use [Image.asset], [Image.network],
+  /// SVGs, or any custom widget.
+  final MediaBuilder? imageBuilder;
 
   /// Optional value or statistic.
   final String? value;
@@ -340,9 +540,26 @@ class HighlightItem {
     required this.title,
     this.description,
     this.icon,
-    this.imagePath,
+    @Deprecated('Use imageBuilder instead') this.imagePath,
+    this.imageBuilder,
     this.value,
   });
+
+  /// Builds the image widget.
+  ///
+  /// Returns the widget from [imageBuilder] if provided, otherwise creates
+  /// an [Image.asset] from [imagePath], or null if neither is provided.
+  Widget? buildImage(BuildContext context) {
+    if (imageBuilder != null) return imageBuilder!(context);
+    if (imagePath != null) {
+      return Image.asset(
+        imagePath!,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      );
+    }
+    return null;
+  }
 }
 
 /// Data for conclusion/summary templates.
@@ -410,6 +627,10 @@ class SummaryData extends TemplateData {
 /// Data for thematic/vibe templates.
 ///
 /// Used by templates like LofiWindow, GlitchReality, Kaleidoscope, etc.
+///
+/// You can provide images either via asset paths (legacy) or via builders
+/// (recommended). Builders allow maximum flexibility for network images,
+/// SVGs, or custom widgets.
 class ThematicData extends TemplateData {
   /// Primary text content.
   final String text;
@@ -427,7 +648,16 @@ class ThematicData extends TemplateData {
   final String? description;
 
   /// List of image paths for visual elements.
+  ///
+  /// Deprecated: Use [imageBuilders] instead for more flexibility.
+  @Deprecated('Use imageBuilders instead for network images, SVGs, etc.')
   final List<String>? images;
+
+  /// Builders for the image widgets.
+  ///
+  /// This allows maximum flexibility - use [Image.asset], [Image.network],
+  /// SVGs, or any custom widget.
+  final List<MediaBuilder>? imageBuilders;
 
   /// Primary value to display.
   final String? value;
@@ -453,7 +683,8 @@ class ThematicData extends TemplateData {
     this.subtitle,
     this.secondaryText,
     this.description,
-    this.images,
+    @Deprecated('Use imageBuilders instead') this.images,
+    this.imageBuilders,
     this.value,
     this.statValue,
     this.statLabel,
@@ -461,4 +692,44 @@ class ThematicData extends TemplateData {
     this.accentColor,
     this.metadata,
   });
+
+  /// Builds all image widgets.
+  ///
+  /// Returns widgets from [imageBuilders] if provided, otherwise creates
+  /// [Image.asset] widgets from [images], or null if neither is provided.
+  List<Widget>? buildImages(BuildContext context) {
+    if (imageBuilders != null) {
+      return imageBuilders!.map((b) => b(context)).toList();
+    }
+    if (images != null) {
+      return images!
+          .map(
+            (path) => Image.asset(
+              path,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          )
+          .toList();
+    }
+    return null;
+  }
+
+  /// Builds the image widget at the given index.
+  ///
+  /// Returns the widget from [imageBuilders] or [images] at the given index,
+  /// or null if no images are available or index is out of range.
+  Widget? buildImage(BuildContext context, int index) {
+    if (imageBuilders != null && index < imageBuilders!.length) {
+      return imageBuilders![index](context);
+    }
+    if (images != null && index < images!.length) {
+      return Image.asset(
+        images![index],
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      );
+    }
+    return null;
+  }
 }

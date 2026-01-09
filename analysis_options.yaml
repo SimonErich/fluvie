@@ -2,3 +2,13 @@ include: package:flutter_lints/flutter.yaml
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
+
+analyzer:
+  errors:
+    # We intentionally use deprecated members internally for backward compatibility
+    deprecated_member_use_from_same_package: ignore
+
+linter:
+  rules:
+    # Disable sort_child_properties_last for factory constructors that pass child to other constructors
+    sort_child_properties_last: false

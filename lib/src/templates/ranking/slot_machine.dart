@@ -89,13 +89,14 @@ class SlotMachine extends WrappedTemplate with TemplateAnimationMixin {
           ),
 
           // Slot machine
-          Positioned.fill(child: Center(child: _buildSlotMachine(colors))),
+          Positioned.fill(
+              child: Center(child: _buildSlotMachine(context, colors))),
         ],
       ),
     );
   }
 
-  Widget _buildSlotMachine(TemplateTheme colors) {
+  Widget _buildSlotMachine(BuildContext context, TemplateTheme colors) {
     return TimeConsumer(
       builder: (context, frame, _) {
         // Animation phases
@@ -155,7 +156,8 @@ class SlotMachine extends WrappedTemplate with TemplateAnimationMixin {
                   // Scrolling content
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: _buildScrollingContent(colors, scrollOffset),
+                    child:
+                        _buildScrollingContent(context, colors, scrollOffset),
                   ),
 
                   // Selection highlight
@@ -225,7 +227,8 @@ class SlotMachine extends WrappedTemplate with TemplateAnimationMixin {
     );
   }
 
-  Widget _buildScrollingContent(TemplateTheme colors, double scrollOffset) {
+  Widget _buildScrollingContent(
+      BuildContext context, TemplateTheme colors, double scrollOffset) {
     final items = rankingData.items;
     final winner = rankingData.topItem;
 
@@ -248,32 +251,37 @@ class SlotMachine extends WrappedTemplate with TemplateAnimationMixin {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: displayItems.map((item) {
+          final imageWidget = item.buildImage(context);
           return Container(
             height: itemHeight,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Row(
               children: [
                 // Image
-                if (item.imagePath != null)
+                if (imageWidget != null)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      item.imagePath!,
+                    child: SizedBox(
                       width: 80,
                       height: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: colors.primaryColor.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.music_note,
-                          color: colors.textColor.withValues(alpha: 0.5),
-                        ),
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        clipBehavior: Clip.hardEdge,
+                        child: imageWidget,
                       ),
+                    ),
+                  )
+                else if (item.imagePath != null || item.imageBuilder != null)
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: colors.primaryColor.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.music_note,
+                      color: colors.textColor.withValues(alpha: 0.5),
                     ),
                   ),
                 const SizedBox(width: 16),

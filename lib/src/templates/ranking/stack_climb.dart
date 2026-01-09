@@ -100,7 +100,8 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
           // Stacked cards
           Positioned.fill(
             child: Center(
-              child: _buildStackedCards(colors, items.take(itemCount).toList()),
+              child: _buildStackedCards(
+                  context, colors, items.take(itemCount).toList()),
             ),
           ),
 
@@ -129,7 +130,8 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
     );
   }
 
-  Widget _buildStackedCards(TemplateTheme colors, List<RankingItem> items) {
+  Widget _buildStackedCards(
+      BuildContext context, TemplateTheme colors, List<RankingItem> items) {
     return TimeConsumer(
       builder: (context, frame, _) {
         const entryStart = 30;
@@ -209,7 +211,7 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
                 scale: entryScale * winnerScale,
                 child: Opacity(
                   opacity: (entryProgress * slideOpacity).clamp(0.0, 1.0),
-                  child: _buildCard(item, colors, isWinner, frame),
+                  child: _buildCard(context, item, colors, isWinner, frame),
                 ),
               ),
             );
@@ -233,6 +235,7 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
   }
 
   Widget _buildCard(
+    BuildContext context,
     RankingItem item,
     TemplateTheme colors,
     bool isWinner,
@@ -267,15 +270,7 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(20),
               ),
-              child: item.imagePath != null
-                  ? Image.asset(
-                      item.imagePath!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      errorBuilder: (_, __, ___) =>
-                          _buildPlaceholderImage(colors),
-                    )
-                  : _buildPlaceholderImage(colors),
+              child: _buildItemImage(context, item, colors),
             ),
           ),
 
@@ -333,6 +328,21 @@ class StackClimb extends WrappedTemplate with TemplateAnimationMixin {
         ],
       ),
     );
+  }
+
+  Widget _buildItemImage(
+      BuildContext context, RankingItem item, TemplateTheme colors) {
+    final imageWidget = item.buildImage(context);
+    if (imageWidget != null) {
+      return SizedBox.expand(
+        child: FittedBox(
+          fit: BoxFit.cover,
+          clipBehavior: Clip.hardEdge,
+          child: imageWidget,
+        ),
+      );
+    }
+    return _buildPlaceholderImage(colors);
   }
 
   Widget _buildPlaceholderImage(TemplateTheme colors) {
