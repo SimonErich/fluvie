@@ -1,6 +1,7 @@
 @Tags(['integration', 'ffmpeg'])
 library;
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -90,6 +91,10 @@ void main() {
           outputPath,
         ]);
 
+        // CRITICAL: Drain stdout/stderr to prevent blocking on Windows.
+        unawaited(process.stdout.drain<void>());
+        unawaited(process.stderr.drain<void>());
+
         // Write frames
         for (int i = 0; i < totalFrames; i++) {
           process.stdin.add(redFrame);
@@ -155,6 +160,10 @@ void main() {
           'yuv420p',
           outputPath,
         ]);
+
+        // CRITICAL: Drain stdout/stderr to prevent blocking on Windows.
+        unawaited(process.stdout.drain<void>());
+        unawaited(process.stderr.drain<void>());
 
         // Generate gradient animation
         for (int f = 0; f < totalFrames; f++) {
@@ -458,6 +467,10 @@ void main() {
           'yuv420p',
           outputPath,
         ]);
+
+        // CRITICAL: Drain stdout/stderr to prevent blocking on Windows.
+        unawaited(process.stdout.drain<void>());
+        unawaited(process.stderr.drain<void>());
 
         // Close stdin immediately without writing any frames
         await process.stdin.close();
