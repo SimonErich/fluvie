@@ -1,6 +1,7 @@
 @Tags(['integration', 'ffmpeg'])
 library;
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -330,6 +331,12 @@ void main() {
           '-',
         ]);
 
+        // CRITICAL: Drain stdout/stderr to prevent blocking on Windows.
+        // Without this, the process can hang when output buffers fill up.
+        // This matches how the production code handles FFmpeg processes.
+        unawaited(process.stdout.drain<void>());
+        unawaited(process.stderr.drain<void>());
+
         process.stdin.add(frameData);
         await process.stdin.close();
 
@@ -366,6 +373,12 @@ void main() {
           'null',
           '-',
         ]);
+
+        // CRITICAL: Drain stdout/stderr to prevent blocking on Windows.
+        // Without this, the process can hang when output buffers fill up.
+        // This matches how the production code handles FFmpeg processes.
+        unawaited(process.stdout.drain<void>());
+        unawaited(process.stderr.drain<void>());
 
         process.stdin.add(frame1);
         process.stdin.add(frame2);
