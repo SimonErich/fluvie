@@ -242,7 +242,13 @@ void main() {
           outputPath,
         ]);
 
-        final streams = probeResult.stdout.toString().trim().split('\n');
+        // Split by regex to handle both Unix (\n) and Windows (\r\n) line endings
+        final streams = probeResult.stdout
+            .toString()
+            .trim()
+            .split(RegExp(r'\r?\n'))
+            .map((s) => s.trim())
+            .toList();
         expect(streams, contains('video'));
         expect(streams, contains('audio'));
       });
