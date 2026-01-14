@@ -175,6 +175,9 @@ class DataAnimation {
     if (frame >= duration) {
       return _formatValue(originalValue);
     }
+    if (duration <= 0) {
+      return _getStartValue(originalValue);
+    }
 
     final progress = curve.transform(frame / duration);
 

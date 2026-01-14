@@ -190,6 +190,8 @@ class AnimatedProp extends StatelessWidget {
         double progress;
         if (frame < effectiveStartFrame) {
           progress = 0.0;
+        } else if (duration <= 0) {
+          progress = 0.0;
         } else if (frame >= endFrame) {
           if (loop) {
             // Loop: restart from beginning

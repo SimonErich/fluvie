@@ -111,6 +111,9 @@ class CounterText extends StatelessWidget {
         } else if (relativeFrame >= duration) {
           // After animation ends
           displayValue = value;
+        } else if (duration <= 0) {
+          // Zero duration - stay at initial value
+          displayValue = startValue;
         } else {
           // During animation
           final linearProgress = relativeFrame / duration;

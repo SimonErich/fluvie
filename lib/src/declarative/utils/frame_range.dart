@@ -114,6 +114,7 @@ class FrameRange {
   double progress(int frame) {
     if (frame <= start) return 0.0;
     if (frame >= end) return 1.0;
+    if (duration <= 0) return 0.0;
     return (frame - start) / duration;
   }
 
@@ -125,7 +126,10 @@ class FrameRange {
   /// Calculates unclamped progress (can be < 0 or > 1).
   ///
   /// Useful for extrapolation effects.
-  double unclampedProgress(int frame) => (frame - start) / duration;
+  double unclampedProgress(int frame) {
+    if (duration <= 0) return 0.0;
+    return (frame - start) / duration;
+  }
 
   /// Returns a new range offset by [frames].
   ///

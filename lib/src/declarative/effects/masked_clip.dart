@@ -342,6 +342,9 @@ class MaskAnimation {
     if (frame >= duration) {
       return type == MaskAnimationType.reveal ? 1.0 : 0.0;
     }
+    if (duration <= 0) {
+      return type == MaskAnimationType.reveal ? 0.0 : 1.0;
+    }
 
     final linearProgress = frame / duration;
     final curvedProgress = curve.transform(linearProgress);

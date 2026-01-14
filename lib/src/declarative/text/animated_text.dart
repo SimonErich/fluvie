@@ -166,6 +166,9 @@ class AnimatedText extends StatelessWidget {
         }
 
         // During animation
+        if (duration <= 0) {
+          return animation!.apply(textWidget, 0.0);
+        }
         final linearProgress = relativeFrame / duration;
         final curvedProgress = curve.transform(linearProgress);
         return animation!.apply(textWidget, curvedProgress);

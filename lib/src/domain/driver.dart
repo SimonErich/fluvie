@@ -22,6 +22,7 @@ class VideoTween extends Driver<double> {
   double get value {
     if (currentFrame < startFrame) return begin;
     if (currentFrame > startFrame + duration) return end;
+    if (duration <= 0) return begin;
     final t = (currentFrame - startFrame) / duration;
     return begin + (end - begin) * t;
   }

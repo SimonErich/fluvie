@@ -99,10 +99,10 @@ class EmbeddedVideoController extends ChangeNotifier {
     FrameExtractionService? extractionService,
     VideoFrameCache? cache,
     VideoPathResolver? pathResolver,
-  })  : _probeService = probeService ?? VideoProbeService(),
-        _extractionService = extractionService ?? FrameExtractionService(),
-        _cache = cache ?? VideoFrameCacheManager.instance,
-        _pathResolver = pathResolver ?? VideoPathResolver();
+  }) : _probeService = probeService ?? VideoProbeService(),
+       _extractionService = extractionService ?? FrameExtractionService(),
+       _cache = cache ?? VideoFrameCacheManager.instance,
+       _pathResolver = pathResolver ?? VideoPathResolver();
 
   /// Current extraction state.
   ExtractionState get state => _state;
@@ -259,6 +259,11 @@ class EmbeddedVideoController extends ChangeNotifier {
       return null;
     }
 
+    // Guard against invalid video with 0 frames
+    if (_metadata!.frameCount <= 0) {
+      return null;
+    }
+
     // Store display dimensions for preloading
     _defaultDisplayWidth = displayWidth;
     _defaultDisplayHeight = displayHeight;
@@ -362,6 +367,15 @@ class EmbeddedVideoController extends ChangeNotifier {
       return;
     }
 
+    // Guard against invalid video with 0 frames
+    if (_metadata!.frameCount <= 0) {
+      FluvieLogger.warning(
+        'Cannot preload: video has ${_metadata!.frameCount} frames',
+        module: 'embedded',
+      );
+      return;
+    }
+
     // Preload first 10 frames (about 1/3 second at 30fps)
     const initialFrameCount = 10;
     final firstSourceFrame = compositionFrameToSourceFrame(startFrame);
@@ -439,6 +453,11 @@ class EmbeddedVideoController extends ChangeNotifier {
       return;
     }
 
+    // Guard against invalid video with 0 frames
+    if (_metadata!.frameCount <= 0) {
+      return;
+    }
+
     // Calculate source frame range to preload
     final startSourceFrame = compositionFrameToSourceFrame(compositionFrame);
     if (startSourceFrame < 0) {
@@ -481,8 +500,8 @@ class EmbeddedVideoController extends ChangeNotifier {
     }
 
     // Convert trim to frames
-    final trimFrames =
-        (trimStart.inMicroseconds * _compositionFps! / 1000000).round();
+    final trimFrames = (trimStart.inMicroseconds * _compositionFps! / 1000000)
+        .round();
 
     // Determine source type based on path format
     final AudioSourceType sourceType;

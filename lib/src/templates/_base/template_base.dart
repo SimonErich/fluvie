@@ -146,6 +146,7 @@ mixin TemplateAnimationMixin on WrappedTemplate {
   ]) {
     if (currentFrame < startFrame) return 0.0;
     if (currentFrame >= startFrame + duration) return 1.0;
+    if (duration <= 0) return 0.0;
 
     final progress = (currentFrame - startFrame) / duration;
     return curve.transform(progress.clamp(0.0, 1.0));
@@ -162,6 +163,7 @@ mixin TemplateAnimationMixin on WrappedTemplate {
   ]) {
     if (currentFrame < exitStart) return 0.0;
     if (currentFrame >= exitStart + duration) return 1.0;
+    if (duration <= 0) return 0.0;
 
     final progress = (currentFrame - exitStart) / duration;
     return curve.transform(progress.clamp(0.0, 1.0));

@@ -199,6 +199,8 @@ class SlideIn extends StatelessWidget {
           progress = 0;
         } else if (animFrame >= duration) {
           progress = 1;
+        } else if (duration <= 0) {
+          progress = 0;
         } else {
           progress = animFrame / duration;
         }

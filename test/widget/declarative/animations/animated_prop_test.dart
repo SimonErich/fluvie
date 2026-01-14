@@ -268,15 +268,18 @@ void main() {
 
     group('edge cases', () {
       testWidgets('handles zero duration', (tester) async {
+        // With zero duration, animation stays at initial state (progress 0.0)
+        // For a fade from 0.0 to 1.0, this means opacity 0.0 (invisible)
         await tester.pumpWidget(wrapWithApp(
           const AnimatedProp(
-            animation: PropAnimation.fade(start: 0.0, end: 1.0),
+            animation: PropAnimation.fade(start: 1.0, end: 0.0),
             startFrame: 0,
             duration: 0,
             child: Text('Zero Duration'),
           ),
         ));
 
+        // Widget is visible because fade starts at 1.0 (initial state)
         expect(find.text('Zero Duration'), findsOneWidget);
       });
 
