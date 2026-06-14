@@ -1,0 +1,13 @@
+# The lint package cannot consume itself via custom_lint; root strictness only.
+include: ../../analysis_options.yaml
+
+# Declared directly so the published package formats at width 100 standalone.
+formatter:
+  page_width: 100
+
+analyzer:
+  exclude:
+    # The rule fixtures carry intentionally-bad code (unresolved imports,
+    # deprecated names, dangling anchors). They are inputs to testAnalyzeAndRun,
+    # not production code, so they are exempt from --fatal-infos.
+    - test/fixtures/**

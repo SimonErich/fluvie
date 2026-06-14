@@ -1,0 +1,7 @@
+# The fixture project wires the custom_lint plugin so its // expect_lint
+# markers are checked, but keeps the rest of the workspace strictness relaxed:
+# the fixtures carry intentionally-wrong code (dangling anchors, deprecated
+# names, layering breaks) that would otherwise trip --fatal-infos.
+analyzer:
+  plugins:
+    - custom_lint

@@ -1,0 +1,164 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.44.0"
+
+# melos run scripts re-invoke `melos` for their exec/steps stages, so melos must
+# be on PATH (a plain `dart run melos` is not enough). Each job activates it and
+# adds the pub-cache bin to PATH.
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - run: melos run format
+      - run: melos run analyze
+      - run: melos run lint --no-select
+
+  test:
+    strategy:
+      matrix:
+        # Linux is the determinism baseline; macOS gives a second Unix target.
+        # Windows is not a supported render platform (the lint and timing test
+        # harnesses are Unix-only), so it is left out of the matrix.
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - run: melos run test
+      - run: melos run test:tool
+      # Platform goldens are Linux-baselined; ci-variant goldens run everywhere
+      # through the coverage job below.
+      - if: runner.os == 'Linux'
+        run: melos run test:goldens
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - run: melos run coverage:check
+      - uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: packages/fluvie/coverage/lcov.info,packages/fluvie_lints/coverage/lcov.info,packages/fluvie_cli/coverage/lcov.info,packages/fluvie_api/coverage/lcov.info
+        continue-on-error: true
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      # Docs snippets must match their compiled sources, and every dart fence
+      # must carry a code-excerpt directive.
+      - run: melos run docs:snippets:check
+      - run: melos run docs:lint
+      - run: melos run docs --no-select
+
+  pana:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: dart pub global activate pana
+      # Fail if the pana score drops below this floor; raise it as the score improves.
+      - run: dart pub global run pana --no-warning --exit-code-threshold 40 packages/fluvie
+
+  smoke_render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Ubuntu 24.04 ships ffmpeg 8.x (+ ffprobe), well over the >= 6.0 floor.
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      # End-to-end render smoke: capture with flutter test, encode with
+      # ffmpeg, all through the real CLI.
+      - run: dart run packages/fluvie_cli/bin/fluvie.dart render demo --out build/demo.mp4
+      - run: test -s build/demo.mp4
+      # The exhaustive 12-lesson render-smoke. Each gallery lesson is
+      # captured -> encoded -> ffprobed through the production capture shell +
+      # manifest + ffmpeg arg array, asserting the encoded video frame count
+      # equals the lesson's video.totalFrames. ffmpeg-tagged, so it is excluded
+      # from the default `melos run test`; this job opts it in.
+      - run: flutter test --tags ffmpeg test/render/lessons_render_smoke_test.dart
+        working-directory: example
+
+  # Optional integration lane: the ffmpeg-tagged suites against the real
+  # binaries. Advisory only; the required jobs above stay binary-free.
+  ffmpeg_integration:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - run: melos run test:ffmpeg

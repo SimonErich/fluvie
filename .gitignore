@@ -1,0 +1,43 @@
+# Dart / Flutter build artifacts
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# Coverage
+coverage/
+*.lcov
+
+# Alchemist writes diff artifacts here only when a golden fails; never commit them.
+**/failures/
+
+# Secrets: real per-service env files. The *.env.example templates are committed.
+*.env
+
+# Generated API docs (dart doc / melos run docs). The `**/` matches the nested
+# package output (packages/fluvie/doc/api), not just a root-level doc/api.
+**/doc/api/
+
+# custom_lint diagnostic log (written into a package dir on some runs)
+custom_lint.log
+
+# Melos
+.melos_tool/
+pubspec_overrides.yaml
+
+# IDE / editor
+.idea/
+*.iml
+.vscode/
+# VSCode local-history extension snapshots.
+.history/
+
+# OS
+.DS_Store
+
+# NOTE: *.g.dart / *.freezed.dart are intentionally committed (see .gitattributes).
+# NOTE: the workspace root pubspec.lock is intentionally committed.
+
+# verify_fresh_clone.sh throwaway working tree
+.verify_clone*

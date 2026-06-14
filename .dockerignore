@@ -1,0 +1,20 @@
+# Keep the build context small and reproducible.
+.git
+.dart_tool
+**/.dart_tool
+build
+**/build
+coverage
+**/coverage
+# Node / Astro artifacts from the docs site.
+**/node_modules
+web/docs/dist
+web/docs/.astro
+web/docs/src/content/docs
+.env
+*.mp4
+*.webm
+*.gif
+**/failures/
+.idea
+*.iml

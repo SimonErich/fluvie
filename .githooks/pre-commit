@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# Fast quality gate run before each commit. The full gate (incl. custom_lint +
+# tests) is `melos run gate`; this hook runs the deterministic, fast subset.
+set -euo pipefail
+
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=_lib.sh
+source "$HOOK_DIR/_lib.sh"
+
+mapfile -t FILES < <(staged_dart_files)
+fail=0
+
+# 1) Forbidden-content + file-size budget on staged Dart (against the staged blob).
+for f in "${FILES[@]}"; do
+  [ -z "$f" ] && continue
+  content="$(git show ":$f" 2>/dev/null || true)"
+  for entry in "${FORBIDDEN_PATTERNS[@]}"; do
+    pat="${entry%%|*}"
+    msg="${entry#*|}"
+    # Here-string, not `printf | grep`: under `set -o pipefail`, `grep -q`
+    # closing the pipe early (on a match) SIGPIPEs the upstream printf, whose
+    # 141 then becomes the pipeline status and silently inverts the result.
+    if grep -qE "$pat" <<<"$content"; then
+      echo "✗ $f: $msg"
+      fail=1
+    fi
+  done
+  # Code-construct patterns: match against comments/strings-stripped source so
+  # a `print(`/`DateTime.now()` inside a dartdoc example or a highlighted-code
+  # test fixture is not a false positive. The fluvie_lints package is exempt:
+  # it is the tooling ABOUT these patterns (the nondeterministic_random rule's
+  # source + its trigger fixtures must contain real DateTime.now()/Random()),
+  # and custom_lint's nondeterministic_random is the authority that correctly
+  # scopes the ban to fluvie's render code, not the lint package itself.
+  if [[ "$f" != packages/fluvie_lints/* ]]; then
+    code_only="$(printf '%s\n' "$content" | strip_dart_comments_and_strings)"
+    for entry in "${FORBIDDEN_CODE_PATTERNS[@]}"; do
+      pat="${entry%%|*}"
+      msg="${entry#*|}"
+      if grep -qE "$pat" <<<"$code_only"; then
+        echo "✗ $f: $msg"
+        fail=1
+      fi
+    done
+  fi
+  # The line budget targets production code; test files may aggregate cases, and
+  # a `fluvie:large-file-ok` marker exempts a cohesive public-API surface that
+  # cannot be split (e.g. the Animation preset facade).
+  # Pure-bash substring test for the marker: no subprocess, so no SIGPIPE/
+  # pipefail interaction (a `printf | grep -q` here wrongly ran the size check
+  # on marked large files when grep matched and SIGPIPEd the printf).
+  if [[ "$f" != */test/* && "$f" != test/* && "$content" != *fluvie:large-file-ok* ]]; then
+    lines="$(printf '%s\n' "$content" | wc -l | tr -d ' ')"
+    if [ "$lines" -gt "$MAX_FILE_LINES" ]; then
+      echo "✗ $f: $lines lines exceeds the $MAX_FILE_LINES-line budget — extract."
+      fail=1
+    fi
+  fi
+done
+
+# 1b) Docs voice gate on staged documentation/ markdown.
+mapfile -t DOCS_FILES < <(staged_docs_files)
+for f in "${DOCS_FILES[@]}"; do
+  [ -z "$f" ] && continue
+  content="$(git show ":$f" 2>/dev/null || true)"
+  if grep -qP '[\x{2013}\x{2014}]' <<<"$content"; then
+    echo "✗ $f: em/en-dash found — use a comma, period, or parentheses."
+    fail=1
+  fi
+  if grep -qiE "\\b($DOCS_BANNED_WORDS)\\b" <<<"$content"; then
+    echo "✗ $f: marketing vocabulary found ($DOCS_BANNED_WORDS)."
+    fail=1
+  fi
+  # Naked-fence gate: every ```dart fence needs a preceding code-excerpt
+  # directive (snippets are compiled, never hand-typed — see CLAUDE.md).
+  naked="$(printf '%s\n' "$content" | naked_dart_fences)"
+  if [ -n "$naked" ]; then
+    for ln in $naked; do
+      echo "✗ $f:$ln: naked \`\`\`dart fence — add a <!-- code-excerpt \"<file> (<region>)\" --> directive (or code-excerpt-ignore)."
+    done
+    fail=1
+  fi
+done
+
+# 2) Formatting of staged Dart files.
+if [ "${#FILES[@]}" -gt 0 ]; then
+  if ! dart format --output=none --set-exit-if-changed "${FILES[@]}" >/dev/null 2>&1; then
+    echo "✗ formatting — run 'melos run format:fix'"
+    fail=1
+  fi
+fi
+
+# 3) Static analysis (whole workspace; infos & warnings fatal).
+analyze_log="$(mktemp)"
+if ! dart analyze --fatal-infos --fatal-warnings . >"$analyze_log" 2>&1; then
+  echo "✗ analyze:"
+  cat "$analyze_log"
+  fail=1
+fi
+rm -f "$analyze_log"
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "Pre-commit gate failed. Fix the above (or run 'melos run gate' for the full gate)."
+  exit 1
+fi
+
+echo "✓ pre-commit gate passed (grep-gate, size budget, format, analyze)."

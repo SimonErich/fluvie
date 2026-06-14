@@ -1,0 +1,209 @@
+name: fluvie_workspace
+description: Melos + pub workspace root for the Fluvie video-rendering library.
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+
+# Native pub workspace (Dart 3.6+). Melos 7 orchestrates scripts on top of this.
+workspace:
+  - packages/fluvie
+  - packages/fluvie_lints
+  - packages/fluvie_lints/example
+  - packages/fluvie_cli
+  - packages/fluvie_ai
+  - packages/fluvie_api
+  - packages/fluvie_mcp
+  - example
+
+dev_dependencies:
+  melos: ^7.0.0
+  test: ^1.31.0
+  very_good_analysis: ^10.2.0
+
+# Melos 7 reads its config from this `melos:` key when the root is a pub workspace.
+melos:
+  name: fluvie
+
+  command:
+    bootstrap:
+      runPubGetInParallel: false
+
+  scripts:
+    analyze:
+      description: Static analysis across the workspace; infos & warnings are fatal.
+      run: dart analyze --fatal-infos --fatal-warnings .
+
+    format:
+      description: Verify formatting (CI). Use `melos run format:fix` to apply.
+      run: dart format --output=none --set-exit-if-changed .
+
+    format:fix:
+      description: Apply formatting across the workspace.
+      run: dart format .
+
+    lint:
+      description: Run fluvie_lints via custom_lint in every consuming package.
+      run: dart run custom_lint
+      exec:
+        concurrency: 1
+      packageFilters:
+        dependsOn: custom_lint
+
+    test:dart:
+      description: Run pure-Dart package tests (ffmpeg integration opt-in).
+      run: dart test --exclude-tags ffmpeg
+      exec:
+        concurrency: 1
+      packageFilters:
+        flutter: false
+        dirExists: test
+
+    test:flutter:
+      description: Run Flutter package tests (golden/snapshot/ffmpeg/wasm tests opt-in).
+      run: flutter test --exclude-tags "golden || snapshot || ffmpeg || wasm"
+      exec:
+        concurrency: 1
+      packageFilters:
+        flutter: true
+        dirExists: test
+
+    test:ffmpeg:
+      description: >
+        Run the ffmpeg-tagged integration suites (real ffmpeg >= 6.0 and
+        ffprobe on PATH; the CLI e2e additionally needs a Flutter SDK).
+      steps:
+        - test:ffmpeg:flutter
+        - test:ffmpeg:dart
+
+    test:ffmpeg:flutter:
+      description: ffmpeg-tagged suites in the fluvie package.
+      run: flutter test --tags ffmpeg
+      exec:
+        concurrency: 1
+      packageFilters:
+        scope: fluvie
+
+    test:ffmpeg:dart:
+      description: ffmpeg-tagged suites in fluvie_cli (the render e2e).
+      run: dart test --tags ffmpeg
+      exec:
+        concurrency: 1
+      packageFilters:
+        scope: fluvie_cli
+
+    test:goldens:
+      description: Run the opt-in pixel-golden tests (Alchemist; baselines pinned to Linux).
+      run: flutter test --tags golden
+      exec:
+        concurrency: 1
+      packageFilters:
+        scope: fluvie
+
+    test:
+      description: Run all package tests (Dart then Flutter).
+      steps:
+        - test:dart
+        - test:flutter
+
+    coverage:
+      description: Run all package tests with coverage (Flutter, pure Dart, root tool).
+      steps:
+        - coverage:flutter
+        - coverage:dart
+        - test:tool
+
+    coverage:flutter:
+      description: >
+        Flutter package tests with coverage (ffmpeg/wasm integration excluded
+        so the gate never needs the binaries; their logic is covered by the
+        mocked unit suites).
+      run: flutter test --coverage --exclude-tags "ffmpeg || wasm"
+      exec:
+        concurrency: 1
+      packageFilters:
+        flutter: true
+        dirExists: test
+
+    coverage:dart:
+      description: Pure-Dart package tests with lcov coverage (ffmpeg e2e excluded).
+      run: >
+        dart test --exclude-tags ffmpeg --coverage=coverage &&
+        dart run coverage:format_coverage --lcov --in=coverage
+        --out=coverage/lcov.info --report-on=lib
+      exec:
+        concurrency: 1
+      packageFilters:
+        flutter: false
+        dirExists: test
+
+    coverage:check:
+      description: The coverage gate — fails under 97% line coverage on library packages.
+      steps:
+        - coverage
+        - coverage:gate
+
+    coverage:gate:
+      description: >
+        Evaluate lcov reports against the 97% threshold (generated files
+        excluded, // coverage:ignore markers honored — see
+        documentation/contributing/coverage.md).
+      run: dart tool/check_coverage.dart --min 97 packages/fluvie packages/fluvie_lints packages/fluvie_cli packages/fluvie_api
+
+    test:tool:
+      description: Root tool tests (coverage gate parser).
+      run: dart test tool
+
+    docs:
+      description: Generate the API techspec for fluvie (needs Flutter >= 3.44).
+      run: dart doc --output doc/api
+      exec:
+        concurrency: 1
+      packageFilters:
+        scope: fluvie
+
+    docs:snippets:
+      description: >
+        Populate every documentation code fence from its compiled
+        `// #docregion` source (see documentation/README.md).
+      run: dart run tool/docs/sync_snippets.dart
+
+    docs:snippets:check:
+      description: >
+        Fail if any documentation code fence has drifted from its source
+        (CI and the fresh-clone run; changes nothing).
+      run: dart run tool/docs/sync_snippets.dart --check
+
+    docs:lint:
+      description: >
+        Fail if any ```dart fence under documentation/ lacks a preceding
+        code-excerpt directive (the naked-fence gate; mirrors the pre-commit
+        hook over the whole tree).
+      run: bash tool/docs/check_naked_fences.sh documentation
+
+    docs:dartdoc:
+      description: >
+        Run `dart doc` on fluvie and fail on any warning (validates links).
+        Used by CI and the fresh-clone script, not the fast pre-commit gate.
+      run: bash tool/docs/check_dartdoc.sh
+
+    gate:
+      description: Full per-epic quality gate — must be green before every commit.
+      steps:
+        - format
+        - analyze
+        - lint
+        - coverage:check
+
+    render:examples:
+      description: >
+        Render every registered composition to build/<key>.mp4 via the
+        two-process CLI (capture with `flutter test`, then encode). Needs a
+        Flutter SDK and ffmpeg on PATH; intentionally not part of `gate`. The
+        key list is static; add a key here when you register a new composition.
+      run: |
+        mkdir -p build
+        for key in demo multi_scene 01_hello_video 02_text_and_motion 03_timing_and_triggers 04_scenes_and_transitions 05_images_and_clips 06_collage 07_charts 08_code_doc_intro 09_diagrams_and_webviews 10_audio_and_captions 11_templates_and_aspects 12_the_kitchen_sink; do
+          echo "Rendering $key…"
+          dart run packages/fluvie_cli/bin/fluvie.dart render "$key" --out "build/$key.mp4" || exit 1
+        done

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and discussion
+    url: https://github.com/SimonErich/fluvie/discussions
+    about: Ask how to do something, or share what you built.
+  - name: Security report
+    url: https://github.com/SimonErich/fluvie/blob/main/SECURITY.md
+    about: Please report security issues privately, not as a public issue.

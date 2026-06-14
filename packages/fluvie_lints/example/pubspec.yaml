@@ -1,0 +1,31 @@
+name: fluvie_lints_fixtures
+description: >-
+  The fluvie_lints rule fixtures: one file per rule with // expect_lint markers.
+  Not published; custom_lint's golden-comment harness asserts each rule fires
+  exactly once on real fluvie syntax.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fluvie: ^0.1.0
+
+dev_dependencies:
+  custom_lint: ^0.8.1
+  flutter_test:
+    sdk: flutter
+  fluvie_lints:
+    # A path (not hosted) constraint: the custom_lint host replicates this
+    # dependency and must resolve it without pub.dev.
+    path: ../
+
+flutter:
+  # fluvie sets uses-material-design; mirror it so the analyzer stays quiet.
+  uses-material-design: true

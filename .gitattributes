@@ -1,0 +1,10 @@
+# Generated sources are committed (determinism + fast CI) but collapsed in diffs.
+*.g.dart        linguist-generated=true
+*.freezed.dart  linguist-generated=true
+*.mocks.dart    linguist-generated=true
+
+# Goldens and rendered media are binary; do not attempt text diffs/merges.
+*.png binary
+*.mp4 binary
+*.gif binary
+*.wav binary

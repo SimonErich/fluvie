@@ -1,0 +1,4 @@
+tags:
+  # The golden-comment harness shells out to `dart run custom_lint`; it is
+  # heavier than a unit test, so it carries the shared `lint` tag.
+  lint:

@@ -1,0 +1,6 @@
+# Code owners for Fluvie. Replace the placeholder handle with the real
+# maintainer (or team) once the repository has a remote.
+#
+# Each line maps a path to its reviewers. The last matching line wins.
+
+* @SimonErich
