@@ -1,0 +1,9 @@
+tags:
+  golden:
+    description: Pixel-golden tests via Alchemist; run with `melos run test:goldens`.
+  snapshot:
+    description: Tests that drive a live headless Chromium snapshot path.
+  ffmpeg:
+    description: Integration tests that need an ffmpeg binary on PATH.
+  wasm:
+    description: Tests that execute ffmpeg.wasm in a browser environment.

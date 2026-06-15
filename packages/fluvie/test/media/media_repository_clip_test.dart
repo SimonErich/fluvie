@@ -1,0 +1,196 @@
+// WI-15 (D7/D8): the MediaRepository clip path. preResolveClip probes the
+// source (via a fake VideoProbeService) and extracts the listed source frames
+// (via a fake FrameExtractionService), decoding each RawFrame to a cached
+// ui.Image; clipMetadataFor and decodedClipFrame serve them synchronously and
+// enforce the pass ordering. A real video file is never touched here.
+
+import 'dart:io';
+
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
+import 'package:fluvie/src/core/media/media_source.dart';
+import 'package:fluvie/src/media/media_bytes_loader.dart';
+import 'package:fluvie/src/media/media_repository.dart';
+import 'package:fluvie/src/media/net/media_http_client.dart';
+import 'package:fluvie/src/media/net/network_allowlist.dart';
+import 'package:fluvie/src/rendering/capture/raw_frame.dart';
+import 'package:fluvie/src/rendering/encoding/frame_extraction_service.dart';
+import 'package:fluvie/src/rendering/encoding/video_probe_service.dart';
+
+class _MapBundle extends CachingAssetBundle {
+  _MapBundle(this._data);
+  final Map<String, Uint8List> _data;
+  @override
+  Future<ByteData> load(String key) async {
+    final bytes = _data[key];
+    if (bytes == null) throw FluvieRenderException('asset not found: $key');
+    return ByteData.view(bytes.buffer);
+  }
+}
+
+class _NoHttp implements MediaHttpClient {
+  @override
+  Future<Uint8List> get(Uri url) async => throw FluvieRenderException('no network: $url');
+}
+
+/// A probe that ignores the path and returns canned facts; counts calls.
+class _FakeProbe implements VideoProbeService {
+  _FakeProbe(this.result);
+  final VideoProbeResult result;
+  int calls = 0;
+  @override
+  Future<VideoProbeResult> probe(String filePath) async {
+    calls++;
+    return result;
+  }
+}
+
+/// An extractor that serves canned 2x2 frames per index; counts calls.
+class _FakeExtractor implements FrameExtractionService {
+  int calls = 0;
+  final extracted = <int>[];
+  @override
+  Future<RawFrame> extractFrame(
+    Uri source,
+    int frameIndex, {
+    required int width,
+    required int height,
+  }) async {
+    calls++;
+    extracted.add(frameIndex);
+    return RawFrame(
+      frameIndex: frameIndex,
+      width: width,
+      height: height,
+      rgba: Uint8List(width * height * 4)..fillRange(0, width * height * 4, frameIndex % 256),
+    );
+  }
+}
+
+MediaRepository _repo({
+  required Map<String, Uint8List> assets,
+  required VideoProbeService probe,
+  required FrameExtractionService extractor,
+}) => MediaRepository(
+  loader: MediaBytesLoader(
+    bundle: _MapBundle(assets),
+    httpClient: _NoHttp(),
+    allowlist: NetworkAllowlist.allowAny(),
+  ),
+  probeService: probe,
+  frameExtractor: extractor,
+);
+
+const _clip = MediaSource.asset('clip_1s.mp4');
+const _probeResult = VideoProbeResult(
+  codec: 'h264',
+  width: 2,
+  height: 2,
+  nbFrames: 30,
+  durationSeconds: 1,
+);
+
+void main() {
+  test('preResolveClip probes once and extracts the listed frames', () async {
+    final probe = _FakeProbe(_probeResult);
+    final extractor = _FakeExtractor();
+    final repo = _repo(assets: {'clip_1s.mp4': Uint8List(16)}, probe: probe, extractor: extractor);
+
+    await repo.preResolveClip(_clip, [0, 10, 20]);
+
+    expect(probe.calls, 1);
+    expect(extractor.extracted, [0, 10, 20]);
+  });
+
+  test('clipMetadataFor returns the probed fps and frame count', () async {
+    final repo = _repo(
+      assets: {'clip_1s.mp4': Uint8List(16)},
+      probe: _FakeProbe(_probeResult),
+      extractor: _FakeExtractor(),
+    );
+
+    await repo.preResolveClip(_clip, [0]);
+    final meta = repo.clipMetadataFor(_clip);
+
+    expect(meta.fps, 30);
+    expect(meta.frameCount, 30);
+    expect(meta.width, 2);
+    expect(meta.height, 2);
+  });
+
+  test('decodedClipFrame returns a sync ui.Image per source frame', () async {
+    final repo = _repo(
+      assets: {'clip_1s.mp4': Uint8List(16)},
+      probe: _FakeProbe(_probeResult),
+      extractor: _FakeExtractor(),
+    );
+
+    await repo.preResolveClip(_clip, [0, 5]);
+
+    expect(repo.decodedClipFrame(_clip, 0).width, 2);
+    expect(repo.decodedClipFrame(_clip, 5).height, 2);
+  });
+
+  test('preResolveClip is idempotent: a re-extracted frame is skipped', () async {
+    final extractor = _FakeExtractor();
+    final repo = _repo(
+      assets: {'clip_1s.mp4': Uint8List(16)},
+      probe: _FakeProbe(_probeResult),
+      extractor: extractor,
+    );
+
+    await repo.preResolveClip(_clip, [0, 5]);
+    await repo.preResolveClip(_clip, [5, 10]);
+
+    expect(extractor.extracted, [0, 5, 10], reason: 'frame 5 must not re-extract');
+  });
+
+  test('clipMetadataFor before preResolveClip throws StateError', () {
+    final repo = _repo(
+      assets: const {},
+      probe: _FakeProbe(_probeResult),
+      extractor: _FakeExtractor(),
+    );
+    expect(() => repo.clipMetadataFor(_clip), throwsA(isA<StateError>()));
+  });
+
+  test('decodedClipFrame of an un-extracted frame throws a typed error', () async {
+    final repo = _repo(
+      assets: {'clip_1s.mp4': Uint8List(16)},
+      probe: _FakeProbe(_probeResult),
+      extractor: _FakeExtractor(),
+    );
+
+    await repo.preResolveClip(_clip, [0]);
+
+    expect(
+      () => repo.decodedClipFrame(_clip, 99),
+      throwsA(isA<FluvieRenderException>().having((e) => e.message, 'message', contains('99'))),
+    );
+  });
+
+  test('a clip missing the extraction services throws a clear error', () async {
+    final repo = MediaRepository(
+      loader: MediaBytesLoader(
+        bundle: _MapBundle({'clip_1s.mp4': Uint8List(16)}),
+        httpClient: _NoHttp(),
+        allowlist: NetworkAllowlist.allowAny(),
+      ),
+    );
+
+    await expectLater(
+      () => repo.preResolveClip(_clip, [0]),
+      throwsA(isA<FluvieRenderException>()),
+    );
+  });
+
+  tearDownAll(() {
+    // Clean any stray clip materialization temp dirs the repo may have made.
+    for (final entry in Directory.systemTemp.listSync()) {
+      if (entry is Directory && entry.path.contains('fluvie_clip_src_')) {
+        entry.deleteSync(recursive: true);
+      }
+    }
+  });
+}

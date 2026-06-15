@@ -1,0 +1,50 @@
+name: fluvie
+description: "Write a video like a Flutter screen: declarative widgets in, a real video file out. No timelines to scrub, no frame math."
+version: 0.1.0
+repository: https://github.com/SimonErich/fluvie/tree/main/packages/fluvie
+homepage: https://github.com/SimonErich/fluvie
+issue_tracker: https://github.com/SimonErich/fluvie/issues
+topics:
+  - video
+  - animation
+  - rendering
+  - ffmpeg
+
+environment:
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.0.0
+  highlight: ^0.7.0
+  http: ^1.5.0
+  intl: ^0.20.2
+  markdown: ^7.0.0
+  meta: ^1.16.0
+  riverpod: ^3.3.2
+
+dev_dependencies:
+  alchemist: ^0.14.0
+  custom_lint: ^0.8.1
+  flutter_test:
+    sdk: flutter
+  fluvie_lints:
+    # A path (not hosted) constraint: the custom_lint plugin host replicates
+    # this dependency and must resolve it without pub.dev.
+    path: ../fluvie_lints
+  mocktail: ^1.0.5
+
+flutter:
+  uses-material-design: true
+  shaders:
+    - shaders/ripple.frag
+  fonts:
+    - family: JetBrains Mono
+      fonts:
+        - asset: fonts/JetBrainsMono-Regular.ttf
+        - asset: fonts/JetBrainsMono-Bold.ttf
+          weight: 700
