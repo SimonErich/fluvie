@@ -1,0 +1,6 @@
+tags:
+  ffmpeg:
+    description: >-
+      End-to-end render tests that spawn the real toolchain; they need
+      flutter, ffmpeg (>= 6.0) and ffprobe on PATH. Run via
+      `melos run test:ffmpeg`.

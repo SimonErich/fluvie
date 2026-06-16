@@ -1,0 +1,152 @@
+import 'dart:io';
+
+import 'package:args/args.dart';
+import 'package:fluvie_cli/src/capture_process.dart';
+import 'package:fluvie_cli/src/encode_process.dart';
+import 'package:fluvie_cli/src/export_flags.dart';
+import 'package:fluvie_cli/src/ffmpeg_gate.dart';
+import 'package:fluvie_cli/src/process_runner.dart';
+
+/// Adds the options shared by `render`, `generate`, and `edit` to [parser].
+void addSharedRenderOptions(ArgParser parser) => parser
+  ..addOption(
+    'project',
+    help:
+        'Flutter project containing the capture harness '
+        '(default: the auto-discovered "example" project).',
+  )
+  ..addOption('ffmpeg', help: 'Path of the ffmpeg binary (default: ffmpeg on PATH).')
+  ..addOption('frames', help: 'Capture only the first N frames (draft renders).')
+  ..addOption('aspect', help: 'Aspect ratio: ${aspectNames.join(', ')}.')
+  ..addOption('quality', help: 'Encode quality: ${qualityNames.join(', ')}.')
+  ..addOption('format', help: 'Export format: ${formatNames.join(', ')}.')
+  ..addOption('poster', help: 'Poster thumbnail Time (e.g. "1.5s", "30f", "500ms").')
+  ..addFlag('no-cache', negatable: false, help: 'Bypass the frame cache for this render.')
+  ..addFlag('keep-temp', negatable: false, help: 'Keep the render sandbox for inspection.')
+  ..addFlag('verbose', abbr: 'v', negatable: false, help: 'Forward capture/encode output.');
+
+/// Validates the export flags up front, mapping a bad enum to a [UsageFailure]
+/// (exit 64) that names the valid set.
+ExportFlags validateExportFlags(ArgResults args) => (
+  aspect: validateEnumFlag(args.option('aspect'), flag: '--aspect', allowed: aspectNames),
+  quality: validateEnumFlag(args.option('quality'), flag: '--quality', allowed: qualityNames),
+  format: validateEnumFlag(args.option('format'), flag: '--format', allowed: formatNames),
+  poster: validatePoster(args.option('poster'), flag: '--poster'),
+);
+
+/// Parses `--frames`, throwing a [UsageFailure] for a non-positive value.
+int? validateFrames(String? framesOption) {
+  if (framesOption == null) return null;
+  final frames = int.tryParse(framesOption);
+  if (frames == null || frames <= 0) {
+    throw UsageFailure('--frames needs a positive integer, got "$framesOption".');
+  }
+  return frames;
+}
+
+/// The pipeline knobs that came from `--ffmpeg`/`--project`/`--no-cache`/
+/// `--verbose`/`--keep-temp`, decoupled from [ArgResults] so a caller that has
+/// no command line (the render server) can drive [runRenderPipeline] directly.
+typedef RenderPipelineOptions = ({
+  String? ffmpegBinary,
+  String? projectDir,
+  bool noCache,
+  bool verbose,
+  bool keepTemp,
+});
+
+/// The shared capture→encode pipeline behind `render`, `generate`, and `edit`
+/// (and the render server): the ffmpeg gate, a temp sandbox, the capture step
+/// (with [extraDefines] and an optional per-run [environment]), the ffmpeg
+/// encode, and sandbox cleanup. Returns the process exit code (`0` on success).
+///
+/// Throws a `CliFailure` on an operational failure; callers catch it and map it
+/// to exit 1.
+Future<int> runRenderPipeline({
+  required ProcessRunner runner,
+  required Future<Directory> Function() createSandbox,
+  required RenderPipelineOptions options,
+  required String key,
+  required String outPath,
+  required int? frames,
+  required ExportFlags flags,
+  required Map<String, String> extraDefines,
+  required StringSink out,
+  required StringSink err,
+  Map<String, String>? environment,
+  void Function(StringSink out) report = _noReport,
+}) async {
+  // Fail fast on a missing/old ffmpeg BEFORE the (slow) capture step.
+  await ensureFfmpeg(runner, binary: options.ffmpegBinary);
+  final projectDir = resolveProjectDir(project: options.projectDir);
+  final sandbox = await createSandbox();
+  try {
+    await runCapture(
+      runner: runner,
+      projectDir: projectDir,
+      key: key,
+      sandbox: sandbox,
+      frames: frames,
+      noCache: options.noCache,
+      verbose: options.verbose,
+      aspect: flags.aspect,
+      quality: flags.quality,
+      format: flags.format,
+      poster: flags.poster,
+      extraDefines: extraDefines,
+      environment: environment,
+      err: err,
+    );
+    final output = await runEncode(
+      runner: runner,
+      sandbox: sandbox,
+      outPath: outPath,
+      ffmpegBinary: options.ffmpegBinary,
+    );
+    out.writeln('Wrote ${output.path}');
+    report(out);
+    return 0;
+  } finally {
+    if (options.keepTemp) {
+      err.writeln('Keeping render sandbox at ${sandbox.path}');
+    } else if (sandbox.existsSync()) {
+      await sandbox.delete(recursive: true);
+    }
+  }
+}
+
+/// The [ArgResults]-driven adapter the CLI commands call: reads the pipeline
+/// options off [args] and delegates to [runRenderPipeline].
+Future<int> captureThenEncode({
+  required ProcessRunner runner,
+  required Future<Directory> Function() createSandbox,
+  required ArgResults args,
+  required String key,
+  required String outPath,
+  required int? frames,
+  required ExportFlags flags,
+  required Map<String, String> extraDefines,
+  required StringSink out,
+  required StringSink err,
+  void Function(StringSink out) report = _noReport,
+}) => runRenderPipeline(
+  runner: runner,
+  createSandbox: createSandbox,
+  options: (
+    ffmpegBinary: args.option('ffmpeg'),
+    projectDir: args.option('project'),
+    noCache: args.flag('no-cache'),
+    verbose: args.flag('verbose'),
+    keepTemp: args.flag('keep-temp'),
+  ),
+  key: key,
+  outPath: outPath,
+  frames: frames,
+  flags: flags,
+  extraDefines: extraDefines,
+  out: out,
+  err: err,
+  report: report,
+);
+
+void _noReport(StringSink out) {}
