@@ -1,0 +1,6 @@
+{
+  "$comment": "Placeholder. Regenerate with: dart run tool/dump_video_spec_schema.dart (run under the example, which has package:fluvie). Serves as the body of GET /v1/schema/video-spec.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VideoSpec",
+  "type": "object"
+}

@@ -1,0 +1,124 @@
+# The Fluvie services, for local development and as a Dokploy deployment
+# reference. Run from the repo root:
+#
+#   cp deploy/env/api.env.example deploy/env/api.env   # then edit the tokens
+#   cp deploy/env/mcp.env.example deploy/env/mcp.env
+#   docker compose -f deploy/docker-compose.yml up --build
+#
+# Each service reads its own documented env file under deploy/env/ (see
+# deploy/README.md). Local ports: render API (8080), demo (8081), landing
+# (8082), MCP (8084). Docs are hosted on GitHub Pages (docs.fluvie.dev), not as
+# a container here. The optional S3 stack (MinIO) starts with the `s3` profile,
+# the external cleanup cron with `cron`.
+#
+# Deploying with Dokploy: create one app per service from these Dockerfiles (or
+# the ghcr.io/simonerich/* images), set each domain in the Dokploy UI, and do
+# not publish ports 80/443 yourself (Traefik owns them). See RELEASE.md.
+#
+# All build contexts are the repo root (..), because the images copy the whole
+# workspace; the Dockerfiles live under deploy/.
+services:
+  fluvie-api:
+    build:
+      context: ..
+      dockerfile: deploy/api.Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - env/api.env
+    volumes:
+      # Persist rendered files and job records across restarts (local backend).
+      - fluvie-renders:/data/renders
+    restart: unless-stopped
+
+  # S3-compatible storage for testing the `STORAGE_BACKEND=s3` path locally.
+  # Enable with `--profile s3` and point env/api.env at it:
+  #   STORAGE_BACKEND=s3
+  #   S3_ENDPOINT=minio        S3_USE_SSL=false   S3_PATH_STYLE=true
+  #   S3_BUCKET=renders        S3_ACCESS_KEY=minioadmin  S3_SECRET_KEY=minioadmin
+  minio:
+    image: minio/minio:latest
+    profiles: ["s3"]
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    restart: unless-stopped
+
+  # Create the bucket once, then exit (only with the `s3` profile).
+  minio-init:
+    image: minio/mc:latest
+    profiles: ["s3"]
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 ${S3_ACCESS_KEY:-minioadmin} ${S3_SECRET_KEY:-minioadmin}; do sleep 1; done;
+      mc mb --ignore-existing local/${S3_BUCKET:-renders};
+      "
+
+  # OPTIONAL: an external cron that triggers cleanup, instead of (or alongside)
+  # the server's built-in CLEANUP_INTERVAL timer. Enable with `--profile cron`.
+  # It reads CLEANUP_TOKEN from the api env file ($$ keeps the expansion at
+  # container runtime, not compose parse time).
+  cleanup-cron:
+    image: curlimages/curl:latest
+    profiles: ["cron"]
+    depends_on:
+      - fluvie-api
+    env_file:
+      - env/api.env
+    restart: unless-stopped
+    entrypoint: >
+      /bin/sh -c "
+      while true; do
+        sleep 3600;
+        curl -fsS -X POST -H \"Authorization: Bearer $$CLEANUP_TOKEN\" http://fluvie-api:8080/v1/maintenance/cleanup || true;
+      done
+      "
+
+  # The hosted MCP server (mcp.fluvie.dev). It renders by delegating to
+  # fluvie-api, so it stays a small binary with no Flutter or ffmpeg.
+  fluvie-mcp:
+    build:
+      context: ..
+      dockerfile: deploy/mcp.Dockerfile
+    ports:
+      - "8084:8080"
+    env_file:
+      - env/mcp.env
+    depends_on:
+      - fluvie-api
+    restart: unless-stopped
+
+  # The live web demo (demo.fluvie.dev). The render API URL is baked in at build
+  # time, so the values come from deploy/env/demo.env:
+  #   docker compose --env-file deploy/env/demo.env -f deploy/docker-compose.yml build fluvie-demo
+  fluvie-demo:
+    build:
+      context: ..
+      dockerfile: deploy/demo.Dockerfile
+      args:
+        FLUVIE_API_URL: ${FLUVIE_API_URL:-http://localhost:8080}
+        FLUVIE_API_TOKEN: ${FLUVIE_API_TOKEN:-}
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+
+  # The marketing landing (fluvie.dev). Static, no configuration.
+  fluvie-web:
+    build:
+      context: ..
+      dockerfile: deploy/landing.Dockerfile
+    ports:
+      - "8082:80"
+    restart: unless-stopped
+
+volumes:
+  fluvie-renders:
+  minio-data:
