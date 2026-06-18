@@ -1,0 +1,27 @@
+name: fluvie_mcp
+description: "An MCP server that lets an AI assistant author and render Fluvie videos, over stdio or HTTP."
+version: 0.1.0
+repository: https://github.com/SimonErich/fluvie/tree/main/packages/fluvie_mcp
+homepage: https://github.com/SimonErich/fluvie
+issue_tracker: https://github.com/SimonErich/fluvie/issues
+topics:
+  - video
+  - ai
+  - mcp
+  - server
+
+environment:
+  sdk: ^3.12.0
+
+resolution: workspace
+
+dependencies:
+  fluvie_api: ^0.1.0
+  http: ^1.5.0
+  meta: ^1.16.0
+  shelf: ^1.4.2
+  shelf_router: ^1.1.4
+dev_dependencies:
+  coverage: ^1.15.1
+  mocktail: ^1.0.5
+  test: ^1.31.0
