@@ -1,0 +1,7 @@
+tags:
+  golden:
+    description: Pixel-golden tests via Alchemist; run with `melos run test:goldens`.
+  render:
+    description: Headless render-smoke tests; need a Flutter SDK and ffmpeg.
+  ffmpeg:
+    description: End-to-end tests that spawn a real ffmpeg/ffprobe binary.
