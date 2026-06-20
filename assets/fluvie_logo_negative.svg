@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 160 1500 640" role="img" aria-labelledby="fluvieTitle fluvieDesc">
+  <title id="fluvieTitle">fluvie logo — negative</title>
+  <desc id="fluvieDesc">A negative white and light-cyan geometric fluvie wordmark with a clapperboard-inspired lowercase f.</desc>
+
+  <defs>
+    <linearGradient id="negativeBase" x1="92" y1="174" x2="1561" y2="782" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f6fdff"></stop>
+      <stop offset="0.46" stop-color="#ccefff"></stop>
+      <stop offset="1" stop-color="#75cfff"></stop>
+    </linearGradient>
+
+    <linearGradient id="negativeTop" x1="391" y1="205" x2="790" y2="236" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"></stop>
+      <stop offset="0.55" stop-color="#c5f2ff"></stop>
+      <stop offset="1" stop-color="#7fd7ff"></stop>
+    </linearGradient>
+
+    <clipPath id="clip-f">
+      <path d="M347 219 257 229 179 309 179 416 94 495 179 507 180 781 273 691 272 507 420 505 420 417 272 415 272 332 302 300 417 278Z"></path>
+    </clipPath>
+
+    <clipPath id="clip-l">
+      <path d="M488 313 450 350 450 646 510 711 614 711 529 625 529 313Z"></path>
+    </clipPath>
+
+    <clipPath id="clip-u">
+      <path d="M863 422 786 423 787 616 759 645 701 645 674 617 674 423 596 423 596 645 656 711 802 711 863 646Z"></path>
+    </clipPath>
+
+    <clipPath id="clip-v">
+      <path d="M885 421 997 709 1069 710 1194 422 1120 422 1037 602 967 422Z"></path>
+    </clipPath>
+
+    <clipPath id="clip-i">
+      <path d="M1210 423 1210 710 1279 710 1280 423Z"></path>
+    </clipPath>
+
+    <clipPath id="clip-e">
+      <path fill-rule="evenodd" d="M1500 421 1382 422 1313 490 1313 644 1381 711 1495 711 1560 645 1406 645 1381 618 1382 604 1508 604 1560 550 1560 489ZM1381 547 1381 520 1410 493 1480 493 1498 513 1461 549 1383 549Z"></path>
+    </clipPath>
+
+    <style>
+      .base {
+        fill: url(#negativeBase);
+      }
+
+      .top {
+        fill: url(#negativeTop);
+      }
+
+      .light {
+        fill: #ffffff;
+        opacity: 0.72;
+      }
+
+      .mid {
+        fill: #c7f3ff;
+        opacity: 0.52;
+      }
+
+      .dark {
+        fill: #8bdcff;
+        opacity: 0.50;
+      }
+
+      .blue {
+        fill: #55c5ff;
+        opacity: 0.48;
+      }
+    </style>
+  </defs>
+
+  <g id="fluvie-logo" shape-rendering="geometricPrecision">
+    <g id="clapper-slats">
+      <path class="top" d="M391 216 463 273 548 261 481 205Z"></path>
+      <path class="top" d="M522 199 590 254 675 242 609 189Z"></path>
+      <path class="top" d="M654 183 718 236 790 226 733 174Z"></path>
+    </g>
+
+    <path id="f-body" class="base" d="M347 219 257 229 179 309 179 416 94 495 179 507 180 781 273 691 272 507 420 505 420 417 272 415 272 332 302 300 417 278Z"></path>
+    <g clip-path="url(#clip-f)">
+      <path class="light" d="M94 495 179 416 272 415 199 492Z"></path>
+      <path class="mid" d="M179 416 272 415 272 332 302 300Z"></path>
+      <path class="dark" d="M272 415 420 417 329 505 272 507Z"></path>
+      <path class="light" d="M257 229 347 219 417 278 302 300Z"></path>
+      <path class="mid" d="M179 309 257 229 302 300 179 416Z"></path>
+      <path class="dark" d="M179 507 272 507 273 691 180 781Z"></path>
+      <path class="blue" d="M180 781 273 691 273 596 215 735Z"></path>
+      <path class="light" d="M94 495 199 492 179 507Z"></path>
+    </g>
+
+    <path id="letter-l" class="base" d="M488 313 450 350 450 646 510 711 614 711 529 625 529 313Z"></path>
+    <g clip-path="url(#clip-l)">
+      <path class="light" d="M450 350 488 313 529 313 529 413 450 487Z"></path>
+      <path class="dark" d="M450 646 529 625 614 711 510 711Z"></path>
+      <path class="blue" d="M529 625 614 711 539 711Z"></path>
+    </g>
+
+    <path id="letter-u" class="base" d="M863 422 786 423 787 616 759 645 701 645 674 617 674 423 596 423 596 645 656 711 802 711 863 646Z"></path>
+    <g clip-path="url(#clip-u)">
+      <path class="light" d="M596 423 674 423 674 505 596 585Z"></path>
+      <path class="mid" d="M786 423 863 422 863 532 787 616Z"></path>
+      <path class="dark" d="M596 585 656 711 701 645 674 617Z"></path>
+      <path class="blue" d="M701 645 759 645 802 711 656 711Z"></path>
+      <path class="dark" d="M787 616 863 532 863 646 802 711Z"></path>
+    </g>
+
+    <path id="letter-v" class="base" d="M885 421 997 709 1069 710 1194 422 1120 422 1037 602 967 422Z"></path>
+    <g clip-path="url(#clip-v)">
+      <path class="light" d="M885 421 967 422 1037 602 981 533Z"></path>
+      <path class="dark" d="M981 533 1037 602 997 709Z"></path>
+      <path class="blue" d="M1037 602 1069 710 997 709Z"></path>
+      <path class="mid" d="M1120 422 1194 422 1069 710 1037 602Z"></path>
+    </g>
+
+    <path id="letter-i" class="base" d="M1210 423 1210 710 1279 710 1280 423Z"></path>
+    <g clip-path="url(#clip-i)">
+      <path class="light" d="M1210 423 1280 423 1280 478 1210 550Z"></path>
+      <path class="dark" d="M1210 550 1280 478 1279 710 1210 710Z"></path>
+    </g>
+
+    <path id="i-dot" class="base" d="M1212 324 1212 393 1280 393 1280 325Z"></path>
+    <path class="light" d="M1212 324 1280 325 1212 393Z"></path>
+    <path class="mid" d="M1212 393 1280 325 1280 393Z"></path>
+
+    <path id="letter-e" class="base" fill-rule="evenodd" d="M1500 421 1382 422 1313 490 1313 644 1381 711 1495 711 1560 645 1406 645 1381 618 1382 604 1508 604 1560 550 1560 489ZM1381 547 1381 520 1410 493 1480 493 1498 513 1461 549 1383 549Z"></path>
+    <g clip-path="url(#clip-e)">
+      <path class="light" d="M1313 490 1382 422 1500 421 1435 493 1381 493Z"></path>
+      <path class="mid" d="M1382 422 1500 421 1560 489 1480 493Z"></path>
+      <path class="dark" d="M1480 493 1560 489 1560 550 1508 604Z"></path>
+      <path class="blue" d="M1381 547 1508 604 1382 604Z"></path>
+      <path class="dark" d="M1313 490 1382 604 1381 711 1313 644Z"></path>
+      <path class="mid" d="M1381 711 1406 645 1560 645 1495 711Z"></path>
+      <path class="blue" d="M1381 618 1406 645 1381 711Z"></path>
+    </g>
+  </g>
+</svg>

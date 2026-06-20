@@ -9,7 +9,11 @@ export default defineConfig({
     starlight({
       title: 'Fluvie',
       description: 'Render declarative Flutter widget trees to real video.',
-      logo: { src: './src/assets/fluvie_logo.svg', alt: 'Fluvie' },
+      logo: {
+        light: './src/assets/fluvie_logo.svg',
+        dark: './src/assets/fluvie_logo_inverted.svg',
+        alt: 'Fluvie',
+      },
       favicon: '/favicon.svg',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/SimonErich/fluvie' },
