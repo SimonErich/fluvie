@@ -29,7 +29,11 @@ keyframe spreadsheet, no 2am debugging because frame 412 is one pixel off.
 
 ## Quick start
 
-This is lesson 01, in full. Roughly 30 lines of widgets becomes a 4 second clip:
+This is lesson 01, in full: about 16 lines of widgets become a 4 second clip.
+
+<table>
+<tr>
+<td>
 
 ```dart
 import 'package:flutter/material.dart' hide Animation;
@@ -41,24 +45,31 @@ Video helloVideo() => Video(
   scenes: [
     Scene(
       duration: 4.seconds,
-      background: Background.gradient(const [Color(0xFF1A2980), Color(0xFF26D0CE)]),
+      background: Background.gradient(
+        const [Color(0xFF1A2980), Color(0xFF26D0CE)],
+      ),
       children: [
-        const Text('Hello, Fluvie', style: TextStyle(color: Colors.white, fontSize: 72))
-            .animate([Animation.fadeIn(), Animation.pop()]),
+        const Text(
+          'Hello, Fluvie',
+          style: TextStyle(color: Colors.white, fontSize: 72),
+        ).animate([Animation.fadeIn(), Animation.pop()]),
       ],
     ),
   ],
 );
 ```
 
+</td>
+<td align="center" width="330">
+<img src="documentation/media/quickstart.gif" alt="The Hello, Fluvie clip Fluvie renders from this code" width="300">
+</td>
+</tr>
+</table>
+
 ```sh
 dart pub global activate fluvie_cli
 fluvie render hello --out hello.mp4
 ```
-
-<p align="center">
-  <img src="documentation/media/quickstart.gif" alt="The Hello, Fluvie clip Fluvie renders from the code above" width="360">
-</p>
 
 The [getting started guide](https://docs.fluvie.dev/getting-started/your-first-video/)
 wires the render key in one step and explains the FFmpeg setup. Full source:
@@ -66,34 +77,44 @@ wires the render key in one step and explains the FFmpeg setup. Full source:
 
 ## See what it can do
 
-The snippets below are trimmed to the shape of the thing. Each links to its full,
-runnable lesson.
+These snippets are trimmed to the shape of the thing; each links to its full,
+runnable lesson. The clips beside them were rendered by Fluvie.
 
 ### Charts that reveal themselves
 
-A counter headline, then a bar, a line, and a donut, each animating in from its
-own data. One theme colors them all.
+<table>
+<tr>
+<td>
 
 ```dart
 Video chartsVideo() => Video(
   size: VideoSize.square,
   scenes: [
     Scene(duration: 3.seconds, children: [
-      Chart.bar(data: {'Q1': 42, 'Q2': 58, 'Q3': 71, 'Q4': 96}, growIn: 1.seconds),
+      Chart.bar(
+        data: {'Q1': 42, 'Q2': 58, 'Q3': 71, 'Q4': 96},
+        growIn: 1.seconds,
+      ),
     ]),
     Scene(duration: 3.seconds, children: [
-      Chart.line(data: {'W1': 12, 'W2': 26, /* ... */}, drawIn: 1.5.seconds),
+      Chart.line(data: {'W1': 12, 'W2': 26, /* ... */}, drawIn: 1500.ms),
     ]),
     Scene(duration: 2500.ms, children: [
-      Chart.donut(data: {'Search': 48, 'Social': 27, /* ... */}, sweepIn: 1.seconds),
+      Chart.donut(
+        data: {'Search': 48, 'Social': 27, /* ... */},
+        sweepIn: 1.seconds,
+      ),
     ]),
   ],
 );
 ```
 
-<p align="center">
-  <img src="documentation/media/charts.gif" alt="A bar, line, and donut chart animating in" width="360">
-</p>
+</td>
+<td align="center" width="330">
+<img src="documentation/media/charts.gif" alt="A counter, then a bar, line, and donut chart animating in" width="300">
+</td>
+</tr>
+</table>
 
 Full source: [`example/lib/lessons/07_charts.dart`](example/lib/lessons/07_charts.dart).
 
@@ -103,19 +124,25 @@ Several scenes play one after another with a cross-fade. Each scene stacks
 layers: a full-frame effect under the content, a chip that pops on the music
 beat, captions over the top.
 
+<table>
+<tr>
+<td>
+
 ```dart
 Video reel() => Video(
   size: VideoSize.reels, // 9:16
   transition: Transition.crossFade(0.4.seconds),
   audio: [Audio.music('beat.wav', track: music)],
-  captions: const Captions.fromSrt('captions.srt', style: CaptionStyle.tikTok()),
+  captions: const Captions.fromSrt('captions.srt'),
   scenes: [
     Scene(children: [
-      Box(/* ... */).animate([Animation.pop(at: Trigger.beat(track: music))]),
+      Box(/* ... */).animate([
+        Animation.pop(at: Trigger.beat(track: music)),
+      ]),
       const Text('On the beat').animate([Animation.fadeIn()]),
     ]),
     Scene(children: [
-      const ColoredBox(/* ... */).animate([Animation.grain(0.12)]), // an effect layer
+      const ColoredBox(/* ... */).animate([Animation.grain(0.12)]),
       Counter(to: 12000, duration: 1500.ms),
     ]),
     Scene.centered(child: /* ... outro ... */),
@@ -123,17 +150,29 @@ Video reel() => Video(
 );
 ```
 
-<p align="center">
-  <img src="documentation/media/kitchensink.gif" alt="A vertical reel with layered scenes, a beat-synced pop, captions, and an outro" width="240">
-</p>
+</td>
+<td align="center" width="330">
+<img src="documentation/media/kitchensink.gif" alt="A vertical reel: layered scenes, a beat-synced pop, captions, an outro" width="220">
+</td>
+</tr>
+</table>
 
 Full source: [`example/lib/lessons/12_the_kitchen_sink.dart`](example/lib/lessons/12_the_kitchen_sink.dart).
 
 ## Examples
 
 Twelve runnable lessons live in [`example/lib/lessons/`](example/lib/lessons),
-from "Hello, Fluvie" to the kitchen sink. Run the gallery with `flutter run` from
-the repo root, or try it in the browser at [demo.fluvie.dev](https://demo.fluvie.dev).
+from "Hello, Fluvie" to the kitchen sink. Try them in the browser at
+[demo.fluvie.dev](https://demo.fluvie.dev), or run the gallery locally:
+
+```sh
+flutter run --enable-impeller   # from the repo root; Impeller for the live preview
+```
+
+> Use Impeller (`--enable-impeller`) whenever you run or preview Fluvie on the
+> desktop. It is Flutter's current renderer and draws shaders, grain, and blends
+> the way the final video does. The headless render pipeline already handles this
+> for you. See [Troubleshooting](#troubleshooting).
 
 ## Packages
 
@@ -197,6 +236,26 @@ Everything you can paint with Flutter, plus the things a video needs:
 | Data stories | stat highlight reels and animated reports |
 | Developer content | code walkthroughs, terminal demos, release notes |
 | Branding | title cards, intros, and lower thirds |
+
+## Troubleshooting
+
+**Text renders as solid white boxes.** That is Flutter's `Ahem` test font, which
+draws every glyph as a filled box, so each word looks like a bar. It means the
+real fonts were not loaded before the frames were captured. Fluvie's own render
+pipeline (the CLI, the API, and the Docker image) loads them for you. If you
+write your own capture harness, load the app fonts and set a real default font
+family before rendering (see `example/test/render/`).
+
+**Shaders, grain, or blends look off when you preview on the desktop.** Run with
+Impeller, Flutter's current renderer:
+
+```sh
+flutter run --enable-impeller
+```
+
+Impeller draws fragment shaders and effects the way the encoded video does; the
+software preview can differ. This is about the live desktop preview only. The
+headless render pipeline produces the final frames correctly.
 
 ## Contributing
 

@@ -37,6 +37,28 @@ encoder runs with bit-exact flags on one thread, so the same FFmpeg build always
 produces the same file from the same frames. See
 [Exporting your video](../guides/exporting-your-video.md).
 
+## My rendered text shows up as solid boxes. Why?
+
+That is Flutter's Ahem test font, which draws every glyph as a filled box, so a
+word looks like one bar. It means the real fonts were not loaded before the
+frames were captured. Fluvie's render pipeline (the CLI, the API, and the Docker
+image) loads the app fonts for you, so a normal render shows real text. If you
+build your own capture harness on top of `flutter test`, load the app fonts and
+set a real default font family before you render.
+
+## Should I run with Impeller?
+
+Yes, when you preview or run a video on the desktop. Impeller is Flutter's
+current renderer, and it draws shaders, grain, and blend modes the way the
+encoded video does:
+
+```sh
+flutter run --enable-impeller
+```
+
+Rendering to a file does not need it: the headless pipeline produces the final
+frames on its own. Impeller affects the live desktop preview only.
+
 ## What can I render today?
 
 Text, images, video clips, charts, code and terminal blocks, Markdown,

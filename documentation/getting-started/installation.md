@@ -7,7 +7,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  fluvie: ^1.0.0
+  fluvie: ^0.1.0
 ```
 
 Then fetch it:
@@ -38,6 +38,20 @@ melos bootstrap
 
 The example app in `example/` is the lesson gallery and inspector. Run it
 from the repo root so its render button can find the CLI.
+
+## Previewing on the desktop
+
+You preview a video by running it like a normal Flutter app. Use Impeller,
+Flutter's current renderer, so shaders, grain, and blends look the way the
+rendered video does:
+
+```sh
+flutter run --enable-impeller
+```
+
+Rendering to a file does not need this. The headless render pipeline (the CLI,
+the API, and the Docker image) produces the final frames correctly on its own,
+including loading the real fonts so text never falls back to the boxy test font.
 
 ## Where to next
 
