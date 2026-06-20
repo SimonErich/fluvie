@@ -168,9 +168,14 @@ Future<RenderManifest> runCaptureHarness({
   // tracks); only the flutter-test-only bits (view sizing, runAsync, the pump
   // loop below) stay here. The shell also serves Trigger.beat (via BeatGridScope)
   // and the reactive tables, so the example exercises the production path.
-  final composition = aspect == null
-      ? entry.build()
-      : AspectScope(aspect: aspect, child: entry.build());
+  final built = aspect == null ? entry.build() : AspectScope(aspect: aspect, child: entry.build());
+  // `flutter test` renders text that names no family with the Ahem test font
+  // (every glyph a filled box). The harness loads the real fonts (loadFonts), so
+  // set a real default family for unstyled text, matching the platform goldens.
+  final composition = DefaultTextStyle.merge(
+    style: const TextStyle(fontFamily: 'Roboto'),
+    child: built,
+  );
   final shell = buildCaptureShell(
     composition: composition,
     boundaryKey: boundaryKey,

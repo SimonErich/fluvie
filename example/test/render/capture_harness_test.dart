@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:alchemist/alchemist.dart' show loadFonts;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie_example/render/ai_authoring.dart';
 import 'package:fluvie_example/render/composition_entry.dart';
@@ -43,6 +44,12 @@ void main() {
       return;
     }
     expect(_outDir, isNotEmpty, reason: 'FLUVIE_RENDER_OUT_DIR must point at the CLI sandbox');
+
+    // Load the real bundled fonts before any capture. `flutter test` otherwise
+    // renders text with the Ahem test font, which draws every glyph as a filled
+    // box; loading the app fonts (the same set the goldens use) makes headless
+    // renders show real glyphs.
+    await loadFonts();
 
     // Resolve the composition from one of three sources, in precedence order:
     // an AI prompt (`generate`/`edit`), a spec file (`render --spec`), or a
