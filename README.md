@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="documentation/fluvie_logo.svg" alt="Fluvie" width="160">
+  <img src="documentation/fluvie_logo.svg" alt="Fluvie" width="360">
 </p>
-
-<h1 align="center">Fluvie</h1>
 
 <p align="center"><strong>You write widgets. Fluvie shoots the film.</strong></p>
 
@@ -14,13 +12,15 @@
   <a href="https://melos.invertase.dev"><img src="https://img.shields.io/badge/maintained%20with-melos-f700ff.svg" alt="maintained with melos"></a>
 </p>
 
-Fluvie renders a declarative Flutter tree to a real video file (MP4 via FFmpeg).
-You describe what the video is. Fluvie works out when everything happens, frame by
-frame. Think of it as a tiny film studio that already speaks Flutter: you direct,
-Fluvie handles continuity, and FFmpeg runs the projector.
+**Fluvie is a Flutter package that turns widget code into real video files.** You
+build a video the way you build a screen, with `Scene`s and the Flutter widgets
+you already know, you say how long each thing lasts, and Fluvie renders every
+frame and encodes it into an MP4 (or a GIF, or an image sequence) with FFmpeg. No
+video editor, no manual timeline, no After Effects.
 
-No timeline to scrub. No keyframe spreadsheet. No 2am debugging because frame 412
-is one pixel off.
+Think of it as a tiny film studio that already speaks Flutter: you direct, Fluvie
+handles continuity, and FFmpeg runs the projector. No timeline to scrub, no
+keyframe spreadsheet, no 2am debugging because frame 412 is one pixel off.
 
 - **Declarative.** Compose `Scene`s and elements like any Flutter screen.
 - **Deterministic.** The same input renders byte-identical frames, every time. Caching, golden tests, and batch rendering just work.
@@ -28,6 +28,8 @@ is one pixel off.
 - **Conversational.** Ask for a video in plain language and get a deterministic spec back.
 
 ## Quick start
+
+This is lesson 01, in full. Roughly 30 lines of widgets becomes a 4 second clip:
 
 ```dart
 import 'package:flutter/material.dart' hide Animation;
@@ -49,15 +51,89 @@ Video helloVideo() => Video(
 );
 ```
 
-Roll camera from the command line:
-
 ```sh
 dart pub global activate fluvie_cli
 fluvie render hello --out hello.mp4
 ```
 
-That is lesson 01. The [getting started guide](https://docs.fluvie.dev/getting-started/your-first-video/)
-wires the render key in one step and explains the FFmpeg setup.
+<p align="center">
+  <img src="documentation/media/quickstart.gif" alt="The Hello, Fluvie clip Fluvie renders from the code above" width="360">
+</p>
+
+The [getting started guide](https://docs.fluvie.dev/getting-started/your-first-video/)
+wires the render key in one step and explains the FFmpeg setup. Full source:
+[`example/lib/lessons/01_hello_video.dart`](example/lib/lessons/01_hello_video.dart).
+
+## See what it can do
+
+The snippets below are trimmed to the shape of the thing. Each links to its full,
+runnable lesson.
+
+### Charts that reveal themselves
+
+A counter headline, then a bar, a line, and a donut, each animating in from its
+own data. One theme colors them all.
+
+```dart
+Video chartsVideo() => Video(
+  size: VideoSize.square,
+  scenes: [
+    Scene(duration: 3.seconds, children: [
+      Chart.bar(data: {'Q1': 42, 'Q2': 58, 'Q3': 71, 'Q4': 96}, growIn: 1.seconds),
+    ]),
+    Scene(duration: 3.seconds, children: [
+      Chart.line(data: {'W1': 12, 'W2': 26, /* ... */}, drawIn: 1.5.seconds),
+    ]),
+    Scene(duration: 2500.ms, children: [
+      Chart.donut(data: {'Search': 48, 'Social': 27, /* ... */}, sweepIn: 1.seconds),
+    ]),
+  ],
+);
+```
+
+<p align="center">
+  <img src="documentation/media/charts.gif" alt="A bar, line, and donut chart animating in" width="360">
+</p>
+
+Full source: [`example/lib/lessons/07_charts.dart`](example/lib/lessons/07_charts.dart).
+
+### Layers and scenes, set to a beat
+
+Several scenes play one after another with a cross-fade. Each scene stacks
+layers: a full-frame effect under the content, a chip that pops on the music
+beat, captions over the top.
+
+```dart
+Video reel() => Video(
+  size: VideoSize.reels, // 9:16
+  transition: Transition.crossFade(0.4.seconds),
+  audio: [Audio.music('beat.wav', track: music)],
+  captions: const Captions.fromSrt('captions.srt', style: CaptionStyle.tikTok()),
+  scenes: [
+    Scene(children: [
+      Box(/* ... */).animate([Animation.pop(at: Trigger.beat(track: music))]),
+      const Text('On the beat').animate([Animation.fadeIn()]),
+    ]),
+    Scene(children: [
+      const ColoredBox(/* ... */).animate([Animation.grain(0.12)]), // an effect layer
+      Counter(to: 12000, duration: 1500.ms),
+    ]),
+    Scene.centered(child: /* ... outro ... */),
+  ],
+);
+```
+
+<p align="center">
+  <img src="documentation/media/kitchensink.gif" alt="A vertical reel with layered scenes, a beat-synced pop, captions, and an outro" width="240">
+</p>
+
+Full source: [`example/lib/lessons/12_the_kitchen_sink.dart`](example/lib/lessons/12_the_kitchen_sink.dart).
+
+## Examples
+
+Twelve runnable lessons live in [`example/lib/lessons/`](example/lib/lessons),
+from "Hello, Fluvie" to the kitchen sink. Run the gallery with `flutter run` from
+the repo root, or try it in the browser at [demo.fluvie.dev](https://demo.fluvie.dev).
 
 ## Packages
 
@@ -95,7 +171,32 @@ Start at [docs.fluvie.dev](https://docs.fluvie.dev):
 - **[AI and MCP](https://docs.fluvie.dev/guides/ai-and-mcp/)**: author from a prompt, run it locally, or point Claude at it.
 - **[Reference](https://docs.fluvie.dev/reference/cheatsheet/)**: the whole public surface on one page.
 
-Twelve runnable lessons live in [`example/`](example).
+## What goes in a video
+
+Everything you can paint with Flutter, plus the things a video needs:
+
+| Kind | What you get |
+| --- | --- |
+| Text | `Text`, `Typewriter`, `Counter`, `Markdown` |
+| Code | `Code`, `CodeReveal` (animated diffs), `Terminal` |
+| Media | `Image`, `Clip` (embedded video), `Snapshot`, `DeviceFrame` |
+| Data | `Chart` (bar, line, area, pie, donut, scatter), `Bars` |
+| Diagrams and web | `Mermaid`, `WebView`, `Html` |
+| Annotations | `Shape`, `Arrow`, `Connector`, `Callout`, `Spotlight`, `LowerThird`, `TitleCard` |
+| Motion and effects | 60+ animation presets, `Stagger`, `Camera`, shaders, particles, grain |
+| Audio | `Audio` (music and sfx), beat detection, `Captions` (SRT and VTT) |
+| Look | `Background` (color, gradient, image), `FluvieTheme`, multi-aspect export |
+
+## What you can make with it
+
+| Use case | For example |
+| --- | --- |
+| Product demos | feature walkthroughs, onboarding clips, changelog videos |
+| Social reels | 9:16 vertical shorts for TikTok, Reels, and Shorts |
+| Explainers | tutorials and concept animations |
+| Data stories | stat highlight reels and animated reports |
+| Developer content | code walkthroughs, terminal demos, release notes |
+| Branding | title cards, intros, and lower thirds |
 
 ## Contributing
 
