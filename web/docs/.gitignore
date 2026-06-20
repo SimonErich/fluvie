@@ -1,0 +1,7 @@
+# Astro / Node build artifacts
+node_modules/
+dist/
+.astro/
+
+# Generated from /documentation by scripts/import-docs.mjs
+src/content/docs/

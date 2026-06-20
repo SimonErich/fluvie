@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fluvie — you write widgets, Fluvie shoots the film</title>
+  <meta name="description" content="Fluvie renders declarative Flutter widget trees to real video files. You describe what the video is; Fluvie works out when everything happens.">
+  <link rel="icon" type="image/svg+xml" href="fluvie_logo.svg">
+  <style>
+    :root {
+      --bg: #14151f;
+      --panel: #1c1e2b;
+      --ink: #ECEEF6;
+      --muted: #A6AAC0;
+      --brand: #9B6CFF;
+      --line: #2A2D40;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    a { color: var(--brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    header { padding: 80px 0 48px; text-align: center; }
+    header img { width: 120px; height: 120px; }
+    h1 { font-size: 2.6rem; margin: 24px 0 8px; letter-spacing: -0.5px; }
+    .tag { font-size: 1.3rem; color: var(--muted); margin: 0 0 8px; }
+    .lede { max-width: 640px; margin: 16px auto 0; color: var(--muted); }
+    .cta { margin: 36px 0 8px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-block; padding: 12px 22px; border-radius: 10px;
+      font-weight: 600; border: 1px solid var(--line);
+    }
+    .btn.primary { background: var(--brand); color: #14151f; border-color: var(--brand); }
+    .btn.primary:hover { text-decoration: none; opacity: 0.92; }
+    .btn.ghost:hover { text-decoration: none; border-color: var(--brand); }
+    section { padding: 40px 0; border-top: 1px solid var(--line); }
+    h2 { font-size: 1.5rem; margin: 0 0 20px; }
+    .feats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+    .card h3 { margin: 0 0 6px; font-size: 1.05rem; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    pre {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+      padding: 18px 20px; overflow-x: auto; font-size: 0.9rem;
+      font-family: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace; color: #D7DCF5;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 600; }
+    code { background: var(--panel); padding: 2px 6px; border-radius: 6px; font-size: 0.85em; }
+    footer { padding: 40px 0 64px; color: var(--muted); text-align: center; border-top: 1px solid var(--line); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="fluvie_logo.svg" alt="Fluvie">
+      <h1>Fluvie</h1>
+      <p class="tag">You write widgets. Fluvie shoots the film.</p>
+      <p class="lede">
+        Fluvie renders a declarative Flutter tree to a real video file (MP4 via
+        FFmpeg). You describe what the video is. Fluvie works out when everything
+        happens, frame by frame.
+      </p>
+      <div class="cta">
+        <a class="btn primary" href="https://docs.fluvie.dev">Read the docs</a>
+        <a class="btn ghost" href="https://demo.fluvie.dev">Try the live demo</a>
+        <a class="btn ghost" href="https://github.com/SimonErich/fluvie">GitHub</a>
+      </div>
+    </header>
+
+    <section>
+      <h2>The short version</h2>
+      <pre><code>import 'package:flutter/material.dart' hide Animation;
+import 'package:fluvie/fluvie.dart';
+
+Video helloVideo() => Video(
+  size: VideoSize.square,
+  scenes: [
+    Scene(
+      duration: 4.seconds,
+      background: Background.gradient(const [Color(0xFF1A2980), Color(0xFF26D0CE)]),
+      children: [
+        const Text('Hello, Fluvie')
+            .animate([Animation.fadeIn(), Animation.pop()]),
+      ],
+    ),
+  ],
+);</code></pre>
+      <p style="color:var(--muted)">Then roll camera: <code>fluvie render hello --out hello.mp4</code></p>
+    </section>
+
+    <section>
+      <h2>Why people like it</h2>
+      <div class="feats">
+        <div class="card"><h3>Declarative</h3><p>Compose scenes and elements like any Flutter screen. No timeline to scrub.</p></div>
+        <div class="card"><h3>Deterministic</h3><p>The same input renders byte-identical frames, every time. Caching and golden tests just work.</p></div>
+        <div class="card"><h3>Headless</h3><p>Render from the command line, an HTTP API, or an MCP server. No display required.</p></div>
+        <div class="card"><h3>Conversational</h3><p>Ask for a video in plain language and get a deterministic spec back.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>The packages</h2>
+      <p style="color:var(--muted)">Most people only need <code>fluvie</code>.</p>
+      <table>
+        <tr><th>Package</th><th>Role</th></tr>
+        <tr><td><a href="https://pub.dev/packages/fluvie">fluvie</a></td><td>The library. Describe a video, render an MP4.</td></tr>
+        <tr><td><a href="https://pub.dev/packages/fluvie_cli">fluvie_cli</a></td><td>Headless renderer for CI and scripts.</td></tr>
+        <tr><td><a href="https://pub.dev/packages/fluvie_lints">fluvie_lints</a></td><td>Lints that catch timing and determinism mistakes.</td></tr>
+        <tr><td><a href="https://pub.dev/packages/fluvie_ai">fluvie_ai</a></td><td>Author a video from a prompt.</td></tr>
+        <tr><td><a href="https://pub.dev/packages/fluvie_api">fluvie_api</a></td><td>HTTP render server plus a web-safe client.</td></tr>
+        <tr><td><a href="https://pub.dev/packages/fluvie_mcp">fluvie_mcp</a></td><td>Let an AI assistant author and render for you.</td></tr>
+      </table>
+    </section>
+
+    <footer>
+      <p>
+        <a href="https://docs.fluvie.dev">Docs</a> ·
+        <a href="https://demo.fluvie.dev">Demo</a> ·
+        <a href="https://github.com/SimonErich/fluvie">GitHub</a> ·
+        <a href="https://pub.dev/packages/fluvie">pub.dev</a>
+      </p>
+      <p>MIT licensed. Made with Flutter.</p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "fluvie-docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "import": "node scripts/import-docs.mjs",
+    "dev": "npm run import && astro dev",
+    "build": "npm run import && astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.40.0",
+    "astro": "^6.4.8"
+  }
+}
