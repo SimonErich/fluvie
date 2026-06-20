@@ -67,6 +67,11 @@ final class PipelineRenderRunner implements RenderRunner {
           ffmpegBinary: ffmpegPath,
           projectDir: renderProject,
           noCache: false,
+          // The server never auto-downloads mid-request; its image provisions
+          // a pinned FFmpeg ahead of time (or FFMPEG_PATH points at one).
+          noDownload: true,
+          // Server renders use the default tester backend, not Impeller.
+          enableImpeller: false,
           verbose: true,
           keepTemp: false,
         ),

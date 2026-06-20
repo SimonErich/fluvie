@@ -51,8 +51,8 @@ melos:
         dependsOn: custom_lint
 
     test:dart:
-      description: Run pure-Dart package tests (ffmpeg integration opt-in).
-      run: dart test --exclude-tags ffmpeg
+      description: Run pure-Dart package tests (ffmpeg/download integration opt-in).
+      run: dart test --exclude-tags "ffmpeg || download"
       exec:
         concurrency: 1
       packageFilters:
@@ -92,6 +92,16 @@ melos:
       packageFilters:
         scope: fluvie_cli
 
+    test:download:
+      description: >
+        Download-tagged suites: fetch the real pinned FFmpeg build over the
+        network and prove it installs and runs. Needs internet access.
+      run: dart test --tags download
+      exec:
+        concurrency: 1
+      packageFilters:
+        scope: fluvie_cli
+
     test:goldens:
       description: Run the opt-in pixel-golden tests (Alchemist; baselines pinned to Linux).
       run: flutter test --tags golden
@@ -126,9 +136,9 @@ melos:
         dirExists: test
 
     coverage:dart:
-      description: Pure-Dart package tests with lcov coverage (ffmpeg e2e excluded).
+      description: Pure-Dart package tests with lcov coverage (ffmpeg/download e2e excluded).
       run: >
-        dart test --exclude-tags ffmpeg --coverage=coverage &&
+        dart test --exclude-tags "ffmpeg || download" --coverage=coverage &&
         dart run coverage:format_coverage --lcov --in=coverage
         --out=coverage/lcov.info --report-on=lib
       exec:
@@ -207,3 +217,12 @@ melos:
           echo "Rendering $key…"
           dart run packages/fluvie_cli/bin/fluvie.dart render "$key" --out "build/$key.mp4" || exit 1
         done
+
+    web:gallery:
+      description: >
+        Regenerate the landing-page example gallery clips: render each lesson to
+        build/<key>.mp4 with Impeller, then encode web/landing/media/<key>.{mp4,
+        webm,poster.webp,gif}. Needs a Flutter SDK and ffmpeg on PATH (not part
+        of `gate`). Pass `--encode-only` to re-encode existing build/*.mp4 (ffmpeg
+        only). After it runs, use the `sync-website` skill to refresh the tiles.
+      run: bash tool/web/regenerate_gallery.sh

@@ -1,5 +1,6 @@
 import 'package:args/args.dart';
 import 'package:fluvie_cli/src/edit_command.dart';
+import 'package:fluvie_cli/src/ffmpeg_command.dart';
 import 'package:fluvie_cli/src/generate_command.dart';
 import 'package:fluvie_cli/src/list_command.dart';
 import 'package:fluvie_cli/src/render_command.dart';
@@ -20,13 +21,15 @@ Future<int> run(
   ListCommand? list,
   GenerateCommand? generate,
   EditCommand? edit,
+  FfmpegCommand? ffmpeg,
 }) async {
   final parser = ArgParser()
     ..addFlag('help', abbr: 'h', negatable: false, help: 'Show this usage.')
     ..addCommand('render', RenderCommand.buildParser())
     ..addCommand('generate', GenerateCommand.buildParser())
     ..addCommand('edit', EditCommand.buildParser())
-    ..addCommand('list', ListCommand.buildParser());
+    ..addCommand('list', ListCommand.buildParser())
+    ..addCommand('ffmpeg', FfmpegCommand.buildParser());
 
   final ArgResults results;
   try {
@@ -53,6 +56,7 @@ Future<int> run(
     'list' => (list ?? ListCommand()).execute(command, out: out, err: err),
     'generate' => (generate ?? GenerateCommand()).execute(command, out: out, err: err),
     'edit' => (edit ?? EditCommand()).execute(command, out: out, err: err),
+    'ffmpeg' => (ffmpeg ?? FfmpegCommand()).execute(command, out: out, err: err),
     _ => (render ?? RenderCommand()).execute(command, out: out, err: err),
   };
 }
@@ -67,11 +71,13 @@ Usage:
   fluvie generate "<prompt>" --out <file> [--provider <name>] [options]
   fluvie edit <file.fluvie.json> "<change>" --out <file> [options]
   fluvie list [--project <dir>]
+  fluvie ffmpeg <install|path|status|uninstall>
 
 `render` captures the registered composition <key> (or a --spec VideoSpec
 document) under `flutter test`, then encodes it with ffmpeg. `generate` authors
 a VideoSpec from a prompt with an LLM, writes it, and renders it; `edit` refines
-an existing spec. `list` prints every render key.
+an existing spec. `list` prints every render key. `ffmpeg` manages the FFmpeg
+build Fluvie downloads so renders work without a manual install.
 
 Render options:
 ${RenderCommand.buildParser().usage}

@@ -4,6 +4,7 @@ import 'package:args/args.dart';
 import 'package:fluvie_cli/src/capture_process.dart';
 import 'package:fluvie_cli/src/encode_process.dart';
 import 'package:fluvie_cli/src/export_flags.dart';
+import 'package:fluvie_cli/src/ffmpeg/ffmpeg_provisioner.dart' show ProvisionLog;
 import 'package:fluvie_cli/src/ffmpeg_gate.dart';
 import 'package:fluvie_cli/src/process_runner.dart';
 
@@ -22,6 +23,16 @@ void addSharedRenderOptions(ArgParser parser) => parser
   ..addOption('format', help: 'Export format: ${formatNames.join(', ')}.')
   ..addOption('poster', help: 'Poster thumbnail Time (e.g. "1.5s", "30f", "500ms").')
   ..addFlag('no-cache', negatable: false, help: 'Bypass the frame cache for this render.')
+  ..addFlag(
+    'no-download',
+    negatable: false,
+    help: 'Never auto-download FFmpeg; fail if none is found (see `fluvie ffmpeg install`).',
+  )
+  ..addFlag(
+    'enable-impeller',
+    negatable: false,
+    help: 'Capture with Impeller (passes --enable-impeller to flutter test).',
+  )
   ..addFlag('keep-temp', negatable: false, help: 'Keep the render sandbox for inspection.')
   ..addFlag('verbose', abbr: 'v', negatable: false, help: 'Forward capture/encode output.');
 
@@ -45,15 +56,29 @@ int? validateFrames(String? framesOption) {
 }
 
 /// The pipeline knobs that came from `--ffmpeg`/`--project`/`--no-cache`/
-/// `--verbose`/`--keep-temp`, decoupled from [ArgResults] so a caller that has
-/// no command line (the render server) can drive [runRenderPipeline] directly.
+/// `--no-download`/`--enable-impeller`/`--verbose`/`--keep-temp`, decoupled from
+/// [ArgResults] so a caller that has no command line (the render server) can
+/// drive [runRenderPipeline] directly.
 typedef RenderPipelineOptions = ({
   String? ffmpegBinary,
   String? projectDir,
   bool noCache,
+  bool noDownload,
+  bool enableImpeller,
   bool verbose,
   bool keepTemp,
 });
+
+/// Resolves the FFmpeg binary to use (the gate's [ensureFfmpeg] by default).
+/// Injectable so command and pipeline tests stay hermetic — no real
+/// environment, cache, or network.
+typedef FfmpegResolver =
+    Future<String> Function(
+      ProcessRunner runner, {
+      String? binary,
+      bool allowDownload,
+      ProvisionLog log,
+    });
 
 /// The shared capture→encode pipeline behind `render`, `generate`, and `edit`
 /// (and the render server): the ffmpeg gate, a temp sandbox, the capture step
@@ -75,9 +100,17 @@ Future<int> runRenderPipeline({
   required StringSink err,
   Map<String, String>? environment,
   void Function(StringSink out) report = _noReport,
+  FfmpegResolver resolveFfmpeg = ensureFfmpeg,
 }) async {
-  // Fail fast on a missing/old ffmpeg BEFORE the (slow) capture step.
-  await ensureFfmpeg(runner, binary: options.ffmpegBinary);
+  // Resolve (and, if needed and allowed, download) ffmpeg BEFORE the slow
+  // capture step. The resolved binary — explicit, cached, on PATH, or freshly
+  // provisioned — is what the encode then runs.
+  final ffmpeg = await resolveFfmpeg(
+    runner,
+    binary: options.ffmpegBinary,
+    allowDownload: !options.noDownload,
+    log: out.writeln,
+  );
   final projectDir = resolveProjectDir(project: options.projectDir);
   final sandbox = await createSandbox();
   try {
@@ -88,6 +121,7 @@ Future<int> runRenderPipeline({
       sandbox: sandbox,
       frames: frames,
       noCache: options.noCache,
+      impeller: options.enableImpeller,
       verbose: options.verbose,
       aspect: flags.aspect,
       quality: flags.quality,
@@ -101,7 +135,7 @@ Future<int> runRenderPipeline({
       runner: runner,
       sandbox: sandbox,
       outPath: outPath,
-      ffmpegBinary: options.ffmpegBinary,
+      ffmpegBinary: ffmpeg,
     );
     out.writeln('Wrote ${output.path}');
     report(out);
@@ -129,6 +163,7 @@ Future<int> captureThenEncode({
   required StringSink out,
   required StringSink err,
   void Function(StringSink out) report = _noReport,
+  FfmpegResolver resolveFfmpeg = ensureFfmpeg,
 }) => runRenderPipeline(
   runner: runner,
   createSandbox: createSandbox,
@@ -136,6 +171,8 @@ Future<int> captureThenEncode({
     ffmpegBinary: args.option('ffmpeg'),
     projectDir: args.option('project'),
     noCache: args.flag('no-cache'),
+    noDownload: args.flag('no-download'),
+    enableImpeller: args.flag('enable-impeller'),
     verbose: args.flag('verbose'),
     keepTemp: args.flag('keep-temp'),
   ),
@@ -147,6 +184,7 @@ Future<int> captureThenEncode({
   out: out,
   err: err,
   report: report,
+  resolveFfmpeg: resolveFfmpeg,
 );
 
 void _noReport(StringSink out) {}

@@ -4,3 +4,8 @@ tags:
       End-to-end render tests that spawn the real toolchain; they need
       flutter, ffmpeg (>= 6.0) and ffprobe on PATH. Run via
       `melos run test:ffmpeg`.
+  download:
+    description: >-
+      Provisioning tests that fetch the real pinned FFmpeg build over the
+      network (~140 MB). Excluded from the gate; run via
+      `melos run test:download`.

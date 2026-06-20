@@ -70,6 +70,18 @@ void main() {
       expect(args, isNot(contains(contains('FLUVIE_RENDER_FORMAT'))));
       expect(args, isNot(contains(contains('FLUVIE_RENDER_POSTER'))));
     });
+
+    test('adds --enable-impeller (before the harness file) when impeller is set', () {
+      final args = captureTestArgs(key: 'demo', sandbox: sandbox, impeller: true);
+      expect(
+        args,
+        containsAllInOrder(<String>['--enable-impeller', 'test/render/capture_harness_test.dart']),
+      );
+    });
+
+    test('omits --enable-impeller by default (plain render unchanged)', () {
+      expect(captureTestArgs(key: 'demo', sandbox: sandbox), isNot(contains('--enable-impeller')));
+    });
   });
 
   group('runCapture', () {
@@ -93,6 +105,26 @@ void main() {
           '--dart-define=FLUVIE_RENDER_OUT_DIR=${sandbox.path}',
         ], workingDirectory: 'example'),
       ).called(1);
+    });
+
+    test('impeller adds --enable-impeller to the spawned argv', () async {
+      stubFlutterTest();
+
+      await runCapture(
+        runner: runner,
+        projectDir: 'example',
+        key: 'demo',
+        sandbox: sandbox,
+        impeller: true,
+        err: StringBuffer(),
+      );
+
+      final captured =
+          verify(
+                () => runner.run('flutter', captureAny(), workingDirectory: 'example'),
+              ).captured.single
+              as List<String>;
+      expect(captured, contains('--enable-impeller'));
     });
 
     test('a non-zero exit throws a CliFailure carrying the test output', () async {

@@ -64,5 +64,29 @@ void main() {
 
       expect(out.toString(), contains('list'));
     });
+
+    test('--help mentions the ffmpeg command', () async {
+      final out = StringBuffer();
+      final err = StringBuffer();
+
+      await run(['--help'], out: out, err: err);
+
+      expect(out.toString(), contains('ffmpeg'));
+    });
+
+    test('the ffmpeg command dispatches and reports the pinned build', () async {
+      final out = StringBuffer();
+      final err = StringBuffer();
+
+      final code = await run(
+        ['ffmpeg', 'status'],
+        out: out,
+        err: err,
+        ffmpeg: FfmpegCommand(cache: FfmpegCache(environment: const {})),
+      );
+
+      expect(code, 0);
+      expect(out.toString(), contains(pinnedFfmpegBuildLabel));
+    });
   });
 }

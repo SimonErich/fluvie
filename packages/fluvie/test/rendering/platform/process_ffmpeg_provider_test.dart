@@ -101,6 +101,38 @@ void main() {
       verify(() => runner.run('/explicit/ffmpeg', const ['-version'])).called(1);
       verifyNever(() => runner.run('/env/ffmpeg', any()));
     });
+
+    test('falls back to the managed cache build when present', () async {
+      final cacheRoot = Directory.systemTemp.createTempSync('fluvie_provider_cache_');
+      addTearDown(() => cacheRoot.deleteSync(recursive: true));
+      final cached = File('${cacheRoot.path}/fluvie/ffmpeg/8.1/ffmpeg')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('stub');
+      stubProbe(cached.path);
+
+      final provider = ProcessFfmpegProvider(
+        runner: runner,
+        environment: {'XDG_CACHE_HOME': cacheRoot.path},
+      );
+      await provider.probeVersion();
+
+      verify(() => runner.run(cached.path, const ['-version'])).called(1);
+      verifyNever(() => runner.run('ffmpeg', any()));
+    });
+
+    test('ignores a managed cache that is not installed', () async {
+      final cacheRoot = Directory.systemTemp.createTempSync('fluvie_provider_nocache_');
+      addTearDown(() => cacheRoot.deleteSync(recursive: true));
+      stubProbe('ffmpeg');
+
+      final provider = ProcessFfmpegProvider(
+        runner: runner,
+        environment: {'XDG_CACHE_HOME': cacheRoot.path},
+      );
+      await provider.probeVersion();
+
+      verify(() => runner.run('ffmpeg', const ['-version'])).called(1);
+    });
   });
 
   group('ProcessFfmpegProvider.encode', () {

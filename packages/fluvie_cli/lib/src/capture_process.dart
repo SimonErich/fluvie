@@ -42,11 +42,17 @@ String resolveProjectDir({String? project, Directory? cwd}) {
 /// [aspect]/[quality]/[format]/[poster] are the export defines. They are
 /// already validated by the command layer; absent values omit their define so
 /// a plain `fluvie render` stays byte-identical to a capture without them.
+///
+/// [impeller] adds `flutter test`'s `--enable-impeller` flag so the capture
+/// rasterizes with Impeller instead of the default tester backend. It is off by
+/// default, so an ordinary render is unchanged; turn it on (via the render
+/// `--enable-impeller` flag) when an effect needs the Impeller pipeline.
 List<String> captureTestArgs({
   required String key,
   required Directory sandbox,
   int? frames,
   bool noCache = false,
+  bool impeller = false,
   String? aspect,
   String? quality,
   String? format,
@@ -55,6 +61,7 @@ List<String> captureTestArgs({
 }) => [
   'test',
   '--no-pub',
+  if (impeller) '--enable-impeller',
   'test/render/capture_harness_test.dart',
   '--dart-define=FLUVIE_RENDER_KEY=$key',
   '--dart-define=FLUVIE_RENDER_OUT_DIR=${sandbox.path}',
@@ -89,6 +96,7 @@ Future<void> runCapture({
   required StringSink err,
   int? frames,
   bool noCache = false,
+  bool impeller = false,
   bool verbose = false,
   String? aspect,
   String? quality,
@@ -102,6 +110,7 @@ Future<void> runCapture({
     sandbox: sandbox,
     frames: frames,
     noCache: noCache,
+    impeller: impeller,
     aspect: aspect,
     quality: quality,
     format: format,

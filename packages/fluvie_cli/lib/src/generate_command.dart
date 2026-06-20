@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:fluvie_cli/src/cli_failure.dart';
 import 'package:fluvie_cli/src/export_flags.dart';
+import 'package:fluvie_cli/src/ffmpeg_gate.dart';
 import 'package:fluvie_cli/src/process_runner.dart';
 import 'package:fluvie_cli/src/render_command.dart' show createRenderSandbox;
 import 'package:fluvie_cli/src/render_defines.dart';
@@ -20,10 +21,12 @@ final class GenerateCommand {
   GenerateCommand({
     this._runner = const IoProcessRunner(),
     this._createSandbox = createRenderSandbox,
+    this._resolveFfmpeg = ensureFfmpeg,
   });
 
   final ProcessRunner _runner;
   final Future<Directory> Function() _createSandbox;
+  final FfmpegResolver _resolveFfmpeg;
 
   /// The `generate` command's argument parser.
   static ArgParser buildParser() {
@@ -86,6 +89,7 @@ final class GenerateCommand {
         out: out,
         err: err,
         report: (sink) => sink.writeln('Spec $specOut'),
+        resolveFfmpeg: _resolveFfmpeg,
       );
     } on CliFailure catch (failure) {
       err.writeln(failure.message);

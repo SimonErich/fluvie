@@ -19,13 +19,15 @@ flutter pub get
 ## What you need
 
 - Flutter 3.44 or newer.
-- FFmpeg on your PATH. Rendering needs it; previews do not.
+- FFmpeg, for rendering (previews do not need it). You do not have to install
+  it: the first render downloads a pinned FFmpeg build and caches it. Run
+  `fluvie ffmpeg install` to fetch it ahead of time, or point `--ffmpeg` /
+  `FLUVIE_FFMPEG` at your own. See [Managing FFmpeg](../guides/managing-ffmpeg.md).
 
-Check both:
+Check Flutter:
 
 ```sh
 flutter --version
-ffmpeg -version
 ```
 
 ## Working inside this repository
@@ -57,3 +59,4 @@ including loading the real fonts so text never falls back to the boxy test font.
 
 - [Your first video](your-first-video.md): build and render lesson 01.
 - [Core concepts](core-concepts.md): the ideas behind every Fluvie video.
+- [Managing FFmpeg](../guides/managing-ffmpeg.md): how Fluvie finds, downloads, and pins FFmpeg.

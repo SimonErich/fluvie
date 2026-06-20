@@ -1,12 +1,35 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
+import 'package:fluvie_cli/src/ffmpeg/ffmpeg_cache.dart';
+import 'package:fluvie_cli/src/ffmpeg/ffmpeg_provisioner.dart';
+import 'package:fluvie_cli/src/ffmpeg_gate.dart';
 import 'package:fluvie_cli/src/process_runner.dart';
 import 'package:fluvie_cli/src/render_command.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 class _MockProcessRunner extends Mock implements ProcessRunner {}
+
+void _drop(String _) {}
+
+/// The real gate with an empty environment and a nowhere-cache, so the probe
+/// still runs through [runner] but resolution never reads the real
+/// `$FLUVIE_FFMPEG`, cache, or network.
+Future<String> _hermeticResolve(
+  ProcessRunner runner, {
+  String? binary,
+  bool allowDownload = true,
+  ProvisionLog log = _drop,
+}) => ensureFfmpeg(
+  runner,
+  binary: binary,
+  allowDownload: allowDownload,
+  log: log,
+  environment: const {},
+  cache: FfmpegCache(abi: Abi.linuxX64, environment: const {}),
+);
 
 const _banner8 = 'ffmpeg version 8.0.1-3ubuntu2 Copyright (c) 2000-2025 the FFmpeg developers';
 const _banner5 = 'ffmpeg version 5.1.4-0+deb12u1 Copyright (c) 2000-2023 the FFmpeg developers';
@@ -52,6 +75,7 @@ void main() {
       sandboxCreated = true;
       return sandbox;
     },
+    resolveFfmpeg: _hermeticResolve,
   );
 
   Future<int> execute(List<String> args) async =>
@@ -259,10 +283,17 @@ void main() {
   });
 
   group('RenderCommand failures', () {
-    test('an ffmpeg below the floor aborts before any capture or sandbox', () async {
+    test('an old ffmpeg with --no-download aborts before any capture or sandbox', () async {
       stubProbe(banner: _banner5);
 
-      final code = await execute(['demo', '--out', outPath, '--project', 'example']);
+      final code = await execute([
+        'demo',
+        '--out',
+        outPath,
+        '--project',
+        'example',
+        '--no-download',
+      ]);
 
       expect(code, 1);
       expect(err.toString(), contains('6.0'));

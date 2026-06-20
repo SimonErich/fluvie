@@ -12,12 +12,13 @@ ENV FLUTTER_VERSION=3.44.0 \
     PATH=/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:/root/.pub-cache/bin:$PATH \
     PUB_CACHE=/root/.pub-cache
 
-# ffmpeg (>= 6.0 on bookworm) for encoding; real fonts so captured text is not
-# tofu (CI inherits the runner's fonts; a slim image has none); git/curl/unzip
-# for the Flutter SDK.
+# Real fonts so captured text is not tofu (CI inherits the runner's fonts; a
+# slim image has none); git/curl/unzip for the Flutter SDK. FFmpeg is NOT
+# installed via apt — it is provisioned below as the same pinned, checksum-
+# verified build the CLI downloads, so server renders are byte-identical to
+# local ones.
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl git unzip xz-utils \
-      ffmpeg \
       fontconfig fonts-dejavu fonts-noto-core fonts-noto-color-emoji \
     && rm -rf /var/lib/apt/lists/* \
     && fc-cache -f
@@ -32,9 +33,12 @@ RUN git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/f
 WORKDIR /app
 COPY . .
 
-# Resolve the workspace, then warm the capture harness with one throwaway render
-# so the first real request does not pay the kernel-snapshot cost.
+# Resolve the workspace, provision the pinned FFmpeg into the managed cache
+# (the runtime server and capture harness both resolve it from there), then warm
+# the capture harness with one throwaway render so the first real request does
+# not pay the kernel-snapshot cost.
 RUN melos bootstrap \
+    && dart run packages/fluvie_cli/bin/fluvie.dart ffmpeg install \
     && (dart run packages/fluvie_cli/bin/fluvie.dart render demo --out /tmp/warm.mp4 || true) \
     && rm -f /tmp/warm.mp4 \
     && dart compile exe packages/fluvie_api/bin/fluvie_api.dart -o /usr/local/bin/fluvie_api

@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:fluvie_cli/src/edit_command.dart';
+import 'package:fluvie_cli/src/ffmpeg/ffmpeg_cache.dart';
+import 'package:fluvie_cli/src/ffmpeg/ffmpeg_provisioner.dart';
+import 'package:fluvie_cli/src/ffmpeg_gate.dart';
 import 'package:fluvie_cli/src/generate_command.dart';
 import 'package:fluvie_cli/src/process_runner.dart';
 import 'package:fluvie_cli/src/render_command.dart';
@@ -9,6 +13,24 @@ import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 class _MockProcessRunner extends Mock implements ProcessRunner {}
+
+void _drop(String _) {}
+
+/// The real gate with an empty environment and a nowhere-cache, keeping
+/// resolution hermetic while still probing through [runner].
+Future<String> _hermeticResolve(
+  ProcessRunner runner, {
+  String? binary,
+  bool allowDownload = true,
+  ProvisionLog log = _drop,
+}) => ensureFfmpeg(
+  runner,
+  binary: binary,
+  allowDownload: allowDownload,
+  log: log,
+  environment: const {},
+  cache: FfmpegCache(abi: Abi.linuxX64, environment: const {}),
+);
 
 const _banner8 = 'ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers';
 const _encodeArgs = ['-f', 'rawvideo', '-i', 'frames.rgba', 'out.mp4'];
@@ -82,6 +104,7 @@ void main() {
     Future<int> run(List<String> args) => GenerateCommand(
       runner: runner,
       createSandbox: sandboxFactory,
+      resolveFfmpeg: _hermeticResolve,
     ).execute(GenerateCommand.buildParser().parse(args), out: out, err: err);
 
     test('authors and renders: prompt + spec-out defines, spec reported', () async {
@@ -160,6 +183,7 @@ void main() {
     Future<int> run(List<String> args) => EditCommand(
       runner: runner,
       createSandbox: sandboxFactory,
+      resolveFfmpeg: _hermeticResolve,
     ).execute(EditCommand.buildParser().parse(args), out: out, err: err);
 
     test('loads the base spec and renders: base + change + spec-out defines', () async {
@@ -234,6 +258,7 @@ void main() {
     Future<int> run(List<String> args) => RenderCommand(
       runner: runner,
       createSandbox: sandboxFactory,
+      resolveFfmpeg: _hermeticResolve,
     ).execute(RenderCommand.buildParser().parse(args), out: out, err: err);
 
     test('passes FLUVIE_RENDER_SPEC and an empty key', () async {

@@ -1,13 +1,35 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:fluvie_cli/src/export_flags.dart';
+import 'package:fluvie_cli/src/ffmpeg/ffmpeg_cache.dart';
+import 'package:fluvie_cli/src/ffmpeg/ffmpeg_provisioner.dart';
+import 'package:fluvie_cli/src/ffmpeg_gate.dart';
 import 'package:fluvie_cli/src/process_runner.dart';
 import 'package:fluvie_cli/src/render_pipeline.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 class _MockProcessRunner extends Mock implements ProcessRunner {}
+
+void _drop(String _) {}
+
+/// The real gate, but with an empty environment and a nowhere-cache so the
+/// resolution stays hermetic (no real `$FLUVIE_FFMPEG`, cache, or network).
+Future<String> _hermeticResolve(
+  ProcessRunner runner, {
+  String? binary,
+  bool allowDownload = true,
+  ProvisionLog log = _drop,
+}) => ensureFfmpeg(
+  runner,
+  binary: binary,
+  allowDownload: allowDownload,
+  log: log,
+  environment: const {},
+  cache: FfmpegCache(abi: Abi.linuxX64, environment: const {}),
+);
 
 const _banner8 = 'ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers';
 const _encodeArgs = ['-f', 'rawvideo', '-i', 'frames.rgba', 'out.mp4'];
@@ -83,6 +105,8 @@ void main() {
       ffmpegBinary: null,
       projectDir: 'example',
       noCache: false,
+      noDownload: false,
+      enableImpeller: false,
       verbose: false,
       keepTemp: false,
     ),
@@ -102,6 +126,7 @@ void main() {
     out: out,
     err: err,
     report: report,
+    resolveFfmpeg: _hermeticResolve,
   );
 
   test('probe -> capture -> encode -> wrote, exit 0, sandbox cleaned', () async {
@@ -139,6 +164,8 @@ void main() {
         ffmpegBinary: null,
         projectDir: 'example',
         noCache: false,
+        noDownload: false,
+        enableImpeller: false,
         verbose: false,
         keepTemp: true,
       ),
@@ -147,6 +174,35 @@ void main() {
     expect(code, 0);
     expect(sandbox.existsSync(), isTrue);
     expect(err.toString(), contains(sandbox.path));
+  });
+
+  test('enableImpeller passes --enable-impeller through to the capture', () async {
+    stubHappyPath();
+
+    final code = await run(
+      options: (
+        ffmpegBinary: null,
+        projectDir: 'example',
+        noCache: false,
+        noDownload: false,
+        enableImpeller: true,
+        verbose: false,
+        keepTemp: false,
+      ),
+    );
+
+    expect(code, 0, reason: err.toString());
+    final captured =
+        verify(
+              () => runner.run(
+                'flutter',
+                captureAny(),
+                workingDirectory: any(named: 'workingDirectory'),
+                environment: any(named: 'environment'),
+              ),
+            ).captured.single
+            as List<String>;
+    expect(captured, contains('--enable-impeller'));
   });
 
   test('the report callback runs after a successful encode', () async {

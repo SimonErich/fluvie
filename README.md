@@ -71,8 +71,11 @@ dart pub global activate fluvie_cli
 fluvie render hello --out hello.mp4
 ```
 
-The [getting started guide](https://docs.fluvie.dev/getting-started/your-first-video/)
-wires the render key in one step and explains the FFmpeg setup. Full source:
+You do not need to install FFmpeg: the first render downloads a pinned,
+checksum-verified build and caches it (run `fluvie ffmpeg install` to fetch it
+ahead of time, or point `--ffmpeg` / `FLUVIE_FFMPEG` at your own). The
+[getting started guide](https://docs.fluvie.dev/getting-started/your-first-video/)
+wires the render key in one step. Full source:
 [`example/lib/lessons/01_hello_video.dart`](example/lib/lessons/01_hello_video.dart).
 
 ## See what it can do

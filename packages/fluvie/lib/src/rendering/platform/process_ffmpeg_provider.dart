@@ -9,11 +9,12 @@ import 'package:fluvie/src/rendering/platform/process_runner.dart';
 /// [ProcessRunner] with argument arrays, never a shell.
 ///
 /// Binary resolution, in priority order: an explicit `binaryPath`, the
-/// `FLUVIE_FFMPEG` environment variable, then `ffmpeg` on `PATH`. Every
-/// encode probes first and enforces the `>= 6.0` floor before any work
-/// starts; failures surface as [FluvieEncodeException] carrying the exit
-/// code and the last 4 KiB of stderr — the actual FFmpeg diagnostic, not a
-/// bare "encode failed".
+/// `FLUVIE_FFMPEG` environment variable, the managed cache build that
+/// `fluvie ffmpeg install` writes (so a provisioned FFmpeg is found without
+/// any setup), then `ffmpeg` on `PATH`. Every encode probes first and enforces
+/// the `>= 6.0` floor before any work starts; failures surface as
+/// [FluvieEncodeException] carrying the exit code and the last 4 KiB of
+/// stderr — the actual FFmpeg diagnostic, not a bare "encode failed".
 final class ProcessFfmpegProvider implements FfmpegProvider {
   /// Creates a provider running through `runner`.
   ///
@@ -32,12 +33,41 @@ final class ProcessFfmpegProvider implements FfmpegProvider {
   /// How much trailing stderr is retained for diagnostics (4 KiB).
   static const int stderrTailLength = 4096;
 
+  /// The cache subdirectory of the FFmpeg build `fluvie ffmpeg install`
+  /// provisions. Kept in sync with `fluvie_cli`'s `pinnedFfmpegVersion` (the
+  /// CLI owns provisioning; this library only reads the cache it populates).
+  static const String _managedFfmpegVersion = '8.1';
+
   final ProcessRunner _runner;
   final String? _binaryPath;
   final Map<String, String>? _environment;
 
   String get _binary =>
-      _binaryPath ?? (_environment ?? Platform.environment)[environmentVariable] ?? 'ffmpeg';
+      _binaryPath ??
+      (_environment ?? Platform.environment)[environmentVariable] ??
+      _managedCacheBinary() ??
+      'ffmpeg';
+
+  /// The managed-cache FFmpeg path when present on disk, else `null`. Mirrors
+  /// `fluvie_cli`'s cache convention: `<cacheRoot>/fluvie/ffmpeg/<version>/`,
+  /// rooted at `%LOCALAPPDATA%` on Windows or `$XDG_CACHE_HOME` / `~/.cache`
+  /// elsewhere.
+  String? _managedCacheBinary() {
+    final env = _environment ?? Platform.environment;
+    final base = Platform.isWindows
+        ? _nonEmpty(env['LOCALAPPDATA'])
+        : _nonEmpty(env['XDG_CACHE_HOME']) ?? _cacheUnderHome(env['HOME']);
+    if (base == null) return null;
+    final sep = Platform.pathSeparator;
+    final name = Platform.isWindows ? 'ffmpeg.exe' : 'ffmpeg';
+    final path = [base, 'fluvie', 'ffmpeg', _managedFfmpegVersion, name].join(sep);
+    return File(path).existsSync() ? path : null;
+  }
+
+  static String? _cacheUnderHome(String? home) =>
+      _nonEmpty(home) == null ? null : '$home${Platform.pathSeparator}.cache';
+
+  static String? _nonEmpty(String? value) => (value == null || value.isEmpty) ? null : value;
 
   @override
   Future<FfmpegVersion?> probeVersion() => _probe();
