@@ -1,20 +1,30 @@
 # Maintaining the Fluvie landing site
 
-This is the marketing landing at https://fluvie.dev. It is one static file,
-`web/landing/index.html`, plus the gallery clips under `web/landing/media/`. There
-is no build step. nginx serves the file as-is.
+This is the marketing landing at https://fluvie.dev. The page is
+`web/landing/index.html`, plus the gallery clips under `web/landing/media/`. The
+two data-driven regions, the package list and the lesson gallery, are generated
+from `web/landing/landing_data.json` by `melos run web:landing` (a deterministic
+script, no LLM); everything else is hand-edited static HTML.
+`melos run web:landing:check` (run in CI and the gate) fails if the page drifts
+from the data, or if a published package or a lesson has no entry.
 
 This doc tells you exactly what to touch when the project changes. The docs site
 (docs.fluvie.dev, Astro) and the demo (demo.fluvie.dev, Flutter web) are separate.
 Do not edit them from here.
 
-> Most of this is automatable. When a lesson, package, or link changes, run the
-> `sync-website` skill (`.claude/skills/sync-website/SKILL.md`); it walks the whole
-> reconcile. This doc is the manual version and the reference behind the skill.
+> The package list and gallery are data-driven: edit
+> `web/landing/landing_data.json` and run `melos run web:landing`. For copy, new
+> sections, links, or accessibility, the `sync-website` skill
+> (`.claude/skills/sync-website/SKILL.md`) walks the editorial reconcile. This doc
+> is the manual reference behind both.
 
 ## What lives where
 
-- `web/landing/index.html` is the whole page. Hand-edited HTML with inline CSS.
+- `web/landing/index.html` is the whole page (inline CSS). Hand-edited, except the
+  package list and the lesson gallery, which `melos run web:landing` generates
+  between the `region:packages` / `#region:gallery` markers.
+- `web/landing/landing_data.json` is the data for those generated regions: the
+  package list and the lesson gallery. Edit it, then run `melos run web:landing`.
 - `web/landing/website-structure.md` is the design brief: structure, sections,
   motion, microinteractions, hover and focus, and accessibility. It defines intent.
   `index.html` is the implementation of it. It carries no colors or fonts (the
@@ -48,15 +58,16 @@ footage instead of a gradient poster. Wire it in only when you want real clips
 
 A new `example/lib/lessons/NN_*.dart` means a new gallery tile.
 
-1. Add a row to the `GAL` array in the `index.html` inline script: number, title, a
-   one-sentence "what it teaches" line, a category (`basics`/`data`/`media`/`audio`/
-   `code`/`transitions`), and `false` (or `true` once it has a real clip). Copy the
-   wording from the lesson list in `website-structure.md` so the page and the brief
-   agree.
-2. If the category is new, add a matching `<button class="filterBtn" ...>` to the
-   filter row.
-3. Reload the page and check the tile appears, the filter includes it, the poster
-   reads well, and the `aria-label` describes the lesson.
+1. Add a `lessons` entry to `web/landing/landing_data.json`: `key` (NN), `title`, a
+   one-sentence `teaches` line, a `category` (`basics`/`data`/`media`/`audio`/
+   `code`/`transitions`), and `clip` `false` (or `true` once it has a real clip).
+   Keep the wording aligned with `website-structure.md`.
+2. Run `melos run web:landing` to regenerate the gallery. `web:landing:check` fails
+   until every lesson on disk has an entry.
+3. If the category is new, add a matching `<button class="filterBtn" ...>` to the
+   filter row (the filter row is static HTML).
+4. Reload the page and check the tile appears, the filter includes it, and the
+   `aria-label` describes the lesson.
 
 ### Optional: embed real clips
 
@@ -73,15 +84,16 @@ A new `example/lib/lessons/NN_*.dart` means a new gallery tile.
 
 ## When a package changes
 
-The ecosystem overview must always list all six published packages: `fluvie`,
-`fluvie_cli`, `fluvie_lints`, `fluvie_ai`, `fluvie_api`, `fluvie_mcp`.
+The package list is generated from `web/landing/landing_data.json`, so it always
+reflects the published `packages/*` (currently eight, including
+`fluvie_mobile_encoder` and `fluvie_web_encoder`).
 
-- New package: add a card to the ecosystem section with its one-line role and its
-  best path (a pub.dev page, or a doc deep-link). Add it to the brief's ecosystem
-  list too.
-- Renamed or removed package: fix the card, the link, and any inline mention.
-- Install version in the getting-started: it uses `fluvie: ^1.0.0`. Bump it only when
-  the major version changes. The caret covers patch and minor.
+- New package: add a `packages` entry (`key`, `role`, a one-line `line`, an `icon`
+  HTML entity, and `primary`/`badge` only for `fluvie`), then run
+  `melos run web:landing`. `web:landing:check` fails until every published
+  `packages/*` has an entry.
+- Renamed or removed package: update or drop its entry and regenerate.
+- Keep the brief's ecosystem list (`website-structure.md`) in step with the data.
 
 ## When copy or links change
 
@@ -139,11 +151,14 @@ The ecosystem overview must always list all six published packages: `fluvie`,
   It copies `web/landing/index.html`, `web/landing/media/`, and
   `documentation/fluvie_logo.svg`. If you add another top-level asset to the page, add
   a matching `COPY` line.
-- Production (fluvie.dev) runs through Dokploy and Traefik: one app per service, the
-  domain set in the Dokploy UI, ports 80 and 443 owned by Traefik. The landing app
-  needs no env file. See `deploy/README.md`.
-- nginx config: the landing uses the default static handler. The SPA rewrite
-  (`deploy/nginx/spa.conf`) is for the demo, not here.
+- Production (fluvie.dev) is GitHub Pages, served from the `SimonErich/fluvie_website`
+  repo. Its `Deploy fluvie.dev` workflow pulls `web/landing` from this monorepo
+  (index.html, the logos, og.png) and publishes it, so editing the page here is the
+  whole job. The deploy runs on demand, daily, and on a `landing-changed`
+  repository_dispatch (this monorepo's `notify-website` workflow sends it when
+  `web/landing/**` changes, once a `FLUVIE_WEBSITE_TOKEN` secret is set).
+- The Docker artifact (`deploy/landing.Dockerfile`, the `fluvie-web` compose
+  service) is now just for local preview, not production.
 
 ## Release checklist
 

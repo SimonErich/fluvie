@@ -1,14 +1,16 @@
 ---
 name: sync-website
-description: Reconcile the marketing landing (web/landing/index.html), its gallery clips (web/landing/media/), the six-package ecosystem list, the getting-started, the design brief (web/landing/website-structure.md), and web/landing/MAINTAINING.md with the current repo. Use after adding or changing an example/lesson, after a package is added/renamed/removed, after a canonical link or copy change, or after any change the public site at fluvie.dev should reflect.
+description: Reconcile the marketing landing (web/landing/index.html), its gallery clips (web/landing/media/), the package list and gallery (data-driven via web/landing/landing_data.json + `melos run web:landing`), the getting-started, the design brief (web/landing/website-structure.md), and web/landing/MAINTAINING.md with the current repo. Use after adding or changing an example/lesson, after a package is added/renamed/removed, after a canonical link or copy change, or after any change the public site at fluvie.dev should reflect.
 ---
 
 # sync-website
 
-The landing at fluvie.dev is a single static file (`web/landing/index.html`) plus
-committed gallery clips under `web/landing/media/`. It drifts the moment a lesson,
-package, or canonical link changes. This skill walks the full reconcile so nothing
-is missed. The page has no build step; you edit `index.html` directly.
+The landing at fluvie.dev is `web/landing/index.html` plus committed gallery clips
+under `web/landing/media/`. Its two data-driven regions (the package list and the
+lesson gallery) are generated from `web/landing/landing_data.json` by
+`melos run web:landing`, so edit the data and regenerate for those; edit
+`index.html` directly for copy, sections, and links. `melos run web:landing:check`
+fails on drift. This skill walks the editorial reconcile so nothing is missed.
 
 Obey the voice rules everywhere: short sentences, second person, no em-dashes, none
 of the banned words (seamless, robust, leverage, powerful as filler, effortless,
@@ -16,16 +18,15 @@ blazing, unleash). The full reference for every step is `web/landing/MAINTAINING
 
 ## Steps
 
-1. **Diff the world against the page.** List the lessons
-   (`example/lib/lessons/NN_*.dart`), the six published packages (`fluvie`,
-   `fluvie_cli`, `fluvie_lints`, `fluvie_ai`, `fluvie_api`, `fluvie_mcp`), and the
-   canonical links. Compare each to what `web/landing/index.html` shows. Note every
-   add, rename, removal, and copy change.
-2. **Update the gallery tiles.** The tiles are generated from a `GAL` array in the
-   inline `<script>` of `index.html` (`["NN","Title","what it teaches","category",
-   isRealClip]`), each rendered as an animated gradient poster. For a new or changed
-   lesson, add or edit its `GAL` row (and a `filterBtn` if the category is new). Keep
-   the wording aligned with the lesson list in `web/landing/website-structure.md`.
+1. **Diff the world against the page.** `melos run web:landing:check` does the
+   package and lesson diff for you: it fails if any published `packages/*` or any
+   `example/lib/lessons/NN_*.dart` has no entry in `landing_data.json`. Then check
+   the canonical links and copy by eye against `web/landing/index.html`.
+2. **Update the gallery tiles.** The tiles are generated from the `lessons` list in
+   `web/landing/landing_data.json` (`key`, `title`, `teaches`, `category`, `clip`).
+   For a new or changed lesson, edit its entry, then run `melos run web:landing` to
+   regenerate the `GAL` array. Add a `filterBtn` to `index.html` only if the
+   category is new. Keep the wording aligned with `web/landing/website-structure.md`.
 3. **Optional, embed a real clip.** Only when a tile should show real footage instead
    of its gradient poster: register the key in `pubspec.yaml` `render:examples` AND in
    the `KEYS` array of `tool/web/regenerate_gallery.sh`, run `melos run web:gallery`
@@ -34,8 +35,10 @@ blazing, unleash). The full reference for every step is `web/landing/MAINTAINING
    re-encode), then swap that tile's poster for the progressive `<video>`(webm, mp4) →
    `<img>` GIF fallback and mark the lesson `true`. Regenerate all affected media on
    ONE machine in one pass (ffmpeg bytes differ across machines).
-4. **Update the ecosystem list.** All six packages present, each with its one-line
-   role and best path (a pub.dev page or a doc deep-link). Fix renames and removals.
+4. **Update the package list.** Edit the `packages` list in
+   `web/landing/landing_data.json` (`key`, `role`, one-line `line`, `icon`, and
+   `primary`/`badge` only for `fluvie`), then run `melos run web:landing`.
+   `web:landing:check` fails until every published `packages/*` has an entry.
 5. **Update getting-started inline.** Keep the flow real: prereqs (Flutter 3.44+,
    ffmpeg on PATH for rendering only), `flutter create`, add the `fluvie` dependency,
    `dart pub global activate fluvie_cli`, write the lesson-01 video, preview by

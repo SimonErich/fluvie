@@ -200,12 +200,27 @@ melos:
         Used by CI and the fresh-clone script, not the fast pre-commit gate.
       run: bash tool/docs/check_dartdoc.sh
 
+    web:landing:
+      description: >
+        Regenerate the marketing landing's data-driven regions (the package list
+        and the lesson gallery in web/landing/index.html) from
+        web/landing/landing_data.json. The page is otherwise static; this replaces
+        the old LLM reconcile.
+      run: dart run tool/web/build_landing.dart
+
+    web:landing:check:
+      description: >
+        Fail if web/landing/index.html drifted from landing_data.json, or if a
+        published package or a lesson has no entry (CI and the pre-commit gate).
+      run: dart run tool/web/build_landing.dart --check
+
     gate:
       description: Full per-epic quality gate — must be green before every commit.
       steps:
         - format
         - analyze
         - lint
+        - web:landing:check
         - coverage:check
 
     render:examples:

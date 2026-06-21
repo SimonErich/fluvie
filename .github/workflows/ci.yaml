@@ -34,6 +34,7 @@ jobs:
       - run: melos run format
       - run: melos run analyze
       - run: melos run lint --no-select
+      - run: melos run web:landing:check
 
   test:
     strategy:
