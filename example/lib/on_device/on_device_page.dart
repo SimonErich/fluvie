@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart' hide Animation;
 import 'package:fluvie/fluvie.dart';
-import 'package:fluvie_example/lessons/01_hello_video.dart';
+import 'package:fluvie_example/lessons/10_audio_and_captions.dart';
 import 'package:fluvie_mobile_encoder/fluvie_mobile_encoder.dart';
 
 /// A standalone entry so this page runs on its own:
@@ -31,8 +31,9 @@ class OnDeviceRenderPage extends StatefulWidget {
 }
 
 class _OnDeviceRenderPageState extends State<OnDeviceRenderPage> {
-  String _status = 'Press render to encode lesson 01 on the device.';
+  String _status = 'Press render to encode lesson 10 on the device.';
   bool _busy = false;
+  bool _withAudio = true;
 
   Future<void> _render() async {
     setState(() {
@@ -43,10 +44,11 @@ class _OnDeviceRenderPageState extends State<OnDeviceRenderPage> {
       // #docregion render
       final renderer = OnDeviceVideoRenderer();
       final file = await renderer.render(
-        composition: lesson01Video(),
-        aspect: Aspect.square,
+        composition: lesson10Video(),
+        aspect: Aspect.landscape,
         duration: const Duration(seconds: 4),
-        longEdge: 720,
+        longEdge: 480,
+        audio: _withAudio, // mix and mux the lesson's music bed on the device
         onProgress: (phase) => debugPrint('on-device render: ${phase.name}'),
       );
       // #enddocregion render
@@ -70,6 +72,13 @@ class _OnDeviceRenderPageState extends State<OnDeviceRenderPage> {
         padding: const EdgeInsets.all(20),
         children: [
           for (final point in _points) _PointTile(point),
+          const SizedBox(height: 12),
+          SwitchListTile(
+            title: const Text('Encode audio'),
+            subtitle: const Text("Mix the lesson's music bed into the MP4"),
+            value: _withAudio,
+            onChanged: _busy ? null : (value) => setState(() => _withAudio = value),
+          ),
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: _busy ? null : _render,

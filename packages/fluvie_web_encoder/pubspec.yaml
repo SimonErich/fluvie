@@ -22,6 +22,7 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   fluvie: ^0.1.0
+  http: ^1.5.0
   meta: ^1.16.0
 
 dev_dependencies:

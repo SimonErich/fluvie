@@ -45,22 +45,13 @@ Future<AudioMixPlan> stageAudioMix({
 
 /// Builds the FFmpeg [AudioTrackNode] for [track] from the shared, neutral
 /// [resolveAudioTrack] resolution, so the FFmpeg mix and the on-device
-/// `resolveAudioMix` delay, trim, gain, and fade a track identically.
+/// `resolveAudioMix` delay, trim, gain, fade, and loop a track identically.
 AudioTrackNode _nodeFor(
   Audio track, {
   required String name,
   required int fps,
   required TimeScopeData scope,
-}) {
-  final resolved = resolveAudioTrack(track, fps: fps, scope: scope);
-  return AudioTrackNode(
-    name: name,
-    delayMs: resolved.delayMs,
-    volume: resolved.volume,
-    trimStartSeconds: resolved.trimStartSeconds,
-    trimEndSeconds: resolved.trimEndSeconds,
-    fadeInSeconds: resolved.fadeInSeconds,
-    fadeOutSeconds: resolved.fadeOutSeconds,
-    fadeOutStartSeconds: resolved.fadeOutStartSeconds,
-  );
-}
+}) => AudioTrackNode.fromResolved(
+  resolveAudioTrack(track, fps: fps, scope: scope),
+  name: name,
+);

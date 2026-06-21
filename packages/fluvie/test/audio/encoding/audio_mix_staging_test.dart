@@ -49,6 +49,8 @@ void main() {
 
       expect(plan.tracks, hasLength(1));
       expect(plan.amix, isNotNull);
+      // A plain music track does not loop, so its input stays a bare -i.
+      expect(plan.tracks.single.loop, isFalse);
       // The node points at a bare sandbox-relative name, never an absolute path.
       final name = plan.tracks.single.name;
       expect(name, isNot(contains('/')));
@@ -142,6 +144,11 @@ void main() {
       );
 
       expect(plan.tracks.single.fadeOutStartSeconds, 5.5);
+      // A looping bed WITH a trim repeats the trimmed window in-filter (aloop),
+      // not at the input, so the trim is what loops and fills the window.
+      expect(plan.tracks.single.loop, isTrue);
+      expect(plan.tracks.single.inputArgs(), isNot(contains('-stream_loop')));
+      expect(plan.tracks.single.filterChain(inputIndex: 1, label: 'a0'), contains('aloop=loop=-1'));
     });
 
     test('a music trim resolves onto the node as start/end seconds', () async {

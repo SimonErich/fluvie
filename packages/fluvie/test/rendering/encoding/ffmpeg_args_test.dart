@@ -238,6 +238,22 @@ void main() {
         expect(args.sublist(firstMap, firstMap + 4), ['-map', '0:v:0', '-map', '[aout]']);
       });
 
+      test('a looping track prefixes -stream_loop -1 before its -i, bounded by -shortest', () {
+        final args = builderWith([const AudioTrackNode(name: 'bed.wav', loop: true)]).build();
+        final input = args.indexOf('bed.wav');
+        expect(args.sublist(input - 3, input + 1), ['-stream_loop', '-1', '-i', 'bed.wav']);
+        // Still one extra -i beyond the video; the looped input is filtered at index 1.
+        expect(args.where((a) => a == '-i'), hasLength(2));
+        final graph = args[args.indexOf('-filter_complex') + 1];
+        expect(graph, contains('[1:a]asetpts=PTS-STARTPTS,volume=1[a0]'));
+        expect(args, contains('-shortest'));
+      });
+
+      test('a non-looping track emits no -stream_loop (the default is unchanged)', () {
+        final args = builderWith([const AudioTrackNode(name: 'bed.wav')]).build();
+        expect(args, isNot(contains('-stream_loop')));
+      });
+
       test('the bitexact quartet and -threads 1 are unchanged with audio', () {
         final args = builderWith([const AudioTrackNode(name: 'track0.wav')]).build();
         final i = args.indexOf('-fflags');

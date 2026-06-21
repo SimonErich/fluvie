@@ -48,6 +48,7 @@ export default defineConfig({
             { label: 'AI and MCP', slug: 'guides/ai-and-mcp' },
             { label: 'Rendering on a server', slug: 'guides/rendering-on-a-server' },
             { label: 'On-device mobile rendering', slug: 'guides/on-device-mobile-rendering' },
+            { label: 'On-device web rendering', slug: 'guides/on-device-web-rendering' },
             { label: 'Exporting your video', slug: 'guides/exporting-your-video' },
           ],
         },

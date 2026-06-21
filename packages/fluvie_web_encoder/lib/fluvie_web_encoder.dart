@@ -13,7 +13,9 @@
 /// private.
 library;
 
-export 'src/offscreen_web_capture_host.dart';
+export 'src/fluvie_web_stage.dart' show FluvieWebStage;
+export 'src/web_audio_materializer.dart'
+    show BundleWebAudioMaterializer, WebAudioFetch, WebAudioMaterializer;
 export 'src/web_capture_host.dart';
 export 'src/web_video_encoder.dart' show WebVideoEncoder;
 export 'src/web_video_renderer.dart';

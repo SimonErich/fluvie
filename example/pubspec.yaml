@@ -17,6 +17,7 @@ dependencies:
   fluvie_ai: ^0.1.0
   fluvie_api: ^0.1.0
   fluvie_mobile_encoder: ^0.1.0
+  fluvie_web_encoder: ^0.1.0
 
 dev_dependencies:
   alchemist: ^0.14.0

@@ -25,9 +25,9 @@ Future<Directory> _newSandbox() async {
   return sandbox;
 }
 
-Future<void> _writeFrames(Directory sandbox) async {
+Future<void> _writeFrames(Directory sandbox, {int frames = _frameCount}) async {
   final sink = File('${sandbox.path}/frames.rgba').openWrite();
-  for (var frame = 0; frame < _frameCount; frame++) {
+  for (var frame = 0; frame < frames; frame++) {
     final bytes = Uint8List(_frameBytes);
     for (var i = 0; i < _frameBytes; i += 4) {
       bytes[i] = (frame * 8) % 256;
@@ -107,5 +107,70 @@ void main() {
     expect(kinds, containsAll(<String>['video', 'audio']));
     final audio = streams.firstWhere((stream) => stream['codec_type'] == 'audio');
     expect(audio['codec_name'], 'aac');
+  });
+
+  test('a looping bed fills a video longer than the source (-stream_loop + -shortest)', () async {
+    final sandbox = await _newSandbox();
+    // A 2-second video (60 frames @ 30 fps) over a 1-second tone.
+    await _writeFrames(sandbox, frames: 60);
+    await _genTone(sandbox, 'bed.wav', frequency: 220);
+
+    final plan = buildAudioMixPlan(const [AudioTrackNode(name: 'bed.wav', loop: true)]);
+    final filters = const FfmpegFilterGraphBuilder().forFrames(width: _width, height: _height);
+    final args =
+        (FfmpegArgsBuilder()
+              ..addRawVideoInput(name: 'frames.rgba', width: _width, height: _height, fps: _fps)
+              ..setH264Output(
+                name: 'out.mp4',
+                quality: Quality.low,
+                fps: _fps,
+                filters: filters,
+                audio: plan.tracks,
+                amix: plan.amix,
+              ))
+            .build();
+
+    await ProcessFfmpegProvider().encode(args: args, sandbox: sandbox);
+
+    final probe = await _ffprobe(sandbox);
+    final streams = (probe['streams']! as List<Object?>).cast<Map<String, Object?>>();
+    final audio = streams.firstWhere((stream) => stream['codec_type'] == 'audio');
+    // The 1 s bed loops to fill the ~2 s video instead of stopping at 1 s.
+    expect(double.parse(audio['duration']! as String), greaterThan(1.5));
+  });
+
+  test('a trimmed looping bed repeats the window and never truncates the video', () async {
+    final sandbox = await _newSandbox();
+    // A 2-second video (60 frames @ 30 fps) over a 1-second tone trimmed to 0.3 s.
+    await _writeFrames(sandbox, frames: 60);
+    await _genTone(sandbox, 'bed.wav', frequency: 220);
+
+    final plan = buildAudioMixPlan(const [
+      AudioTrackNode(name: 'bed.wav', loop: true, trimStartSeconds: 0, trimEndSeconds: 0.3),
+    ]);
+    final filters = const FfmpegFilterGraphBuilder().forFrames(width: _width, height: _height);
+    final args =
+        (FfmpegArgsBuilder()
+              ..addRawVideoInput(name: 'frames.rgba', width: _width, height: _height, fps: _fps)
+              ..setH264Output(
+                name: 'out.mp4',
+                quality: Quality.low,
+                fps: _fps,
+                filters: filters,
+                audio: plan.tracks,
+                amix: plan.amix,
+              ))
+            .build();
+
+    await ProcessFfmpegProvider().encode(args: args, sandbox: sandbox);
+
+    final probe = await _ffprobe(sandbox);
+    final streams = (probe['streams']! as List<Object?>).cast<Map<String, Object?>>();
+    final video = streams.firstWhere((stream) => stream['codec_type'] == 'video');
+    final audio = streams.firstWhere((stream) => stream['codec_type'] == 'audio');
+    // The trimmed window loops to fill the ~2 s video; the video is NOT clipped
+    // down to the 0.3 s trim (the bug this guards against).
+    expect(double.parse(video['duration']! as String), greaterThan(1.5));
+    expect(double.parse(audio['duration']! as String), greaterThan(1.5));
   });
 }

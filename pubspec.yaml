@@ -16,6 +16,7 @@ workspace:
   - packages/fluvie_mcp
   - packages/fluvie_mobile_encoder
   - packages/fluvie_web_encoder
+  - packages/fluvie_web_encoder/example
   - example
 
 dev_dependencies:

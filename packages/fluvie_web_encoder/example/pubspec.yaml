@@ -1,0 +1,21 @@
+name: fluvie_web_encoder_example
+description: "Renders a Fluvie Video to MP4 in the browser with fluvie_web_encoder."
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fluvie: ^0.1.0
+  fluvie_web_encoder: ^0.1.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/audio/

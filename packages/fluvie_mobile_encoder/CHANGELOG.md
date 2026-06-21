@@ -22,7 +22,10 @@ The first public release.
   (delays, volumes, trims, fades), and mux a `Video`'s declared `Audio` tracks
   with the platform audio encoder. `MobileAudioTrack`, a `MobileAudioMaterializer`
   (with the bundled-asset/file `BundleAudioMaterializer`), and a suppressible
-  `onWarning` when a `Video` has audio but `audio` is off.
+  `onWarning` when a `Video` has audio but `audio` is off. Looping music beds fill
+  the video on both Android and iOS.
+- `NetworkAudioMaterializer`: opt-in network audio, fetched to a local file behind
+  a `NetworkAllowlist`, so a remote bed mixes like a bundled one.
 - Riverpod providers (`mobileVideoEncoderProvider`, `onDeviceVideoRendererProvider`)
   and a `FakeMobileVideoEncoder` for tests.
 

@@ -11,10 +11,11 @@ You write the same `Video` you would render anywhere. Only the renderer changes:
 ```dart
 final renderer = OnDeviceVideoRenderer();
 final file = await renderer.render(
-  composition: lesson01Video(),
-  aspect: Aspect.square,
+  composition: lesson10Video(),
+  aspect: Aspect.landscape,
   duration: const Duration(seconds: 4),
-  longEdge: 720,
+  longEdge: 480,
+  audio: _withAudio, // mix and mux the lesson's music bed on the device
   onProgress: (phase) => debugPrint('on-device render: ${phase.name}'),
 );
 ```
@@ -70,9 +71,9 @@ encode edge:
   back within a tolerance, never by byte-comparing it to a desktop render.
 - **Audio is opt-in.** Declare `Audio` on your `Video` as usual and pass
   `audio: true` to encode it; the renderer materializes, mixes, and muxes the
-  tracks with the platform audio encoder. Left off, a `Video` with audio renders
-  silent and warns once (see [Audio](#audio)). Looping beds and network audio
-  sources are not honored on-device yet.
+  tracks with the platform audio encoder. Looping beds work on both platforms, and
+  network audio is supported opt-in (see [Audio](#audio)). Left off, a `Video` with
+  audio renders silent and warns once.
 - **MP4 only.** H.264 or HEVC. GIF and transparent WebM have no hardware path;
   render those with `fluvie_cli` or `fluvie_api`.
 
@@ -86,10 +87,16 @@ then decodes, mixes, and muxes them (Android `MediaCodec`, iOS AVFoundation), so
 the on-device mix matches the desktop one.
 
 Pass `audio: true` to `OnDeviceVideoRenderer.render` to turn it on. Bundle your
-audio as an asset or a local file; network sources are not fetched on-device yet.
+audio as an asset or pass a local file path. A looping `Audio.music(loop: true)`
+bed fills the whole video on both Android and iOS. For a network source,
+construct the renderer with a `NetworkAudioMaterializer` and a `NetworkAllowlist`
+of permitted hosts; the bytes are fetched to a local file, then mixed as usual.
 If a `Video` declares audio but you leave `audio` off, the render is silent and
 the renderer warns once through `OnDeviceVideoRenderer.onWarning` — pass
 `warnOnDroppedAudio: false` to silence it.
+
+See [Audio across platforms](audio-and-captions.md#audio-across-platforms) for the
+full per-platform support table.
 
 ## Codec and bitrate
 

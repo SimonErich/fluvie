@@ -21,7 +21,8 @@ target mobile stay light.
 ## How it works
 
 1. `WebVideoRenderer` runs Fluvie's deterministic capture loop into an off-screen
-   surface, writing the frames into an in-memory sandbox.
+   surface inside your app's own pipeline (a `FluvieWebStage`), writing the frames
+   into an in-memory sandbox.
 2. It feeds that sandbox to ffmpeg.wasm through Fluvie's `WasmRuntime`, runs the
    manifest's argument plan, and reads the MP4 back as bytes.
 
@@ -41,6 +42,18 @@ the single-threaded core to avoid needing cross-origin-isolation headers.
 
 ## Quick start
 
+Wrap your app once in a `FluvieWebStage`. It gives in-browser capture a surface
+inside your app's own pipeline (off-screen, never shown), which is what lets the
+render boundary mount and paint:
+
+```dart
+import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
+
+void main() => runApp(const FluvieWebStage(child: MyApp()));
+```
+
+Then render anywhere in the app. The same `Video` you render on the desktop:
+
 ```dart
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
@@ -56,7 +69,7 @@ Future<Uint8List> renderInBrowser(Video video) async {
 }
 ```
 
-The returned bytes are an MP4 — hand them to a download link or upload them.
+The returned bytes are an MP4: hand them to a download link or upload them.
 
 ## What carries over, and what does not
 
@@ -66,8 +79,11 @@ GIF, transparent WebM) renders exactly as on the desktop.
 
 - **Performance**: ffmpeg.wasm is roughly 10–50× slower than native FFmpeg. Web
   on-device suits previews and short clips; use `fluvie_api` for long renders.
-- **Audio**: this release renders video only. Mix audio on a desktop or server
-  render for now.
+- **Audio**: opt-in. Pass `audio: true` to mix and mux a `Video`'s `Audio` tracks
+  (the same `amix` plan the desktop uses — looping beds, fades, trims, multi-track).
+  Bundle audio as an asset or fetch it from an allowlisted URL; the browser has no
+  local-file source. See the
+  [audio guide](https://docs.fluvie.dev/guides/on-device-web-rendering/#audio).
 - **Determinism**: the captured frames are byte-identical run-to-run; the encoded
   MP4 may differ from a native FFmpeg build, so give web its own golden baseline.
 

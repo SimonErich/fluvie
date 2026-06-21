@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>fluvie_web_encoder</title>
+
+  <!--
+    The FluvieFfmpeg bridge: installs the page-global object Fluvie's WasmRuntime
+    drives (load / writeFile / exec / readFile), wrapping @ffmpeg/ffmpeg loaded as
+    ESM with the single-threaded core (no cross-origin-isolation headers needed).
+    Ship this in your own index.html, or self-host the ffmpeg files for offline use.
+  -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@ffmpeg/ffmpeg": "/ffmpeg/ffmpeg/index.js",
+        "@ffmpeg/util": "/ffmpeg/util/index.js"
+      }
+    }
+  </script>
+  <script type="module">
+    import { FFmpeg } from '@ffmpeg/ffmpeg';
+
+    async function toBlobURL(url, type) {
+      const buffer = await (await fetch(url)).arrayBuffer();
+      return URL.createObjectURL(new Blob([buffer], { type }));
+    }
+
+    const ffmpeg = new FFmpeg();
+    let loaded = null;
+    async function loadFfmpeg() {
+      await ffmpeg.load({
+        coreURL: await toBlobURL('/ffmpeg/core/ffmpeg-core.js', 'text/javascript'),
+        wasmURL: await toBlobURL('/ffmpeg/core/ffmpeg-core.wasm', 'application/wasm'),
+      });
+    }
+
+    globalThis.FluvieFfmpeg = {
+      load: () => (loaded ??= loadFfmpeg()),
+      writeFile: (name, bytes) => ffmpeg.writeFile(name, bytes),
+      exec: (args) => ffmpeg.exec(args),
+      readFile: (name) => ffmpeg.readFile(name),
+    };
+  </script>
+</head>
+<body>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

@@ -1,7 +1,38 @@
 import 'dart:convert';
 
+import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/hash/fnv1a.dart';
 import 'package:meta/meta.dart';
+
+/// Classifies a raw audio [source] string into a typed [AudioSource] by shape:
+///
+/// - an `http`/`https` URL becomes an [AudioSource.network],
+/// - a path starting with `/` becomes an [AudioSource.file],
+/// - anything else becomes a bundled [AudioSource.asset].
+///
+/// The single source of this rule, shared by `Audio.audioSource` and the encoder
+/// staging, so a track resolves to the same source (and the same
+/// [AudioSource.cacheKey], and thus the same sandbox file name) on every backend.
+/// Throws a
+/// [FluvieRenderException] when [source] is empty or a network URL has no host;
+/// [context] is appended to the empty-source message (for example a track name).
+AudioSource audioSourceFromString(String source, {String? context}) {
+  if (source.isEmpty) {
+    throw FluvieRenderException(
+      'Audio source is empty${context == null ? '' : ' $context'}. '
+      'Give Audio.music/Audio.sfx an asset key, file path, or URL.',
+    );
+  }
+  final uri = Uri.tryParse(source);
+  if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
+    if (uri.host.isEmpty) {
+      throw FluvieRenderException('Audio network URL "$source" has no host to fetch.');
+    }
+    return AudioSource.network(uri);
+  }
+  if (source.startsWith('/')) return AudioSource.file(source);
+  return AudioSource.asset(source);
+}
 
 /// One declared audio origin, identified before it is decoded.
 ///

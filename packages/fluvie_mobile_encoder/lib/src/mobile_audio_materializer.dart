@@ -20,10 +20,11 @@ abstract interface class MobileAudioMaterializer {
 /// The default [MobileAudioMaterializer]: reads bundled assets through an
 /// [AssetBundle] and passes absolute file paths straight through.
 ///
-/// A network URL throws a [FluvieMobileEncoderException]: this release does not
-/// fetch remote audio on-device, so bundle it as an asset or pre-download it to a
-/// file. Materialized assets are written under a cache directory (a fresh temp
-/// dir by default), named from a sanitized form of the asset key.
+/// A network URL throws a [FluvieMobileEncoderException]: this materializer does
+/// not fetch remote audio, so bundle it as an asset, pre-download it to a file,
+/// or use a `NetworkAudioMaterializer` with an allowlist. Materialized assets are
+/// written under a cache directory (a fresh temp dir by default), named from a
+/// sanitized form of the asset key.
 final class BundleAudioMaterializer implements MobileAudioMaterializer {
   /// Creates a materializer over [bundle] (defaults to [rootBundle]), writing
   /// materialized assets into [cacheDir] (a fresh temp dir when omitted).
@@ -39,8 +40,9 @@ final class BundleAudioMaterializer implements MobileAudioMaterializer {
   Future<String> materialize(String source) async {
     if (source.startsWith('http://') || source.startsWith('https://')) {
       throw FluvieMobileEncoderException(
-        'Network audio ("$source") is not supported on-device yet. Bundle it as '
-        'an asset or pass a local file path.',
+        'Network audio ("$source") is not fetched by BundleAudioMaterializer. '
+        'Bundle it as an asset, pass a local file path, or use a '
+        'NetworkAudioMaterializer with an allowlist.',
         code: 'unsupported_audio_source',
       );
     }

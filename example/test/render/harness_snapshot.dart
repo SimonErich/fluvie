@@ -18,7 +18,6 @@ import 'package:fluvie/src/elements/snapshot/runtime/snapshot_capture_scope.dart
 import 'package:fluvie/src/media/media_bytes_loader.dart';
 import 'package:fluvie/src/media/media_repository.dart';
 import 'package:fluvie/src/media/net/media_http_client.dart';
-import 'package:fluvie/src/media/net/network_allowlist.dart';
 import 'package:fluvie/src/media/runtime/image_resolver_scope.dart';
 
 /// Pre-resolves every declared [SnapshotSource] before frame 0 with the offline

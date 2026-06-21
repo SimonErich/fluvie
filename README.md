@@ -191,6 +191,43 @@ CI, on a server, or from an AI assistant.
 | [`fluvie_api`](packages/fluvie_api) | HTTP render server (local or S3) plus a web-safe client. | [![pub](https://img.shields.io/pub/v/fluvie_api.svg)](https://pub.dev/packages/fluvie_api) |
 | [`fluvie_mcp`](packages/fluvie_mcp) | MCP server. Let Claude (or any assistant) author and render for you. | [![pub](https://img.shields.io/pub/v/fluvie_mcp.svg)](https://pub.dev/packages/fluvie_mcp) |
 | [`fluvie_mobile_encoder`](packages/fluvie_mobile_encoder) | Render to MP4 fully on-device on Android and iOS, no FFmpeg. | [![pub](https://img.shields.io/pub/v/fluvie_mobile_encoder.svg)](https://pub.dev/packages/fluvie_mobile_encoder) |
+| [`fluvie_web_encoder`](packages/fluvie_web_encoder) | Render to MP4 fully in the browser with ffmpeg.wasm, opt-in. | [![pub](https://img.shields.io/pub/v/fluvie_web_encoder.svg)](https://pub.dev/packages/fluvie_web_encoder) |
+
+## Rendering modes by platform
+
+The same `Video` renders three ways. Pick by where the encode should run: on your
+own machine, on a server you call, or on the user's own device.
+
+| Platform | Local (FFmpeg binary) | Server API | On-device |
+| --- | --- | --- | --- |
+| Desktop (Linux/macOS/Windows) | ✅ [`fluvie_cli`](https://docs.fluvie.dev/getting-started/installation/) | ✅ [`fluvie_api` client](https://docs.fluvie.dev/guides/rendering-on-a-server/) | ✅ local FFmpeg (the CLI itself) |
+| Android | — | ✅ [`fluvie_api` client](https://docs.fluvie.dev/guides/rendering-on-a-server/) | ✅ [`fluvie_mobile_encoder`](https://docs.fluvie.dev/guides/on-device-mobile-rendering/) (native) |
+| iOS | — | ✅ [`fluvie_api` client](https://docs.fluvie.dev/guides/rendering-on-a-server/) | ✅ [`fluvie_mobile_encoder`](https://docs.fluvie.dev/guides/on-device-mobile-rendering/) (native) |
+| Web (browser) | — | ✅ [`fluvie_api` client](https://docs.fluvie.dev/guides/rendering-on-a-server/) | ✅ [`fluvie_web_encoder`](https://docs.fluvie.dev/guides/on-device-web-rendering/) (ffmpeg.wasm, opt-in) |
+
+- **Local** runs FFmpeg on your own machine. It is the full feature set (audio,
+  GIF, transparency) and the baseline for byte-identical output. This is the CLI
+  and CI path.
+- **Server API** keeps the client thin: the app sends a spec, a render server runs
+  FFmpeg, the app gets a file back. It works on every platform and keeps app
+  bundles small. Use it when you do not want to ship an encoder.
+- **On-device** renders without a server, so the video never leaves the device.
+  Mobile uses the platform's native encoder; web uses ffmpeg.wasm. The frames are
+  captured by Fluvie's own pipeline, so they match a desktop render; only the
+  encode edge differs (see each guide for the trade-offs).
+
+**Combining platforms.** One Flutter app can run on mobile **and** web and render
+on-device on both: choose the renderer per platform behind a conditional import
+(`fluvie_mobile_encoder` on mobile, `fluvie_web_encoder` on web), passing the same
+`Video`. On the web you trade bundle size for the ffmpeg.wasm payload; choose the
+Server API instead to keep the bundle light.
+
+**Audio works everywhere too.** Declare `Audio.music`/`Audio.sfx` once and it
+mixes on every renderer — looping beds, fades, trims, and multi-track `amix` —
+with audio opt-in on-device. The web has no local-file source (bundle as an asset
+or fetch from an allowlisted URL). See the full
+[audio support by platform](https://docs.fluvie.dev/guides/audio-and-captions/#audio-across-platforms)
+table.
 
 ## The ecosystem
 

@@ -21,7 +21,6 @@ import 'package:fluvie/src/core/contracts/beat_grid.dart';
 import 'package:fluvie/src/media/media_bytes_loader.dart';
 import 'package:fluvie/src/media/media_repository.dart';
 import 'package:fluvie/src/media/net/media_http_client.dart';
-import 'package:fluvie/src/media/net/network_allowlist.dart';
 import 'package:fluvie/src/rendering/capture/beat_grid_scope.dart';
 import 'package:fluvie_example/lessons/lessons.dart';
 

@@ -2,7 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:fluvie/fluvie.dart';
-import 'package:fluvie_web_encoder/src/offscreen_web_capture_host.dart';
+import 'package:fluvie_web_encoder/src/fluvie_web_stage.dart';
+import 'package:fluvie_web_encoder/src/web_audio_materializer.dart';
 import 'package:fluvie_web_encoder/src/web_capture_host.dart';
 import 'package:fluvie_web_encoder/src/web_video_encoder.dart';
 
@@ -18,17 +19,35 @@ typedef WebCaptureHostFactory = WebCaptureHost Function(Size size);
 /// transparent WebM via [Export]) render exactly as on the desktop, with the
 /// bytes never leaving the browser.
 ///
-/// Every dependency is injected so the orchestration is unit-testable: tests
-/// pass a tester-backed [WebCaptureHost] and a [WebVideoEncoder] over a fake
-/// runtime. This release renders video only (no audio mix yet).
+/// Audio is opt-in: pass `audio: true` to [render] to mix and mux a `Video`'s
+/// declared `Audio` tracks (asset or allowlisted network audio); by default a
+/// `Video` with audio renders silent and (unless silenced) warns through
+/// [onWarning]. Every dependency is injected so the orchestration is
+/// unit-testable: tests pass a tester-backed [WebCaptureHost], a [WebVideoEncoder]
+/// over a fake runtime, and a fake [WebAudioMaterializer].
 final class WebVideoRenderer {
   /// Creates a renderer; the defaults target a real browser.
-  WebVideoRenderer({WebVideoEncoder? encoder, WebCaptureHostFactory? hostFactory})
-    : _encoder = encoder ?? WebVideoEncoder(),
-      _hostFactory = hostFactory ?? _defaultHostFactory;
+  WebVideoRenderer({
+    WebVideoEncoder? encoder,
+    WebCaptureHostFactory? hostFactory,
+    WebAudioMaterializer? audioMaterializer,
+  }) : _hostFactory = hostFactory ?? _defaultHostFactory,
+       // coverage:ignore-line: the `?? _defaultEncoder()` default only runs in a browser.
+       _encoder = encoder ?? _defaultEncoder(),
+       // coverage:ignore-line: the default materializer reads rootBundle, only in a browser.
+       _audioMaterializer = audioMaterializer ?? BundleWebAudioMaterializer();
+
+  /// Sink for renderer warnings (for example a `Video` declares audio but
+  /// in-browser audio is off). Defaults to [debugPrint]; replace it to route
+  /// warnings (a test captures them here).
+  static void Function(String message) onWarning = _defaultWarn;
+
+  // coverage:ignore-line: the default sink runs only when onWarning is not overridden, which tests always do.
+  static void _defaultWarn(String message) => debugPrint('fluvie_web_encoder: $message');
 
   final WebVideoEncoder _encoder;
   final WebCaptureHostFactory _hostFactory;
+  final WebAudioMaterializer _audioMaterializer;
 
   /// Renders [composition] for [aspect] over [duration] and returns the MP4
   /// bytes (deliver them as a browser download or upload).
@@ -36,15 +55,23 @@ final class WebVideoRenderer {
   /// [longEdge] sets the canvas's longer side; [fps] and [duration] set the
   /// frame count (`duration * fps`, at least one). [export] selects GIF or
   /// transparent WebM instead of H.264; [posterFrame] adds a poster still;
-  /// [onProgress] observes the capture loop. Throws an [ArgumentError] for a
-  /// non-positive [duration] or [fps], and a `FluvieEncodeException` when
-  /// ffmpeg.wasm fails.
+  /// [onProgress] observes the capture loop.
+  ///
+  /// When [composition] is a `Video` with declared `Audio`, pass [audio] `true`
+  /// to mix and mux those tracks; left `false` the render is silent and, unless
+  /// [warnOnDroppedAudio] is `false`, [onWarning] is called once. Audio rides the
+  /// MP4 export only — a GIF or transparent [export] drops it (also warned).
+  ///
+  /// Throws an [ArgumentError] for a non-positive [duration] or [fps], and a
+  /// `FluvieEncodeException` when ffmpeg.wasm fails.
   Future<Uint8List> render({
     required Widget composition,
     required Aspect aspect,
     required Duration duration,
     int fps = 30,
     int longEdge = 1080,
+    bool audio = false,
+    bool warnOnDroppedAudio = true,
     String compositionKey = 'render',
     Export? export,
     int? posterFrame,
@@ -55,6 +82,15 @@ final class WebVideoRenderer {
     final sandbox = MemoryRenderSandbox();
     final host = _hostFactory(Size(size.width.toDouble(), size.height.toDouble()));
     try {
+      // Resolve audio inside the try so a throw here still disposes the host.
+      final mix = _audioFor(
+        composition,
+        encode: audio,
+        warn: warnOnDroppedAudio,
+        export: export,
+        fps: fps,
+        frameCount: frameCount,
+      );
       final manifest = await renderToSandbox(
         composition: composition,
         aspect: aspect,
@@ -69,11 +105,53 @@ final class WebVideoRenderer {
         export: export,
         posterFrame: posterFrame,
         onProgress: onProgress,
+        audioTracks: mix.tracks,
+        loadAudioBytes: _audioMaterializer.materialize,
+        audioMasterVolume: mix.masterVolume,
       );
       return _encoder.encode(manifest: manifest, sandbox: sandbox);
     } finally {
       await host.dispose();
     }
+  }
+
+  /// Resolves [composition]'s audio into resolved tracks to stage, or none.
+  ///
+  /// A non-`Video` or audio-less composition yields no tracks. With audio present
+  /// but [encode] `false`, it warns once (when [warn]) and yields none; a non-MP4
+  /// [export] cannot carry audio, so it warns and yields none too.
+  ({List<ResolvedAudioTrack> tracks, double masterVolume}) _audioFor(
+    Widget composition, {
+    required bool encode,
+    required bool warn,
+    required Export? export,
+    required int fps,
+    required int frameCount,
+  }) {
+    const none = (tracks: <ResolvedAudioTrack>[], masterVolume: 1.0);
+    if (composition is! Video) return none;
+    final mix = resolveAudioMix(video: composition, fps: fps, totalFrames: frameCount);
+    if (mix.isEmpty) return none;
+    if (!encode) {
+      if (warn) {
+        onWarning(
+          'This Video declares ${mix.tracks.length} audio track(s), but in-browser '
+          'audio is off, so the MP4 will be silent. Pass audio: true to encode it, '
+          'or warnOnDroppedAudio: false to silence this warning.',
+        );
+      }
+      return none;
+    }
+    if (export != null && export.mode != ExportMode.mp4) {
+      if (warn) {
+        onWarning(
+          'Audio is only muxed into MP4 renders; this ${export.mode.name} export '
+          'drops the ${mix.tracks.length} declared audio track(s).',
+        );
+      }
+      return none;
+    }
+    return (tracks: mix.tracks, masterVolume: mix.masterVolume);
   }
 
   static int _frameCountFor(Duration duration, int fps) {
@@ -85,6 +163,9 @@ final class WebVideoRenderer {
     return frames < 1 ? 1 : frames;
   }
 
-  // coverage:ignore-line: constructs the engine-backed host, exercised only in a browser.
-  static WebCaptureHost _defaultHostFactory(Size size) => OffscreenWebCaptureHost(size);
+  // coverage:ignore-line: binds to the live FluvieWebStage, exercised only in a browser.
+  static WebCaptureHost _defaultHostFactory(Size size) => FluvieWebStage.hostFor(size);
+
+  // coverage:ignore-line: constructs the default ffmpeg.wasm encoder, only valid in a browser.
+  static WebVideoEncoder _defaultEncoder() => WebVideoEncoder();
 }

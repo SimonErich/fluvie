@@ -33,7 +33,8 @@ struct AudioTrackSpec {
 ///
 /// Each track is inserted at its [AudioTrackSpec.delayMs] offset, trimmed to its
 /// `[trimStart, trimEnd]` window, and gained by `volume * masterVolume`; fade-in
-/// and fade-out become volume ramps. Looping is not yet honored on-device.
+/// and fade-out become volume ramps. A looping track tiles its trimmed range to
+/// fill the video duration, matching Android and the FFmpeg path.
 final class AudioComposer {
   private let videoURL: URL
   private let tracks: [AudioTrackSpec]
@@ -63,9 +64,10 @@ final class AudioComposer {
       at: .zero
     )
 
+    let durationSeconds = CMTimeGetSeconds(videoAsset.duration)
     var parameters: [AVMutableAudioMixInputParameters] = []
     for spec in tracks {
-      if let params = try insert(spec, into: composition) {
+      if let params = try insert(spec, into: composition, fillTo: durationSeconds) {
         parameters.append(params)
       }
     }
@@ -94,7 +96,8 @@ final class AudioComposer {
 
   private func insert(
     _ spec: AudioTrackSpec,
-    into composition: AVMutableComposition
+    into composition: AVMutableComposition,
+    fillTo durationSeconds: Double
   ) throws -> AVMutableAudioMixInputParameters? {
     let asset = AVURLAsset(url: URL(fileURLWithPath: spec.path))
     guard
@@ -113,7 +116,11 @@ final class AudioComposer {
       duration: CMTime(seconds: max(0, end - start), preferredTimescale: scale)
     )
     let at = CMTime(value: CMTimeValue(spec.delayMs), timescale: 1000)
-    try compositionAudio.insertTimeRange(sourceRange, of: sourceAudio, at: at)
+    if spec.loop && sourceRange.duration.seconds > 0 {
+      try tile(sourceRange, of: sourceAudio, into: compositionAudio, from: at, fillTo: durationSeconds)
+    } else {
+      try compositionAudio.insertTimeRange(sourceRange, of: sourceAudio, at: at)
+    }
 
     let gain = spec.volume * masterVolume
     let params = AVMutableAudioMixInputParameters(track: compositionAudio)
@@ -134,5 +141,34 @@ final class AudioComposer {
       )
     }
     return params
+  }
+
+  /// Repeats [sourceRange] back to back into [track] from [start] until the
+  /// composition reaches [durationSeconds], clamping the final repeat. This is
+  /// how a looping bed fills a video longer than the source.
+  private func tile(
+    _ sourceRange: CMTimeRange,
+    of sourceAudio: AVAssetTrack,
+    into track: AVMutableCompositionTrack,
+    from start: CMTime,
+    fillTo durationSeconds: Double
+  ) throws {
+    let end = CMTime(seconds: durationSeconds, preferredTimescale: 44100)
+    let piece = sourceRange.duration
+    // Skip a final sliver shorter than one sample: inserting a sub-sample range
+    // is a no-op at best and an AVFoundation glitch at worst.
+    let minimal = CMTime(value: 1, timescale: 44100)
+    var cursor = start
+    while cursor < end {
+      let remaining = end - cursor
+      if remaining < minimal { break }
+      let thisDuration = remaining < piece ? remaining : piece
+      try track.insertTimeRange(
+        CMTimeRange(start: sourceRange.start, duration: thisDuration),
+        of: sourceAudio,
+        at: cursor
+      )
+      cursor = cursor + thisDuration
+    }
   }
 }

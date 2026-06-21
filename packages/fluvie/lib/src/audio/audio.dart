@@ -83,23 +83,8 @@ final class Audio {
   /// Throws a [FluvieRenderException] naming the track when [source] is empty
   /// or a network URL has no host — the encoder must never be handed a blank or
   /// hostless `-i`.
-  AudioSource get audioSource {
-    if (source.isEmpty) {
-      throw FluvieRenderException(
-        'Audio source is empty${track == null ? '' : " on track '$track'"}. '
-        'Give Audio.music/Audio.sfx an asset key, file path, or URL.',
-      );
-    }
-    final uri = Uri.tryParse(source);
-    if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
-      if (uri.host.isEmpty) {
-        throw FluvieRenderException('Audio network URL "$source" has no host to fetch.');
-      }
-      return AudioSource.network(uri);
-    }
-    if (source.startsWith('/')) return AudioSource.file(source);
-    return AudioSource.asset(source);
-  }
+  AudioSource get audioSource =>
+      audioSourceFromString(source, context: track == null ? null : "on track '$track'");
 
   @override
   String toString() =>

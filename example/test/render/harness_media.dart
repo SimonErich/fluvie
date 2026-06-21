@@ -16,7 +16,6 @@ import 'package:fluvie/src/core/media/snapshot_source.dart';
 import 'package:fluvie/src/media/media_bytes_loader.dart';
 import 'package:fluvie/src/media/media_repository.dart';
 import 'package:fluvie/src/media/net/media_http_client.dart';
-import 'package:fluvie/src/media/net/network_allowlist.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_frame_extraction_service.dart';
 import 'package:fluvie/src/rendering/encoding/video_probe_service.dart';
 import 'package:fluvie_example/lessons/lessons.dart';

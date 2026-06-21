@@ -294,7 +294,7 @@ This is the example gallery the page must include. See the
   any frame. Reduced motion: tiles stay on posters, no autoplay and no wave, and
   each tile has an explicit play control for anyone who wants the clip.
 
-### 7. The crew: seven packages
+### 7. The crew: eight packages
 
 This is the ecosystem overview the page must include. See the
 [ecosystem content below](#the-ecosystem-the-full-content).
@@ -367,6 +367,29 @@ This is the open-source section the page must include. See the
   button. The CTAs read distinctly in text, not by position. Reduced motion:
   instant panel swap, static doors. The "same frames" reassurance is always present
   as text.
+- **Rendering modes by platform (the matrix):** Below the door switcher, a compact
+  table answers "where does the encode run on my platform?" Three modes (Local
+  FFmpeg, Server API, On-device) across four platforms (Desktop, Android, iOS,
+  Web). Every supported cell links to its setup guide. The same `Video` feeds all
+  three; only the encode edge changes.
+
+  | Platform | Local (FFmpeg) | Server API | On-device |
+  | --- | --- | --- | --- |
+  | Desktop | yes, fluvie_cli (installation) | yes, fluvie_api client (rendering-on-a-server) | yes, local FFmpeg (the CLI) |
+  | Android | — | yes, fluvie_api client (rendering-on-a-server) | yes, fluvie_mobile_encoder (on-device-mobile-rendering) |
+  | iOS | — | yes, fluvie_api client (rendering-on-a-server) | yes, fluvie_mobile_encoder (on-device-mobile-rendering) |
+  | Web | — | yes, fluvie_api client (rendering-on-a-server) | yes, fluvie_web_encoder, ffmpeg.wasm, opt-in (on-device-web-rendering) |
+
+  A one-line note under the table covers combining platforms: one app on mobile and
+  web can render on-device on both by picking the renderer per platform behind a
+  conditional import, same `Video`. On the web you trade bundle size for the
+  ffmpeg.wasm payload, so choose the Server API to keep the bundle light.
+
+- **Audio support by platform:** A second line notes that declared audio
+  (`Audio.music`/`Audio.sfx`) mixes on every renderer — looping beds, fades,
+  trims, multi-track — with audio opt-in on-device and no local-file source on the
+  web. Link to the canonical table at the audio guide
+  (audio-and-captions, "Audio across platforms"). Do not re-tabulate it here.
 
 ### 10. Or just say what you want (AI + MCP)
 
@@ -583,7 +606,7 @@ the clips are generated (see [gallery assets](#gallery-assets-format-and-source)
 ## The ecosystem, the full content
 
 Section 7. Render as the shot-list board. `fluvie` leads with "Start here". Most
-people only need `fluvie`. All seven are on pub.dev. All seven are MIT.
+people only need `fluvie`. All eight are on pub.dev. All eight are MIT.
 
 | Package | Role | One line | Best path |
 | --- | --- | --- | --- |
@@ -594,6 +617,7 @@ people only need `fluvie`. All seven are on pub.dev. All seven are MIT.
 | **fluvie_api** | the render server | An HTTP server plus a web-safe client. Render from anywhere, host it yourself. | pub.dev/packages/fluvie_api, then rendering-on-a-server |
 | **fluvie_mcp** | the assistant's hands | An MCP server so your AI can write and render videos for you, end to end. | pub.dev/packages/fluvie_mcp, then mcp.fluvie.dev |
 | **fluvie_mobile_encoder** | the on-device camera operator | Render to MP4 on the phone itself, no FFmpeg and nothing leaves the device. | pub.dev/packages/fluvie_mobile_encoder, then on-device-mobile-rendering |
+| **fluvie_web_encoder** | the in-browser camera operator | Render to MP4 in the browser with ffmpeg.wasm, opt-in, nothing leaves the page. | pub.dev/packages/fluvie_web_encoder, then on-device-web-rendering |
 
 ---
 

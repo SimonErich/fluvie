@@ -1,4 +1,5 @@
 import 'package:fluvie/src/audio/encoding/audio_filter_graph.dart';
+import 'package:fluvie/src/audio/encoding/resolved_audio_track.dart';
 import 'package:fluvie/src/rendering/encoding/audio_graph_nodes.dart';
 import 'package:meta/meta.dart';
 
@@ -29,7 +30,28 @@ final class AudioTrackNode implements FfmpegAudioNode {
     this.fadeInSeconds,
     this.fadeOutSeconds,
     this.fadeOutStartSeconds = 0,
+    this.loop = false,
   });
+
+  /// Builds the FFmpeg node for an encoder-neutral [resolved] track, decoding the
+  /// sandbox-relative [name].
+  ///
+  /// The single mapping from a [ResolvedAudioTrack] to its FFmpeg node, so the
+  /// desktop, server, and in-browser mixes share one definition (mirrors
+  /// `MobileAudioTrack.fromResolved`). Carries [ResolvedAudioTrack.loop] through,
+  /// so a looping bed fills the render window.
+  factory AudioTrackNode.fromResolved(ResolvedAudioTrack resolved, {required String name}) =>
+      AudioTrackNode(
+        name: name,
+        delayMs: resolved.delayMs,
+        volume: resolved.volume,
+        trimStartSeconds: resolved.trimStartSeconds,
+        trimEndSeconds: resolved.trimEndSeconds,
+        fadeInSeconds: resolved.fadeInSeconds,
+        fadeOutSeconds: resolved.fadeOutSeconds,
+        fadeOutStartSeconds: resolved.fadeOutStartSeconds,
+        loop: resolved.loop,
+      );
 
   /// The sandbox-relative materialized source file this track decodes from.
   final String name;
@@ -55,8 +77,26 @@ final class AudioTrackNode implements FfmpegAudioNode {
   /// When the fade-out begins, in seconds (only used with [fadeOutSeconds]).
   final double fadeOutStartSeconds;
 
+  /// Whether the track loops to fill the render window (a music bed).
+  ///
+  /// With no trim the whole input loops at the demux level (`-stream_loop -1`).
+  /// With a trim the trimmed window loops in the filter graph (`aloop`), so the
+  /// repeated segment is the trim and not the whole file — otherwise a trim would
+  /// clip the looped stream to one window and `-shortest` would truncate the
+  /// video. Either way the encode's `-shortest` bounds the loop to the video.
+  final bool loop;
+
+  /// Whether a trim window is set (either bound).
+  bool get _hasTrim => trimStartSeconds != null || trimEndSeconds != null;
+
   @override
-  List<String> inputArgs() => ['-i', validateAudioName(name)];
+  List<String> inputArgs() => [
+    // Only an untrimmed loop repeats the whole demuxed input here; a trimmed loop
+    // repeats the trimmed window in-filter via [filterChain]'s `aloop`.
+    if (loop && !_hasTrim) ...['-stream_loop', '-1'],
+    '-i',
+    validateAudioName(name),
+  ];
 
   @override
   String mapSpecifier(int inputIndex) => '$inputIndex:a';
@@ -65,13 +105,15 @@ final class AudioTrackNode implements FfmpegAudioNode {
   /// [inputIndex]'s audio stream and producing the named [label] pad.
   ///
   /// The order is fixed for determinism: optional `atrim`, then the mandatory
-  /// `asetpts=PTS-STARTPTS` (so a trim restarts at zero), then optional
-  /// `adelay`, then `volume`, then optional `afade` in/out.
+  /// `asetpts=PTS-STARTPTS` (so a trim restarts at zero), then `aloop` for a
+  /// trimmed loop, then optional `adelay`, then `volume`, then optional `afade`
+  /// in/out.
   @override
   String filterChain({required int inputIndex, required String label}) {
     final filters = <String>[
-      if (trimStartSeconds != null || trimEndSeconds != null) _atrim(),
+      if (_hasTrim) _atrim(),
       'asetpts=PTS-STARTPTS',
+      if (loop && _hasTrim) 'aloop=loop=-1:size=$_loopSampleBudget',
       if (delayMs > 0) 'adelay=$delayMs|$delayMs',
       'volume=${formatFilterNumber(volume)}',
       if (fadeInSeconds != null) 'afade=t=in:st=0:d=${formatFilterNumber(fadeInSeconds!)}',
@@ -79,6 +121,11 @@ final class AudioTrackNode implements FfmpegAudioNode {
     ];
     return '[$inputIndex:a]${filters.join(',')}[$label]';
   }
+
+  /// The `aloop` sample cap for a trimmed loop. `aloop` only buffers the samples
+  /// it actually receives (the trimmed window), so this is a ceiling, not an
+  /// allocation; `1 << 30` samples is ~6 hours at 48 kHz, beyond any real trim.
+  static const int _loopSampleBudget = 1073741824;
 
   String _fadeOut() {
     final start = formatFilterNumber(fadeOutStartSeconds);

@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
+import 'package:fluvie/src/audio/encoding/resolved_audio_track.dart';
 import 'package:fluvie/src/composition/runtime/aspect_scope.dart';
 import 'package:fluvie/src/core/aspect.dart';
 import 'package:fluvie/src/core/export.dart';
+import 'package:fluvie/src/rendering/audio_sandbox_staging.dart';
 import 'package:fluvie/src/rendering/capture/capture_shell.dart';
 import 'package:fluvie/src/rendering/capture/frame_capture_service.dart';
 import 'package:fluvie/src/rendering/capture/render_manifest.dart';
@@ -27,11 +29,17 @@ typedef SandboxFramePump = Future<void> Function();
 /// It mirrors the file-based `render`: it re-derives the canvas from
 /// `aspect.sizeFor(longEdge)`, builds the production [buildCaptureShell], pumps
 /// it through [pumpWidget] / [pumpFrame], runs the shared [runFrameCaptureLoop]
-/// into [sandbox]'s frames file, then writes `manifest.json` there. It is
-/// **video only** (no media or audio staging yet), so the encode plan carries
-/// `-an`. The caller (the web encoder) reads [sandbox] to feed ffmpeg.wasm and
-/// returns the encoded bytes. Rendering the same composition twice produces
-/// byte-identical frames — the same determinism contract as the file path.
+/// into [sandbox]'s frames file, then writes `manifest.json` there. The caller
+/// (the web encoder) reads [sandbox] to feed ffmpeg.wasm and returns the encoded
+/// bytes. Rendering the same composition twice produces byte-identical frames —
+/// the same determinism contract as the file path.
+///
+/// Pass [audioTracks] (resolved by `resolveAudioMix`) plus a [loadAudioBytes]
+/// loader to mix audio: each track is staged into [sandbox] by
+/// [stageResolvedAudioToSandbox] and its `amix` plan flows into the encode args,
+/// scaled by [audioMasterVolume]. With no tracks (or no loader) the plan carries
+/// `-an`, byte-identical to a video-only render. Audio rides the MP4 export only;
+/// the other export modes ignore it.
 Future<RenderManifest> renderToSandbox({
   required Widget composition,
   required Aspect aspect,
@@ -47,7 +55,17 @@ Future<RenderManifest> renderToSandbox({
   int? posterFrame,
   ProgressCallback? onProgress,
   VideoEncoderService encoder = const VideoEncoderService(),
+  List<ResolvedAudioTrack> audioTracks = const [],
+  AudioByteLoader? loadAudioBytes,
+  double audioMasterVolume = 1,
 }) async {
+  if (audioTracks.isNotEmpty && loadAudioBytes == null) {
+    throw ArgumentError.value(
+      audioTracks,
+      'audioTracks',
+      'loadAudioBytes is required to stage audio; pass one or leave audioTracks empty',
+    );
+  }
   final size = aspect.sizeFor(longEdge);
   final config = RenderConfig(
     width: size.width,
@@ -88,6 +106,15 @@ Future<RenderManifest> renderToSandbox({
     await sink.close();
   }
 
+  final audioPlan = (audioTracks.isEmpty || loadAudioBytes == null)
+      ? null
+      : await stageResolvedAudioToSandbox(
+          tracks: audioTracks,
+          sandbox: sandbox,
+          loadBytes: loadAudioBytes,
+          masterVolume: audioMasterVolume,
+        );
+
   final manifest = RenderManifest(
     width: config.width,
     height: config.height,
@@ -96,7 +123,12 @@ Future<RenderManifest> renderToSandbox({
     framesFileName: VideoEncoderService.framesFileName,
     outputFileName: encoder.outputNameFor(export),
     renderDigest: digest,
-    ffmpegArgs: encoder.planEncodeArgs(config, export: export),
+    ffmpegArgs: encoder.planEncodeArgs(
+      config,
+      audio: audioPlan?.tracks ?? const [],
+      amix: audioPlan?.amix,
+      export: export,
+    ),
     posterFileName: posterFrame == null ? null : VideoEncoderService.posterFileName,
     posterArgs: posterFrame == null
         ? null

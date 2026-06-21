@@ -25,7 +25,12 @@ line means it can still change before `1.0`, so pin a version.
   and VTT captions.
 - `resolveAudioMix`: the encoder-neutral `ResolvedAudioMix`/`ResolvedAudioTrack`
   view of a `Video`'s audio (the same timing math the FFmpeg mix uses) for custom
-  encoders such as `fluvie_mobile_encoder`.
+  encoders such as `fluvie_mobile_encoder` and `fluvie_web_encoder`.
+- Looping music beds in the FFmpeg path (`-stream_loop`), so a short bed fills the
+  whole video on the desktop, server, and web. The `dart:io`-free
+  `renderToSandbox` accepts audio through an injected `AudioByteLoader` and
+  `stageResolvedAudioToSandbox`, the seam the in-browser encoder mixes through;
+  `NetworkAllowlist` is now exported for on-device network audio.
 - The power layer: `FluvieTheme`, `Adaptive` and multi-aspect render, templates,
   the `FrameBuilder` escape hatch, and `Export.*` modes.
 - Determinism throughout: identical input renders byte-identical frames, with

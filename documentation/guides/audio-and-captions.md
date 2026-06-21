@@ -237,6 +237,30 @@ the pre-pass, but the trigger that reads it does not drive the render yet. Reach
 for the reactive presets above for motion that follows the music today, and treat
 beat-synced cuts as forthcoming.
 
+## Audio across platforms
+
+The same `Audio` you declare works on every renderer. The mix math
+(`resolveAudioMix`) is shared, so delay, volume, trim, and fades resolve
+identically; only the encoder differs. This is the canonical support table.
+
+| Platform | Asset | Local file | Network (allowlist) | Looping beds | SFX / multi-track | Fades / trim / volume | Codec |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [Desktop / Server](rendering-on-a-server.md) (FFmpeg) | yes | yes | yes | yes | yes | yes | AAC 192k / MP4 |
+| [Android](on-device-mobile-rendering.md#audio) | yes | yes | opt-in | yes | yes | yes | AAC / MP4 |
+| [iOS](on-device-mobile-rendering.md#audio) | yes | yes | opt-in | yes | yes | yes | AAC / MP4 |
+| [Web](on-device-web-rendering.md#audio) (ffmpeg.wasm) | yes | no | yes | yes | yes | yes | AAC 192k / MP4 |
+
+Notes:
+
+- Audio rides the MP4 export only. GIF, transparent WebM, and image sequences
+  carry no sound.
+- "Network (allowlist)" needs an explicit allowlist of hosts. On-device it is
+  opt-in: the web renderer takes a `WebAudioMaterializer`, the mobile renderer a
+  `NetworkAudioMaterializer`. Browser fetches are also subject to CORS.
+- The web has no file system, so a local file path is not a valid source there.
+  Bundle the audio as an asset or serve it over an allowlisted URL.
+- Audio bytes are per-machine on every backend (the frames stay byte-identical).
+
 ## Where to next
 
 - [Timing and triggers](timing-and-triggers.md): the trigger vocabulary the

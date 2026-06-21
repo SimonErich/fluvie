@@ -17,7 +17,6 @@ import 'package:fluvie/src/core/audio/dsp/wav_reader.dart';
 import 'package:fluvie/src/media/media_bytes_loader.dart';
 import 'package:fluvie/src/media/media_repository.dart';
 import 'package:fluvie/src/media/net/media_http_client.dart';
-import 'package:fluvie/src/media/net/network_allowlist.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_frame_extraction_service.dart';
 import 'package:fluvie/src/rendering/encoding/video_probe_service.dart';
 
