@@ -12,7 +12,7 @@ parts that need your accounts and credentials.
 | push to `main` | `ci.yaml` | format, analyze, lint, tests, coverage, goldens, pana, render smoke |
 | push to `main` (docs change) | `docs.yml` | builds the Astro site and deploys it to GitHub Pages |
 | tag `fluvie-v0.1.0` (per package) | `publish.yml` | publishes that package to pub.dev via OIDC |
-| tag `v0.1.0` (umbrella) | `images.yml` | builds and pushes the service images to ghcr.io |
+| tag `v0.1.0` (umbrella) | `images.yml` | builds and pushes the service images to ghcr.io, then pings the Dokploy redeploy webhooks |
 
 ## 1. The hosting map
 
@@ -75,6 +75,22 @@ this repo's Dockerfiles under `deploy/` (build context is the repo root). Set th
 domain in the Dokploy **Domains** tab and let Traefik handle TLS. Do not publish
 ports 80/443 yourself.
 
+In the **Domains** tab, set **Container Port** to the port the service listens on
+*inside* the container. Traefik connects over the Docker network, so this is the
+container's port, not a host port. The local `docker-compose.yml` host ports
+(8081, 8082, 8084) do not apply here:
+
+| App | Container port |
+| --- | --- |
+| api.fluvie.dev | `8080` |
+| mcp.fluvie.dev | `8080` |
+| demo.fluvie.dev | `80` |
+| fluvie.dev | `80` |
+
+The render API and the MCP server listen on `8080` (override with `PORT`); the
+demo and landing are static sites behind nginx on `80`. Pointing a domain at the
+wrong port is what yields a Bad Gateway.
+
 - **api.fluvie.dev** (`fluvie-api`, `deploy/api.Dockerfile`): set `API_TOKEN` and
   `CLEANUP_TOKEN`. For server-side AI also set `ANTHROPIC_API_KEY` (or another
   provider key); leave it unset to keep prompt-based renders off. Add a volume for
@@ -87,6 +103,27 @@ ports 80/443 yourself.
   baked in at build time. The published image points at `https://api.fluvie.dev`;
   to target another API, rebuild with `--build-arg FLUVIE_API_URL=...`.
 - **fluvie.dev** (`fluvie-web`, `deploy/landing.Dockerfile`): static, no config.
+
+### Auto-redeploy on a new image
+
+After `images.yml` pushes the images, it pings a Dokploy deploy webhook for each
+service so api, mcp, and demo redeploy themselves. To enable it:
+
+1. In Dokploy, open each app and copy its **Webhook URL** (the deploy/auto-deploy
+   webhook under the app's settings).
+2. Point each app's image at a moving tag so the redeploy pulls the new build:
+   `ghcr.io/simonerich/fluvie-api:latest` (or `:0.1`). A pinned `:0.1.0` would
+   just re-pull the old image.
+3. Store the URLs as repo secrets (Settings -> Secrets and variables -> Actions),
+   or with the CLI:
+   ```sh
+   gh secret set DOKPLOY_WEBHOOK_API  --body 'https://<dokploy-host>/<webhook-path>'
+   gh secret set DOKPLOY_WEBHOOK_MCP  --body 'https://<dokploy-host>/<webhook-path>'
+   gh secret set DOKPLOY_WEBHOOK_DEMO --body 'https://<dokploy-host>/<webhook-path>'
+   ```
+
+A secret left unset just skips that service, so the release never fails on a
+missing webhook. (`fluvie.dev` uses the separate `notify-website` flow.)
 
 ### Keeping the public demo cheap and safe
 

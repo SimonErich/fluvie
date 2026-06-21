@@ -53,3 +53,47 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # After every image is pushed, ping each Dokploy app's deploy webhook so the
+  # service pulls the new image and restarts. Store each app's webhook URL as a
+  # repo secret (Settings -> Secrets and variables -> Actions); a missing secret
+  # skips that service, so this never fails the release. For the redeploy to pick
+  # up the new build, point each Dokploy app at a moving tag (`:latest` or
+  # `:0.1`), not a pinned `:0.1.0`.
+  redeploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Redeploy api.fluvie.dev
+        env:
+          HOOK: ${{ secrets.DOKPLOY_WEBHOOK_API }}
+        run: |
+          set -euo pipefail
+          if [ -z "${HOOK}" ]; then
+            echo "DOKPLOY_WEBHOOK_API not set; skipping."
+            exit 0
+          fi
+          curl -fsS -X POST "${HOOK}"
+          echo "Pinged the api redeploy webhook."
+      - name: Redeploy mcp.fluvie.dev
+        env:
+          HOOK: ${{ secrets.DOKPLOY_WEBHOOK_MCP }}
+        run: |
+          set -euo pipefail
+          if [ -z "${HOOK}" ]; then
+            echo "DOKPLOY_WEBHOOK_MCP not set; skipping."
+            exit 0
+          fi
+          curl -fsS -X POST "${HOOK}"
+          echo "Pinged the mcp redeploy webhook."
+      - name: Redeploy demo.fluvie.dev
+        env:
+          HOOK: ${{ secrets.DOKPLOY_WEBHOOK_DEMO }}
+        run: |
+          set -euo pipefail
+          if [ -z "${HOOK}" ]; then
+            echo "DOKPLOY_WEBHOOK_DEMO not set; skipping."
+            exit 0
+          fi
+          curl -fsS -X POST "${HOOK}"
+          echo "Pinged the demo redeploy webhook."
