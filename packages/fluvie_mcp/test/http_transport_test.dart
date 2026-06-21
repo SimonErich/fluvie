@@ -67,5 +67,29 @@ void main() {
       )(Request('GET', Uri.parse('http://localhost/healthz')));
       expect(response.statusCode, 200);
     });
+
+    test('serves an instruction page on / listing the tools and the endpoint', () async {
+      final response = await mcpHttpHandler(
+        _server(),
+      )(Request('GET', Uri.parse('http://localhost/')));
+      expect(response.statusCode, 200);
+      expect(response.headers['content-type'], contains('text/html'));
+      final body = await response.readAsString();
+      expect(body, contains('/mcp'));
+      expect(body, contains('echo'), reason: 'lists the registered tools');
+      expect(body, contains('docs.fluvie.dev'));
+    });
+
+    test('the instruction page notes the bearer token only when one is set', () async {
+      final open = await mcpHttpHandler(
+        _server(),
+      )(Request('GET', Uri.parse('http://localhost/')));
+      expect(await open.readAsString(), isNot(contains('Authorization: Bearer')));
+
+      final guarded = await mcpHttpHandler(_server(), token: 'secret')(
+        Request('GET', Uri.parse('http://localhost/')),
+      );
+      expect(await guarded.readAsString(), contains('Authorization: Bearer'));
+    });
   });
 }

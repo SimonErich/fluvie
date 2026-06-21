@@ -3,6 +3,14 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] - 2026-06-21
+
+### Added
+
+- An instruction page at `GET /` on the HTTP transport: what the server does, how
+  to point an MCP client at `/mcp`, whether a bearer token is required, and the
+  tools it exposes.
+
 ## [0.1.0] - 2026-06-20
 
 The first public release.
@@ -17,4 +25,5 @@ The first public release.
 - Rendering is delegated to a running Fluvie render API, so the package has no
   Flutter or FFmpeg dependency and builds into a tiny image.
 
+[0.1.1]: https://github.com/SimonErich/fluvie/releases/tag/v0.1.1
 [0.1.0]: https://github.com/SimonErich/fluvie/releases/tag/v0.1.0

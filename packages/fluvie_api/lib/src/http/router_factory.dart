@@ -3,6 +3,7 @@ import 'package:fluvie_api/src/http/handlers/health_handler.dart';
 import 'package:fluvie_api/src/http/handlers/job_handler.dart';
 import 'package:fluvie_api/src/http/handlers/maintenance_handler.dart';
 import 'package:fluvie_api/src/http/handlers/render_handler.dart';
+import 'package:fluvie_api/src/http/handlers/root_handler.dart';
 import 'package:fluvie_api/src/http/handlers/schema_handler.dart';
 import 'package:fluvie_api/src/http/middleware/auth_middleware.dart';
 import 'package:fluvie_api/src/http/server_dependencies.dart';
@@ -36,11 +37,13 @@ Router buildRouter(ServerDependencies deps) {
   final maintenance = MaintenanceHandler(deps.retention);
   final health = HealthHandler(deps.fileStore);
   final schema = SchemaHandler(deps.schemaJson);
+  const root = RootHandler();
 
   final api = bearerAuth(deps.config.apiToken);
   final cleanup = bearerAuth(deps.config.cleanupToken);
 
   return Router()
+    ..get('/', root.index)
     ..post('/v1/renders', _guard(api, render.create))
     ..get('/v1/renders/<id>', _guard(api, (request) => job.get(request, _param(request, 'id'))))
     ..get(

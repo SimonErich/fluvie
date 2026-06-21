@@ -327,6 +327,18 @@ void main() {
     });
   });
 
+  group('GET /', () {
+    test('serves an open HTML help page pointing to the docs, repo, and API', () async {
+      final response = await send(app(), 'GET', '/');
+      expect(response.statusCode, 200);
+      expect(response.headers['content-type'], contains('text/html'));
+      final body = await response.readAsString();
+      expect(body, contains('/v1/renders'));
+      expect(body, contains('docs.fluvie.dev'));
+      expect(body, contains('github.com/SimonErich/fluvie'));
+    });
+  });
+
   group('open endpoints', () {
     test('schema, healthz, readyz', () async {
       final handler = app();
