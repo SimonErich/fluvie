@@ -1,24 +1,21 @@
-import 'dart:io';
-
 import 'package:fluvie/src/core/export.dart';
 import 'package:fluvie/src/rendering/encoding/audio_graph_nodes.dart';
 import 'package:fluvie/src/rendering/encoding/export_args.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_args.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_filter_graph_builder.dart';
-import 'package:fluvie/src/rendering/encoding/ffmpeg_provider.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
 
-/// Plans and runs the encode of a captured frames file to the requested
-/// [Export] mode.
+/// Plans the encode of a captured frames file to the requested [Export] mode.
 ///
-/// [planEncodeArgs] is **pure**: the capture harness calls it to
-/// embed the complete argument array in the render manifest, and the CLI
-/// later spawns ffmpeg with exactly that plan — one source of ffmpeg-arg
-/// truth. [encode] is the in-process variant: the same plan handed to an
-/// [FfmpegProvider]. With an `export` mode the plan dispatches to GIF, image
-/// sequence, or transparent WebM; `null` and
+/// This is **pure and `dart:io`-free** so it runs on every platform (the web
+/// path reuses the same plan). [planEncodeArgs] embeds the complete argument
+/// array in the render manifest, and the CLI later spawns ffmpeg with exactly
+/// that plan — one source of ffmpeg-arg truth. With an `export` mode the plan
+/// dispatches to GIF, image sequence, or transparent WebM; `null` and
 /// [Export.mp4] keep the byte-identical H.264 path. A `posterFrame` adds a
-/// SECOND poster-extract invocation via [planPosterArgs].
+/// SECOND poster-extract invocation via [planPosterArgs]. The in-process
+/// `encode` convenience that runs a plan through an `FfmpegProvider` lives in
+/// the `dart:io` extension `VideoEncoderServiceIo`.
 final class VideoEncoderService {
   /// Creates the service; it is stateless and const.
   const VideoEncoderService();
@@ -113,25 +110,4 @@ final class VideoEncoderService {
       ..setPosterOutput(name: posterFileName, frameIndex: posterFrame, fps: config.fps);
     return builder.build();
   }
-
-  /// Encodes the frames already captured into [sandbox] by running
-  /// [planEncodeArgs] through [provider].
-  ///
-  /// The [audio] lanes and their optional [amix] mixdown thread straight into
-  /// [planEncodeArgs], so a real (filter-chained) track encodes through
-  /// `-filter_complex` instead of tripping the unmixed-track guard. With an
-  /// [export] the plan dispatches to that mode.
-  ///
-  /// Failures surface as `FluvieEncodeException` from the provider.
-  Future<void> encode({
-    required RenderConfig config,
-    required Directory sandbox,
-    required FfmpegProvider provider,
-    List<FfmpegAudioNode> audio = const [],
-    FfmpegAudioMix? amix,
-    Export? export,
-  }) => provider.encode(
-    args: planEncodeArgs(config, audio: audio, amix: amix, export: export),
-    sandbox: sandbox,
-  );
 }

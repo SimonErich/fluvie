@@ -190,6 +190,7 @@ CI, on a server, or from an AI assistant.
 | [`fluvie_ai`](packages/fluvie_ai) | Author a video from a prompt. A model writes a deterministic spec. | [![pub](https://img.shields.io/pub/v/fluvie_ai.svg)](https://pub.dev/packages/fluvie_ai) |
 | [`fluvie_api`](packages/fluvie_api) | HTTP render server (local or S3) plus a web-safe client. | [![pub](https://img.shields.io/pub/v/fluvie_api.svg)](https://pub.dev/packages/fluvie_api) |
 | [`fluvie_mcp`](packages/fluvie_mcp) | MCP server. Let Claude (or any assistant) author and render for you. | [![pub](https://img.shields.io/pub/v/fluvie_mcp.svg)](https://pub.dev/packages/fluvie_mcp) |
+| [`fluvie_mobile_encoder`](packages/fluvie_mobile_encoder) | Render to MP4 fully on-device on Android and iOS, no FFmpeg. | [![pub](https://img.shields.io/pub/v/fluvie_mobile_encoder.svg)](https://pub.dev/packages/fluvie_mobile_encoder) |
 
 ## The ecosystem
 

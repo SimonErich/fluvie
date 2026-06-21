@@ -132,9 +132,12 @@ The example app renders either way:
   `--dart-define=FLUVIE_API_TOKEN=...`). The app calls `fluvie_api` and shows the
   download URL.
 
-On-device rendering on web and mobile is not supported yet: frame capture writes
-through `dart:io`, there is no live-app frame driver, and the in-browser ffmpeg
-encoder is not wired. So the hosted web example renders through `fluvie_api`.
+On-device rendering on mobile is supported by
+[fluvie_mobile_encoder](on-device-mobile-rendering.md): it drives Fluvie's capture
+loop in the running app and encodes with the platform's native hardware encoder,
+so nothing leaves the device. On the web it is not wired yet (the in-browser
+ffmpeg encoder is unconnected), so the hosted web example renders through
+`fluvie_api`.
 
 ## Where to next
 

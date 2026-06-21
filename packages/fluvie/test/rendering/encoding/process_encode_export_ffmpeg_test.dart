@@ -12,6 +12,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/core/errors/fluvie_encode_exception.dart';
 import 'package:fluvie/src/core/export.dart';
+import 'package:fluvie/src/rendering/encoding/video_encoder_io.dart';
 import 'package:fluvie/src/rendering/encoding/video_encoder_service.dart';
 import 'package:fluvie/src/rendering/platform/process_ffmpeg_provider.dart';
 import 'package:fluvie/src/rendering/render_config.dart';

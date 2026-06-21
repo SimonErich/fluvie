@@ -7,6 +7,7 @@ import 'package:fluvie/src/core/errors/fluvie_encode_exception.dart';
 import 'package:fluvie/src/core/export.dart';
 import 'package:fluvie/src/core/quality.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_provider.dart';
+import 'package:fluvie/src/rendering/encoding/video_encoder_io.dart';
 import 'package:fluvie/src/rendering/encoding/video_encoder_service.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
 import 'package:mocktail/mocktail.dart';

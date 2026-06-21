@@ -70,7 +70,7 @@ right door.
 4  The proof: render twice, same bytes
 5  From `flutter create` to `fluvie render`   (the getting-started)
 6  The reel wall: twelve examples
-7  The crew: six packages
+7  The crew: seven packages
 8  Open source, on purpose
 9  Pick your seat: CLI / HTTP / MCP / live
 10 Or just say what you want (AI + MCP)
@@ -294,7 +294,7 @@ This is the example gallery the page must include. See the
   any frame. Reduced motion: tiles stay on posters, no autoplay and no wave, and
   each tile has an explicit play control for anyone who wants the clip.
 
-### 7. The crew: six packages
+### 7. The crew: seven packages
 
 This is the ecosystem overview the page must include. See the
 [ecosystem content below](#the-ecosystem-the-full-content).
@@ -304,7 +304,7 @@ This is the ecosystem overview the page must include. See the
 - **Serves / routes:** Dev and expert. Each card routes to its pub.dev page and its
   best doc path.
 - **Special treatment:** A "shot list" or "studio departments" board, not a table.
-  A playhead rail threads all six rows. Each row carries a name, a role, a one-line
+  A playhead rail threads all seven rows. Each row carries a name, a role, a one-line
   description, and a destination chip, with a small distinct glyph per package for
   pattern-matching. The `fluvie` card carries permanent quiet emphasis as the lead,
   with a pinned "Start here".
@@ -429,7 +429,7 @@ This is the open-source section the page must include. See the
 - **Columns / routes:**
   - **Learn:** installation, your-first-video, core-concepts, cheatsheet.
   - **Guides:** ai-and-mcp, rendering-on-a-server.
-  - **Packages:** all six pub.dev links.
+  - **Packages:** all seven pub.dev links.
   - **Try:** demo.fluvie.dev, mcp.fluvie.dev.
   - **Project:** GitHub, Issues, Discussions, MIT license, Releases.
 - **Special treatment:** A calm, scannable multi-column credits index (the one
@@ -583,7 +583,7 @@ the clips are generated (see [gallery assets](#gallery-assets-format-and-source)
 ## The ecosystem, the full content
 
 Section 7. Render as the shot-list board. `fluvie` leads with "Start here". Most
-people only need `fluvie`. All six are on pub.dev. All six are MIT.
+people only need `fluvie`. All seven are on pub.dev. All seven are MIT.
 
 | Package | Role | One line | Best path |
 | --- | --- | --- | --- |
@@ -593,6 +593,7 @@ people only need `fluvie`. All six are on pub.dev. All six are MIT.
 | **fluvie_ai** | the screenwriter | Turn a plain sentence into a VideoSpec. Claude, Gemini, Mistral, or Ollama. | pub.dev/packages/fluvie_ai, then ai-and-mcp |
 | **fluvie_api** | the render server | An HTTP server plus a web-safe client. Render from anywhere, host it yourself. | pub.dev/packages/fluvie_api, then rendering-on-a-server |
 | **fluvie_mcp** | the assistant's hands | An MCP server so your AI can write and render videos for you, end to end. | pub.dev/packages/fluvie_mcp, then mcp.fluvie.dev |
+| **fluvie_mobile_encoder** | the on-device camera operator | Render to MP4 on the phone itself, no FFmpeg and nothing leaves the device. | pub.dev/packages/fluvie_mobile_encoder, then on-device-mobile-rendering |
 
 ---
 

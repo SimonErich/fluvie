@@ -14,6 +14,8 @@ workspace:
   - packages/fluvie_ai
   - packages/fluvie_api
   - packages/fluvie_mcp
+  - packages/fluvie_mobile_encoder
+  - packages/fluvie_web_encoder
   - example
 
 dev_dependencies:
@@ -158,7 +160,7 @@ melos:
         Evaluate lcov reports against the 97% threshold (generated files
         excluded, // coverage:ignore markers honored — see
         documentation/contributing/coverage.md).
-      run: dart tool/check_coverage.dart --min 97 packages/fluvie packages/fluvie_lints packages/fluvie_cli packages/fluvie_api
+      run: dart tool/check_coverage.dart --min 97 packages/fluvie packages/fluvie_lints packages/fluvie_cli packages/fluvie_api packages/fluvie_mobile_encoder packages/fluvie_web_encoder
 
     test:tool:
       description: Root tool tests (coverage gate parser).

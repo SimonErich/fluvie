@@ -25,6 +25,7 @@ already exists and what is coming.
 | guides/ | [authoring-with-specs](guides/authoring-with-specs.md) | shipped |
 | guides/ | [ai-and-mcp](guides/ai-and-mcp.md) | shipped |
 | guides/ | [rendering-on-a-server](guides/rendering-on-a-server.md) | shipped |
+| guides/ | [on-device-mobile-rendering](guides/on-device-mobile-rendering.md) | shipped |
 | (root) | [cookbook](cookbook.md) | shipped |
 | advanced/ | custom-animations · [timeline-orchestration](advanced/timeline-orchestration.md) · [frame-builder](advanced/frame-builder.md) · [shaders-and-effects](advanced/shaders-and-effects.md) · [templates](advanced/templates.md) · [multi-aspect](advanced/multi-aspect.md) · [theming](advanced/theming.md) · [determinism-and-caching](advanced/determinism-and-caching.md) · [performance](advanced/performance.md) | performance + frame-builder + shaders-and-effects + templates + multi-aspect + theming + timeline-orchestration + determinism-and-caching shipped; custom-animations per page |
 | reference/ | [cheatsheet](reference/cheatsheet.md) | shipped, living |

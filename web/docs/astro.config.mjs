@@ -47,6 +47,7 @@ export default defineConfig({
             { label: 'Authoring with specs', slug: 'guides/authoring-with-specs' },
             { label: 'AI and MCP', slug: 'guides/ai-and-mcp' },
             { label: 'Rendering on a server', slug: 'guides/rendering-on-a-server' },
+            { label: 'On-device mobile rendering', slug: 'guides/on-device-mobile-rendering' },
             { label: 'Exporting your video', slug: 'guides/exporting-your-video' },
           ],
         },

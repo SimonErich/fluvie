@@ -8,6 +8,10 @@ import 'package:fluvie/src/rendering/render_config.dart';
 // re-exported here to keep the established render-side import stable.
 export 'package:fluvie/src/core/hash/fnv1a.dart' show fnv1a64Hex;
 
+/// The fluvie version baked into every render digest (kept in lockstep with
+/// `pubspec.yaml`); a version bump invalidates all cached frames.
+const String fluvieRenderVersion = '0.1.0';
+
 /// The digest that identifies one render's cached frames: a hash over the
 /// full [config] JSON, the [compositionKey], and the [fluvieVersion].
 ///

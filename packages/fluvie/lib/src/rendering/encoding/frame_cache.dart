@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:fluvie/src/rendering/encoding/content_hash.dart';
+import 'package:fluvie/src/rendering/encoding/frame_store.dart';
 import 'package:riverpod/riverpod.dart';
 
 /// Persists captured frames on disk so an unchanged render replays from cache
@@ -65,6 +66,23 @@ final class FrameCache {
       );
     }
   }
+}
+
+/// Adapts a disk [FrameCache] to the `dart:io`-free [FrameStore] the capture
+/// loop reads, computing each key from the render digest and frame index.
+final class FrameCacheStore implements FrameStore {
+  /// Wraps a disk [FrameCache].
+  const FrameCacheStore(this._cache);
+
+  final FrameCache _cache;
+
+  @override
+  Future<Uint8List?> lookup(String digest, int frameIndex) =>
+      _cache.lookup(_cache.frameKey(digest, frameIndex));
+
+  @override
+  Future<void> store(String digest, int frameIndex, Uint8List bytes) =>
+      _cache.store(_cache.frameKey(digest, frameIndex), bytes);
 }
 
 /// The frame cache used by the render pipeline; defaults to the shared

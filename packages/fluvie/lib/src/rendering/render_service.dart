@@ -13,22 +13,15 @@ import 'package:fluvie/src/rendering/encoding/content_hash.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_provider.dart';
 import 'package:fluvie/src/rendering/encoding/frame_cache.dart';
 import 'package:fluvie/src/rendering/encoding/video_encoder_service.dart';
+import 'package:fluvie/src/rendering/frame_capture_loop.dart';
+import 'package:fluvie/src/rendering/io/file_render_sandbox.dart';
 import 'package:fluvie/src/rendering/no_media_resolver.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
 
-part 'render_frame_loop.dart';
-
-/// Pumps the tree to frame `n` and returns once that frame is fully built —
-/// the host (a widget test, the capture harness) owns the pumping mechanics.
-typedef FramePump = Future<void> Function(int frame);
-
-/// Reports capture progress: [completed] of [total] frames are written.
-///
-/// Called once per frame after it is appended (a cache hit counts too), so the
-/// count rises monotonically from `1` to `total`. Purely observational — it is
-/// driven by the deterministic frame loop, reads no wall-clock, and never
-/// affects a frame's bytes; a host wires it to a UI or a progress file.
-typedef ProgressCallback = void Function(int completed, int total);
+// FramePump and ProgressCallback now live in the dart:io-free frame_capture_loop
+// so the capture loop is shared by the desktop, mobile, and web backends;
+// re-export them so existing render_service importers keep seeing them.
+export 'package:fluvie/src/rendering/frame_capture_loop.dart' show FramePump, ProgressCallback;
 
 /// The encoder audio lanes a render contributes: the per-track [FfmpegAudioNode]s
 /// and the [FfmpegAudioMix] that combines them (`null` mix = no audio).
@@ -60,10 +53,6 @@ final class RenderService {
     this._cache,
     this.encoder = const VideoEncoderService(),
   });
-
-  /// The fluvie version baked into every render digest (kept in lockstep with
-  /// `pubspec.yaml`); a version bump invalidates all cached frames.
-  static const String _fluvieVersion = '0.1.0';
 
   final FrameCaptureService _capture;
   final FrameCache? _cache;
@@ -100,22 +89,23 @@ final class RenderService {
     final digest = renderDigest(
       config: config,
       compositionKey: compositionKey,
-      fluvieVersion: _fluvieVersion,
+      fluvieVersion: fluvieRenderVersion,
     );
-    await outDir.create(recursive: true);
+    final sandbox = FileRenderSandbox(outDir);
+    await sandbox.create();
     final lanes = stageAudio == null
         ? const (nodes: <FfmpegAudioNode>[], amix: null)
         : await stageAudio(resolver: media, sandbox: outDir);
-    final sink = File('${outDir.path}/${VideoEncoderService.framesFileName}').openWrite();
+    final sink = sandbox.openFrames(VideoEncoderService.framesFileName);
     try {
-      await _runFrameLoop(
+      await runFrameCaptureLoop(
         config: config,
         digest: digest,
         pump: pump,
         boundaryKey: boundaryKey,
         sink: sink,
         capture: _capture,
-        cache: _cache,
+        store: _cache == null ? null : FrameCacheStore(_cache),
         onProgress: onProgress,
       );
     } finally {
@@ -140,9 +130,7 @@ final class RenderService {
           ? null
           : encoder.planPosterArgs(config, posterFrame: posterFrame),
     );
-    await File(
-      '${outDir.path}/manifest.json',
-    ).writeAsString(jsonEncode(manifest.toJson()), flush: true);
+    await sandbox.writeText('manifest.json', jsonEncode(manifest.toJson()));
     return manifest;
   }
 

@@ -23,6 +23,9 @@ line means it can still change before `1.0`, so pin a version.
 - Transitions, shared-element morphs, and a scene-wide `Camera`.
 - Audio and captions: `Audio.music`/`sfx`, beat detection, reactive inputs, SRT
   and VTT captions.
+- `resolveAudioMix`: the encoder-neutral `ResolvedAudioMix`/`ResolvedAudioTrack`
+  view of a `Video`'s audio (the same timing math the FFmpeg mix uses) for custom
+  encoders such as `fluvie_mobile_encoder`.
 - The power layer: `FluvieTheme`, `Adaptive` and multi-aspect render, templates,
   the `FrameBuilder` escape hatch, and `Export.*` modes.
 - Determinism throughout: identical input renders byte-identical frames, with
