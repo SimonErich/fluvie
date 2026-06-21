@@ -1,0 +1,35 @@
+---
+import { packages, packageCountWord } from '../data/site';
+---
+  <!-- ============ 7 · CREW ============ -->
+  <section id="crew" data-section="crew" aria-labelledby="crew-h" style="position:relative; padding:90px 24px;">
+    <div style="max-width:1180px; margin:0 auto;">
+      <div style="max-width:760px;">
+        <span style="display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.06em; color:var(--acc); border:1px solid var(--line); padding:6px 12px; border-radius:30px; background:#fff;"><span aria-hidden="true" style="color:var(--acc2);">[</span> 07 &middot; THE CREW <span aria-hidden="true" style="color:var(--acc2);">]</span></span>
+        <h2 id="crew-h" class="flv-h2" style="font-family:'Sora',sans-serif; font-weight:800; font-size:40px; letter-spacing:-0.02em; line-height:1.08; margin:18px 0 0;">A small crew. One does the magic.</h2>
+        <p style="font-size:17.5px; line-height:1.6; color:var(--soft); margin:18px 0 0;">{packageCountWord} MIT packages, all on pub.dev. Most people only ever need <span style="font-family:'JetBrains Mono'; color:var(--acc); font-weight:600;">fluvie</span>. The rest are there when you scale.</p>
+      </div>
+
+      <ul style="list-style:none; margin:40px 0 0; padding:0; display:flex; flex-direction:column; gap:12px;">
+        {packages.map((pkg) => (
+          <li>
+            <a
+              href={`https://pub.dev/packages/${pkg.key}`}
+              aria-label={`${pkg.key}, ${pkg.role}, opens pub.dev (external)`}
+              class="flv-pkg-row"
+              style={`display:grid; grid-template-columns:52px 200px 1fr auto; gap:20px; align-items:center; text-decoration:none; color:inherit; border-radius:16px; ${pkg.primary ? 'border:1px solid rgba(22,104,227,0.3); background:linear-gradient(120deg,#F4F9FF,#EAF2FF);' : 'border:1px solid var(--line); background:#fff;'} padding:20px 24px; transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;`}
+              style-hover="transform:translateX(4px); box-shadow:0 18px 40px -26px rgba(22,104,227,0.3); border-color:#BFE6FF;"
+            >
+              <span aria-hidden="true" style={`display:inline-flex; width:52px; height:52px; align-items:center; justify-content:center; border-radius:14px; font-size:22px; ${pkg.primary ? 'background:var(--grad); color:#fff;' : 'background:#EEF3FD; color:var(--acc);'}`} set:html={pkg.icon} />
+              <div>
+                <div style="display:flex; align-items:center; gap:8px;"><span style="font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px; color:var(--ink);">{pkg.key}</span>{pkg.badge && <span style="font-size:9.5px; font-weight:700; letter-spacing:0.04em; color:#fff; background:var(--acc); padding:2px 7px; border-radius:5px;">{pkg.badge}</span>}</div>
+                <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">{pkg.role}</div>
+              </div>
+              <div class="flv-pkg-line" style="font-size:14px; color:var(--soft); line-height:1.5;">{pkg.line}</div>
+              <span class="flv-pkg-chip" aria-hidden="true" style="display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--acc); white-space:nowrap;">pub.dev <span style="font-size:11px;">&#8599;</span></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>

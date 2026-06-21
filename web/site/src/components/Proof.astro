@@ -1,0 +1,42 @@
+  <!-- ============ 4 · PROOF ============ -->
+  <section data-section="proof" aria-labelledby="proof-h" style="position:relative; padding:90px 24px 110px;">
+    <div style="max-width:1180px; margin:0 auto;">
+      <div style="position:relative; border-radius:26px; overflow:hidden; background:radial-gradient(130% 130% at 18% 0%, #16357f, #06070F 70%); padding:60px 44px; box-shadow:0 40px 80px -40px rgba(7,11,24,0.6);">
+        <div aria-hidden="true" style="position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1.4px); background-size:24px 24px; mask-image:radial-gradient(120% 90% at 50% 0%, #000, transparent 72%); -webkit-mask-image:radial-gradient(120% 90% at 50% 0%, #000, transparent 72%);"></div>
+        <div class="flv-grid-2" style="position:relative; display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center;">
+          <div>
+            <span style="display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.06em; color:var(--acc2); border:1px solid rgba(54,225,255,0.3); padding:6px 12px; border-radius:30px;"><span aria-hidden="true">[</span> 04 &middot; THE PROOF <span aria-hidden="true">]</span></span>
+            <h2 id="proof-h" style="font-family:'Sora',sans-serif; font-weight:800; font-size:34px; letter-spacing:-0.02em; line-height:1.1; margin:18px 0 0; color:#fff;">Identical input. Byte-identical frames. Every machine.</h2>
+            <p style="font-size:16.5px; line-height:1.6; color:var(--dtext); margin:16px 0 0;">Render the same video twice and the frames hash the same. That is the whole trick. Caching works, golden tests work, and a thousand data-driven videos render the way they did in review.</p>
+            <p style="font-family:'Sora',sans-serif; font-weight:700; font-size:18px; color:#fff; margin:22px 0 0; border-left:3px solid var(--acc2); padding-left:14px;">"Your CI can diff frames the way it diffs JSON."</p>
+          </div>
+          <!-- two takes, one hash -->
+          <div style="border-radius:16px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); padding:22px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+              <div>
+                <div style="aspect-ratio:16/10; border-radius:10px; background:radial-gradient(120% 120% at 50% 35%,#16357f,#06070F); display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative;">
+                  <div class="renderFill" style="position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg,rgba(54,225,255,0.18),rgba(54,225,255,0.04)); transition:width 1.2s ease;"></div>
+                  <span style="font-family:'Sora'; font-weight:800; color:#fff; font-size:16px; position:relative;">Take 1</span>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--acc2); margin-top:8px; text-align:center;">sha256:a1f3&#8230;9c4e</div>
+              </div>
+              <div>
+                <div style="aspect-ratio:16/10; border-radius:10px; background:radial-gradient(120% 120% at 50% 35%,#16357f,#06070F); display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative;">
+                  <div class="renderFill" style="position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg,rgba(54,225,255,0.18),rgba(54,225,255,0.04)); transition:width 1.2s ease;"></div>
+                  <span style="font-family:'Sora'; font-weight:800; color:#fff; font-size:16px; position:relative;">Take 2</span>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--acc2); margin-top:8px; text-align:center;">sha256:a1f3&#8230;9c4e</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:18px;">
+              <button id="renderAgainBtn" style="cursor:pointer; border:none; padding:11px 18px; border-radius:10px; font-weight:700; font-size:13.5px; color:#06070F; background:var(--acc2); box-shadow:0 8px 20px rgba(54,225,255,0.3);" style-hover="transform:translateY(-1px);">Render again</button>
+              <span id="lockBadge" style="display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; color:var(--dmut);"><span aria-hidden="true">&#128275;</span> ready</span>
+            </div>
+            <p id="renderMsg" aria-live="polite" style="margin:12px 0 0; font-size:12px; color:var(--dtext);"></p>
+            <p style="margin:6px 0 0; font-size:10.5px; color:var(--dmut);">A demonstration of a real property. Two genuinely identical pre-rendered hashes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+

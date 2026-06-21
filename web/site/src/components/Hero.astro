@@ -1,0 +1,92 @@
+  <!-- ============ 1 · HERO ============ -->
+  <section data-flv-hero data-section="hero" aria-labelledby="hero-h" style="position:relative; overflow:hidden; background:radial-gradient(125% 92% at 50% -12%, #123073 0%, #0a1742 40%, #06070F 100%); border-bottom-left-radius:44px; border-bottom-right-radius:44px; box-shadow:0 34px 60px -34px rgba(7,11,24,0.55);">
+    <div aria-hidden="true" style="position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1.4px); background-size:26px 26px; mask-image:radial-gradient(120% 80% at 50% 2%, #000 0%, transparent 72%); -webkit-mask-image:radial-gradient(120% 80% at 50% 2%, #000 0%, transparent 72%);"></div>
+    <div aria-hidden="true" data-flv-spot style="position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen; background:radial-gradient(440px circle at var(--mx,70%) var(--my,26%), rgba(54,225,255,0.16), transparent 46%);"></div>
+    <div aria-hidden="true" style="position:absolute; top:-220px; left:50%; transform:translateX(-50%); width:900px; height:540px; background:radial-gradient(circle, rgba(54,225,255,0.26), rgba(22,104,227,0.15) 38%, transparent 66%); filter:blur(26px); animation:flvGlow 9s ease-in-out infinite;"></div>
+
+    <div style="position:relative; max-width:1180px; margin:0 auto; padding:120px 24px 116px;">
+      <div style="max-width:760px;">
+        <div style="display:inline-flex; align-items:center; gap:9px; padding:6px 14px; border:1px solid rgba(255,255,255,0.16); border-radius:30px; background:rgba(255,255,255,0.07); backdrop-filter:blur(8px);">
+          <span aria-hidden="true" style="width:7px; height:7px; border-radius:50%; background:var(--acc2); box-shadow:0 0 0 4px rgba(54,225,255,0.22); animation:flvBlink 2s ease-in-out infinite;"></span>
+          <span style="font-size:12.5px; font-weight:600; color:#BFE0FF;">Open-source video, written in Flutter</span>
+        </div>
+        <h1 id="hero-h" style="font-family:'Sora',sans-serif; font-weight:800; font-size:54px; line-height:1.04; letter-spacing:-0.02em; margin:22px 0 0; color:#fff; text-shadow:0 2px 40px rgba(54,225,255,0.18);">You write widgets.<br><span style="background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;">Fluvie shoots the film.</span></h1>
+        <p style="font-size:18px; line-height:1.6; color:var(--dtext); max-width:560px; margin:22px 0 0;">A real Flutter widget tree goes in. A real MP4 comes out. You say what the video is. Fluvie works out when everything happens, frame by frame. No timeline to scrub by hand. No video editor.</p>
+        <div role="list" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:22px;">
+          <span role="listitem" style="display:inline-flex; align-items:center; gap:7px; padding:7px 13px; border-radius:9px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); font-size:13px; font-weight:600; color:#CFE6FF;"><span aria-hidden="true" style="color:var(--acc2);">&#9632;</span> It is code.</span>
+          <span role="listitem" style="display:inline-flex; align-items:center; gap:7px; padding:7px 13px; border-radius:9px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); font-size:13px; font-weight:600; color:#CFE6FF;"><span aria-hidden="true" style="color:var(--acc2);">&#9632;</span> It is deterministic.</span>
+          <span role="listitem" style="display:inline-flex; align-items:center; gap:7px; padding:7px 13px; border-radius:9px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); font-size:13px; font-weight:600; color:#CFE6FF;"><span aria-hidden="true" style="color:var(--acc2);">&#9632;</span> It is a real video file.</span>
+        </div>
+      </div>
+
+      <!-- split: code in, film out -->
+      <div class="flv-grid-2" style="margin-top:44px; display:grid; grid-template-columns:1fr 1fr; gap:26px; align-items:stretch;">
+        <!-- code -->
+        <div style="border-radius:16px; overflow:hidden; background:#06070F; border:1px solid rgba(255,255,255,0.08); box-shadow:0 30px 60px -28px rgba(0,0,0,0.6);">
+          <div style="display:flex; align-items:center; gap:8px; padding:11px 15px; border-bottom:1px solid rgba(255,255,255,0.07); background:#0A0E1C;">
+            <span aria-hidden="true" style="display:flex; gap:6px;"><i style="width:9px;height:9px;border-radius:50%;background:#FF5E7A;"></i><i style="width:9px;height:9px;border-radius:50%;background:#FFC24B;"></i><i style="width:9px;height:9px;border-radius:50%;background:#7CF3C2;"></i></span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dmut); margin-left:6px;">lesson_01.dart</span>
+            <span style="margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--acc2); padding:2px 8px; border:1px solid rgba(54,225,255,0.3); border-radius:5px;">Dart</span>
+          </div>
+          <pre style="margin:0; padding:18px; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.75; color:#CFE6FF; overflow:auto;"><span style="color:#C792EA;">import</span> <span style="color:#7CF3C2;">'package:flutter/material.dart'</span> <span style="color:#C792EA;">hide</span> <span style="color:#36E1FF;">Animation</span>; <span style="color:#6A7796;">// Fluvie's wins</span>
+<span style="color:#C792EA;">import</span> <span style="color:#7CF3C2;">'package:fluvie/fluvie.dart'</span>;
+
+<span style="color:#36E1FF;">Video</span> <span style="color:#82AAFF;">lesson01Video</span>() => <span style="color:#36E1FF;">Video</span>(
+  size: VideoSize.square,
+  scenes: [
+    <span style="color:#36E1FF;">Scene</span>(
+      duration: <span style="color:#F78C6C;">4</span>.seconds,
+      background: <span style="color:#36E1FF;">Background</span>.gradient(<span style="color:#6A7796;">[...]</span>),
+      children: [
+        <span style="color:#36E1FF;">Text</span>(<span style="color:#7CF3C2;">'Hello, Fluvie'</span>)
+          .<span style="color:#82AAFF;">animate</span>([<span style="color:#36E1FF;">Animation</span>.fadeIn(), <span style="color:#36E1FF;">Animation</span>.pop()]),
+      ],
+    ),
+  ],
+);</pre>
+        </div>
+
+        <!-- film -->
+        <div style="border-radius:16px; overflow:hidden; background:#06070F; border:1px solid rgba(255,255,255,0.08); box-shadow:0 30px 60px -28px rgba(0,0,0,0.6); display:flex; flex-direction:column;">
+          <div style="display:flex; align-items:center; gap:8px; padding:11px 15px; border-bottom:1px solid rgba(255,255,255,0.07); background:#0A0E1C;">
+            <span style="display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dmut);"><span aria-hidden="true" style="width:7px;height:7px;border-radius:50%;background:#7CF3C2;box-shadow:0 0 6px #7CF3C2;"></span> hello.mp4</span>
+            <span style="margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--dmut);">1080 &times; 1080 &middot; 30fps</span>
+          </div>
+          <!-- preview stage -->
+          <div style="position:relative; aspect-ratio:16/10; background:radial-gradient(120% 120% at 50% 35%,#16357f,#06070F); overflow:hidden; display:flex; align-items:center; justify-content:center;">
+            <div aria-hidden="true" style="position:absolute; top:8%; left:0; right:0; height:9%; background:#06070F;"></div>
+            <div aria-hidden="true" style="position:absolute; bottom:0; left:0; right:0; height:9%; background:#06070F;"></div>
+            <span id="heroTitle" style="font-family:'Sora',sans-serif; font-weight:800; font-size:34px; letter-spacing:-0.02em; color:#fff; text-shadow:0 2px 28px rgba(124,243,255,0.4); opacity:1; transform:scale(0.96); transition:opacity .12s linear, transform .12s linear;">Hello, Fluvie</span>
+            <div aria-hidden="true" style="position:absolute; inset:0; box-shadow:inset 0 0 90px 20px rgba(0,0,0,0.5); pointer-events:none;"></div>
+          </div>
+          <!-- filmstrip -->
+          <div id="heroStrip" aria-hidden="true" style="display:flex; gap:3px; padding:8px 12px; background:#0A0E1C;"></div>
+          <!-- scrubber -->
+          <div style="display:flex; align-items:center; gap:12px; padding:12px 15px; background:#0A0E1C; border-top:1px solid rgba(255,255,255,0.06);">
+            <span aria-hidden="true" style="color:#fff;"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1l8 5-8 5z"/></svg></span>
+            <input type="range" class="flv-range" min="0" max="15" value="8" id="heroRange" style="flex:1;" aria-label="Scrub the preview, frame by frame" aria-valuetext="frame 9 of 16" />
+            <span id="heroFrameText" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dmut); min-width:74px; text-align:right;">frame 9 of 16</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- render line -->
+      <div style="margin-top:24px; display:flex; flex-wrap:wrap; align-items:center; gap:14px;">
+        <div style="display:flex; align-items:center; max-width:420px; border:1px solid rgba(255,255,255,0.14); border-radius:12px; overflow:hidden; background:rgba(255,255,255,0.05);">
+          <span style="padding:13px 16px; font-family:'JetBrains Mono',monospace; font-size:13.5px; color:#E6EEFF; flex:1;"><span style="color:var(--acc2);">$</span> fluvie render hello --out hello.mp4</span>
+          <button aria-label="Copy the render command" id="copyRenderBtn" data-cmd="fluvie render hello --out hello.mp4" style="border:none; cursor:pointer; padding:13px 15px; background:rgba(255,255,255,0.06); color:#9FD8FF; border-left:1px solid rgba(255,255,255,0.1); align-self:stretch;" style-hover="background:rgba(54,225,255,0.18); color:#fff;">
+            <span aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></span>
+          </button>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--dmut); display:inline-flex; align-items:center; gap:7px;"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:#7CF3C2;"></span> no display needed</span>
+        <span id="copyRenderMsg" aria-live="polite" style="font-size:12.5px; color:#7CF3C2; font-weight:600;"></span>
+      </div>
+
+      <!-- hero CTAs -->
+      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:13px; margin-top:30px;">
+        <a href="#start" style="display:inline-flex; align-items:center; gap:9px; text-decoration:none; padding:14px 24px; border-radius:12px; color:#fff; font-size:15px; font-weight:700; background:var(--grad); box-shadow:0 12px 28px rgba(22,104,227,0.4);" style-hover="transform:translateY(-1px); box-shadow:0 16px 34px rgba(22,104,227,0.5);">Roll your first video <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://demo.fluvie.dev" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; padding:14px 22px; border-radius:12px; color:#fff; font-size:15px; font-weight:600; border:1px solid rgba(255,255,255,0.22); background:transparent;" style-hover="border-color:var(--acc2); color:var(--acc2);">Open the live demo <span aria-hidden="true" style="font-size:11px; opacity:.7;">&#8599;</span></a>
+      </div>
+    </div>
+  </section>
+

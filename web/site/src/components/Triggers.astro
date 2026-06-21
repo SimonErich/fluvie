@@ -1,0 +1,48 @@
+  <!-- ============ 3 · TRIGGERS ============ -->
+  <section data-section="triggers" aria-labelledby="trig-h" style="position:relative; padding:90px 24px;">
+    <div style="max-width:1180px; margin:0 auto;">
+      <div style="max-width:720px;">
+        <span style="display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.06em; color:var(--acc); border:1px solid var(--line); padding:6px 12px; border-radius:30px; background:#fff;"><span aria-hidden="true" style="color:var(--acc2);">[</span> 03 &middot; THE CLEVER BIT <span aria-hidden="true" style="color:var(--acc2);">]</span></span>
+        <h2 id="trig-h" class="flv-h2" style="font-family:'Sora',sans-serif; font-weight:800; font-size:40px; letter-spacing:-0.02em; line-height:1.08; margin:18px 0 0;">Triggers, not timecodes.</h2>
+        <p style="font-size:17.5px; line-height:1.6; color:var(--soft); margin:18px 0 0;">Say "after the title lands, float the subtitle." Fluvie schedules it. Move the title earlier and everything downstream follows. You never type a frame number. Try it: drag the title's start and watch which side keeps up.</p>
+      </div>
+
+      <div class="flv-grid-2" style="margin-top:44px; display:grid; grid-template-columns:1.1fr 1fr; gap:26px; align-items:stretch;">
+        <!-- code toggle -->
+        <div style="border-radius:18px; overflow:hidden; background:#06070F; border:1px solid rgba(255,255,255,0.08); box-shadow:0 30px 60px -30px rgba(0,0,0,0.5);">
+          <div role="tablist" aria-label="Timing style" style="display:flex; gap:6px; padding:12px 14px; background:#0A0E1C; border-bottom:1px solid rgba(255,255,255,0.07);">
+            <button role="tab" id="trigTabTimeline" aria-selected="false" style="cursor:pointer; border:none; padding:7px 14px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; background:transparent; color:#6A7796;">The timeline way</button>
+            <button role="tab" id="trigTabFluvie" aria-selected="true" style="cursor:pointer; border:none; padding:7px 14px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; background:linear-gradient(120deg,#36E1FF,#1668E3 60%,#0B3FB0); color:#fff;">The Fluvie way</button>
+          </div>
+          <pre id="trigCode" style="margin:0; padding:20px; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.85; color:#CFE6FF; overflow:auto; min-height:210px;"></pre>
+        </div>
+
+        <!-- mini timeline + lever -->
+        <div style="border-radius:18px; border:1px solid var(--line); background:#fff; padding:24px; box-shadow:0 24px 50px -32px rgba(11,16,32,0.22); display:flex; flex-direction:column;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <span style="font-family:'Sora',sans-serif; font-weight:700; font-size:15px;">Inspector</span>
+            <span id="syncBadge" aria-hidden="true" style="display:inline-flex; align-items:center; gap:7px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; background:#E4F7EE; color:#0E9E6E;">&#10003; in sync</span>
+          </div>
+          <!-- title bar (the one you move) -->
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <span style="width:72px; font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace;">title</span>
+            <div style="flex:1; height:14px; border-radius:7px; background:#EEF2FB; position:relative;"><div id="leverFill" style="position:absolute; top:0; bottom:0; left:12%; width:30%; border-radius:7px; background:var(--grad);"></div></div>
+          </div>
+          <!-- fluvie subtitle: follows -->
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <span style="width:72px; font-size:11px; color:var(--acc); font-family:'JetBrains Mono',monospace;">subtitle</span>
+            <div style="flex:1; height:14px; border-radius:7px; background:#EEF2FB; position:relative;"><div id="subFollowFill" style="position:absolute; top:0; bottom:0; left:46%; width:26%; border-radius:7px; background:#9FC8FF; transition:left .25s ease;"></div></div>
+          </div>
+          <!-- hardcoded subtitle: stays put -->
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+            <span style="width:72px; font-size:11px; color:#C0496A; font-family:'JetBrains Mono',monospace;">subtitle*</span>
+            <div style="flex:1; height:14px; border-radius:7px; background:#EEF2FB; position:relative;"><div style="position:absolute; top:0; bottom:0; left:42%; width:26%; border-radius:7px; background:repeating-linear-gradient(45deg,#F3B9C6,#F3B9C6 5px,#FADCE3 5px,#FADCE3 10px);"></div></div>
+          </div>
+          <label for="leverRange" style="font-size:12px; color:var(--soft); font-weight:600; display:block; margin-bottom:8px;">Move the title's start</label>
+          <input type="range" class="flv-lever" min="0" max="60" value="12" id="leverRange" style="width:100%;" aria-label="Move the title's start time" aria-valuetext="Title starts at 12%" />
+          <p id="leverMsg" aria-live="polite" style="margin:14px 0 0; font-size:12.5px; color:var(--soft);">On the Fluvie side, the subtitle is anchored after the title, so it followed automatically.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+

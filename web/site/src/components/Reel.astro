@@ -1,0 +1,31 @@
+---
+import { lessons } from '../data/site';
+const gal = lessons.map((l) => [l.key, l.title, l.teaches, l.category, l.clip]);
+---
+  <!-- ============ 6 · REEL WALL ============ -->
+  <section id="reel" data-section="reel" aria-labelledby="reel-h" style="position:relative; padding:100px 24px;">
+    <div style="max-width:1180px; margin:0 auto;">
+      <div style="max-width:760px;">
+        <span style="display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.06em; color:var(--acc); border:1px solid var(--line); padding:6px 12px; border-radius:30px; background:#fff;"><span aria-hidden="true" style="color:var(--acc2);">[</span> 06 &middot; THE REEL WALL <span aria-hidden="true" style="color:var(--acc2);">]</span></span>
+        <h2 id="reel-h" class="flv-h2" style="font-family:'Sora',sans-serif; font-weight:800; font-size:40px; letter-spacing:-0.02em; line-height:1.08; margin:18px 0 0;">Twelve little films, each in one readable file.</h2>
+        <p style="font-size:17.5px; line-height:1.6; color:var(--soft); margin:18px 0 0;">Every clip below is a real Fluvie render: text and motion, scenes and transitions, charts that draw themselves, self-typing code, a beat-synced visualizer, captions, the lot. Click any tile to scrub it live.</p>
+      </div>
+
+      <div role="group" aria-label="Filter examples" style="display:flex; flex-wrap:wrap; gap:9px; margin-top:26px;">
+        <button class="filterBtn" data-filter="all" aria-pressed="true" style="cursor:pointer; padding:7px 15px; border-radius:30px; font-size:13px; font-weight:600; border:1px solid var(--acc); background:var(--acc); color:#fff; transition:all .2s ease;">All</button>
+        <button class="filterBtn" data-filter="basics" aria-pressed="false" style="cursor:pointer; padding:7px 15px; border-radius:30px; font-size:13px; font-weight:600; border:1px solid var(--line); background:#fff; color:var(--soft); transition:all .2s ease;">Basics</button>
+        <button class="filterBtn" data-filter="data" aria-pressed="false" style="cursor:pointer; padding:7px 15px; border-radius:30px; font-size:13px; font-weight:600; border:1px solid var(--line); background:#fff; color:var(--soft); transition:all .2s ease;">Data</button>
+        <button class="filterBtn" data-filter="media" aria-pressed="false" style="cursor:pointer; padding:7px 15px; border-radius:30px; font-size:13px; font-weight:600; border:1px solid var(--line); background:#fff; color:var(--soft); transition:all .2s ease;">Media</button>
+        <button class="filterBtn" data-filter="audio" aria-pressed="false" style="cursor:pointer; padding:7px 15px; border-radius:30px; font-size:13px; font-weight:600; border:1px solid var(--line); background:#fff; color:var(--soft); transition:all .2s ease;">Audio</button>
+        <button class="filterBtn" data-filter="code" aria-pressed="false" style="cursor:pointer; padding:7px 15px; border-radius:30px; font-size:13px; font-weight:600; border:1px solid var(--line); background:#fff; color:var(--soft); transition:all .2s ease;">Code</button>
+        <button class="filterBtn" data-filter="transitions" aria-pressed="false" style="cursor:pointer; padding:7px 15px; border-radius:30px; font-size:13px; font-weight:600; border:1px solid var(--line); background:#fff; color:var(--soft); transition:all .2s ease;">Transitions</button>
+      </div>
+
+      <div id="galleryGrid" class="flv-grid-3" style="margin-top:26px; display:grid; grid-template-columns:repeat(3,1fr); gap:20px;"></div>
+
+      <div style="margin-top:30px; text-align:center;">
+        <a href="https://demo.fluvie.dev" style="display:inline-flex; align-items:center; gap:9px; text-decoration:none; padding:13px 24px; border-radius:12px; background:var(--grad); color:#fff; font-weight:700; font-size:15px; box-shadow:0 12px 28px rgba(22,104,227,0.34);" style-hover="transform:translateY(-1px);">Scrub any of these live <span aria-hidden="true" style="font-size:11px;">&#8599;</span></a>
+      </div>
+    </div>
+  </section>
+  <script type="application/json" id="gal-data" set:html={JSON.stringify(gal)} is:inline></script>

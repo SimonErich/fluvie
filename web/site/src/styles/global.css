@@ -1,0 +1,36 @@
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: #FFFFFF; }
+  ::selection { background: #BBE4FF; color: #0B1020; }
+  a, button { outline: none; }
+  a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2px solid #1668E3; outline-offset: 3px; border-radius: 6px; }
+  .flv-skip { position: fixed; left: 16px; top: -60px; z-index: 90; background: #06070F; color: #fff; padding: 10px 16px; border-radius: 10px; font-family: 'Manrope',sans-serif; font-weight: 600; text-decoration: none; transition: top .2s ease; }
+  .flv-skip:focus { top: 16px; }
+  input[type=range].flv-range { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 6px; background: rgba(255,255,255,0.16); outline: none; }
+  input[type=range].flv-range::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px rgba(54,225,255,0.9); cursor: pointer; border: 2px solid #36E1FF; }
+  input[type=range].flv-range::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 2px solid #36E1FF; cursor: pointer; }
+  input[type=range].flv-lever { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 6px; background: #E3EAF6; }
+  input[type=range].flv-lever::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #1668E3; cursor: grab; box-shadow: 0 4px 12px rgba(22,104,227,0.4); }
+  input[type=range].flv-lever::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #1668E3; border: none; cursor: grab; }
+  @keyframes flvGlow { 0%,100%{opacity:.55;transform:scale(1)} 50%{opacity:.9;transform:scale(1.06)} }
+  @keyframes flvFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+  @keyframes flvFloat2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(12px)} }
+  @keyframes flvFlare { 0%,100%{opacity:.35;transform:translateX(-8%) scaleX(.9)} 50%{opacity:.7;transform:translateX(8%) scaleX(1.1)} }
+  @keyframes flvWord { 0%,8%{opacity:0;transform:translateY(18px)} 26%,82%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-10px)} }
+  @keyframes flvFadeScale { 0%{opacity:0;transform:scale(.84)} 16%,80%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(1.07)} }
+  @keyframes flvBar { 0%{transform:scaleY(0)} 34%,86%{transform:scaleY(1)} 100%{transform:scaleY(.2)} }
+  @keyframes flvSheen { 0%{transform:translateX(-130%) skewX(-18deg)} 55%,100%{transform:translateX(260%) skewX(-18deg)} }
+  @keyframes flvBlink { 0%,100%{opacity:1} 50%{opacity:.3} }
+  @keyframes flvCaret { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+  @keyframes flvRing { from{stroke-dashoffset:264} to{stroke-dashoffset:70} }
+  @keyframes flvGrain { 0%{transform:translate(0,0)} 25%{transform:translate(-5%,3%)} 50%{transform:translate(4%,-4%)} 75%{transform:translate(-3%,2%)} 100%{transform:translate(0,0)} }
+  @media (max-width: 900px) {
+    .flv-grid-2, .flv-grid-3, .flv-grid-router, .flv-foot { grid-template-columns: 1fr !important; }
+    .flv-pkg-row { grid-template-columns: 44px 1fr !important; }
+    .flv-pkg-row .flv-pkg-line, .flv-pkg-row .flv-pkg-chip { display: none !important; }
+    .flv-nav-links { display: none !important; }
+    h1#hero-h { font-size: 40px !important; }
+    .flv-h2 { font-size: 30px !important; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; } }

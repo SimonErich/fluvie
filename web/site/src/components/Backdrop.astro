@@ -1,0 +1,12 @@
+  <a href="#main" class="flv-skip">Skip to content</a>
+
+  <!-- film grain -->
+  <div aria-hidden="true" style="position:fixed; inset:-60%; z-index:9; pointer-events:none; opacity:0.045; mix-blend-mode:multiply; background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E&quot;); animation:flvGrain 7s steps(6) infinite;"></div>
+
+  <!-- ambient blurry spots over the white body -->
+  <div aria-hidden="true" style="position:absolute; inset:0; z-index:-1; pointer-events:none; overflow:hidden;">
+    <div style="position:absolute; left:-8%; top:14%; width:560px; height:560px; border-radius:50%; background:radial-gradient(circle,rgba(54,225,255,0.20),transparent 66%); filter:blur(46px); animation:flvGlow 12s ease-in-out infinite;"></div>
+    <div style="position:absolute; right:-10%; top:36%; width:640px; height:640px; border-radius:50%; background:radial-gradient(circle,rgba(22,104,227,0.16),transparent 66%); filter:blur(52px); animation:flvGlow 15s ease-in-out infinite; animation-delay:1s;"></div>
+    <div style="position:absolute; left:10%; top:60%; width:560px; height:560px; border-radius:50%; background:radial-gradient(circle,rgba(110,130,255,0.16),transparent 66%); filter:blur(50px); animation:flvGlow 13s ease-in-out infinite; animation-delay:2s;"></div>
+    <div style="position:absolute; right:6%; top:82%; width:520px; height:520px; border-radius:50%; background:radial-gradient(circle,rgba(54,225,255,0.14),transparent 66%); filter:blur(48px); animation:flvGlow 16s ease-in-out infinite; animation-delay:1.5s;"></div>
+  </div>

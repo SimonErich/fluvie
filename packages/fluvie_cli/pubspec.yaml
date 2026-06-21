@@ -1,6 +1,6 @@
 name: fluvie_cli
 description: "Headless renderer CLI for Fluvie compositions: capture frames with flutter test, then encode with ffmpeg."
-version: 0.1.0
+version: 0.1.2
 repository: https://github.com/SimonErich/fluvie/tree/main/packages/fluvie_cli
 homepage: https://github.com/SimonErich/fluvie
 issue_tracker: https://github.com/SimonErich/fluvie/issues

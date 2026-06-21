@@ -1,0 +1,45 @@
+  <!-- ============ 10 · AI + MCP ============ -->
+  <section data-section="ai" aria-labelledby="ai-h" style="position:relative; padding:90px 24px;">
+    <div style="max-width:1180px; margin:0 auto;">
+      <div style="max-width:720px;">
+        <span style="display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.06em; color:var(--acc); border:1px solid var(--line); padding:6px 12px; border-radius:30px; background:#fff;"><span aria-hidden="true" style="color:var(--acc2);">[</span> 10 &middot; EASY MODE <span aria-hidden="true" style="color:var(--acc2);">]</span></span>
+        <h2 id="ai-h" class="flv-h2" style="font-family:'Sora',sans-serif; font-weight:800; font-size:40px; letter-spacing:-0.02em; line-height:1.08; margin:18px 0 0;">Or just say what you want.</h2>
+        <p style="font-size:17.5px; line-height:1.6; color:var(--soft); margin:18px 0 0;"><span style="font-family:'JetBrains Mono'; color:var(--acc); font-weight:600;">fluvie_ai</span> turns a plain sentence into a real <span style="font-family:'JetBrains Mono'; color:var(--acc); font-weight:600;">VideoSpec</span>. <span style="font-family:'JetBrains Mono'; color:var(--acc); font-weight:600;">fluvie_mcp</span> lets your assistant write and render it without you opening an editor. This is the optional easy mode, not the only mode.</p>
+      </div>
+
+      <div class="flv-grid-3" style="margin-top:40px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; align-items:stretch;">
+        <!-- prompt -->
+        <div style="border-radius:16px; border:1px solid var(--line); background:#fff; padding:22px; display:flex; flex-direction:column; box-shadow:0 18px 40px -30px rgba(11,16,32,0.2);">
+          <div style="font-family:'JetBrains Mono'; font-size:11px; color:var(--muted); margin-bottom:12px;">1 &middot; the prompt</div>
+          <div style="background:var(--grad); color:#fff; border-radius:14px 14px 14px 4px; padding:16px 18px; font-size:14.5px; line-height:1.55; box-shadow:0 12px 26px -14px rgba(22,104,227,0.5);">"A 10-second product promo, brand teal, big counter to 10,000, confetti on the last beat."</div>
+        </div>
+        <!-- spec -->
+        <div style="border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.08); background:#06070F; box-shadow:0 18px 40px -30px rgba(0,0,0,0.5);">
+          <div style="padding:14px 18px 0; font-family:'JetBrains Mono'; font-size:11px; color:var(--dmut);">2 &middot; the VideoSpec</div>
+          <pre style="margin:0; padding:14px 18px 18px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.7; color:#CFE6FF; overflow:auto;"><span style="color:#36E1FF;">VideoSpec</span>(
+  duration: <span style="color:#F78C6C;">10</span>.seconds,
+  theme: <span style="color:#36E1FF;">Theme</span>.teal,
+  scenes: [
+    <span style="color:#36E1FF;">Counter</span>(to: <span style="color:#F78C6C;">10000</span>),
+    <span style="color:#36E1FF;">Confetti</span>(on: Beat.last),
+  ],
+);</pre>
+        </div>
+        <!-- film -->
+        <div style="border-radius:16px; overflow:hidden; border:1px solid var(--line); background:#fff; box-shadow:0 18px 40px -30px rgba(11,16,32,0.2);">
+          <div style="padding:14px 18px 10px; font-family:'JetBrains Mono'; font-size:11px; color:var(--muted);">3 &middot; the film</div>
+          <div style="position:relative; aspect-ratio:1/1; background:radial-gradient(120% 120% at 50% 35%,#0E9E8E,#06351f); display:flex; align-items:center; justify-content:center;">
+            <span style="font-family:'JetBrains Mono'; font-weight:700; font-size:30px; color:#fff; text-shadow:0 2px 20px rgba(0,0,0,0.4);">10,000</span>
+            <span aria-hidden="true" style="position:absolute; top:14%; left:20%; width:6px; height:6px; border-radius:50%; background:#FFD36B; animation:flvFloat 3s ease-in-out infinite;"></span>
+            <span aria-hidden="true" style="position:absolute; top:24%; right:24%; width:5px; height:5px; border-radius:50%; background:#FF8FB1; animation:flvFloat2 3.6s ease-in-out infinite;"></span>
+            <span aria-hidden="true" style="position:absolute; bottom:20%; left:30%; width:5px; height:5px; border-radius:50%; background:#7CF3FF; animation:flvFloat 4s ease-in-out infinite;"></span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:24px; display:flex; flex-wrap:wrap; gap:12px;">
+        <a href="https://docs.fluvie.dev/guides/ai-and-mcp" style="text-decoration:none; padding:12px 20px; border-radius:11px; background:var(--grad); color:#fff; font-weight:700; font-size:14px;" style-hover="transform:translateY(-1px);">Read the AI &amp; MCP guide</a>
+        <a href="https://mcp.fluvie.dev" style="text-decoration:none; padding:12px 20px; border-radius:11px; border:1px solid var(--line); background:#fff; color:var(--ink); font-weight:600; font-size:14px;" style-hover="border-color:var(--acc); color:var(--acc);">Hosted MCP <span aria-hidden="true" style="font-size:10px;">&#8599;</span></a>
+      </div>
+    </div>
+  </section>
+

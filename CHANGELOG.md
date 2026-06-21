@@ -6,6 +6,18 @@ All notable changes to the Fluvie workspace. The format follows
 
 Per-package changelogs live next to each package.
 
+## [0.1.2] - 2026-06-21
+
+Added more deployment options, local mobile and local web renderer.
+
+### Added
+
+- added local mobile renderer
+- added local web renderer
+- improved deployment strategy
+
+[0.1.2]: https://github.com/SimonErich/fluvie/releases/tag/v0.1.2
+
 ## [0.1.0] - 2026-06-20
 
 The first public release of the whole workspace. See each package's CHANGELOG for
