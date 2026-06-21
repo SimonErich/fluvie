@@ -19,6 +19,7 @@ final class ServerDependencies {
     required this.retention,
     required this.signer,
     this.schemaJson = '{}',
+    this.now = _systemUtcNow,
   });
 
   /// The resolved server configuration.
@@ -41,4 +42,14 @@ final class ServerDependencies {
 
   /// The `VideoSpec` JSON schema served at `/v1/schema/video-spec`.
   final String schemaJson;
+
+  /// Supplies the current UTC time for download-token verification.
+  ///
+  /// Defaults to the system clock; tests inject a fixed clock so token expiry is
+  /// deterministic instead of racing the calendar (the determinism contract).
+  final DateTime Function() now;
 }
+
+// The system wall clock in UTC, the production default for ServerDependencies.now.
+// coverage:ignore-line: real wall clock; tests inject a fixed clock by contract.
+DateTime _systemUtcNow() => DateTime.now().toUtc();

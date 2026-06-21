@@ -31,6 +31,7 @@ Router buildRouter(ServerDependencies deps) {
     fileStore: deps.fileStore,
     config: deps.config,
     signer: deps.signer,
+    now: deps.now,
   );
   final maintenance = MaintenanceHandler(deps.retention);
   final health = HealthHandler(deps.fileStore);

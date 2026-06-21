@@ -17,8 +17,8 @@ final class DownloadHandler {
     required this.fileStore,
     required this.config,
     required this.signer,
-    DateTime Function()? now,
-  }) : _now = now ?? _utcNow;
+    required this.now,
+  });
 
   /// Where job records live.
   final JobStore jobStore;
@@ -32,7 +32,8 @@ final class DownloadHandler {
   /// Verifies signed download tokens.
   final DownloadTokenSigner signer;
 
-  final DateTime Function() _now;
+  /// Supplies the current UTC time for token expiry checks.
+  final DateTime Function() now;
 
   /// Serves the [kind] (`video`|`poster`) file of job [id].
   Future<Response> get(Request request, String id, String kind) async {
@@ -68,9 +69,7 @@ final class DownloadHandler {
     if (header == 'Bearer ${config.apiToken}') return true;
     final token = request.url.queryParameters['token'];
     if (token == null) return false;
-    final grant = signer.verify(token, now: _now());
+    final grant = signer.verify(token, now: now());
     return grant != null && grant.jobId == id && grant.kind == kind;
   }
-
-  static DateTime _utcNow() => DateTime.now().toUtc();
 }

@@ -84,6 +84,7 @@ void main() {
       fileStore: _FakeFileStore(grant: DownloadGrant.redirect(Uri.parse('https://cdn/v.mp4'))),
       config: _config(),
       signer: DownloadTokenSigner(_config().downloadSigningKey),
+      now: () => DateTime.utc(2026),
     );
 
     final response = await handler.get(

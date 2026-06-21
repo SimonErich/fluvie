@@ -67,6 +67,7 @@ void main() {
         retention: retention ?? DefaultRetentionService(jobs, files),
         signer: DownloadTokenSigner(cfg.downloadSigningKey),
         schemaJson: r'{"$id":"video-spec"}',
+        now: () => now,
       ),
     );
   }
