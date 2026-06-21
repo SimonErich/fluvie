@@ -223,6 +223,16 @@ melos:
         - web:landing:check
         - coverage:check
 
+    release:
+      description: >
+        Dry-run a release: show which pub.dev tags would be pushed (one per
+        package, derived from each pubspec version), skipping any version already
+        on pub.dev. Run from a green `main`. To actually publish:
+        `bash tool/release.sh --push` (add `--images <ver>` for the umbrella
+        container-image tag). Tags must be pushed from a real account, not the
+        Actions token, or publish.yml/images.yml never fire.
+      run: bash tool/release.sh
+
     render:examples:
       description: >
         Render every registered composition to build/<key>.mp4 via the

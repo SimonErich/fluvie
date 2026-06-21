@@ -136,22 +136,29 @@ The demo renders through `api.fluvie.dev`. To keep cost and abuse down:
 
 ## 7. Cut a release
 
-From a green `main`:
+Bump the version (and CHANGELOG) of each package you changed, land it on a green
+`main`, then run the release helper from your machine:
 
 ```sh
-# pub.dev packages (each tag publishes one package)
-git tag fluvie-v0.1.0       && git push origin fluvie-v0.1.0
-git tag fluvie_cli-v0.1.0   && git push origin fluvie_cli-v0.1.0
-git tag fluvie_lints-v0.1.0 && git push origin fluvie_lints-v0.1.0
-git tag fluvie_ai-v0.1.0    && git push origin fluvie_ai-v0.1.0
-git tag fluvie_api-v0.1.0   && git push origin fluvie_api-v0.1.0
-git tag fluvie_mcp-v0.1.0   && git push origin fluvie_mcp-v0.1.0
-
-# the umbrella release tag (builds and pushes the container images)
-git tag v0.1.0 && git push origin v0.1.0
+melos run release                       # dry run: shows the tags it would push
+bash tool/release.sh --push             # push a pub.dev tag per changed package
+bash tool/release.sh --push --images 0.1.2  # also push the umbrella image tag
 ```
 
-Then create the GitHub Release for `v0.1.0` with notes from `CHANGELOG.md`.
+`tool/release.sh` derives every `<package>-v<version>` tag from that package's
+pubspec, and **skips any version already on pub.dev**, so unchanged packages are
+left alone and a re-run after a partial release is safe. Each pushed tag triggers
+`publish.yml` (pub.dev); the umbrella `v<version>` triggers `images.yml`.
+
+Run it locally, not from an Action: GitHub does not fire `publish.yml` /
+`images.yml` for tags pushed by the built-in `GITHUB_TOKEN`. You can still push
+the tags by hand if you prefer; the helper only saves typing and prevents a
+tag/version mismatch.
+
+The container-image version (`v<version>`) is independent of the package
+versions — pick the one the deployed services should advertise.
+
+Then create the GitHub Release for the umbrella tag with notes from `CHANGELOG.md`.
 
 ## 8. Optional polish
 
