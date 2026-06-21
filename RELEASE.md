@@ -11,8 +11,11 @@ parts that need your accounts and credentials.
 | --- | --- | --- |
 | push to `main` | `ci.yaml` | format, analyze, lint, tests, coverage, goldens, pana, render smoke |
 | push to `main` (docs change) | `docs.yml` | builds the Astro site and deploys it to GitHub Pages |
-| tag `fluvie-v0.1.0` (per package) | `publish.yml` | publishes that package to pub.dev via OIDC |
+| tag `v0.1.0` (umbrella) | `publish.yml` | publishes every package to pub.dev via OIDC (one shared version) |
 | tag `v0.1.0` (umbrella) | `images.yml` | builds and pushes the service images to ghcr.io, then pings the Dokploy redeploy webhooks |
+
+One tag does everything: publish a GitHub Release for `v0.1.0` (or push the tag)
+and pub.dev publishing, the image build, and the Dokploy redeploy all fire.
 
 ## 1. The hosting map
 
@@ -29,9 +32,9 @@ and the other static sites run as Dokploy containers.
 
 ## 2. One-time: pub.dev publishing
 
-Each package publishes when you push its tag, but pub.dev must trust this repo
-first. For every package (`fluvie`, `fluvie_cli`, `fluvie_lints`, `fluvie_ai`,
-`fluvie_api`, `fluvie_mcp`):
+All packages share one version and publish from one umbrella tag, but pub.dev
+must trust this repo first. For every package (`fluvie`, `fluvie_cli`,
+`fluvie_lints`, `fluvie_ai`, `fluvie_api`, `fluvie_mcp`):
 
 1. Reserve the name with a first manual publish from the package directory:
    ```sh
@@ -41,7 +44,8 @@ first. For every package (`fluvie`, `fluvie_cli`, `fluvie_lints`, `fluvie_ai`,
    `fluvie_ai`/`fluvie_api`/`fluvie_mcp` (later ones depend on the earlier ones).
 2. On each package's pub.dev page, open **Admin → Automated publishing** and
    enable publishing from GitHub Actions for `SimonErich/fluvie` with the tag
-   pattern `{{package}}-v{{version}}` (for example `fluvie-v{{version}}`).
+   pattern **`v{{version}}`** (the umbrella tag — the same for every package, so
+   one `v0.1.2` release publishes them all).
 
 ## 3. One-time: GitHub Pages for docs.fluvie.dev
 
@@ -136,29 +140,28 @@ The demo renders through `api.fluvie.dev`. To keep cost and abuse down:
 
 ## 7. Cut a release
 
-Bump the version (and CHANGELOG) of each package you changed, land it on a green
-`main`, then run the release helper from your machine:
+All packages move together. Three steps:
 
 ```sh
-melos run release                       # dry run: shows the tags it would push
-bash tool/release.sh --push             # push a pub.dev tag per changed package
-bash tool/release.sh --push --images 0.1.2  # also push the umbrella image tag
+bash tool/set_version.sh 0.1.2   # 1. set every package to 0.1.2
+#                                  2. update the CHANGELOGs, commit, land on green main
+gh release create v0.1.2 --generate-notes   # 3. publish the GitHub Release
 ```
 
-`tool/release.sh` derives every `<package>-v<version>` tag from that package's
-pubspec, and **skips any version already on pub.dev**, so unchanged packages are
-left alone and a re-run after a partial release is safe. Each pushed tag triggers
-`publish.yml` (pub.dev); the umbrella `v<version>` triggers `images.yml`.
+Creating the release (step 3, or just `git push origin v0.1.2`) is the only
+trigger you need. The `v0.1.2` tag fires both `publish.yml` (every package to
+pub.dev) and `images.yml` (build the images, then ping the Dokploy redeploy
+webhooks). You can also create the release from the GitHub **Releases** UI.
 
-Run it locally, not from an Action: GitHub does not fire `publish.yml` /
-`images.yml` for tags pushed by the built-in `GITHUB_TOKEN`. You can still push
-the tags by hand if you prefer; the helper only saves typing and prevents a
-tag/version mismatch.
+Notes:
 
-The container-image version (`v<version>`) is independent of the package
-versions — pick the one the deployed services should advertise.
-
-Then create the GitHub Release for the umbrella tag with notes from `CHANGELOG.md`.
+- The version must be **new on pub.dev** for every package — a release republishes
+  all of them, so bump it each time. A version already on pub.dev fails that
+  package's publish job (the others still succeed).
+- Do this from a real account, not an Action: GitHub does not fire `publish.yml` /
+  `images.yml` for a tag pushed by the built-in `GITHUB_TOKEN`.
+- Inter-package constraints are intentionally loose (`^0.1.x`) so the publish jobs
+  can run in parallel. If you tighten them, add `needs:` ordering in `publish.yml`.
 
 ## 8. Optional polish
 

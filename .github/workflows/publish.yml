@@ -1,26 +1,23 @@
 name: publish
 
-# Automated publishing to pub.dev via OIDC. Each package is published by pushing
-# a package-scoped tag whose version matches that package's pubspec, e.g.:
+# Publish every package to pub.dev when the umbrella release tag is pushed — the
+# same `v<version>` tag that builds the images. All packages share one version
+# (lockstep), so the tag `v0.1.2` publishes the 0.1.2 pubspec of each package.
 #
-#   git tag fluvie-v0.1.0 && git push origin fluvie-v0.1.0
+# For pub.dev's OIDC check to pass, set each package's tag pattern under
+# Admin -> Automated publishing to `v{{version}}` (not `{{package}}-v{{version}}`).
+# Creating a GitHub Release for the tag (or `git push` of the tag) triggers this.
 #
-# Enable "Automated publishing from GitHub Actions" on each package's pub.dev
-# admin page with the matching tag pattern before the first run.
+# Jobs run in parallel; that is safe because the inter-package constraints are
+# loose (`^0.1.x`), so a dependency only needs SOME already-published version, not
+# this release's. If you tighten those constraints, add `needs:` to order them.
 
 on:
   push:
-    tags:
-      - "fluvie-v[0-9]+.[0-9]+.[0-9]+"
-      - "fluvie_cli-v[0-9]+.[0-9]+.[0-9]+"
-      - "fluvie_lints-v[0-9]+.[0-9]+.[0-9]+"
-      - "fluvie_ai-v[0-9]+.[0-9]+.[0-9]+"
-      - "fluvie_api-v[0-9]+.[0-9]+.[0-9]+"
-      - "fluvie_mcp-v[0-9]+.[0-9]+.[0-9]+"
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
 
 jobs:
   fluvie:
-    if: startsWith(github.ref, 'refs/tags/fluvie-v')
     permissions:
       id-token: write # OIDC token for pub.dev
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
@@ -28,7 +25,6 @@ jobs:
       working-directory: packages/fluvie
 
   fluvie_cli:
-    if: startsWith(github.ref, 'refs/tags/fluvie_cli-v')
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
@@ -36,7 +32,6 @@ jobs:
       working-directory: packages/fluvie_cli
 
   fluvie_lints:
-    if: startsWith(github.ref, 'refs/tags/fluvie_lints-v')
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
@@ -44,7 +39,6 @@ jobs:
       working-directory: packages/fluvie_lints
 
   fluvie_ai:
-    if: startsWith(github.ref, 'refs/tags/fluvie_ai-v')
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
@@ -52,7 +46,6 @@ jobs:
       working-directory: packages/fluvie_ai
 
   fluvie_api:
-    if: startsWith(github.ref, 'refs/tags/fluvie_api-v')
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
@@ -60,7 +53,6 @@ jobs:
       working-directory: packages/fluvie_api
 
   fluvie_mcp:
-    if: startsWith(github.ref, 'refs/tags/fluvie_mcp-v')
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
