@@ -1,0 +1,40 @@
+name: notify-website
+
+# When the landing page changes, tell the fluvie_website repo to redeploy
+# fluvie.dev (its "Deploy fluvie.dev" workflow listens for landing-changed).
+# Needs a FLUVIE_WEBSITE_TOKEN secret (a token with Contents: write on
+# SimonErich/fluvie_website); without it this skips, so it never fails CI.
+on:
+  push:
+    branches: [main]
+    paths:
+      - web/landing/index.html
+      - web/landing/fluvie_logo.svg
+      - web/landing/fluvie_logo_inverted.svg
+      - web/landing/og.png
+      - web/landing/media/**
+      - .github/workflows/notify-website.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch a fluvie.dev redeploy
+        env:
+          TOKEN: ${{ secrets.FLUVIE_WEBSITE_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TOKEN}" ]; then
+            echo "FLUVIE_WEBSITE_TOKEN not set; skipping. Add it to enable instant deploys."
+            exit 0
+          fi
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/SimonErich/fluvie_website/dispatches \
+            -d '{"event_type":"landing-changed"}'
+          echo "Dispatched landing-changed to fluvie_website."
