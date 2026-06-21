@@ -1,6 +1,6 @@
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import contentJson from './content.json';
 
 /// The site's data-driven content: the package list and the lesson gallery.
 ///
@@ -10,9 +10,8 @@ import { fileURLToPath } from 'node:url';
 /// mismatch throws and fails the build, the deterministic replacement for the old
 /// hand-reconcile.
 
-const here = dirname(fileURLToPath(import.meta.url));
-// src/data -> src -> site -> web -> repo root
-const repoRoot = join(here, '..', '..', '..', '..');
+// The build runs from web/site, so the monorepo root is two levels up.
+const repoRoot = join(process.cwd(), '..', '..');
 
 export interface SitePackage {
   key: string;
@@ -36,7 +35,7 @@ interface Content {
   lessons: SiteLesson[];
 }
 
-const content = JSON.parse(readFileSync(join(here, 'content.json'), 'utf8')) as Content;
+const content = contentJson as unknown as Content;
 
 /// Published packages on disk: every `packages/<name>` whose pubspec is not
 /// `publish_to: none`.
