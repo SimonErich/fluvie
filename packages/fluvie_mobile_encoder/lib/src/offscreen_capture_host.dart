@@ -28,7 +28,13 @@ final class OffscreenCaptureHost implements CaptureHost {
 
   final ui.FlutterView _view;
   final PipelineOwner _pipelineOwner = PipelineOwner();
-  final BuildOwner _buildOwner = BuildOwner(focusManager: FocusManager());
+  // The app's build owner, not a private one: `GlobalKey.currentContext` (how the
+  // capture service finds the boundary) resolves only against
+  // `WidgetsBinding.instance.buildOwner`, so the capture boundary's key must
+  // register there. A private `BuildOwner` would keep the boundary invisible to
+  // the lookup. Off-screen isolation still holds: the standalone `_pipelineOwner`
+  // and `_renderView` below are never attached to the binding's render tree.
+  BuildOwner get _buildOwner => WidgetsBinding.instance.buildOwner!;
   late final RenderView _renderView = RenderView(
     view: _view,
     configuration: ViewConfiguration(

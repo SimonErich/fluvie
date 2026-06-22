@@ -43,6 +43,10 @@ class RgbaVideoEncoder(private val request: EncodeRequest) {
 
     val bufferInfo = MediaCodec.BufferInfo()
     val frameBytes = request.width * request.height * 4
+    // The encoder's input buffer holds YUV420 (12 bits/px), not the source RGBA
+    // (32 bits/px): queueInputBuffer's size must describe the YUV payload, or it
+    // overruns the smaller YUV buffer's capacity.
+    val yuvBytes = request.width * request.height * 3 / 2
     val rgba = ByteArray(frameBytes)
     var trackIndex = -1
     var muxing = false
@@ -62,7 +66,7 @@ class RgbaVideoEncoder(private val request: EncodeRequest) {
                   ?: throw IllegalStateException("encoder returned no input image")
                 writeYuv420(image, rgba, request.width, request.height)
                 val ptsUs = frame.toLong() * 1_000_000L / request.fps
-                codec.queueInputBuffer(inputIndex, 0, frameBytes, ptsUs, 0)
+                codec.queueInputBuffer(inputIndex, 0, yuvBytes, ptsUs, 0)
                 frame++
               } else {
                 codec.queueInputBuffer(
