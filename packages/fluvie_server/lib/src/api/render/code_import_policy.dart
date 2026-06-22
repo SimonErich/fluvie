@@ -5,8 +5,9 @@
 ///
 /// Allowed:
 /// - any `package:fluvie/...` path (the public API and its `src/`),
-/// - `package:flutter/painting.dart` and `package:flutter/animation.dart` — the
-///   value-type libraries (`Color`, `Alignment`, `Curve`, ...) fluvie re-exports,
+/// - any `package:flutter/...` library (the UI framework: `material`, `widgets`,
+///   `painting`, `animation`, ...), none of which can touch the filesystem or
+///   network — a composition is a widget tree,
 /// - `dart:math` and `dart:ui`.
 ///
 /// Rejected (a non-exhaustive list of the dangerous ones): `dart:io`, `dart:ffi`,
@@ -15,15 +16,11 @@
 library;
 
 /// Libraries a snippet may import or export, matched exactly.
-const Set<String> _allowedExact = {
-  'dart:math',
-  'dart:ui',
-  'package:flutter/painting.dart',
-  'package:flutter/animation.dart',
-};
+const Set<String> _allowedExact = {'dart:math', 'dart:ui'};
 
 /// Library prefixes a snippet may import or export (any sub-path is allowed).
-const List<String> _allowedPrefixes = ['package:fluvie/'];
+/// The flutter framework is pure UI — it exposes no filesystem or socket APIs.
+const List<String> _allowedPrefixes = ['package:fluvie/', 'package:flutter/'];
 
 // A directive at the start of a (possibly indented) line, capturing its URI.
 // Anchored to a line start so an import-like string inside a body or a trailing
@@ -70,8 +67,7 @@ final class CodeImportException implements Exception {
   /// A client-safe message naming every rejected library.
   String get message =>
       'Disallowed import(s): ${disallowed.join(', ')}. A Playground snippet may '
-      'only import package:fluvie, package:flutter/painting.dart, '
-      'package:flutter/animation.dart, dart:math, and dart:ui.';
+      'only import package:fluvie, package:flutter, dart:math, and dart:ui.';
 
   @override
   String toString() => 'CodeImportException: $message';

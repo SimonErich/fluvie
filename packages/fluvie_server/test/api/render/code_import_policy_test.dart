@@ -69,19 +69,14 @@ Video build() {
       expect(disallowedImports("export 'dart:io';"), contains('dart:io'));
     });
 
-    test('allows the flutter painting/animation value libraries fluvie re-exports', () {
+    test('allows the flutter UI framework a real composition needs', () {
       const code = '''
+import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/widgets.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/animation.dart';
 ''';
       expect(disallowedImports(code), isEmpty);
-    });
-
-    test('rejects package:flutter/widgets.dart (not a value-types library)', () {
-      expect(
-        disallowedImports("import 'package:flutter/widgets.dart';"),
-        contains('package:flutter/widgets.dart'),
-      );
     });
   });
 

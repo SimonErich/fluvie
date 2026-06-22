@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart' show Directionality, TextDirection;
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_example/render/composition_entry.dart';
 
@@ -16,7 +17,10 @@ CompositionEntry compositionFromVideo(Video Function() builder) {
     height: video.height,
     fps: video.fps,
     frameCount: video.totalFrames,
-    build: builder,
+    // The capture harness mounts no app, so supply a left-to-right Directionality
+    // (Text throws debugCheckHasDirectionality without one) — like every other
+    // composition entry.
+    build: () => Directionality(textDirection: TextDirection.ltr, child: builder()),
     mediaSources: collectMediaSources(video.scenes),
   );
 }

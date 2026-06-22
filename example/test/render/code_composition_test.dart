@@ -34,7 +34,9 @@ void main() {
 
       final entry = compositionFromVideo(builder);
       expect(calls, 1, reason: 'one build to read geometry');
-      expect(entry.build(), isA<Widget>());
+      // Wrapped in a Directionality: the capture harness mounts no app, and Text
+      // throws debugCheckHasDirectionality without one.
+      expect(entry.build(), isA<Directionality>());
       expect(calls, 2, reason: 'entry.build calls the user builder again');
     });
   });
