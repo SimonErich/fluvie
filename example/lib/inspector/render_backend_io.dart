@@ -2,7 +2,7 @@ import 'package:fluvie_example/inspector/api_render_launcher.dart';
 import 'package:fluvie_example/inspector/process_render_launcher.dart';
 import 'package:fluvie_example/inspector/render_launcher.dart';
 
-/// The native default render backend: the `fluvie_api` server when
+/// The native default render backend: the `fluvie_server` server when
 /// `FLUVIE_API_URL` is set (and `FLUVIE_RENDER_BACKEND` is not `local`),
 /// otherwise the local desktop [ProcessRenderLauncher].
 ///

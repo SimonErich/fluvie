@@ -31,7 +31,7 @@ final class RenderViewModel extends Notifier<RenderState> {
   /// Renders the selected lesson via the injected backend; no-op while one runs.
   ///
   /// The backend is chosen by configuration: a local desktop render (the Fluvie
-  /// CLI, needs a Dart VM and ffmpeg) or a `fluvie_api` server (set
+  /// CLI, needs a Dart VM and ffmpeg) or a `fluvie_server` server (set
   /// `FLUVIE_API_URL`; the only option on web). A launch that throws (a missing
   /// `dart` on PATH raises a `ProcessException`, not a non-zero exit) is caught
   /// so the button never hangs on "Rendering ...".

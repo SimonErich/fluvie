@@ -1,7 +1,7 @@
 import 'package:fluvie_example/inspector/api_render_launcher.dart';
 import 'package:fluvie_example/inspector/render_launcher.dart';
 
-/// The web default render backend: always the `fluvie_api` server (the local
+/// The web default render backend: always the `fluvie_server` server (the local
 /// process launcher needs `dart:io`, unavailable on web).
 ///
 /// When `FLUVIE_API_URL` is not configured the launcher reports a clear error at
@@ -25,7 +25,7 @@ final class _UnconfiguredLauncher implements RenderLauncher {
     exitCode: 1,
     stdout: '',
     stderr:
-        'Rendering on web needs a fluvie_api server. '
+        'Rendering on web needs a fluvie_server. '
         'Build with --dart-define=FLUVIE_API_URL=https://your-server',
   );
 }

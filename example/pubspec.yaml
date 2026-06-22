@@ -15,8 +15,8 @@ dependencies:
   flutter_riverpod: ^3.3.2
   fluvie: ^0.1.0
   fluvie_ai: ^0.1.0
-  fluvie_api: ^0.1.0
   fluvie_mobile_encoder: ^0.1.0
+  fluvie_server: ^0.1.0
   fluvie_web_encoder: ^0.1.0
 
 dev_dependencies:

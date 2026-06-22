@@ -1,16 +1,15 @@
 # The Fluvie services, for local development and as a Dokploy deployment
 # reference. Run from the repo root:
 #
-#   cp deploy/env/api.env.example deploy/env/api.env   # then edit the tokens
-#   cp deploy/env/mcp.env.example deploy/env/mcp.env
+#   cp deploy/env/server.env.example deploy/env/server.env   # then edit the tokens
 #   docker compose -f deploy/docker-compose.yml up --build
 #
 # Each service reads its own documented env file under deploy/env/ (see
-# deploy/README.md). Local ports: render API (8080), demo (8081), MCP (8084).
-# The docs (docs.fluvie.dev) and the marketing landing (fluvie.dev) are hosted on
-# GitHub Pages, not as containers here. The optional S3 stack (MinIO) starts with
-# the `s3` profile,
-# the external cleanup cron with `cron`.
+# deploy/README.md). Local ports: full server (8080), demo (8081), slim
+# docs/MCP server (8084). The docs (docs.fluvie.dev) and the marketing landing
+# (fluvie.dev) are hosted on GitHub Pages, not as containers here. The optional
+# S3 stack (MinIO) starts with the `s3` profile, the external cleanup cron with
+# `cron`, and the slim docs server with the `docs` profile.
 #
 # Deploying with Dokploy: create one app per service from these Dockerfiles (or
 # the ghcr.io/simonerich/* images), set each domain in the Dokploy UI, and do
@@ -19,21 +18,22 @@
 # All build contexts are the repo root (..), because the images copy the whole
 # workspace; the Dockerfiles live under deploy/.
 services:
-  fluvie-api:
+  # The full server: render API + MCP + docs in one binary, toggled by env.
+  fluvie-server:
     build:
       context: ..
-      dockerfile: deploy/api.Dockerfile
+      dockerfile: deploy/server.Dockerfile
     ports:
       - "8080:8080"
     env_file:
-      - env/api.env
+      - env/server.env
     volumes:
       # Persist rendered files and job records across restarts (local backend).
       - fluvie-renders:/data/renders
     restart: unless-stopped
 
   # S3-compatible storage for testing the `STORAGE_BACKEND=s3` path locally.
-  # Enable with `--profile s3` and point env/api.env at it:
+  # Enable with `--profile s3` and point env/server.env at it:
   #   STORAGE_BACKEND=s3
   #   S3_ENDPOINT=minio        S3_USE_SSL=false   S3_PATH_STYLE=true
   #   S3_BUCKET=renders        S3_ACCESS_KEY=minioadmin  S3_SECRET_KEY=minioadmin
@@ -65,36 +65,36 @@ services:
 
   # OPTIONAL: an external cron that triggers cleanup, instead of (or alongside)
   # the server's built-in CLEANUP_INTERVAL timer. Enable with `--profile cron`.
-  # It reads CLEANUP_TOKEN from the api env file ($$ keeps the expansion at
+  # It reads CLEANUP_TOKEN from the server env file ($$ keeps the expansion at
   # container runtime, not compose parse time).
   cleanup-cron:
     image: curlimages/curl:latest
     profiles: ["cron"]
     depends_on:
-      - fluvie-api
+      - fluvie-server
     env_file:
-      - env/api.env
+      - env/server.env
     restart: unless-stopped
     entrypoint: >
       /bin/sh -c "
       while true; do
         sleep 3600;
-        curl -fsS -X POST -H \"Authorization: Bearer $$CLEANUP_TOKEN\" http://fluvie-api:8080/v1/maintenance/cleanup || true;
+        curl -fsS -X POST -H \"Authorization: Bearer $$CLEANUP_TOKEN\" http://fluvie-server:8080/v1/maintenance/cleanup || true;
       done
       "
 
-  # The hosted MCP server (mcp.fluvie.dev). It renders by delegating to
-  # fluvie-api, so it stays a small binary with no Flutter or ffmpeg.
-  fluvie-mcp:
+  # The slim docs/MCP server (no Flutter or ffmpeg): the documentation helper and
+  # the MCP docs tools, offline. Enable with `--profile docs`. Point it at the
+  # full server with FLUVIE_API_URL in env/server-docs.env to render too.
+  fluvie-server-docs:
     build:
       context: ..
-      dockerfile: deploy/mcp.Dockerfile
+      dockerfile: deploy/server-docs.Dockerfile
+    profiles: ["docs"]
     ports:
       - "8084:8080"
     env_file:
-      - env/mcp.env
-    depends_on:
-      - fluvie-api
+      - env/server-docs.env
     restart: unless-stopped
 
   # The live web demo (demo.fluvie.dev). The render API URL is baked in at build

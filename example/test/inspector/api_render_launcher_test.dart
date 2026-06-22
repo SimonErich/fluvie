@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluvie_api/client.dart';
 import 'package:fluvie_example/inspector/api_render_launcher.dart';
 import 'package:fluvie_example/inspector/render_launcher.dart';
+import 'package:fluvie_server/client.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockApiRenderClient extends Mock implements ApiRenderClient {}

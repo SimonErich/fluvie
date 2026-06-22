@@ -29,12 +29,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: fluvie-api
-            dockerfile: deploy/api.Dockerfile
-            hook: DOKPLOY_WEBHOOK_API
-          - name: fluvie-mcp
-            dockerfile: deploy/mcp.Dockerfile
-            hook: DOKPLOY_WEBHOOK_MCP
+          - name: fluvie-server
+            dockerfile: deploy/server.Dockerfile
+            hook: DOKPLOY_WEBHOOK_SERVER
+          - name: fluvie-server-docs
+            dockerfile: deploy/server-docs.Dockerfile
+            hook: DOKPLOY_WEBHOOK_SERVER_DOCS
           - name: fluvie-demo
             dockerfile: deploy/demo.Dockerfile
             hook: DOKPLOY_WEBHOOK_DEMO
@@ -69,8 +69,8 @@ jobs:
       # legs untouched.
       - name: Redeploy ${{ matrix.name }}
         env:
-          DOKPLOY_WEBHOOK_API: ${{ secrets.DOKPLOY_WEBHOOK_API }}
-          DOKPLOY_WEBHOOK_MCP: ${{ secrets.DOKPLOY_WEBHOOK_MCP }}
+          DOKPLOY_WEBHOOK_SERVER: ${{ secrets.DOKPLOY_WEBHOOK_SERVER }}
+          DOKPLOY_WEBHOOK_SERVER_DOCS: ${{ secrets.DOKPLOY_WEBHOOK_SERVER_DOCS }}
           DOKPLOY_WEBHOOK_DEMO: ${{ secrets.DOKPLOY_WEBHOOK_DEMO }}
           HOOK_VAR: ${{ matrix.hook }}
         run: |

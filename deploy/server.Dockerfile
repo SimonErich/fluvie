@@ -1,0 +1,62 @@
+# Fluvie server image (full).
+#
+# One self-hostable binary: the render API, the MCP server, and the documentation
+# helper, each toggled by environment variables (FLUVIE_ENABLE_API / _MCP / _DOCS).
+# Rendering is a two-process pipeline: capture frames with `flutter test` (headless
+# software rendering — no display server needed) then encode with ffmpeg. So the
+# image carries the Flutter SDK, ffmpeg, real fonts, the workspace (the example app
+# is the default RENDER_PROJECT), and the bundled documentation corpus. For a tiny
+# docs/MCP-only deployment with no render toolchain, use server-docs.Dockerfile.
+FROM debian:bookworm-slim
+
+ENV FLUTTER_VERSION=3.44.0 \
+    FLUTTER_HOME=/opt/flutter \
+    PATH=/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:/root/.pub-cache/bin:$PATH \
+    PUB_CACHE=/root/.pub-cache
+
+# Real fonts so captured text is not tofu (CI inherits the runner's fonts; a
+# slim image has none); git/curl/unzip for the Flutter SDK. FFmpeg is NOT
+# installed via apt — it is provisioned below as the same pinned, checksum-
+# verified build the CLI downloads, so server renders are byte-identical to
+# local ones.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ca-certificates curl git unzip xz-utils \
+      fontconfig fonts-dejavu fonts-noto-core fonts-noto-color-emoji \
+    && rm -rf /var/lib/apt/lists/* \
+    && fc-cache -f
+
+# Pin the Flutter SDK to the workspace version and precache the Linux engine.
+RUN git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$FLUTTER_HOME" \
+    && git config --global --add safe.directory "$FLUTTER_HOME" \
+    && flutter config --no-analytics --no-cli-animations \
+    && flutter precache --linux \
+    && dart pub global activate melos
+
+WORKDIR /app
+COPY . .
+
+# Resolve the workspace, provision the pinned FFmpeg into the managed cache
+# (the runtime server and capture harness both resolve it from there), then warm
+# the capture harness with one throwaway render so the first real request does
+# not pay the kernel-snapshot cost.
+RUN melos bootstrap \
+    && dart run packages/fluvie_cli/bin/fluvie.dart ffmpeg install \
+    && (dart run packages/fluvie_cli/bin/fluvie.dart render demo --out /tmp/warm.mp4 || true) \
+    && rm -f /tmp/warm.mp4 \
+    && dart compile exe packages/fluvie_server/bin/fluvie_server.dart -o /usr/local/bin/fluvie_server
+
+ENV HOST=0.0.0.0 \
+    PORT=8080 \
+    RENDER_PROJECT=/app/example \
+    LOCAL_STORAGE_DIR=/data/renders \
+    FLUVIE_DOCS_DIR=/app/documentation \
+    VIDEO_SPEC_SCHEMA_PATH=/app/packages/fluvie_server/assets/video_spec_schema.json
+
+VOLUME ["/data/renders"]
+EXPOSE 8080
+
+# A healthcheck against the open liveness endpoint (served whatever the feature set).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s \
+  CMD curl -fsS "http://localhost:${PORT}/healthz" || exit 1
+
+CMD ["fluvie_server"]

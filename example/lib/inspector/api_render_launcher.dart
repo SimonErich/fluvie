@@ -1,9 +1,9 @@
-import 'package:fluvie_api/client.dart';
 import 'package:fluvie_example/inspector/render_launcher.dart';
+import 'package:fluvie_server/client.dart';
 
-/// A [RenderLauncher] that renders through a `fluvie_api` server over HTTP.
+/// A [RenderLauncher] that renders through a `fluvie_server` over HTTP.
 ///
-/// Web-safe (it depends only on `package:fluvie_api/client.dart`), so the hosted
+/// Web-safe (it depends only on `package:fluvie_server/client.dart`), so the hosted
 /// web example uses it where the local `ProcessRenderLauncher` cannot run. It
 /// submits the composition key, polls until the render finishes, and returns the
 /// download URL.

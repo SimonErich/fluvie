@@ -48,19 +48,12 @@ jobs:
     with:
       working-directory: packages/fluvie_ai
 
-  fluvie_api:
+  fluvie_server:
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
     with:
-      working-directory: packages/fluvie_api
-
-  fluvie_mcp:
-    permissions:
-      id-token: write
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
-    with:
-      working-directory: packages/fluvie_mcp
+      working-directory: packages/fluvie_server
 
   fluvie_mobile_encoder:
     permissions:

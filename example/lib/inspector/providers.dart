@@ -36,6 +36,6 @@ final timelineProbeProvider = Provider<TimelineProbe>((ref) {
   return probe;
 });
 
-/// The render backend for this platform/config (local desktop or `fluvie_api`);
+/// The render backend for this platform/config (local desktop or `fluvie_server`);
 /// tests override this with a mock so no process or HTTP call happens.
 final renderLauncherProvider = Provider<RenderLauncher>((ref) => createRenderLauncher());
