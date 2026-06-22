@@ -28,6 +28,7 @@ dev_dependencies:
     # A path (not hosted) constraint: the custom_lint plugin host replicates
     # this dependency and must resolve it without pub.dev.
     path: ../packages/fluvie_lints
+  http: ^1.5.0
   mocktail: ^1.0.5
 
 flutter:
