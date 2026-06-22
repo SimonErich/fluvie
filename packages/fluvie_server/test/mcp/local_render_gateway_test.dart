@@ -16,6 +16,7 @@ import 'package:fluvie_server/src/mcp/local_render_gateway.dart';
 import 'package:test/test.dart';
 
 import '../api/render/fakes/fake_render_runner.dart';
+import '../api/validate/fake_code_validation_service.dart';
 
 // Turns the event loop (so the background render can progress) without waiting
 // the real poll interval.
@@ -61,6 +62,7 @@ void main() {
       fileStore: files,
       retention: DefaultRetentionService(jobs, files),
       signer: DownloadTokenSigner(config.downloadSigningKey),
+      codeValidator: FakeCodeValidationService(),
       schemaJson: schemaJson,
     );
   }

@@ -41,3 +41,6 @@ pubspec_overrides.yaml
 
 # verify_fresh_clone.sh throwaway working tree
 .verify_clone*
+
+# Playground snippet validation scratch (fluvie_validate writes then deletes here)
+.fluvie_scratch/

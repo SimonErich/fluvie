@@ -32,6 +32,16 @@ void main() {
     ),
   );
 
+  Future<Response> postValidate(Handler app, String code, {Map<String, String>? headers}) async =>
+      app(
+        Request(
+          'POST',
+          Uri.parse('http://localhost/v1/validate'),
+          headers: {'content-type': 'application/json', ...?headers},
+          body: jsonEncode({'code': code}),
+        ),
+      );
+
   group('the full server (API + MCP + docs)', () {
     late Handler app;
 
@@ -71,6 +81,19 @@ void main() {
       expect(response.statusCode, 200);
       expect((decoded['result']! as Map)['tools'], isNotEmpty);
     });
+
+    test('validates submitted code with a bearer token', () async {
+      final response = await postValidate(
+        app,
+        'Video build() => Video(scenes: []);',
+        headers: {'authorization': 'Bearer tok'},
+      );
+      final decoded = jsonDecode(await response.readAsString()) as Map<String, Object?>;
+
+      expect(response.statusCode, 200);
+      expect(decoded['ok'], isTrue);
+      expect(decoded['diagnostics'], isEmpty);
+    });
   });
 
   group('a docs-only server', () {
@@ -88,6 +111,10 @@ void main() {
 
     test('has no render API', () async {
       expect((await get(app, '/v1/renders/abc')).statusCode, 404);
+    });
+
+    test('has no validate route', () async {
+      expect((await postValidate(app, 'x')).statusCode, 404);
     });
   });
 

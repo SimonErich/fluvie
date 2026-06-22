@@ -1,0 +1,11 @@
+include: ../../analysis_options.yaml
+
+# Declared directly so the published package formats at width 100 standalone.
+formatter:
+  page_width: 100
+
+analyzer:
+  exclude:
+    # Transient snippet files the analyzer engine writes at runtime and deletes;
+    # never production code, never committed.
+    - .fluvie_scratch/**

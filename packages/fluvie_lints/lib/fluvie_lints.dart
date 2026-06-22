@@ -9,7 +9,8 @@ import 'package:fluvie_lints/src/rules/no_src_import.dart';
 import 'package:fluvie_lints/src/rules/relative_outside_scope.dart';
 import 'package:fluvie_lints/src/rules/unused_anchor.dart';
 
-/// Entry point read by `custom_lint` to load the Fluvie rule set.
+/// The Fluvie rule set, in one place so `custom_lint` and programmatic callers
+/// (the Playground's snippet validator) share the exact same rules.
 ///
 /// The rules split three ways: structural law (`no_src_import`, `layering`),
 /// migration (`deprecated_member`), and the conservative timing-semantics family
@@ -17,20 +18,25 @@ import 'package:fluvie_lints/src/rules/unused_anchor.dart';
 /// `animation_exceeds_window`, `conflicting_keyframe_fields`,
 /// `relative_outside_scope`). The timing rules are AST-syntactic and stay silent
 /// whenever an argument is not statically decidable, so they never raise a false
-/// positive on real code.
+/// positive on real code. The structural rules read a file's `lib/` path and so
+/// stay silent on a standalone snippet, which is why running the whole set
+/// against an isolated file is safe.
+const List<DartLintRule> fluvieLintRules = [
+  NoSrcImport(),
+  Layering(),
+  DeprecatedMember(),
+  DanglingAnchor(),
+  CyclicTrigger(),
+  UnusedAnchor(),
+  AnimationExceedsWindow(),
+  ConflictingKeyframeFields(),
+  RelativeOutsideScope(),
+];
+
+/// Entry point read by `custom_lint` to load the Fluvie rule set.
 PluginBase createPlugin() => _FluvieLintsPlugin();
 
 final class _FluvieLintsPlugin extends PluginBase {
   @override
-  List<LintRule> getLintRules(CustomLintConfigs configs) => const [
-    NoSrcImport(),
-    Layering(),
-    DeprecatedMember(),
-    DanglingAnchor(),
-    CyclicTrigger(),
-    UnusedAnchor(),
-    AnimationExceedsWindow(),
-    ConflictingKeyframeFields(),
-    RelativeOutsideScope(),
-  ];
+  List<LintRule> getLintRules(CustomLintConfigs configs) => fluvieLintRules;
 }

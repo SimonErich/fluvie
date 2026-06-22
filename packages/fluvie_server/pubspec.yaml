@@ -15,12 +15,13 @@ environment:
   sdk: ^3.12.0
 
 resolution: workspace
-# `crypto`, `fluvie_cli`, `minio`, and the `shelf` deps are server-only and are
-# never reached by `lib/client.dart`, so the client stays web-safe; `http` and
-# `meta` are shared by the client and the server.
+# `crypto`, `fluvie_cli`, `fluvie_validate`, `minio`, and the `shelf` deps are
+# server-only and never reached by `lib/client.dart`, so the client stays
+# web-safe; `http` and `meta` are shared by the client and the server.
 dependencies:
   crypto: ^3.0.7
   fluvie_cli: ^0.1.0
+  fluvie_validate: ^0.1.0
   http: ^1.5.0
   meta: ^1.16.0
   minio: ^3.5.8

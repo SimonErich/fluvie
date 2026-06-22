@@ -12,6 +12,7 @@ workspace:
   - packages/fluvie_lints/example
   - packages/fluvie_cli
   - packages/fluvie_ai
+  - packages/fluvie_validate
   - packages/fluvie_server
   - packages/fluvie_mobile_encoder
   - packages/fluvie_web_encoder

@@ -12,6 +12,7 @@ import 'package:fluvie_server/src/api/storage/local_file_store.dart';
 import 'package:fluvie_server/src/api/storage/minio_object_storage.dart';
 import 'package:fluvie_server/src/api/storage/s3_file_store.dart';
 import 'package:fluvie_server/src/api/storage/signed_token.dart';
+import 'package:fluvie_server/src/api/validate/in_process_code_validation_service.dart';
 import 'package:minio/minio.dart';
 
 /// Builds the [ServerDependencies] graph from [config]: the file store (local or
@@ -44,6 +45,11 @@ ServerDependencies buildServerDependencies(ServerConfig config, {String schemaJs
     fileStore: fileStore,
     retention: DefaultRetentionService(jobStore, fileStore),
     signer: DownloadTokenSigner(config.downloadSigningKey),
+    codeValidator: InProcessCodeValidationService(
+      projectRoot: config.renderProject != null
+          ? Directory(config.renderProject!)
+          : Directory.current,
+    ),
     schemaJson: schemaJson,
   );
 }

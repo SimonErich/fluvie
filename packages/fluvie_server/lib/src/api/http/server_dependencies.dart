@@ -4,6 +4,7 @@ import 'package:fluvie_server/src/api/jobs/job_store.dart';
 import 'package:fluvie_server/src/api/jobs/render_queue.dart';
 import 'package:fluvie_server/src/api/storage/file_store.dart';
 import 'package:fluvie_server/src/api/storage/signed_token.dart';
+import 'package:fluvie_server/src/api/validate/code_validation_service.dart';
 import 'package:meta/meta.dart';
 
 /// The collaborators the HTTP layer needs, bundled so the router and app builder
@@ -18,6 +19,7 @@ final class ServerDependencies {
     required this.fileStore,
     required this.retention,
     required this.signer,
+    required this.codeValidator,
     this.schemaJson = '{}',
     this.now = _systemUtcNow,
   });
@@ -39,6 +41,9 @@ final class ServerDependencies {
 
   /// Signs and verifies private download tokens.
   final DownloadTokenSigner signer;
+
+  /// Validates submitted Playground code (analysis only; never executes it).
+  final CodeValidationService codeValidator;
 
   /// The `VideoSpec` JSON schema served at `/v1/schema/video-spec`.
   final String schemaJson;

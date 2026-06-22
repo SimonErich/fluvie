@@ -16,6 +16,7 @@ import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 
 import '../render/fakes/fake_render_runner.dart';
+import '../validate/fake_code_validation_service.dart';
 
 void main() {
   late InMemoryJobStore jobs;
@@ -66,6 +67,7 @@ void main() {
         fileStore: files,
         retention: retention ?? DefaultRetentionService(jobs, files),
         signer: DownloadTokenSigner(cfg.downloadSigningKey),
+        codeValidator: FakeCodeValidationService(),
         schemaJson: r'{"$id":"video-spec"}',
         now: () => now,
       ),

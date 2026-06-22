@@ -5,6 +5,7 @@ import 'package:fluvie_server/src/api/http/handlers/maintenance_handler.dart';
 import 'package:fluvie_server/src/api/http/handlers/render_handler.dart';
 import 'package:fluvie_server/src/api/http/handlers/root_handler.dart';
 import 'package:fluvie_server/src/api/http/handlers/schema_handler.dart';
+import 'package:fluvie_server/src/api/http/handlers/validate_handler.dart';
 import 'package:fluvie_server/src/api/http/middleware/auth_middleware.dart';
 import 'package:fluvie_server/src/api/http/server_dependencies.dart';
 import 'package:shelf/shelf.dart';
@@ -37,6 +38,7 @@ Router buildRouter(ServerDependencies deps) {
   final maintenance = MaintenanceHandler(deps.retention);
   final health = HealthHandler(deps.fileStore);
   final schema = SchemaHandler(deps.schemaJson);
+  final validate = ValidateHandler(validator: deps.codeValidator);
   const root = RootHandler();
 
   final api = bearerAuth(deps.config.apiToken);
@@ -45,6 +47,7 @@ Router buildRouter(ServerDependencies deps) {
   return Router()
     ..get('/', root.index)
     ..post('/v1/renders', _guard(api, render.create))
+    ..post('/v1/validate', _guard(api, validate.validate))
     ..get('/v1/renders/<id>', _guard(api, (request) => job.get(request, _param(request, 'id'))))
     ..get(
       '/v1/files/<id>/<kind>',

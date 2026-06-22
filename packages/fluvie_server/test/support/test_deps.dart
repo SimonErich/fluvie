@@ -9,6 +9,7 @@ import 'package:fluvie_server/src/api/storage/in_memory_file_store.dart';
 import 'package:fluvie_server/src/api/storage/signed_token.dart';
 
 import '../api/render/fakes/fake_render_runner.dart';
+import '../api/validate/fake_code_validation_service.dart';
 
 /// Builds an in-memory [ServerDependencies] for HTTP/app tests (no disk, no
 /// network). The render queue uses a stub runner; most app tests never run it.
@@ -33,6 +34,7 @@ ServerDependencies inMemoryDeps({String schemaJson = '{}'}) {
     fileStore: files,
     retention: DefaultRetentionService(jobs, files),
     signer: DownloadTokenSigner(config.downloadSigningKey),
+    codeValidator: FakeCodeValidationService(),
     schemaJson: schemaJson,
   );
 }
