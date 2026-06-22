@@ -3,6 +3,14 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.2] - 2026-06-21
+
+### Added
+
+- A pinned FFmpeg provisioner: download, cache, and use a known-good FFmpeg build,
+  so a render works without a system FFmpeg on `PATH`.
+- Impeller capture support in the render pipeline.
+
 ## [0.1.0] - 2026-06-20
 
 The first public release.

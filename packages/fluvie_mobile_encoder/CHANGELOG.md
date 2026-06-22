@@ -3,6 +3,13 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.2] - 2026-06-21
+
+### Added
+
+- On-device audio: materialize and mux audio tracks, including network sources,
+  into the encoded MP4 alongside the captured frames.
+
 ## [0.1.0] - 2026-06-20
 
 The first public release.

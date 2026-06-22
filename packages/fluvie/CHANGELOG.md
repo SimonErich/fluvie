@@ -3,6 +3,20 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.2] - 2026-06-21
+
+### Added
+
+- On-device audio: audio sources and a resolved audio-track model, mixed through
+  the deterministic encode path, including looping audio beds.
+- A render-sandbox seam with file and in-memory backends, so a composition can be
+  captured to disk or to memory for the on-device mobile and web renderers.
+
+### Changed
+
+- The render service stages audio and frames through the sandbox and runs a
+  dedicated frame-capture loop, in place of the previous single render loop.
+
 ## [0.1.0] - 2026-06-20
 
 The first public release. The API is feature-complete and well tested; the `0.x`

@@ -7,6 +7,9 @@ name: publish
 # For pub.dev's OIDC check to pass, set each package's tag pattern under
 # Admin -> Automated publishing to `v{{version}}` (not `{{package}}-v{{version}}`).
 # Creating a GitHub Release for the tag (or `git push` of the tag) triggers this.
+# A brand-new package has no Admin page yet, so its first version must be
+# published manually (`dart pub publish` once); the tag automates every release
+# after that.
 #
 # Jobs run in parallel; that is safe because the inter-package constraints are
 # loose (`^0.1.x`), so a dependency only needs SOME already-published version, not
@@ -58,3 +61,17 @@ jobs:
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
     with:
       working-directory: packages/fluvie_mcp
+
+  fluvie_mobile_encoder:
+    permissions:
+      id-token: write
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      working-directory: packages/fluvie_mobile_encoder
+
+  fluvie_web_encoder:
+    permissions:
+      id-token: write
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      working-directory: packages/fluvie_web_encoder

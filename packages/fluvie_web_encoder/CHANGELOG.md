@@ -3,6 +3,13 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.2] - 2026-06-21
+
+### Added
+
+- On-device audio: mix audio into the in-browser MP4 through the same ffmpeg.wasm
+  argument plan that encodes the captured frames.
+
 ## [0.1.0] - 2026-06-21
 
 The first public release.
