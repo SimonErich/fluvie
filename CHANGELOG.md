@@ -6,6 +6,31 @@ All notable changes to the Fluvie workspace. The format follows
 
 Per-package changelogs live next to each package.
 
+## [0.1.3] - 2026-06-22
+
+On-device rendering of compositions that declare media, plus release-tooling
+fixes so every package publishes from the umbrella tag.
+
+### Added
+
+- On-device media: off-screen renders pre-resolve declared `Image`/`Clip`
+  sources, and the mobile renderer paints them on device.
+
+### Fixed
+
+- The mobile encoder's input buffer size (YUV420, not RGBA) and the off-screen
+  capture boundary lookup.
+- The lockstep publish: every package CHANGELOG is stamped with the release
+  version, so pub.dev's dry-run no longer rejects the tag. `tool/set_version.sh`
+  now stamps the CHANGELOGs as part of the bump.
+
+### Changed
+
+- The marketing site builds from the Astro project in `web/site`; the old
+  data-driven landing is removed.
+
+[0.1.3]: https://github.com/SimonErich/fluvie/releases/tag/v0.1.3
+
 ## [0.1.2] - 2026-06-21
 
 Added more deployment options, local mobile and local web renderer.

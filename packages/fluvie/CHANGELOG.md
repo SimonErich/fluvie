@@ -3,6 +3,14 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.3] - 2026-06-22
+
+### Added
+
+- Off-screen renders can pre-resolve a composition's declared media: an injected
+  `MediaResolver` decodes and caches the `Image`/`Clip` sources before the first
+  frame, so the on-device mobile and web renderers can paint declared media.
+
 ## [0.1.2] - 2026-06-21
 
 ### Added

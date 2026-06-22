@@ -3,6 +3,10 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.3] - 2026-06-22
+
+Lockstep release with the rest of the workspace; no changes to this package.
+
 ## [0.1.2] - 2026-06-21
 
 ### Added

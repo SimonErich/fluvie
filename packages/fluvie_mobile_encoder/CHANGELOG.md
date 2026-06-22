@@ -3,6 +3,21 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.3] - 2026-06-22
+
+### Added
+
+- Render compositions that declare an `Image` or `Clip` on device:
+  `OnDeviceVideoRenderer` resolves declared media (inject a `MediaResolver`, or it
+  builds and disposes one per render).
+
+### Fixed
+
+- Size the encoder's input buffer for YUV420, not RGBA, so the native encoder no
+  longer overruns its input image.
+- Resolve the off-screen capture boundary against the app's `BuildOwner`, so
+  `GlobalKey.currentContext` finds it.
+
 ## [0.1.2] - 2026-06-21
 
 ### Added
