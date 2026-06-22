@@ -6,15 +6,13 @@ import 'package:fluvie_lints/src/rules/dangling_anchor.dart';
 import 'package:fluvie_lints/src/rules/deprecated_member.dart';
 import 'package:fluvie_lints/src/rules/layering.dart';
 import 'package:fluvie_lints/src/rules/no_src_import.dart';
-import 'package:fluvie_lints/src/rules/nondeterministic_random.dart';
 import 'package:fluvie_lints/src/rules/relative_outside_scope.dart';
 import 'package:fluvie_lints/src/rules/unused_anchor.dart';
 
 /// Entry point read by `custom_lint` to load the Fluvie rule set.
 ///
-/// The ten rules split three ways: structural law (`no_src_import`,
-/// `layering`), the determinism contract (`nondeterministic_random`), migration
-/// (`deprecated_member`), and the conservative timing-semantics family
+/// The rules split three ways: structural law (`no_src_import`, `layering`),
+/// migration (`deprecated_member`), and the conservative timing-semantics family
 /// (`dangling_anchor`, `cyclic_trigger`, `unused_anchor`,
 /// `animation_exceeds_window`, `conflicting_keyframe_fields`,
 /// `relative_outside_scope`). The timing rules are AST-syntactic and stay silent
@@ -27,7 +25,6 @@ final class _FluvieLintsPlugin extends PluginBase {
   List<LintRule> getLintRules(CustomLintConfigs configs) => const [
     NoSrcImport(),
     Layering(),
-    NondeterministicRandom(),
     DeprecatedMember(),
     DanglingAnchor(),
     CyclicTrigger(),

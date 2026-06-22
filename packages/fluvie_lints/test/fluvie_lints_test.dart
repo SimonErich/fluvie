@@ -10,7 +10,7 @@ void main() {
       CustomLintConfigs.empty,
     );
 
-    test('declares exactly the ten Fluvie rules', () {
+    test('declares exactly the nine Fluvie rules', () {
       expect(plugin, isA<PluginBase>());
       final names = rules.map((r) => r.code.name).toSet();
       expect(
@@ -18,7 +18,6 @@ void main() {
         unorderedEquals(<String>[
           'no_src_import',
           'layering',
-          'nondeterministic_random',
           'deprecated_member',
           'dangling_anchor',
           'cyclic_trigger',
@@ -28,7 +27,7 @@ void main() {
           'relative_outside_scope',
         ]),
       );
-      expect(rules, hasLength(10));
+      expect(rules, hasLength(9));
     });
 
     test('every rule code name is unique', () {

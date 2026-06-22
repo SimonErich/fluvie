@@ -51,15 +51,19 @@ import 'package:flutter/widgets.dart' as flutter; // flutter.Animation<T>, etc.
 
 ---
 
-## Determinism contract (non-negotiable)
+## Capture model
 
-Identical input → byte-identical frames → byte-identical output. This makes
-caching, golden tests, and data-driven batch rendering possible.
+Headless capture needs the frame to be the only clock, so each frame builds as a
+pure function of its index. This is a **correctness** requirement (not a
+byte-identity guarantee):
 
-- In **capture mode** (`RenderModeContext`): no wall-clock, no async-in-frame, media pre-resolved before the frame loop. The frame is the only clock.
-- **No `DateTime.now()`** and **no unseeded `dart:math` `Random()`** in render code. Randomness flows through seeded `noise(seed)` / `random(seed)` (the `nondeterministic_random` lint and the pre-commit grep-gate both forbid it).
-- Media (`Image`/`Clip`/snapshots) are pre-resolved and **cached by content hash** before capture.
-- Encoded files are byte-identical **per machine** (ffmpeg builds differ); frames are byte-identical everywhere. Encoder runs use bitexact flags and a single thread.
+- In **capture mode** (`RenderModeContext`): no async-in-frame, no platform views, media pre-resolved before the frame loop. You cannot await media or run a wall-clock ticker mid-frame in a synchronous capture pump.
+- Media (`Image`/`Clip`/snapshots) are pre-resolved before capture and **cached by content hash** (an advisory cache for performance — it does not detect composition-code changes).
+- Seeded `noise(seed)` / `random(seed)` keep effects stable run-to-run; prefer them so renders don't flicker, but they are not enforced.
+
+Fluvie does **not** guarantee byte-identical output across machines, platforms, or
+encoders. On-device decode (WebCodecs, native mobile) and hardware encoders vary;
+that is fine — the bar is "it looks right," not "the bytes match."
 
 ---
 
@@ -67,10 +71,9 @@ caching, golden tests, and data-driven batch rendering possible.
 
 - **Red → green → refactor for every change.** No production `.dart` file before its failing test exists and has been seen to fail for the right reason.
 - **Unit tests** for everything pure (core, timing, services, math) — the bulk. Mock with **mocktail**; inject fakes through Riverpod overrides. No real network or filesystem in unit tests.
-- **Goldens via Alchemist** (`golden` tag): ci goldens (Ahem font) run everywhere; platform goldens (real, bundled fonts) run on Linux only — the baseline platform. Fixed fps, fixed seed, DPR 1.0. Regenerate with `flutter test --update-goldens --tags golden`, then review the PNG before committing.
+- **Goldens via Alchemist** (`golden` tag): visual-regression on the Linux baseline. ci goldens (Ahem font) run everywhere; platform goldens (real, bundled fonts) run on Linux only. Fixed fps, fixed seed, DPR 1.0. Regenerate with `flutter test --update-goldens --tags golden`, then review the PNG before committing.
 - **Integration tests** are tagged by what they need: `ffmpeg`, `snapshot` (live Chromium), `wasm`, `render`. Plain `melos run test` excludes goldens/snapshots; CI gates tags per platform.
 - **Coverage gate: ≥97% line coverage** on `packages/fluvie`, `fluvie_lints`, `fluvie_cli` (generated files excluded, `// coverage:ignore` markers honored), enforced by `melos run coverage:check`; 100% is the goal. Justified `// coverage:ignore` needs a reason on the same line — see `documentation/contributing/coverage.md`.
-- Determinism proofs where relevant: render twice → identical frame hashes; same seed → same sequence.
 
 ---
 
@@ -89,7 +92,7 @@ caching, golden tests, and data-driven batch rendering possible.
 - **Naming:** `snake_case.dart` files; `UpperCamel` types.
 - **Hard rules:** no `TODO`/`FIXME` left behind, no dead or commented-out code, no `print` (use `stderr`/logging), no `dynamic` unless unavoidable **and** justified with a file-scoped `// ignore:` + reason.
 - **Dartdoc:** every public member of `packages/fluvie` is documented (`public_member_api_docs`). Annotate `@useResult` on `.animate()`/`.show()`; `@experimental` on `Timeline`/`FrameBuilder`/shader animations; `@Deprecated` on renamed members.
-- **Generated code (`*.g.dart`, `*.freezed.dart`) is committed** (determinism + fast CI + reviewable diffs); `.gitattributes` collapses it in diffs; the analyzer excludes it. Run `build_runner` and commit the result in the same change.
+- **Generated code (`*.g.dart`, `*.freezed.dart`) is committed** (reviewable diffs + fast CI); `.gitattributes` collapses it in diffs; the analyzer excludes it. Run `build_runner` and commit the result in the same change.
 - **Formatting:** page width 100 (root `analysis_options.yaml`), trailing commas required.
 - **Add a dependency only in the package that first uses it** — no speculative deps (pana penalizes them).
 
@@ -133,7 +136,7 @@ Run Melos non-interactively (`CI=true`) to avoid the interactive-prompt path.
 
 For a substantial change: **architect → implementer → reviewer → tester**;
 `docs-writer` updates the documentation pages. Bring in `render-engineer` for
-render-heavy work (timing, encoding, determinism, FFmpeg). See
+render-heavy work (timing, encoding, capture, FFmpeg). See
 [`.claude/agents/`](.claude/agents/) for roles and [`.claude/skills/`](.claude/skills/)
 for the repeatable house patterns (`new-element`, `new-service`, `golden-frame`,
 `new-animation-preset`).

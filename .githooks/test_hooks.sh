@@ -13,7 +13,7 @@ fail=0
 note() { echo "  $1"; }
 
 # A code-construct violation in LIVE code must survive stripping and match.
-bad=$'void main() {\n  print(DateTime.now());\n  final r = Random();\n  final x = r as dynamic;\n}'
+bad=$'void main() {\n  print("x");\n  final r = 1;\n  final x = r as dynamic;\n}'
 stripped="$(printf '%s' "$bad" | strip_dart_comments_and_strings)"
 for entry in "${FORBIDDEN_CODE_PATTERNS[@]}"; do
   pat="${entry%%|*}"

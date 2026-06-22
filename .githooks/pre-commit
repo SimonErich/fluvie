@@ -26,12 +26,9 @@ for f in "${FILES[@]}"; do
     fi
   done
   # Code-construct patterns: match against comments/strings-stripped source so
-  # a `print(`/`DateTime.now()` inside a dartdoc example or a highlighted-code
-  # test fixture is not a false positive. The fluvie_lints package is exempt:
-  # it is the tooling ABOUT these patterns (the nondeterministic_random rule's
-  # source + its trigger fixtures must contain real DateTime.now()/Random()),
-  # and custom_lint's nondeterministic_random is the authority that correctly
-  # scopes the ban to fluvie's render code, not the lint package itself.
+  # a `print(` inside a dartdoc example or a highlighted-code test fixture is not
+  # a false positive. The fluvie_lints package is exempt: its rule sources and
+  # trigger fixtures contain these constructs deliberately.
   if [[ "$f" != packages/fluvie_lints/* ]]; then
     code_only="$(printf '%s\n' "$content" | strip_dart_comments_and_strings)"
     for entry in "${FORBIDDEN_CODE_PATTERNS[@]}"; do

@@ -14,16 +14,9 @@ FORBIDDEN_PATTERNS=(
 # the file with comments and string literals stripped, so a `print(` inside a
 # dartdoc example or a highlighted-code test fixture is not a false positive;
 # only a real statement-level occurrence trips the gate.
-#
-# As of Phase 15 the fluvie_lints `nondeterministic_random` rule is the
-# authority on DateTime.now()/unseeded Random() (it runs in the IDE and in
-# `melos run lint`). This grep-gate stays as the fast pre-commit proxy: the
-# overlap is intentional defense in depth (decision D-GrepGate-KEEP).
 FORBIDDEN_CODE_PATTERNS=(
   'print\(|use of print() — use stderr/logging'
   ' as dynamic|cast to dynamic'
-  'DateTime\.now\(|wall-clock DateTime.now() — the frame is the only clock'
-  'Random\(\)|unseeded Random() — use seeded noise(seed)/random(seed)'
 )
 
 # Strip comments (`//`, `/* */`) and string literals (triple-quoted blocks and
