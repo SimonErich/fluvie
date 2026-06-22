@@ -50,15 +50,20 @@ void main() {
     expect(_renderButton(tester).onPressed, isNotNull);
   });
 
-  testWidgets('the render button is disabled when validation finds an error', (tester) async {
+  testWidgets('a validation error blocks the render but keeps the button clickable', (
+    tester,
+  ) async {
     final backend = FakePlaygroundBackend(
       validateResult: const ApiValidationResult(ok: false, diagnostics: [_errorDiagnostic]),
     );
     final container = await _pump(tester, backend);
-    await container.read(playgroundViewModelProvider.notifier).validate('bad');
+    await container.read(playgroundViewModelProvider.notifier).render('bad');
     await tester.pump();
 
-    expect(_renderButton(tester).onPressed, isNull);
+    // The render is blocked, but the button stays enabled so a fixed snippet can
+    // be re-validated and rendered (validation runs on every Render press).
+    expect(find.textContaining('Fix the errors'), findsOneWidget);
+    expect(_renderButton(tester).onPressed, isNotNull);
   });
 
   testWidgets('a successful render shows the video url', (tester) async {

@@ -61,7 +61,7 @@ void main() {
     expect(find.textContaining('1 problem'), findsOneWidget);
   });
 
-  testWidgets('typing after the debounce triggers a validate call', (tester) async {
+  testWidgets('typing never triggers validation on its own (only Render does)', (tester) async {
     final backend = FakePlaygroundBackend();
     await _pump(tester, backend);
 
@@ -69,7 +69,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pumpAndSettle();
 
-    expect(backend.validateCalls, greaterThanOrEqualTo(1));
-    expect(backend.lastValidatedCode, contains('Video'));
+    expect(backend.validateCalls, 0, reason: 'validation runs only on Render, not on edit');
   });
 }

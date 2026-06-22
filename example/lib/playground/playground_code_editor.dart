@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_code_editor/flutter_code_editor.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,13 +6,12 @@ import 'package:fluvie_example/playground/playground_view_model.dart';
 import 'package:fluvie_server/client.dart';
 import 'package:highlight/languages/dart.dart' as highlight_dart;
 
-/// The Playground's Dart editor: a syntax-highlighted [CodeField] that debounces
-/// edits into a validation, then renders the result's diagnostics as gutter
-/// markers and a one-line "N problems" summary.
+/// The Playground's Dart editor: a syntax-highlighted [CodeField] whose gutter
+/// markers and one-line "N problems" summary come from the server's validation.
 ///
-/// Validation runs on the server (it never executes the snippet here), so the
-/// built-in analyzer is replaced with a no-op and the markers come straight from
-/// [PlaygroundViewModel].
+/// Validation runs only when the user hits Render (driven by the parent
+/// `Playground`), never on its own; the built-in analyzer is a no-op so it
+/// cannot overwrite the server-sourced markers in [PlaygroundViewModel].
 final class PlaygroundCodeEditor extends ConsumerStatefulWidget {
   /// Creates the editor, seeded with [defaultPlaygroundCode].
   const PlaygroundCodeEditor({super.key});
@@ -31,10 +28,7 @@ final class PlaygroundCodeEditor extends ConsumerStatefulWidget {
 }
 
 class _PlaygroundCodeEditorState extends ConsumerState<PlaygroundCodeEditor> {
-  static const _debounce = Duration(milliseconds: 500);
-
   late final CodeController _controller;
-  Timer? _timer;
 
   @override
   void initState() {
@@ -42,33 +36,15 @@ class _PlaygroundCodeEditorState extends ConsumerState<PlaygroundCodeEditor> {
     _controller = CodeController(
       text: defaultPlaygroundCode,
       language: highlight_dart.dart,
-      // The default analyzer auto-runs on every edit and overwrites
-      // analysisResult; a no-op leaves the server-sourced markers in place.
+      // A no-op so the built-in analyzer never overwrites the markers we set
+      // from the server's validation (which runs only on Render).
       analyzer: const _NoOpAnalyzer(),
     );
-    _controller.addListener(_onChanged);
-    // Validate the seeded snippet once so the editor opens with a verdict.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _validateNow();
-    });
   }
-
-  void _onChanged() {
-    _timer?.cancel();
-    _timer = Timer(_debounce, () {
-      if (mounted) _validateNow();
-    });
-  }
-
-  void _validateNow() =>
-      unawaited(ref.read(playgroundViewModelProvider.notifier).validate(_controller.fullText));
 
   @override
   void dispose() {
-    _timer?.cancel();
-    _controller
-      ..removeListener(_onChanged)
-      ..dispose();
+    _controller.dispose();
     super.dispose();
   }
 

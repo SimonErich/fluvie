@@ -37,7 +37,11 @@ class _PlaygroundState extends ConsumerState<Playground> {
           Expanded(flex: 3, child: PlaygroundCodeEditor(key: _editorKey)),
           const SizedBox(height: 8),
           _RenderControls(
-            onRender: (state.hasErrors || busy) ? null : _render,
+            // Always clickable when idle: a click re-validates the current code
+            // and renders only if it is now error-free, so stale errors never
+            // lock the button.
+            onRender: busy ? null : _render,
+            validating: state.validating,
             rendering: state.rendering,
             progress: state.progress,
           ),
@@ -66,11 +70,13 @@ class _PlaygroundState extends ConsumerState<Playground> {
 final class _RenderControls extends StatelessWidget {
   const _RenderControls({
     required this.onRender,
+    required this.validating,
     required this.rendering,
     required this.progress,
   });
 
   final VoidCallback? onRender;
+  final bool validating;
   final bool rendering;
   final RenderProgress? progress;
 
@@ -80,8 +86,14 @@ final class _RenderControls extends StatelessWidget {
     children: [
       FilledButton.icon(
         onPressed: onRender,
-        icon: const Icon(Icons.smart_display_outlined),
-        label: const Text('Render'),
+        icon: validating
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.smart_display_outlined),
+        label: Text(validating ? 'Validating ...' : 'Render'),
       ),
       if (rendering)
         Padding(
