@@ -12,6 +12,7 @@ import 'package:fluvie_mobile_encoder/src/mobile_video_codec.dart';
 import 'package:fluvie_mobile_encoder/src/mobile_video_encoder.dart';
 import 'package:fluvie_mobile_encoder/src/offscreen_capture_host.dart';
 import 'package:fluvie_mobile_encoder/src/on_device_render_progress.dart';
+import 'package:riverpod/riverpod.dart';
 
 /// Builds the off-screen [CaptureHost] for a render at [size] logical pixels.
 typedef CaptureHostFactory = CaptureHost Function(Size size);
@@ -33,12 +34,17 @@ typedef SandboxFactory = Future<Directory> Function();
 /// (unless silenced) [render] warns through [onWarning].
 final class OnDeviceVideoRenderer {
   /// Creates a renderer over its seams; the defaults target a real device.
+  ///
+  /// [mediaResolver] resolves a composition's `Image`/`Clip` sources; when left
+  /// null a fresh `MediaRepository` is built (and disposed) per [render] from
+  /// `mediaResolverProvider`. Pass one to inject a fake in a test.
   OnDeviceVideoRenderer({
     MobileVideoEncoder? encoder,
     CaptureHostFactory? hostFactory,
     SandboxFactory? sandboxFactory,
     RenderService? service,
     MobileAudioMaterializer? audioMaterializer,
+    this.mediaResolver,
   }) : _encoder = encoder ?? const MethodChannelMobileVideoEncoder(),
        _hostFactory = hostFactory ?? _defaultHostFactory,
        _sandboxFactory = sandboxFactory ?? _defaultSandboxFactory,
@@ -58,6 +64,10 @@ final class OnDeviceVideoRenderer {
   final SandboxFactory _sandboxFactory;
   final RenderService _service;
   final MobileAudioMaterializer _audioMaterializer;
+
+  /// The injected media resolver, or null to build (and dispose) one per
+  /// [render] from `mediaResolverProvider`.
+  final MediaResolver? mediaResolver;
 
   /// Renders [composition] for [aspect] over [duration] to an MP4 file.
   ///
@@ -91,6 +101,10 @@ final class OnDeviceVideoRenderer {
     final size = aspect.sizeFor(longEdge);
     final sandbox = await _sandboxFactory();
     final host = _hostFactory(Size(size.width.toDouble(), size.height.toDouble()));
+    // Build a media resolver per render unless one was injected; the owned
+    // container is disposed in the finally once capture and encode are done.
+    final ownedContainer = mediaResolver == null ? ProviderContainer() : null;
+    final resolver = mediaResolver ?? ownedContainer!.read<MediaResolver>(mediaResolverProvider);
     try {
       onProgress?.call(OnDeviceRenderPhase.capturing);
       final captured = await _captureToSandbox(
@@ -104,6 +118,7 @@ final class OnDeviceVideoRenderer {
         longEdge: longEdge,
         fps: fps,
         compositionKey: compositionKey,
+        resolver: resolver,
       );
       final manifest = captured.manifest;
       final mix = await _audioFor(
@@ -134,6 +149,7 @@ final class OnDeviceVideoRenderer {
       return File('${sandbox.path}/${manifest.outputFileName}');
     } finally {
       await host.dispose();
+      ownedContainer?.dispose();
     }
   }
 
@@ -206,6 +222,7 @@ Future<RenderAspectResult> _captureToSandbox({
   required int longEdge,
   required int fps,
   required String compositionKey,
+  required MediaResolver resolver,
 }) => render(
   composition: composition,
   aspect: aspect,
@@ -218,6 +235,7 @@ Future<RenderAspectResult> _captureToSandbox({
   fps: fps,
   compositionKey: compositionKey,
   stageAudio: _silentAudio,
+  resolver: resolver,
 );
 
 Future<AudioMixLanes> _silentAudio({
