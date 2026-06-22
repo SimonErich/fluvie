@@ -200,27 +200,12 @@ melos:
         Used by CI and the fresh-clone script, not the fast pre-commit gate.
       run: bash tool/docs/check_dartdoc.sh
 
-    web:landing:
-      description: >
-        Regenerate the marketing landing's data-driven regions (the package list
-        and the lesson gallery in web/landing/index.html) from
-        web/landing/landing_data.json. The page is otherwise static; this replaces
-        the old LLM reconcile.
-      run: dart run tool/web/build_landing.dart
-
-    web:landing:check:
-      description: >
-        Fail if web/landing/index.html drifted from landing_data.json, or if a
-        published package or a lesson has no entry (CI and the pre-commit gate).
-      run: dart run tool/web/build_landing.dart --check
-
     gate:
       description: Full per-epic quality gate — must be green before every commit.
       steps:
         - format
         - analyze
         - lint
-        - web:landing:check
         - coverage:check
 
     version:
@@ -245,9 +230,10 @@ melos:
 
     web:gallery:
       description: >
-        Regenerate the landing-page example gallery clips: render each lesson to
-        build/<key>.mp4 with Impeller, then encode web/landing/media/<key>.{mp4,
-        webm,poster.webp,gif}. Needs a Flutter SDK and ffmpeg on PATH (not part
-        of `gate`). Pass `--encode-only` to re-encode existing build/*.mp4 (ffmpeg
-        only). After it runs, use the `sync-website` skill to refresh the tiles.
+        Regenerate the optional landing-page example gallery clips: render each
+        lesson to build/<key>.mp4 with Impeller, then encode
+        web/site/public/media/<key>.{mp4,webm,poster.webp,gif}. Needs a Flutter SDK
+        and ffmpeg on PATH (not part of `gate`). Pass `--encode-only` to re-encode
+        existing build/*.mp4 (ffmpeg only). The Astro gallery shows gradient posters
+        by default; wire clips in per web/site/MAINTAINING.md.
       run: bash tool/web/regenerate_gallery.sh
