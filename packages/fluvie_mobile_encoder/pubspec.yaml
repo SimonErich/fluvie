@@ -1,6 +1,6 @@
 name: fluvie_mobile_encoder
 description: "Render Fluvie videos to MP4 fully on-device on Android and iOS using the platform's native hardware encoder, with no FFmpeg and no server."
-version: 0.1.3
+version: 0.1.4
 repository: https://github.com/SimonErich/fluvie/tree/main/packages/fluvie_mobile_encoder
 homepage: https://github.com/SimonErich/fluvie
 issue_tracker: https://github.com/SimonErich/fluvie/issues

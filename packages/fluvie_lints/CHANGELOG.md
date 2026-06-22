@@ -3,6 +3,13 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.4] - 2026-06-22
+
+### Removed
+
+- The `nondeterministic_random` lint rule, with its fixtures. Byte-identical
+  determinism is no longer a Fluvie ground pattern, so the rule no longer ships.
+
 ## [0.1.3] - 2026-06-22
 
 Lockstep release with the rest of the workspace; no changes to this package.
