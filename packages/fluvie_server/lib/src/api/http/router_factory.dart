@@ -21,6 +21,7 @@ Router buildRouter(ServerDependencies deps) {
     config: deps.config,
     signer: deps.signer,
     fileStore: deps.fileStore,
+    codeValidator: deps.codeValidator,
   );
   final job = JobHandler(
     jobStore: deps.jobStore,

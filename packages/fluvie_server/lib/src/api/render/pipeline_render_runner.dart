@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluvie_cli/fluvie_cli.dart';
+import 'package:fluvie_server/src/api/render/code_render_setup.dart';
 import 'package:fluvie_server/src/api/render/render_request.dart';
 import 'package:fluvie_server/src/api/render/render_runner.dart';
 
@@ -21,11 +22,18 @@ final class PipelineRenderRunner implements RenderRunner {
     this.ffmpegPath,
     this.aiEnv = const {},
     this.processRunner = const IoProcessRunner(),
+    this.captureTimeout = const Duration(minutes: 8),
     Future<Directory> Function()? createSandbox,
   }) : _createSandbox = createSandbox ?? _defaultSandbox;
 
   /// The Flutter project hosting the capture harness, or `null` to auto-discover.
   final String? renderProject;
+
+  /// The wall-clock ceiling on a code render's capture. A runaway untrusted
+  /// `build()` (an infinite loop) is abandoned and surfaced as a [RenderFailure]
+  /// rather than hanging the worker. Applied to code renders only — trusted
+  /// key/spec/AI renders keep their existing unbounded behavior.
+  final Duration captureTimeout;
 
   /// The ffmpeg binary, or `null` for `ffmpeg` on PATH.
   final String? ffmpegPath;
@@ -39,6 +47,7 @@ final class PipelineRenderRunner implements RenderRunner {
   final Future<Directory> Function() _createSandbox;
 
   static const _pollInterval = Duration(milliseconds: 100);
+  static const _defaultHarnessPath = 'test/render/capture_harness_test.dart';
 
   @override
   Future<RenderOutcome> run(
@@ -50,8 +59,23 @@ final class PipelineRenderRunner implements RenderRunner {
     final (ext, contentType) = _formatTarget(request.options.format);
     final outPath = '${workDir.path}/video.$ext';
     final specOut = '${workDir.path}/spec.fluvie.json';
-    final extraDefines = _defines(request, workDir, specOut);
     final progressFile = '${workDir.path}/progress';
+    // A code render stages an isolated, per-render harness under the project and
+    // runs flutter test against it, forwarding NO aiEnv (the untrusted snippet
+    // must never see the AI keys). Every other request drives the permanent
+    // harness with --dart-define authoring and inherits aiEnv.
+    // note: a content-hash cache (fnv1a of the normalized code) could let an
+    // identical resubmission reuse a prior output, but the queue keys outputs by
+    // job id and deletes the work dir per job, so a cross-job result cache is a
+    // separate change — deliberately skipped here to keep the job model simple.
+    final isCode = request is CodeRenderRequest;
+    final staging = isCode
+        ? stageCodeRenderOrFail(renderProject: renderProject, code: request.code)
+        : null;
+    final environment = {
+      if (onProgress != null) 'FLUVIE_PROGRESS_FILE': progressFile,
+      if (!isCode) ...aiEnv,
+    };
 
     Timer? poll;
     if (onProgress != null) {
@@ -60,39 +84,44 @@ final class PipelineRenderRunner implements RenderRunner {
     final out = StringBuffer();
     final err = StringBuffer();
     try {
-      final code = await runRenderPipeline(
-        runner: processRunner,
-        createSandbox: _createSandbox,
-        options: (
-          ffmpegBinary: ffmpegPath,
-          projectDir: renderProject,
-          noCache: false,
-          // The server never auto-downloads mid-request; its image provisions
-          // a pinned FFmpeg ahead of time (or FFMPEG_PATH points at one).
-          noDownload: true,
-          // Server renders use the default tester backend, not Impeller.
-          enableImpeller: false,
-          verbose: true,
-          keepTemp: false,
+      final code = await _bounded(
+        runRenderPipeline(
+          runner: processRunner,
+          createSandbox: _createSandbox,
+          options: (
+            ffmpegBinary: ffmpegPath,
+            projectDir: staging?.projectDir ?? renderProject,
+            noCache: false,
+            // The server never auto-downloads mid-request; its image provisions
+            // a pinned FFmpeg ahead of time (or FFMPEG_PATH points at one).
+            noDownload: true,
+            // Server renders use the default tester backend, not Impeller.
+            enableImpeller: false,
+            verbose: true,
+            keepTemp: false,
+          ),
+          key: request is KeyRenderRequest ? request.key : '',
+          outPath: outPath,
+          frames: null,
+          flags: (
+            aspect: request.options.aspect,
+            quality: request.options.quality,
+            format: request.options.format,
+            poster: request.options.poster,
+          ),
+          harnessPath: staging?.harnessPath ?? _defaultHarnessPath,
+          extraDefines: isCode ? const {} : _defines(request, workDir, specOut),
+          environment: environment,
+          out: out,
+          err: err,
         ),
-        key: request is KeyRenderRequest ? request.key : '',
-        outPath: outPath,
-        frames: null,
-        flags: (
-          aspect: request.options.aspect,
-          quality: request.options.quality,
-          format: request.options.format,
-          poster: request.options.poster,
-        ),
-        extraDefines: extraDefines,
-        environment: {if (onProgress != null) 'FLUVIE_PROGRESS_FILE': progressFile, ...aiEnv},
-        out: out,
-        err: err,
+        bounded: isCode,
       );
       if (code != 0) throw RenderFailure('Render exited with code $code');
     } on CliFailure catch (failure) {
       throw RenderFailure(failure.message);
     } finally {
+      staging?.cleanup();
       poll?.cancel();
       if (onProgress != null) _emit(progressFile, onProgress);
     }
@@ -111,8 +140,21 @@ final class PipelineRenderRunner implements RenderRunner {
     );
   }
 
+  // Bounds [pipeline] by the wall clock for a code render so a runaway untrusted
+  // build() is abandoned (the orphaned flutter-test process is reaped by the OS/
+  // container) and surfaced as a failure, not a hung worker.
+  Future<int> _bounded(Future<int> pipeline, {required bool bounded}) => bounded
+      ? pipeline.timeout(
+          captureTimeout,
+          onTimeout: () =>
+              throw RenderFailure('Render timed out after ${captureTimeout.inSeconds}s'),
+        )
+      : pipeline;
+
   Map<String, String> _defines(RenderRequest request, Directory workDir, String specOut) =>
       switch (request) {
+        // coverage:ignore-line: unreachable; code renders take the staged path
+        CodeRenderRequest() => const {},
         KeyRenderRequest() => const {},
         SpecRenderRequest(:final spec) => specDefines(
           _writeJson(spec, '${workDir.path}/input.fluvie.json'),

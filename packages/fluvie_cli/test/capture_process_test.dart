@@ -82,6 +82,25 @@ void main() {
     test('omits --enable-impeller by default (plain render unchanged)', () {
       expect(captureTestArgs(key: 'demo', sandbox: sandbox), isNot(contains('--enable-impeller')));
     });
+
+    test('a custom harnessPath replaces the default harness test in the argv', () {
+      final args = captureTestArgs(
+        key: '',
+        sandbox: sandbox,
+        harnessPath: '.fluvie_playground/abc/harness_test.dart',
+      );
+      expect(args, contains('.fluvie_playground/abc/harness_test.dart'));
+      expect(args, isNot(contains('test/render/capture_harness_test.dart')));
+    });
+
+    test('the default harnessPath keeps the permanent harness (byte-identical)', () {
+      expect(
+        captureTestArgs(key: 'demo', sandbox: sandbox),
+        contains(
+          'test/render/capture_harness_test.dart',
+        ),
+      );
+    });
   });
 
   group('runCapture', () {
@@ -105,6 +124,27 @@ void main() {
           '--dart-define=FLUVIE_RENDER_OUT_DIR=${sandbox.path}',
         ], workingDirectory: 'example'),
       ).called(1);
+    });
+
+    test('a custom harnessPath is spawned in place of the permanent harness', () async {
+      stubFlutterTest();
+
+      await runCapture(
+        runner: runner,
+        projectDir: 'example',
+        key: '',
+        sandbox: sandbox,
+        harnessPath: '.fluvie_playground/abc/harness_test.dart',
+        err: StringBuffer(),
+      );
+
+      final captured =
+          verify(
+                () => runner.run('flutter', captureAny(), workingDirectory: 'example'),
+              ).captured.single
+              as List<String>;
+      expect(captured, contains('.fluvie_playground/abc/harness_test.dart'));
+      expect(captured, isNot(contains('test/render/capture_harness_test.dart')));
     });
 
     test('impeller adds --enable-impeller to the spawned argv', () async {

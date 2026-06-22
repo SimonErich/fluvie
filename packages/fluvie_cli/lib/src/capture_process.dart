@@ -47,6 +47,11 @@ String resolveProjectDir({String? project, Directory? cwd}) {
 /// rasterizes with Impeller instead of the default tester backend. It is off by
 /// default, so an ordinary render is unchanged; turn it on (via the render
 /// `--enable-impeller` flag) when an effect needs the Impeller pipeline.
+///
+/// [harnessPath] is the test `flutter test` JIT-compiles and runs, relative to
+/// the project directory. It defaults to the permanent capture harness, so an
+/// ordinary render is byte-identical; the Playground points it at a generated
+/// per-render harness that statically imports the user's `input.dart`.
 List<String> captureTestArgs({
   required String key,
   required Directory sandbox,
@@ -57,12 +62,13 @@ List<String> captureTestArgs({
   String? quality,
   String? format,
   String? poster,
+  String harnessPath = 'test/render/capture_harness_test.dart',
   Map<String, String> extraDefines = const {},
 }) => [
   'test',
   '--no-pub',
   if (impeller) '--enable-impeller',
-  'test/render/capture_harness_test.dart',
+  harnessPath,
   '--dart-define=FLUVIE_RENDER_KEY=$key',
   '--dart-define=FLUVIE_RENDER_OUT_DIR=${sandbox.path}',
   if (frames != null) '--dart-define=FLUVIE_RENDER_FRAMES=$frames',
@@ -102,6 +108,7 @@ Future<void> runCapture({
   String? quality,
   String? format,
   String? poster,
+  String harnessPath = 'test/render/capture_harness_test.dart',
   Map<String, String> extraDefines = const {},
   Map<String, String>? environment,
 }) async {
@@ -115,6 +122,7 @@ Future<void> runCapture({
     quality: quality,
     format: format,
     poster: poster,
+    harnessPath: harnessPath,
     extraDefines: extraDefines,
   );
   final ProcessRunResult result;

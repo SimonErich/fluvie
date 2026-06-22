@@ -7,7 +7,8 @@ typedef ExportOptions = ({String? format, String? aspect, String? quality, Strin
 const ExportOptions _noOptions = (format: null, aspect: null, quality: null, poster: null);
 
 /// A render request parsed from an HTTP body: exactly one of a registry key, a
-/// spec, an AI prompt, or an AI edit, plus export [options].
+/// spec, an AI prompt, an AI edit, or a Dart code snippet, plus export
+/// [options].
 sealed class RenderRequest {
   const RenderRequest(this.options);
 
@@ -22,15 +23,16 @@ sealed class RenderRequest {
   /// a [RenderRequestException] (HTTP 400) on any problem.
   static RenderRequest fromJson(Map<String, Object?> json) {
     final options = _options(json['options']);
-    final inputs = ['key', 'spec', 'prompt', 'edit'].where(json.containsKey).toList();
+    final inputs = ['key', 'spec', 'prompt', 'edit', 'code'].where(json.containsKey).toList();
     if (inputs.length != 1) {
-      throw const RenderRequestException('Provide exactly one of key, spec, prompt, edit.');
+      throw const RenderRequestException('Provide exactly one of key, spec, prompt, edit, code.');
     }
     final provider = _optionalString(json, 'provider');
     return switch (inputs.single) {
       'key' => KeyRenderRequest(_key(json), options),
       'spec' => SpecRenderRequest(_spec(json['spec'], 'spec'), options),
       'prompt' => PromptRenderRequest(_nonEmpty(json, 'prompt'), provider, options),
+      'code' => CodeRenderRequest(_nonEmpty(json, 'code'), options),
       _ => _edit(json, provider, options),
     };
   }
@@ -161,6 +163,21 @@ final class PromptRenderRequest extends RenderRequest {
 
   @override
   RenderJobKind get kind => RenderJobKind.prompt;
+}
+
+/// Render a user-submitted Dart `Video build()` snippet (the Playground).
+///
+/// The snippet is statically validated (analysis + import allowlist) before it
+/// is enqueued, then executed inside an isolated `flutter test` capture.
+final class CodeRenderRequest extends RenderRequest {
+  /// Creates a code request.
+  const CodeRenderRequest(this.code, super.options);
+
+  /// The Dart source defining a top-level `Video build()`.
+  final String code;
+
+  @override
+  RenderJobKind get kind => RenderJobKind.code;
 }
 
 /// Refine [baseSpec] with a natural-language [change], then render it.

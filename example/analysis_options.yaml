@@ -5,6 +5,11 @@ include: ../analysis_options.yaml
 analyzer:
   plugins:
     - custom_lint
+  exclude:
+    # Transient per-render Playground files the server writes under the render
+    # project and deletes after each render; never production code, never
+    # committed (see .gitignore).
+    - .fluvie_playground/**
 
 linter:
   rules:

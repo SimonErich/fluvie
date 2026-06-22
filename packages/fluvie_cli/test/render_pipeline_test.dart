@@ -112,6 +112,7 @@ void main() {
     ),
     Map<String, String>? environment,
     Map<String, String> extraDefines = const {},
+    String harnessPath = 'test/render/capture_harness_test.dart',
     void Function(StringSink out) report = _noop,
   }) => runRenderPipeline(
     runner: runner,
@@ -123,6 +124,7 @@ void main() {
     flags: _noFlags,
     extraDefines: extraDefines,
     environment: environment,
+    harnessPath: harnessPath,
     out: out,
     err: err,
     report: report,
@@ -174,6 +176,26 @@ void main() {
     expect(code, 0);
     expect(sandbox.existsSync(), isTrue);
     expect(err.toString(), contains(sandbox.path));
+  });
+
+  test('a custom harnessPath flows through to the spawned flutter test', () async {
+    stubHappyPath();
+
+    final code = await run(harnessPath: '.fluvie_playground/abc/harness_test.dart');
+
+    expect(code, 0, reason: err.toString());
+    final captured =
+        verify(
+              () => runner.run(
+                'flutter',
+                captureAny(),
+                workingDirectory: any(named: 'workingDirectory'),
+                environment: any(named: 'environment'),
+              ),
+            ).captured.single
+            as List<String>;
+    expect(captured, contains('.fluvie_playground/abc/harness_test.dart'));
+    expect(captured, isNot(contains('test/render/capture_harness_test.dart')));
   });
 
   test('enableImpeller passes --enable-impeller through to the capture', () async {

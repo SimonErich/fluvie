@@ -44,3 +44,7 @@ pubspec_overrides.yaml
 
 # Playground snippet validation scratch (fluvie_validate writes then deletes here)
 .fluvie_scratch/
+
+# Playground code-render scratch: the server writes a per-render input.dart +
+# generated harness under the render project, then deletes it after the render.
+.fluvie_playground/

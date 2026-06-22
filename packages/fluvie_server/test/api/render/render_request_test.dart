@@ -38,6 +38,13 @@ void main() {
       expect((request as EditRenderRequest).change, 'make it blue');
       expect(request.kind, RenderJobKind.edit);
     });
+
+    test('parses a code request', () {
+      final request = RenderRequest.fromJson({'code': 'Video build() => Video(scenes: []);'});
+      expect(request, isA<CodeRenderRequest>());
+      expect((request as CodeRenderRequest).code, 'Video build() => Video(scenes: []);');
+      expect(request.kind, RenderJobKind.code);
+    });
   });
 
   group('RenderRequest.fromJson validation', () {
@@ -71,6 +78,10 @@ void main() {
     });
     test('rejects a non-object edit', () => rejects({'edit': 'nope'}, 'object'));
     test('rejects a non-string provider', () => rejects({'prompt': 'p', 'provider': 5}, 'string'));
+    test('rejects an empty code snippet', () => rejects({'code': '   '}, 'non-empty'));
+    test('rejects code combined with another input', () {
+      rejects({'code': 'x', 'key': 'demo'}, 'exactly one');
+    });
   });
 
   group('RenderRequest.fromJson options', () {

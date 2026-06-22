@@ -1,0 +1,4 @@
+tags:
+  render:
+    description: End-to-end render tests; need a Flutter SDK and ffmpeg, plus the
+      example render project. CI gates these per platform.

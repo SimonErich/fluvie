@@ -16,6 +16,9 @@ enum RenderJobKind {
 
   /// A base spec plus a natural-language change (AI editing).
   edit,
+
+  /// A user-submitted Dart `Video build()` snippet (the Playground).
+  code,
 }
 
 /// One render job: its lifecycle state, timing, visibility, output keys, and a

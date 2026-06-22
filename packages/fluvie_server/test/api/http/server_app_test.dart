@@ -12,6 +12,7 @@ import 'package:fluvie_server/src/api/jobs/render_job.dart';
 import 'package:fluvie_server/src/api/jobs/render_queue.dart';
 import 'package:fluvie_server/src/api/storage/in_memory_file_store.dart';
 import 'package:fluvie_server/src/api/storage/signed_token.dart';
+import 'package:fluvie_server/src/api/validate/code_validation_result.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 
@@ -44,6 +45,7 @@ void main() {
     Map<String, String> env = const {},
     FakeRenderRunner? runner,
     RetentionService? retention,
+    FakeCodeValidationService? codeValidator,
   }) {
     final cfg = config(env);
     final queue = RenderQueue(
@@ -67,7 +69,7 @@ void main() {
         fileStore: files,
         retention: retention ?? DefaultRetentionService(jobs, files),
         signer: DownloadTokenSigner(cfg.downloadSigningKey),
-        codeValidator: FakeCodeValidationService(),
+        codeValidator: codeValidator ?? FakeCodeValidationService(),
         schemaJson: r'{"$id":"video-spec"}',
         now: () => now,
       ),
@@ -196,6 +198,52 @@ void main() {
         body: {'prompt': 'a promo'},
       );
       expect(response.statusCode, 202);
+    });
+
+    test('202 for a code render that passes validation and the allowlist', () async {
+      final response = await send(
+        app(),
+        'POST',
+        '/v1/renders',
+        headers: auth,
+        body: {'code': "import 'package:fluvie/fluvie.dart';\nVideo build() => Video(scenes: []);"},
+      );
+      expect(response.statusCode, 202);
+    });
+
+    test('422 with diagnostics for a code render that fails validation', () async {
+      final validator = FakeCodeValidationService(
+        result: const CodeValidationResult([
+          CodeDiagnostic(
+            severity: CodeDiagnosticSeverity.error,
+            message: 'Undefined name Vid.',
+            line: 1,
+            column: 1,
+          ),
+        ]),
+      );
+      final response = await send(
+        app(codeValidator: validator),
+        'POST',
+        '/v1/renders',
+        headers: auth,
+        body: {'code': 'Vid(scenes: [])'},
+      );
+      expect(response.statusCode, 422);
+      final json = jsonDecode(await response.readAsString()) as Map<String, Object?>;
+      expect(json['ok'], isFalse);
+      expect(json['diagnostics'], isNotEmpty);
+    });
+
+    test('422 for a code render importing outside the allowlist', () async {
+      final response = await send(
+        app(),
+        'POST',
+        '/v1/renders',
+        headers: auth,
+        body: {'code': "import 'dart:io';\nVideo build() => Video(scenes: []);"},
+      );
+      expect(response.statusCode, 422);
     });
   });
 
