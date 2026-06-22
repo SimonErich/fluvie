@@ -1,8 +1,17 @@
 name: images
 
 # Build and push the service container images to the GitHub Container Registry
-# (ghcr.io) on a release tag, e.g. `git tag v0.1.0 && git push origin v0.1.0`.
-# The images are public and need no token to pull; pushing uses GITHUB_TOKEN.
+# (ghcr.io) on a release tag, e.g. `git tag v0.1.0 && git push origin v0.1.0`,
+# then ping each service's Dokploy deploy webhook so it pulls the new image and
+# restarts. The images are public and need no token to pull; pushing uses
+# GITHUB_TOKEN.
+#
+# Build and redeploy are one matrix job per service, so the services are
+# independent: if one image fails to build, the others still build and redeploy
+# (fail-fast is off, and a failed build stops only its own leg). For the redeploy
+# to pull the new build, point each Dokploy app at a moving tag (`:latest` or
+# `:0.1`), not a pinned `:0.1.0`. A missing webhook secret just skips that
+# service's redeploy, so a release never fails on an unset webhook.
 
 on:
   push:
@@ -14,7 +23,7 @@ permissions:
   packages: write
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -22,10 +31,13 @@ jobs:
         include:
           - name: fluvie-api
             dockerfile: deploy/api.Dockerfile
+            hook: DOKPLOY_WEBHOOK_API
           - name: fluvie-mcp
             dockerfile: deploy/mcp.Dockerfile
+            hook: DOKPLOY_WEBHOOK_MCP
           - name: fluvie-demo
             dockerfile: deploy/demo.Dockerfile
+            hook: DOKPLOY_WEBHOOK_DEMO
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -51,47 +63,22 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  # After every image is pushed, ping each Dokploy app's deploy webhook so the
-  # service pulls the new image and restarts. Store each app's webhook URL as a
-  # repo secret (Settings -> Secrets and variables -> Actions); a missing secret
-  # skips that service, so this never fails the release. For the redeploy to pick
-  # up the new build, point each Dokploy app at a moving tag (`:latest` or
-  # `:0.1`), not a pinned `:0.1.0`.
-  redeploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Redeploy api.fluvie.dev
+      # Ping this service's Dokploy webhook so it pulls the image just pushed and
+      # restarts. Skipped (not failed) when the webhook secret is unset; a failed
+      # build above stops the leg before this runs, leaving the other services'
+      # legs untouched.
+      - name: Redeploy ${{ matrix.name }}
         env:
-          HOOK: ${{ secrets.DOKPLOY_WEBHOOK_API }}
+          DOKPLOY_WEBHOOK_API: ${{ secrets.DOKPLOY_WEBHOOK_API }}
+          DOKPLOY_WEBHOOK_MCP: ${{ secrets.DOKPLOY_WEBHOOK_MCP }}
+          DOKPLOY_WEBHOOK_DEMO: ${{ secrets.DOKPLOY_WEBHOOK_DEMO }}
+          HOOK_VAR: ${{ matrix.hook }}
         run: |
           set -euo pipefail
-          if [ -z "${HOOK}" ]; then
-            echo "DOKPLOY_WEBHOOK_API not set; skipping."
+          HOOK="${!HOOK_VAR:-}"
+          if [ -z "$HOOK" ]; then
+            echo "$HOOK_VAR not set; skipping ${{ matrix.name }} redeploy."
             exit 0
           fi
-          curl -fsS -X POST "${HOOK}"
-          echo "Pinged the api redeploy webhook."
-      - name: Redeploy mcp.fluvie.dev
-        env:
-          HOOK: ${{ secrets.DOKPLOY_WEBHOOK_MCP }}
-        run: |
-          set -euo pipefail
-          if [ -z "${HOOK}" ]; then
-            echo "DOKPLOY_WEBHOOK_MCP not set; skipping."
-            exit 0
-          fi
-          curl -fsS -X POST "${HOOK}"
-          echo "Pinged the mcp redeploy webhook."
-      - name: Redeploy demo.fluvie.dev
-        env:
-          HOOK: ${{ secrets.DOKPLOY_WEBHOOK_DEMO }}
-        run: |
-          set -euo pipefail
-          if [ -z "${HOOK}" ]; then
-            echo "DOKPLOY_WEBHOOK_DEMO not set; skipping."
-            exit 0
-          fi
-          curl -fsS -X POST "${HOOK}"
-          echo "Pinged the demo redeploy webhook."
+          curl -fsS -X POST "$HOOK"
+          echo "Pinged the ${{ matrix.name }} redeploy webhook."
