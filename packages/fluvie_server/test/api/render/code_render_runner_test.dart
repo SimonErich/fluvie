@@ -135,6 +135,10 @@ void main() {
     final harnessArg = argv.firstWhere((a) => a.endsWith('harness_test.dart'));
     expect(harnessArg, startsWith('.fluvie_playground/'));
     expect(argv, isNot(contains('test/render/capture_harness_test.dart')));
+    // The shared frame cache keys on the "code" composition key, not the
+    // snippet, so code renders must bypass it (one submission's frames must
+    // never be served for another).
+    expect(argv, contains('--dart-define=FLUVIE_RENDER_NO_CACHE=true'));
   });
 
   test('strips the AI env for a code render (no secrets reach untrusted code)', () async {

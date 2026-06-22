@@ -91,7 +91,10 @@ final class PipelineRenderRunner implements RenderRunner {
           options: (
             ffmpegBinary: ffmpegPath,
             projectDir: staging?.projectDir ?? renderProject,
-            noCache: false,
+            // The shared frame cache keys on the composition key (always "code"
+            // for the Playground) and NOT the snippet, so it would serve one
+            // submission's frames for another. Disable it for code renders.
+            noCache: isCode,
             // The server never auto-downloads mid-request; its image provisions
             // a pinned FFmpeg ahead of time (or FFMPEG_PATH points at one).
             noDownload: true,
