@@ -20,6 +20,9 @@ final class FileJobStore implements JobStore {
   /// The directory holding `<id>.json` job files.
   final Directory dir;
 
+  // Bumps per write so concurrent updates use distinct temp files.
+  static int _tmpSeq = 0;
+
   @override
   Future<RenderJob> create(RenderJob job) => update(job);
 
@@ -33,7 +36,10 @@ final class FileJobStore implements JobStore {
   @override
   Future<RenderJob> update(RenderJob job) async {
     await dir.create(recursive: true);
-    final temp = File('${_fileFor(job.id).path}.tmp');
+    // A unique temp name per write: concurrent updates of the same job (rapid
+    // progress ticks) must not both rename the same temp file, which raced and
+    // threw PathNotFoundException on the second rename.
+    final temp = File('${_fileFor(job.id).path}.${_tmpSeq++}.tmp');
     await temp.writeAsString(jsonEncode(_encode(job)));
     await temp.rename(_fileFor(job.id).path);
     return job;

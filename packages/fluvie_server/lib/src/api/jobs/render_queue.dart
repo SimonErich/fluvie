@@ -115,8 +115,14 @@ final class RenderQueue {
         error: 'Internal render error',
       );
     } finally {
-      if (workDir.existsSync()) await workDir.delete(recursive: true);
-      await jobStore.update(job);
+      // Releasing the slot and pumping the next job must always happen: a
+      // cleanup or final-persist failure must never wedge the worker.
+      try {
+        if (workDir.existsSync()) await workDir.delete(recursive: true);
+        await jobStore.update(job);
+      } on Object catch (_) {
+        // Swallowed on purpose; the slot is released below regardless.
+      }
       _active--;
       _pump();
     }

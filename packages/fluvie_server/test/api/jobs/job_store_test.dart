@@ -109,5 +109,18 @@ void main() {
       final reopened = FileJobStore(dir);
       expect((await reopened.get('a'))!.id, 'a');
     });
+
+    test('overlapping updates of one job do not race on a shared temp file', () async {
+      await store.create(queued('race'));
+      final base = (await store.get('race'))!;
+      // Rapid progress ticks update the same job concurrently (the queue fires
+      // them unawaited); a shared temp name used to throw PathNotFoundException
+      // on the second rename.
+      await Future.wait([
+        for (var i = 1; i <= 25; i++)
+          store.update(base.copyWith(progress: RenderProgress(completed: i, total: 25))),
+      ]);
+      expect((await store.get('race'))!.id, 'race');
+    });
   });
 }

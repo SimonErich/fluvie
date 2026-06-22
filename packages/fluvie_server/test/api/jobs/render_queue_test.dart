@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:fluvie_cli/fluvie_cli.dart' show RenderProgress;
 import 'package:fluvie_server/src/api/jobs/in_memory_job_store.dart';
 import 'package:fluvie_server/src/api/jobs/job_status.dart';
+import 'package:fluvie_server/src/api/jobs/job_store.dart';
 import 'package:fluvie_server/src/api/jobs/render_job.dart';
 import 'package:fluvie_server/src/api/jobs/render_queue.dart';
 import 'package:fluvie_server/src/api/render/render_request.dart';
@@ -28,6 +29,34 @@ Future<RenderJob> _eventually(
     await Future<void>.delayed(const Duration(milliseconds: 5));
   }
   throw StateError('job $id never satisfied the condition');
+}
+
+/// A [JobStore] that throws once on the first terminal-status write (simulating
+/// a finalize-time disk race), delegating every other call to [_inner].
+final class _FlakyJobStore implements JobStore {
+  _FlakyJobStore(this._inner);
+
+  final JobStore _inner;
+  bool threw = false;
+
+  @override
+  Future<RenderJob> update(RenderJob job) {
+    final terminal = job.status == JobStatus.succeeded || job.status == JobStatus.failed;
+    if (terminal && !threw) {
+      threw = true;
+      throw StateError('simulated finalize write failure');
+    }
+    return _inner.update(job);
+  }
+
+  @override
+  Future<RenderJob> create(RenderJob job) => _inner.create(job);
+  @override
+  Future<RenderJob?> get(String id) => _inner.get(id);
+  @override
+  Stream<RenderJob> expiredBefore(DateTime cutoff) => _inner.expiredBefore(cutoff);
+  @override
+  Future<void> delete(String id) => _inner.delete(id);
 }
 
 void main() {
@@ -66,6 +95,31 @@ void main() {
     newId: () => 'rnd_test_${jobs.hashCode}_${DateTime.now().microsecondsSinceEpoch}',
     createWorkDir: makeWorkDir,
   );
+
+  test('a finalize write failure releases the slot and runs the next job', () async {
+    final flaky = _FlakyJobStore(jobs);
+    final q = RenderQueue(
+      runner: FakeRenderRunner(),
+      jobStore: flaky,
+      fileStore: files,
+      fileTtl: const Duration(hours: 24),
+      newId: () => 'rnd_${DateTime.now().microsecondsSinceEpoch}_${flaky.hashCode}',
+      createWorkDir: makeWorkDir,
+    );
+    await q.enqueue(
+      const KeyRenderRequest('demo', _noOptions),
+      visibility: StoreVisibility.private,
+    );
+    final j2 = await q.enqueue(
+      const KeyRenderRequest('demo', _noOptions),
+      visibility: StoreVisibility.private,
+    );
+
+    // The first job's terminal write throws; the worker must still free its slot
+    // and finish the second job (the bug left it queued forever).
+    await _eventually(jobs, j2.id, (job) => job.status == JobStatus.succeeded);
+    expect(flaky.threw, isTrue);
+  });
 
   test('a successful render stores the video + poster and records the keys', () async {
     final now = DateTime.utc(2026, 6, 20, 10);
