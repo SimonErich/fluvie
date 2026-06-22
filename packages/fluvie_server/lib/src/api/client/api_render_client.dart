@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:fluvie_server/src/api/client/api_client_exception.dart';
 import 'package:fluvie_server/src/api/client/api_render_job.dart';
 import 'package:fluvie_server/src/api/client/api_render_request.dart';
+import 'package:fluvie_server/src/api/client/api_validation_result.dart';
 import 'package:http/http.dart' as http;
 
 /// A web-safe HTTP client for the Fluvie render API.
@@ -69,6 +70,25 @@ interface class ApiRenderClient {
       throw ApiClientException(latest.error ?? 'Render failed');
     }
     return latest;
+  }
+
+  /// Statically validates a Playground [code] snippet (analysis only; never
+  /// renders). Returns the diagnostics; throws [ApiClientException] on a
+  /// non-200 or a malformed response.
+  Future<ApiValidationResult> validate(String code) async {
+    final response = await _http.post(
+      baseUrl.resolve('v1/validate'),
+      headers: {'content-type': 'application/json', ..._auth},
+      body: jsonEncode({'code': code}),
+    );
+    if (response.statusCode != 200) {
+      throw ApiClientException(_errorMessage(response.body), statusCode: response.statusCode);
+    }
+    try {
+      return ApiValidationResult.fromJson(jsonDecode(response.body) as Map<String, Object?>);
+    } on Object {
+      throw const ApiClientException('Malformed response from the validate API');
+    }
   }
 
   /// Closes the underlying HTTP client.

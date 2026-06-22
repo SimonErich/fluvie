@@ -8,3 +8,4 @@ export 'src/api/client/api_client_exception.dart';
 export 'src/api/client/api_render_client.dart';
 export 'src/api/client/api_render_job.dart';
 export 'src/api/client/api_render_request.dart';
+export 'src/api/client/api_validation_result.dart';

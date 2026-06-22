@@ -83,6 +83,21 @@ final class ApiRenderRequest {
     ),
   );
 
+  /// Render a user-submitted Dart `Video build()` [code] snippet (the
+  /// Playground). The server validates and import-allowlist-gates it before
+  /// rendering, returning 422 with diagnostics if it is unsafe.
+  factory ApiRenderRequest.code(
+    String code, {
+    String? format,
+    String? aspect,
+    String? quality,
+    String? poster,
+    String? visibility,
+    String? ttl,
+  }) => ApiRenderRequest._(
+    _assemble({'code': code}, format, aspect, quality, poster, visibility, ttl),
+  );
+
   final Map<String, Object?> _json;
 
   /// The request as the JSON map the server expects.
