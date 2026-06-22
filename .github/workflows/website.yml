@@ -1,0 +1,81 @@
+name: website
+
+# Build fluvie.dev (the marketing landing) from the Astro project in web/site and
+# publish the static output to the SimonErich/fluvie_website repo, whose GitHub
+# Pages serves the custom domain. The build runs here, in the monorepo, so the
+# package list and the lesson gallery are derived from the source tree at build
+# time (see web/site/src/data/site.ts). The published output is committed to
+# fluvie_website, where a one-line Pages workflow serves it.
+#
+# Pushing across repos needs a FLUVIE_WEBSITE_TOKEN secret (a token with
+# Contents: write on SimonErich/fluvie_website). Without it the build still runs
+# and uploads the site as a workflow artifact, but the deploy step skips, so CI
+# never fails for a missing token.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - web/site/**
+      - packages/*/pubspec.yaml
+      - example/lib/lessons/**
+      - .github/workflows/website.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: website
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/site/package-lock.json
+      - name: Build the static site
+        working-directory: web/site
+        run: |
+          npm ci
+          npm run build
+      - name: Upload the built site
+        uses: actions/upload-artifact@v4
+        with:
+          name: fluvie-dev-site
+          path: web/site/dist
+      - name: Publish to fluvie_website
+        env:
+          TOKEN: ${{ secrets.FLUVIE_WEBSITE_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TOKEN:-}" ]; then
+            echo "FLUVIE_WEBSITE_TOKEN not set; the built site is in the workflow artifact. Skipping deploy."
+            exit 0
+          fi
+          work="$(mktemp -d)"
+          git clone --depth 1 \
+            "https://x-access-token:${TOKEN}@github.com/SimonErich/fluvie_website.git" "$work"
+          # Replace the served files; keep the repo's own infrastructure.
+          find "$work" -mindepth 1 -maxdepth 1 \
+            ! -name .git ! -name .github ! -name CNAME ! -name LICENSE ! -name README.md \
+            -exec rm -rf {} +
+          cp -R web/site/dist/. "$work"/
+          echo "fluvie.dev" > "$work/CNAME"
+          touch "$work/.nojekyll"
+          cd "$work"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "fluvie.dev already up to date."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -m "deploy fluvie.dev from ${GITHUB_SHA::7}"
+          git push origin HEAD:main
+          echo "Published fluvie.dev."
