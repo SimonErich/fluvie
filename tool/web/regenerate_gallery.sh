@@ -6,14 +6,13 @@
 #      (flutter test --enable-impeller). Falls back to the default tester
 #      backend per key if the Impeller pass fails (e.g. a headless box with no
 #      GPU). Skip this phase with --encode-only.
-#   2. Encode  web/landing/media/<key>.{mp4,webm,poster.webp,gif} for the
+#   2. Encode  web/site/public/media/<key>.{mp4,webm,poster.webp,gif} for the
 #      gallery: a muted looping MP4 (primary <video>), a smaller VP9 WebM, a
 #      first-frame poster, and a two-pass-palette GIF fallback.
 #
 # Re-run any time. The MP4/WebM are the page's <video> sources; the GIF is the
-# no-JS / reduced-motion fallback. After regenerating, run the `sync-website`
-# skill (or hand-edit web/landing/index.html) to add or refresh the tiles, then
-# commit the media with the HTML. See web/landing/MAINTAINING.md.
+# no-JS / reduced-motion fallback. After regenerating, wire the clips into the
+# Astro gallery (see web/site/MAINTAINING.md) and commit the media.
 #
 # Needs ffmpeg on PATH (always) and a Flutter SDK (unless --encode-only).
 # Determinism note: Fluvie frames are byte-identical, but ffmpeg builds differ
@@ -33,7 +32,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
 SRC_DIR="build"
-OUT_DIR="web/landing/media"
+OUT_DIR="web/site/public/media"
 CLI="packages/fluvie_cli/bin/fluvie.dart"
 
 WIDTH=480
@@ -130,4 +129,4 @@ done
 
 echo
 echo "Wrote ${#KEYS[@]} gallery clips to $OUT_DIR/"
-echo "Next: run the sync-website skill (or edit web/landing/index.html) to refresh the tiles."
+echo "Next: wire the clips into the Astro gallery (see web/site/MAINTAINING.md)."

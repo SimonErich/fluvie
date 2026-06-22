@@ -11,9 +11,10 @@ folder.
 | `fluvie-api` | `api.Dockerfile` | `env/api.env` | 8080 | api.fluvie.dev |
 | `fluvie-mcp` | `mcp.Dockerfile` | `env/mcp.env` | 8080 | mcp.fluvie.dev |
 | `fluvie-demo` | `demo.Dockerfile` | `env/demo.env` (build-time) | 80 | demo.fluvie.dev |
-| `fluvie-web` | `landing.Dockerfile` | none | 80 | fluvie.dev |
 
 All build contexts are the repo root; the Dockerfiles just live under `deploy/`.
+The marketing landing (fluvie.dev) is not a container here; it is built from
+`web/site` and served by GitHub Pages (see `.github/workflows/website.yml`).
 
 ## Env files
 

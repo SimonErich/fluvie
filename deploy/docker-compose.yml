@@ -6,9 +6,10 @@
 #   docker compose -f deploy/docker-compose.yml up --build
 #
 # Each service reads its own documented env file under deploy/env/ (see
-# deploy/README.md). Local ports: render API (8080), demo (8081), landing
-# (8082), MCP (8084). Docs are hosted on GitHub Pages (docs.fluvie.dev), not as
-# a container here. The optional S3 stack (MinIO) starts with the `s3` profile,
+# deploy/README.md). Local ports: render API (8080), demo (8081), MCP (8084).
+# The docs (docs.fluvie.dev) and the marketing landing (fluvie.dev) are hosted on
+# GitHub Pages, not as containers here. The optional S3 stack (MinIO) starts with
+# the `s3` profile,
 # the external cleanup cron with `cron`.
 #
 # Deploying with Dokploy: create one app per service from these Dockerfiles (or
@@ -108,15 +109,6 @@ services:
         FLUVIE_API_TOKEN: ${FLUVIE_API_TOKEN:-}
     ports:
       - "8081:80"
-    restart: unless-stopped
-
-  # The marketing landing (fluvie.dev). Static, no configuration.
-  fluvie-web:
-    build:
-      context: ..
-      dockerfile: deploy/landing.Dockerfile
-    ports:
-      - "8082:80"
     restart: unless-stopped
 
 volumes:

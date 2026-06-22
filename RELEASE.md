@@ -10,9 +10,10 @@ parts that need your accounts and credentials.
 | Trigger | Workflow | Result |
 | --- | --- | --- |
 | push to `main` | `ci.yaml` | format, analyze, lint, tests, coverage, goldens, pana, render smoke |
-| push to `main` (docs change) | `docs.yml` | builds the Astro site and deploys it to GitHub Pages |
+| push to `main` (docs change) | `docs.yml` | builds the docs site (`web/docs`) and deploys it to GitHub Pages (docs.fluvie.dev) |
+| push to `main` (`web/site` change) | `website.yml` | builds the landing (`web/site`, Astro) and publishes it to the `fluvie_website` repo, whose Pages serves fluvie.dev |
 | tag `v0.1.0` (umbrella) | `publish.yml` | publishes every package to pub.dev via OIDC (one shared version) |
-| tag `v0.1.0` (umbrella) | `images.yml` | builds and pushes the service images to ghcr.io, then pings the Dokploy redeploy webhooks |
+| tag `v0.1.0` (umbrella) | `images.yml` | builds and pushes the api/mcp/demo images to ghcr.io, then pings the Dokploy redeploy webhooks |
 
 One tag does everything: publish a GitHub Release for `v0.1.0` (or push the tag)
 and pub.dev publishing, the image build, and the Dokploy redeploy all fire.
@@ -22,19 +23,21 @@ and pub.dev publishing, the image build, and the Dokploy redeploy all fire.
 | Surface | Where it runs | How |
 | --- | --- | --- |
 | docs.fluvie.dev | **GitHub Pages** (free, this repo) | `docs.yml` builds `web/docs` and deploys |
-| fluvie.dev (landing) | **Dokploy** | image `fluvie-web` |
+| fluvie.dev (landing) | **GitHub Pages** (the `fluvie_website` repo) | `website.yml` builds `web/site` and publishes it there |
 | demo.fluvie.dev | **Dokploy** | image `fluvie-demo` (static Flutter web) |
 | api.fluvie.dev | **Dokploy** | image `fluvie-api` (the renderer) |
 | mcp.fluvie.dev | **Dokploy** | image `fluvie-mcp` |
 
-GitHub Pages allows one custom domain per repo, which is why only the docs use it
-and the other static sites run as Dokploy containers.
+GitHub Pages allows one custom domain per repo, so docs.fluvie.dev serves from
+this repo and fluvie.dev serves from the separate `fluvie_website` repo. The API,
+MCP, and demo services run as Dokploy containers.
 
 ## 2. One-time: pub.dev publishing
 
 All packages share one version and publish from one umbrella tag, but pub.dev
 must trust this repo first. For every package (`fluvie`, `fluvie_cli`,
-`fluvie_lints`, `fluvie_ai`, `fluvie_api`, `fluvie_mcp`):
+`fluvie_lints`, `fluvie_ai`, `fluvie_api`, `fluvie_mcp`, `fluvie_mobile_encoder`,
+`fluvie_web_encoder`):
 
 1. Reserve the name with a first manual publish from the package directory:
    ```sh
@@ -60,14 +63,14 @@ The images publish to `ghcr.io/simonerich/<name>` using the built-in
 `GITHUB_TOKEN`, so there is nothing to configure to push. After the first
 `images` run, open each package under your GitHub **Packages** and set it to
 **public** so anyone can pull without auth. Images: `fluvie-api`, `fluvie-mcp`,
-`fluvie-demo`, `fluvie-web`.
+`fluvie-demo`.
 
 ## 5. DNS (your registrar)
 
 | Host | Points at |
 | --- | --- |
 | `docs.fluvie.dev` | GitHub Pages (CNAME to `simonerich.github.io`) |
-| `fluvie.dev` | your Dokploy host (the `fluvie-web` app) |
+| `fluvie.dev` | GitHub Pages (CNAME to `simonerich.github.io`, served from `fluvie_website`) |
 | `demo.fluvie.dev` | your Dokploy host (the `fluvie-demo` app) |
 | `api.fluvie.dev` | your Dokploy host (the `fluvie-api` app) |
 | `mcp.fluvie.dev` | your Dokploy host (the `fluvie-mcp` app) |
@@ -89,10 +92,9 @@ container's port, not a host port. The local `docker-compose.yml` host ports
 | api.fluvie.dev | `8080` |
 | mcp.fluvie.dev | `8080` |
 | demo.fluvie.dev | `80` |
-| fluvie.dev | `80` |
 
 The render API and the MCP server listen on `8080` (override with `PORT`); the
-demo and landing are static sites behind nginx on `80`. Pointing a domain at the
+demo is a static site behind nginx on `80`. Pointing a domain at the
 wrong port is what yields a Bad Gateway.
 
 - **api.fluvie.dev** (`fluvie-api`, `deploy/api.Dockerfile`): set `API_TOKEN` and
@@ -106,7 +108,6 @@ wrong port is what yields a Bad Gateway.
 - **demo.fluvie.dev** (`fluvie-demo`, `deploy/demo.Dockerfile`): the API URL is
   baked in at build time. The published image points at `https://api.fluvie.dev`;
   to target another API, rebuild with `--build-arg FLUVIE_API_URL=...`.
-- **fluvie.dev** (`fluvie-web`, `deploy/landing.Dockerfile`): static, no config.
 
 ### Auto-redeploy on a new image
 
@@ -127,7 +128,8 @@ service so api, mcp, and demo redeploy themselves. To enable it:
    ```
 
 A secret left unset just skips that service, so the release never fails on a
-missing webhook. (`fluvie.dev` uses the separate `notify-website` flow.)
+missing webhook. (`fluvie.dev` is served by GitHub Pages via `website.yml`, not
+Dokploy, so it has no redeploy webhook.)
 
 ### Keeping the public demo cheap and safe
 
@@ -171,7 +173,7 @@ Notes:
 ## Local dry run
 
 ```sh
-# the services (api :8080, demo :8081, landing :8082, mcp :8084)
+# the services (api :8080, demo :8081, mcp :8084)
 cp deploy/env/api.env.example deploy/env/api.env   # set API_TOKEN and CLEANUP_TOKEN
 cp deploy/env/mcp.env.example deploy/env/mcp.env
 docker compose -f deploy/docker-compose.yml up --build

@@ -134,11 +134,9 @@ complete. To embed real footage:
   to that repo, where a one-line Pages workflow publishes it. The cross-repo push
   needs a `FLUVIE_WEBSITE_TOKEN` secret; without it the build still runs and
   uploads the site as a workflow artifact, and the deploy step skips.
-- **Docker (optional)**: `deploy/landing.Dockerfile` (the `fluvie-web` compose
-  service and the `ghcr.io/simonerich/fluvie-web` image) builds the same Astro site
-  and serves the static output with nginx. Local preview:
-  `docker compose -f deploy/docker-compose.yml up --build fluvie-web`, then open
-  http://localhost:8082.
+- **Local preview**: `npm run build` then `npm run preview` in `web/site`. There
+  is no container for the landing; the old `fluvie-web` nginx image was retired
+  when fluvie.dev moved to GitHub Pages.
 
 ## Release checklist
 
