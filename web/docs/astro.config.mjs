@@ -62,7 +62,6 @@ export default defineConfig({
             { label: 'Templates', slug: 'advanced/templates' },
             { label: 'Multi-aspect', slug: 'advanced/multi-aspect' },
             { label: 'Theming', slug: 'advanced/theming' },
-            { label: 'Determinism and caching', slug: 'advanced/determinism-and-caching' },
             { label: 'Performance', slug: 'advanced/performance' },
           ],
         },
