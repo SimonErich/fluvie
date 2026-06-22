@@ -92,18 +92,29 @@ final class _RightPane extends StatelessWidget {
   }
 }
 
-/// The centre stage: the rendered Playground video once one exists, otherwise
-/// the live preview of the selected lesson (which also feeds the Motions tab).
+/// The centre stage: the freshly rendered Playground video once one exists,
+/// otherwise the selected lesson's pre-rendered `/media/<key>.mp4` (baked into
+/// the demo image, so no server render on load).
+///
+/// The live [PreviewPane] stays mounted behind the opaque video so it is laid
+/// out — resolving the selected lesson's timeline for the Motions tab and
+/// driving the scrubber — while the video hides it.
 final class _CenterStage extends ConsumerWidget {
   const _CenterStage();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final videoUrl = ref.watch(playgroundViewModelProvider.select((s) => s.videoUrl));
-    if (videoUrl == null) return const PreviewPane();
-    return ColoredBox(
-      color: const Color(0xFF14141C),
-      child: PlaygroundVideo(url: videoUrl),
+    final rendered = ref.watch(playgroundViewModelProvider.select((s) => s.videoUrl));
+    final lessonKey = ref.watch(selectedLessonProvider).id;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const PreviewPane(),
+        ColoredBox(
+          color: const Color(0xFF14141C),
+          child: PlaygroundVideo(url: rendered ?? '/media/$lessonKey.mp4'),
+        ),
+      ],
     );
   }
 }

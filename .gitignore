@@ -48,3 +48,7 @@ pubspec_overrides.yaml
 # Playground code-render scratch: the server writes a per-render input.dart +
 # generated harness under the render project, then deletes it after the render.
 .fluvie_playground/
+
+# Pre-rendered demo videos: generated at image-build time (deploy/demo.Dockerfile)
+# into example/web/media and bundled into build/web/media. Never committed.
+example/web/media/
