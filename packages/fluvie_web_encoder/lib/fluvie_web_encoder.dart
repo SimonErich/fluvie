@@ -6,13 +6,15 @@
 /// import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
 /// ```
 ///
-/// The capture half is Fluvie's own deterministic pipeline (`renderToSandbox`);
+/// The capture half is Fluvie's own frame-driven pipeline (`renderToSandbox`);
 /// this package adds the in-browser ffmpeg.wasm encode, which runs the exact
-/// same argument plan as the desktop and server paths. It is opt-in, so apps
-/// that only render via the API stay free of the wasm payload. `src/` stays
-/// private.
+/// same argument plan as the desktop and server paths. Clips decode on-device
+/// through WebCodecs via `createWebClipDecoder`. It is opt-in, so apps that only
+/// render via the API stay free of the wasm payload. `src/` stays private.
 library;
 
+export 'src/clip_decoder.dart' show createWebClipDecoder;
+export 'src/download.dart' show downloadBytes;
 export 'src/fluvie_web_stage.dart' show FluvieWebStage;
 export 'src/web_audio_materializer.dart'
     show BundleWebAudioMaterializer, WebAudioFetch, WebAudioMaterializer;

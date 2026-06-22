@@ -65,7 +65,7 @@ Markdown releaseNotes() =>
       '# Release notes\n\n'
       '- Faster renders\n'
       '- Highlighted `Code` blocks\n\n'
-      '> Determinism is the headline.',
+      '> On-device rendering is the headline.',
     );
 // #enddocregion markdown
 

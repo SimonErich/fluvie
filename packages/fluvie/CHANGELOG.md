@@ -3,6 +3,32 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- In-browser rendering paints declared image media. A `dart:io`-free
+  `WebImageMediaResolver` (selected by `mediaResolverProvider` on web) resolves
+  and decodes asset, network, and memory `Image` sources before the frame loop,
+  and `renderToSandbox` accepts an injected resolver. Audio, snapshots, and
+  captions are not supported on web yet and fail with a clear typed error.
+- On-device video `Clip` support, shared across desktop and web. A
+  `ClipResolveCache` mixin probes a clip, plans the source frames its scene
+  window reads (`planClipFrames`), extracts and caches them, and serves them
+  synchronously per frame; a clip pre-pass (`preResolveCompositionClips`) runs
+  before the frame loop in every render entry point. The browser decodes through
+  an injected `WebClipDecoder` (WebCodecs), wired by `webClipDecoderProvider`;
+  with no decoder a clip fails with a clear typed error.
+- Shared on-device render primitives so the mobile and web encoders stay thin and
+  consistent: `RenderPhase` + `RenderProgress`/`RenderProgressCallback`,
+  `frameCountFor`, `runGuarded` (cleanup that never masks the render error),
+  `runStage` (stamps a stage onto a thrown `FluvieRenderException`),
+  `DisposableResolver`, and `resolverScope`.
+- `FluvieRenderException.stage` records whether a failure happened while capturing
+  or encoding.
+- Media resolvers (`MediaRepository`, `WebImageMediaResolver`) now `dispose()`
+  their decoded images, freeing native memory instead of waiting for GC.
+
 ## [0.1.3] - 2026-06-22
 
 ### Added
@@ -55,7 +81,7 @@ line means it can still change before `1.0`, so pin a version.
   `NetworkAllowlist` is now exported for on-device network audio.
 - The power layer: `FluvieTheme`, `Adaptive` and multi-aspect render, templates,
   the `FrameBuilder` escape hatch, and `Export.*` modes.
-- Determinism throughout: identical input renders byte-identical frames, with
-  content-hash media caching.
+- Content-hash media caching, so an unchanged frame is read from cache rather
+  than redrawn.
 
 [0.1.0]: https://github.com/SimonErich/fluvie/releases/tag/v0.1.0

@@ -7,9 +7,9 @@ import 'package:fluvie/src/composition/video.dart';
 /// the same definition produces a personalized intro per user, a stat reel per
 /// metric, a release card per changelog entry. `build` is a pure function of its
 /// [P]: it reads the props and returns a [Video], with no IO and no wall-clock,
-/// so the same props always build the same tree. Combined with the deterministic
-/// capture pipeline, identical props produce byte-identical frames — the
-/// data-driven-batch caching contract.
+/// so the same props always build the same tree. Combined with the frame-driven
+/// capture pipeline, identical props render the same frames, so a batch caches
+/// and goldens.
 ///
 /// Render a template with the top-level `renderTemplate` free function, which
 /// builds `template.build(props)` and runs the same offline capture shell as
@@ -45,7 +45,7 @@ abstract class VideoTemplate<P> {
   /// Builds the [Video] for [props].
   ///
   /// A pure function of [props]: no IO, no wall-clock, no unseeded randomness, so
-  /// the same value always returns the same tree (the determinism contract).
+  /// the same value always returns the same tree (so it caches and goldens).
   /// Override it to map your props onto scenes and elements.
   Video build(P props);
 }

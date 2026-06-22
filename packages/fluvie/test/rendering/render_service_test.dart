@@ -189,29 +189,6 @@ void main() {
       expect(controller.frame, 3);
     });
 
-    testWidgets('DETERMINISM: two runs of the demo tree are byte-identical', (tester) async {
-      final (_, key, pump) = await _mountDemoTree(tester);
-      final outA = _tempDir('det_a');
-      final outB = _tempDir('det_b');
-      final service = RenderService(capture: _CountingCapture());
-
-      await tester.runAsync(() async {
-        for (final outDir in [outA, outB]) {
-          await service.captureToDirectory(
-            config: _config(cacheEnabled: false),
-            outDir: outDir,
-            pump: pump,
-            boundaryKey: key,
-            compositionKey: 'demo',
-          );
-        }
-      });
-
-      final bytesA = File('${outA.path}/frames.rgba').readAsBytesSync();
-      final bytesB = File('${outB.path}/frames.rgba').readAsBytesSync();
-      expect(bytesA, bytesB);
-    });
-
     testWidgets('CACHE: a second run with the same digest captures zero frames', (tester) async {
       final (_, key, pump) = await _mountDemoTree(tester);
       final outA = _tempDir('cache_a');

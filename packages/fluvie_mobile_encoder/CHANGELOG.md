@@ -3,6 +3,23 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- `OnDeviceVideoRenderer.render` takes an `outputFile` to write the MP4 straight
+  to a path you choose, and the constructor takes a `networkAllowlist` to gate
+  network image hosts.
+- A cleanup failure after a render is reported through `onWarning` instead of
+  masking the real render error, and the per-render resolver's decoded images are
+  disposed once the render is done.
+
+### Changed
+
+- **Breaking:** `render`'s `onProgress` now takes the unified
+  `RenderProgressCallback` (a `RenderProgress` with a `RenderPhase`); the
+  `OnDeviceProgress`/`OnDeviceRenderPhase` types are removed.
+
 ## [0.1.3] - 2026-06-22
 
 ### Added

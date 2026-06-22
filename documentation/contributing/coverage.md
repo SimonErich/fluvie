@@ -83,6 +83,4 @@ stubborn defect to the implementer rather than hiding it.
 ## Where to next
 
 - [Testing guide](testing.md): how the suites and fakes fit together.
-- [Determinism and caching](../advanced/determinism-and-caching.md): why every
-  frame stays reproducible.
 - [Contributing overview](overview.md): the workflow and the quality gate.

@@ -117,16 +117,13 @@ vertical without a per-call aspect. Pass another aspect to fan one template out
 across formats. The `service`, `pumpWidget`, and `pumpFrame` are the host's
 render wiring; the example app and the CLI supply them for you.
 
-## Same props, same frames
+## Same props, same render
 
-The headline contract: the same template rendered for the same props twice
-produces byte-identical frames. The render path proves this with a test that
-renders three cards from a data list and compares bytes.
-
-This holds because `build` is a pure function of its props and the capture
-pipeline is deterministic. The same props build the same tree, the same tree
-captures the same pixels, and value-equal props let the frame cache share work
-across renders. Different props produce different frames, as you would expect.
+The same template rendered for the same props produces the same render. This
+holds because `build` is a pure function of its props: the same props build the
+same tree, the same tree captures the same picture, and value-equal props let the
+frame cache share work across renders. Different props produce different frames,
+as you would expect.
 Pass a different `value` and the count changes; pass an equal `Props` and you
 get the exact same bytes.
 
@@ -140,5 +137,3 @@ unchanged row produces the same file it did today.
   landscape, and portrait with the same props.
 - [Exporting your video](../guides/exporting-your-video.md): pick the container
   each rendered template writes.
-- [Determinism and caching](determinism-and-caching.md): why the same props
-  always render the same frames.

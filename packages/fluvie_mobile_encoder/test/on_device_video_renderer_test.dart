@@ -35,6 +35,18 @@ class _TesterCaptureHost implements CaptureHost {
   }
 }
 
+/// A capture host whose dispose throws after tearing down, to prove a cleanup
+/// failure is reported through `onWarning` and never masks a finished render.
+class _ThrowingDisposeHost extends _TesterCaptureHost {
+  _ThrowingDisposeHost(super.tester, super.size);
+
+  @override
+  Future<void> dispose() async {
+    await super.dispose();
+    throw StateError('dispose boom');
+  }
+}
+
 Directory _sandbox() {
   final dir = Directory.systemTemp.createTempSync('mob_render_');
   addTearDown(() => dir.deleteSync(recursive: true));
@@ -54,24 +66,20 @@ void main() {
       sandboxFactory: () async => sandbox,
     );
 
-    final phases = <OnDeviceRenderPhase>[];
+    final phases = <RenderPhase>[];
     final file = await tester.runAsync(
       () => renderer.render(
         composition: _composition,
         aspect: Aspect.square,
         duration: const Duration(milliseconds: 100),
         longEdge: 64,
-        onProgress: phases.add,
+        onProgress: (progress) => phases.add(progress.phase),
       ),
     );
 
     expect(file, isNotNull);
     expect(file!.path, endsWith('out.mp4'));
-    expect(phases, [
-      OnDeviceRenderPhase.capturing,
-      OnDeviceRenderPhase.encoding,
-      OnDeviceRenderPhase.complete,
-    ]);
+    expect(phases, [RenderPhase.capturing, RenderPhase.encoding, RenderPhase.complete]);
     expect(host.disposed, isTrue);
     expect(encoder.requests, hasLength(1));
 
@@ -109,6 +117,57 @@ void main() {
     final req = encoder.requests.single;
     expect(req.codec, MobileVideoCodec.hevc);
     expect(req.bitRate, 2500000);
+  });
+
+  testWidgets('writes the MP4 to an explicit outputFile', (tester) async {
+    final sandbox = _sandbox();
+    final dest = File('${sandbox.path}/custom_name.mp4');
+    final encoder = FakeMobileVideoEncoder();
+    final renderer = OnDeviceVideoRenderer(
+      encoder: encoder,
+      hostFactory: (size) => _TesterCaptureHost(tester, size),
+      sandboxFactory: () async => sandbox,
+    );
+
+    final file = await tester.runAsync(
+      () => renderer.render(
+        composition: _composition,
+        aspect: Aspect.square,
+        duration: const Duration(milliseconds: 100),
+        longEdge: 64,
+        outputFile: dest,
+      ),
+    );
+
+    expect(file!.path, dest.path);
+    expect(encoder.requests.single.outputPath, dest.path);
+  });
+
+  testWidgets('a cleanup failure is reported, not masked, and the render succeeds', (tester) async {
+    final messages = <String>[];
+    final previous = OnDeviceVideoRenderer.onWarning;
+    OnDeviceVideoRenderer.onWarning = messages.add;
+    addTearDown(() => OnDeviceVideoRenderer.onWarning = previous);
+
+    final sandbox = _sandbox();
+    final renderer = OnDeviceVideoRenderer(
+      encoder: FakeMobileVideoEncoder(),
+      hostFactory: (size) => _ThrowingDisposeHost(tester, size),
+      sandboxFactory: () async => sandbox,
+    );
+
+    final file = await tester.runAsync(
+      () => renderer.render(
+        composition: _composition,
+        aspect: Aspect.square,
+        duration: const Duration(milliseconds: 100),
+        longEdge: 64,
+      ),
+    );
+
+    expect(file, isNotNull, reason: 'a cleanup hiccup must not fail a finished render');
+    expect(messages.single, contains('Cleanup after render failed'));
+    expect(messages.single, contains('dispose boom'));
   });
 
   testWidgets('rounds a sub-frame duration up to one frame', (tester) async {

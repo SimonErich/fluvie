@@ -8,7 +8,7 @@ const Color _shadowColor = Color(0x40000000);
 const Offset _shadowOffset = Offset(0, 8);
 
 /// The default card/polaroid blur radius: kept at 24 so the
-/// existing layout goldens stay byte-identical. `Frame.card(elevation:)` sets
+/// existing layout goldens stay stable. `Frame.card(elevation:)` sets
 /// it directly; `Frame.polaroid` always uses this default.
 const double _defaultElevation = 24;
 

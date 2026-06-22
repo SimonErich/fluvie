@@ -89,10 +89,10 @@ There are three families: `Particles.confetti`, `Particles.snow`, and
 and you override one field at a time.
 
 The seed is what makes the field reproducible. Each particle reads its placement
-from the seeded noise source as `valueForSeed("$seed-$i")`, never from an
-unseeded `Random`. Two renders of the same spec produce byte-identical frames,
-which is what lets the frame cache and goldens trust the output. Change the seed
-and you get a different but equally stable field.
+from the seeded noise source as `valueForSeed("$seed-$i")`, so a given seed lays
+the field out the same way every render. That stability is what lets the frame
+cache and goldens trust the output. Change the seed and you get a different but
+equally stable field.
 
 ## Parallax
 
@@ -202,8 +202,6 @@ honest.
 
 ## Where to next
 
-- [Determinism and caching](determinism-and-caching.md): why the same input
-  always renders the same frames, the rule every effect here follows.
 - [Timing and triggers](../guides/timing-and-triggers.md): when an effect plays
   and how `at:` chains one off another.
 - [Cheatsheet](../reference/cheatsheet.md): the whole shipped surface on one

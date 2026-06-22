@@ -564,7 +564,7 @@ final class Animation {
   /// Pass a [seed] for organic variation: the pure sine then carries a
   /// low-amplitude, reproducible noise wobble drawn from the seeded noise
   /// source, so two elements with different seeds bob differently while each
-  /// stays byte-identical across runs. Sampled on a closed loop, the wobble is
+  /// stays stable across runs. Sampled on a closed loop, the wobble is
   /// continuous across the cycle wrap. With no [seed] this is the unchanged
   /// pure-sine keyframe float.
   static Animation float({

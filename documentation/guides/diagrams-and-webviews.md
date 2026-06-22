@@ -24,8 +24,8 @@ subtree is rasterized once, before frame 0, into a decoded image. That image is
 cached by content hash and painted synchronously on every frame after. The frame
 loop never runs a live browser or a live platform view.
 
-This is what keeps renders byte-identical. The same source produces the same
-image, and the same image paints the same pixels on frame 0 and frame 200. A
+This is what keeps a snapshot stable across the render. The same source produces
+the same image, and that image paints the same on frame 0 and frame 200. A
 snapshot is just another resolved media, so it caches and goldens like an
 `Image` or a `Clip`.
 
@@ -35,7 +35,7 @@ already-rendered raster, not over the act of rendering it.
 
 ## What works today
 
-`Snapshot`, `DeviceFrame`, and the full API and determinism model work now.
+`Snapshot`, `DeviceFrame`, and the full rasterize-once API work now.
 Live Mermaid and live web rasterization need a renderer that is not wired in this
 version yet. See [The live renderer is experimental](#the-live-renderer-is-experimental)
 below for the exact state and how to supply your own. Read this page top to
@@ -187,7 +187,7 @@ What works now:
 - `Snapshot(child)` rasterizes any subtree in process, fully deterministic.
 - `DeviceFrame.phone/browser/tablet` chrome over any child.
 - The full API for `Mermaid`, `WebView`, and `Html`, plus the rasterize-once
-  determinism model.
+  caching model.
 - Your own `SnapshotService` (an offline fixture one is enough).
 
 What is forthcoming:
@@ -200,12 +200,12 @@ a typed `FluvieSnapshotUnavailableError`. That error names the missing capabilit
 and the install fix, so a fresh clone gets a clear message rather than a blank
 frame.
 
-## Deterministic by construction
+## Rasterized once, cached by content
 
 Every element here is a pure function of its source, its viewport or theme, and
 its reveal progress. The rasterize step runs once per content and is cached by
-content hash, never per frame. The same input paints the same pixels every time,
-so diagrams, pages, and snapshots cache and golden like every other element.
+content hash, never per frame. The same input paints the same way every time, so
+diagrams, pages, and snapshots cache and golden like every other element.
 
 ## Where to next
 
@@ -213,5 +213,3 @@ so diagrams, pages, and snapshots cache and golden like every other element.
   `Code`, and `Terminal` elements a diagram sits beside.
 - [Images and video clips](images-and-video-clips.md): the media pipeline a
   snapshot rides, pre-resolved before the frame loop.
-- [Determinism and caching](../advanced/determinism-and-caching.md): why the same
-  source always renders the same frames.

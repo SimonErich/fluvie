@@ -27,7 +27,7 @@ already exists and what is coming.
 | guides/ | [rendering-on-a-server](guides/rendering-on-a-server.md) | shipped |
 | guides/ | [on-device-mobile-rendering](guides/on-device-mobile-rendering.md) | shipped |
 | (root) | [cookbook](cookbook.md) | shipped |
-| advanced/ | custom-animations · [timeline-orchestration](advanced/timeline-orchestration.md) · [frame-builder](advanced/frame-builder.md) · [shaders-and-effects](advanced/shaders-and-effects.md) · [templates](advanced/templates.md) · [multi-aspect](advanced/multi-aspect.md) · [theming](advanced/theming.md) · [determinism-and-caching](advanced/determinism-and-caching.md) · [performance](advanced/performance.md) | performance + frame-builder + shaders-and-effects + templates + multi-aspect + theming + timeline-orchestration + determinism-and-caching shipped; custom-animations per page |
+| advanced/ | custom-animations · [timeline-orchestration](advanced/timeline-orchestration.md) · [frame-builder](advanced/frame-builder.md) · [shaders-and-effects](advanced/shaders-and-effects.md) · [templates](advanced/templates.md) · [multi-aspect](advanced/multi-aspect.md) · [theming](advanced/theming.md) · [performance](advanced/performance.md) | performance + frame-builder + shaders-and-effects + templates + multi-aspect + theming + timeline-orchestration shipped; custom-animations per page |
 | reference/ | [cheatsheet](reference/cheatsheet.md) | shipped, living |
 | reference/ | [migration](reference/migration.md) · [faq](reference/faq.md) | shipped |
 | contributing/ | [overview](contributing/overview.md) · [testing](contributing/testing.md) · [coverage](contributing/coverage.md) | shipped |
@@ -45,7 +45,7 @@ code-excerpt directives, never hand-typed.
 - [Your first video](getting-started/your-first-video.md): lesson 01, start
   to finish.
 - [Images and video clips](guides/images-and-video-clips.md): photos and
-  embedded video, pre-resolved for deterministic frames.
+  embedded video, pre-resolved before the frame loop.
 - [Charts and data](guides/charts-and-data.md): bar, line, area, pie, donut,
   and scatter charts that reveal themselves from your data.
 - [Code and terminal videos](guides/code-and-terminal-videos.md): typed,
@@ -60,8 +60,7 @@ code-excerpt directives, never hand-typed.
   load it back, and generate one from a prompt with an LLM.
 - [Rendering on a server](guides/rendering-on-a-server.md): the HTTP API that
   renders videos to files, with local or S3 storage and scheduled cleanup.
-- [Templates](advanced/templates.md): render one definition per data row,
-  byte-identically.
+- [Templates](advanced/templates.md): render one definition per data row.
 - [Multi-aspect](advanced/multi-aspect.md): one definition rendered to reels,
   square, landscape, and portrait.
 - [Theming](advanced/theming.md): brand a video from one palette and type scale.
@@ -69,8 +68,6 @@ code-excerpt directives, never hand-typed.
   frame-clock builder for when no preset fits.
 - [Shaders and effects](advanced/shaders-and-effects.md): grain, particles,
   parallax, and fragment shaders, all in one animate list.
-- [Determinism and caching](advanced/determinism-and-caching.md): why the same
-  input always renders the same frames.
 - [Animating elements](guides/animating-elements.md): the one motion list,
   the presets, triggers, and stagger.
 - [Performance](advanced/performance.md): the frame cache, content-hash media

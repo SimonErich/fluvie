@@ -92,6 +92,15 @@ final class FakeMediaResolver implements MediaResolver {
   }
 
   @override
+  Future<ClipMetadata> probeClip(MediaSource source) async {
+    final metadata = _metadata[source];
+    if (metadata == null) {
+      throw FluvieRenderException('FakeMediaResolver has no canned clip metadata for "$source".');
+    }
+    return metadata;
+  }
+
+  @override
   Future<void> preResolveClip(MediaSource source, Iterable<int> sourceFrames) async {
     if (!_metadata.containsKey(source)) {
       throw FluvieRenderException('FakeMediaResolver has no canned clip metadata for "$source".');

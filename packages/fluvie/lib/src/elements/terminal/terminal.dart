@@ -22,8 +22,8 @@ const double _defaultFontSize = 14;
 /// [TerminalLine.out] streams its output whole once its turn arrives. Each line
 /// starts [lineGap] after the previous one settles, and a command types at
 /// [typingSpeed] frames per glyph. The painter is a pure function of
-/// `(lines, reveal state, theme tokens)`, so the same frame renders
-/// byte-identically every time.
+/// `(lines, reveal state, theme tokens)`, so the same frame renders the same
+/// every time.
 ///
 /// ```dart
 /// Terminal(

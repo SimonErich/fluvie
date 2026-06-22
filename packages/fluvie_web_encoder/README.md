@@ -15,12 +15,12 @@ and runs the *exact same* encode argument plan through ffmpeg.wasm: H.264, GIF,
 and transparent WebM all work with no reimplementation and no native code.
 
 It is **opt-in**. The ffmpeg.wasm payload is large, so only apps that depend on
-this package load it; apps that render through `fluvie_api` (a server) or only
+this package load it; apps that render through `fluvie_server` (a server) or only
 target mobile stay light.
 
 ## How it works
 
-1. `WebVideoRenderer` runs Fluvie's deterministic capture loop into an off-screen
+1. `WebVideoRenderer` runs Fluvie's capture loop into an off-screen
    surface inside your app's own pipeline (a `FluvieWebStage`), writing the frames
    into an in-memory sandbox.
 2. It feeds that sandbox to ffmpeg.wasm through Fluvie's `WasmRuntime`, runs the
@@ -78,14 +78,18 @@ feature set works: every element, animation, transition, and `Export` mode (MP4,
 GIF, transparent WebM) renders exactly as on the desktop.
 
 - **Performance**: ffmpeg.wasm is roughly 10–50× slower than native FFmpeg. Web
-  on-device suits previews and short clips; use `fluvie_api` for long renders.
+  on-device suits previews and short clips; use `fluvie_server` for long renders.
+- **Clips**: a `Clip` decodes on-device through WebCodecs. `WebVideoRenderer`
+  wires a decoder by default; it needs a browser with WebCodecs and the
+  `FluvieClipDecoder` bridge on the page. Without them a clip fails with a clear
+  error, so wire the bridge or render clip compositions on the server or mobile.
 - **Audio**: opt-in. Pass `audio: true` to mix and mux a `Video`'s `Audio` tracks
   (the same `amix` plan the desktop uses — looping beds, fades, trims, multi-track).
   Bundle audio as an asset or fetch it from an allowlisted URL; the browser has no
   local-file source. See the
   [audio guide](https://docs.fluvie.dev/guides/on-device-web-rendering/#audio).
-- **Determinism**: the captured frames are byte-identical run-to-run; the encoded
-  MP4 may differ from a native FFmpeg build, so give web its own golden baseline.
+- **Golden baseline**: the encoded MP4 may differ from a native FFmpeg build, so
+  give web its own golden baseline.
 
 ## Documentation
 

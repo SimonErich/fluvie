@@ -67,7 +67,7 @@ right door.
 1  Hero: code in, film out
 2  The one idea: what, not when
 3  The clever bit: triggers, not timecodes
-4  The proof: render twice, same bytes
+4  The payoff: write one, render a thousand
 5  From `flutter create` to `fluvie render`   (the getting-started)
 6  The reel wall: twelve examples
 7  The crew: seven packages
@@ -120,7 +120,7 @@ accessibility note.
   - Lead: "A real Flutter widget tree goes in. A real MP4 comes out. You say what
     the video is. Fluvie works out when everything happens, frame by frame. No
     timeline to scrub by hand. No video editor."
-  - Three micro-labels under the lead: "It is code." / "It is deterministic." /
+  - Three micro-labels under the lead: "It is code." / "It runs anywhere." /
     "It is a real video file."
 - **Special treatment:** A split "film strip" stage. On one side, the real
   lesson-01 source, syntax-highlighted, with the `import 'package:flutter/
@@ -140,8 +140,8 @@ accessibility note.
      line highlights the frames it controls. The link runs both ways.
   3. A play or clapper button dramatizes a render: the filmstrip clears, frames
      pour in fast and quantized behind a slim progress bar, and it ends on a
-     "byte-identical" stamp. A second press shows the identical fill. Caption:
-     "Run it twice. Same frames."
+     "no display needed" stamp. A second press replays the fill. Caption:
+     "Render it headless."
 - **Accessibility:** The code is selectable `pre` text with a language label,
   never an image. Line highlights carry a non-color cue (a left marker or a weight
   change). The scrubber is a real `role="slider"` with `aria-valuemin`,
@@ -208,32 +208,26 @@ accessibility note.
   correct" carries an icon and a label, not color or motion alone. Reduced motion:
   the re-flow snaps to its end state.
 
-### 4. The proof: render twice, same bytes
+### 4. The payoff: write one, render a thousand
 
-- **Job:** Make the determinism claim credible to a test-minded dev, and tie it to
-  golden tests they already use.
-- **Serves / routes:** The Flutter dev. Routes to core-concepts and rendering on a
-  server (docs.fluvie.dev/guides/rendering-on-a-server).
+- **Job:** Show the batch-and-cache payoff to a builder with real data to turn into
+  video, and tie it to templates they can reuse.
+- **Serves / routes:** The Flutter dev. Routes to core-concepts and templates
+  (docs.fluvie.dev/advanced/templates).
 - **Copy:**
-  - Headline: "Identical input. Byte-identical frames. Every machine."
-  - Body: "Render the same video twice and the frames hash the same. That is the
-    whole trick. Caching works, golden tests work, and a thousand data-driven
-    videos render the way they did in review. No flaky pixels. No 'works on my
-    machine.'"
-  - Pull quote: "Your CI can diff frames the way it diffs JSON."
-- **Special treatment:** A "two takes, one hash" widget: two render outputs side by
-  side, a frame hash under each, and a "Render again" button that re-runs so both
-  hashes land identical with a lock-in. Beside it, a compact strip showing a Fluvie
-  scene next to its committed golden image and a "matches baseline" check, so the
-  golden-test angle is literal. (See the honesty note in
-  [Open decisions](#open-decisions-for-the-owner).)
-- **Motion:** On "Render again", two progress bars fill, the hash strings settle,
-  and a padlock or clapper snaps shut to signify "locked, identical". The golden
-  check stamps in like an approval mark.
-- **Accessibility:** "Identical" is stated in text and with an icon, not color. The
-  hash strings are real selectable text. The button announces its result in an
-  `aria-live` region ("Both renders produced the same frame hash"). Reduced motion:
-  bars and snap appear in their final state at once.
+  - Headline: "Write one. Render a thousand."
+  - Body: "One template plus a data list renders one video per row. The frame cache
+    keys on content, so an unchanged frame is read, not redrawn. Change one number
+    and only the frames that moved render again."
+  - Pull quote: "A thousand data-driven videos, rendered like one."
+- **Special treatment:** A "one template, one card per row" panel: a small data row
+  (`rows = [ Q1, Q2, Q3, Q4 ]`) above a grid of cards, each tile labeled with its
+  row and value, so the data-to-video mapping is literal.
+- **Motion:** On scroll, the data row settles first, then the cards stamp in one per
+  row, staggered. Hovering a card lifts it and shows its row value.
+- **Accessibility:** The data row and the cards are real text, not images. Card
+  labels carry their value as text, never color-coded only. Reduced motion: the
+  cards appear in their final state at once.
 
 ### 5. From `flutter create` to `fluvie render`
 
@@ -248,7 +242,7 @@ This is the getting-started the page must include. See the
 - **Special treatment:** A vertical numbered "call sheet" with a perforation rail
   down one side. Each step is its own card with its own copy button. Step 4
   expands to the code, and the `hide Animation` line carries an inline note. The
-  final card shows a small "two renders, one hash" badge.
+  final card shows a small "change the data, render again" badge.
 - **Motion:** Steps reveal with a gentle stagger. The perforation line threads
   downward as you progress. Each successful copy ticks that step's number (an
   allowed pop moment). The render command gets a tiny clapper-snap on copy. The
@@ -294,7 +288,7 @@ This is the example gallery the page must include. See the
   any frame. Reduced motion: tiles stay on posters, no autoplay and no wave, and
   each tile has an explicit play control for anyone who wants the clip.
 
-### 7. The crew: eight packages
+### 7. The crew: seven packages
 
 This is the ecosystem overview the page must include. See the
 [ecosystem content below](#the-ecosystem-the-full-content).
@@ -328,19 +322,17 @@ This is the open-source section the page must include. See the
 - **Serves / routes:** Everyone, the decision-sealer. Routes to the GitHub repo,
   the LICENSE, the contributing guide, and the self-host guide
   (rendering-on-a-server).
-- **Special treatment:** A "show, do not claim" centerpiece that reuses the
-  determinism widget ("two renders, one hash", "Render again" keeps matching),
-  surrounded by stamped pillar tiles in the style of certification marks. An honest
-  GitHub stat strip (stars, latest release, license, open-issue count) so the
-  section is never stale.
+- **Special treatment:** A "show, do not claim" centerpiece: stat tiles (license,
+  package count, lesson count, no per-render bill) in the style of certification
+  marks. An honest GitHub stat strip (stars, latest release, license, open-issue
+  count) so the section is never stale.
 - **Motion:** A deliberate cut into the section. Pillar stamps press-and-settle on
   scroll, staggered. Hover lifts a tile and reveals its one-line elaboration. Repo
   stats count up once on first view.
 - **Accessibility:** Pillars are a real list with full-text consequences, not
   hover-revealed. License and stats are text plus icon, never color-coded only.
   Live numbers degrade to a static accurate fallback if the fetch fails, no empty
-  boxes. The determinism result is announced in an `aria-live` region. Reduced
-  motion: stamps and count-up resolve at once.
+  boxes. Reduced motion: stamps and count-up resolve at once.
 
 ### 9. Pick your seat: CLI / HTTP / MCP / live
 
@@ -356,8 +348,8 @@ This is the open-source section the page must include. See the
 - **Special treatment:** A door or lane switcher (a segmented control, or tall
   "stage doors"): Live / CLI / HTTP / MCP. Selecting one swaps a single panel to
   that door's idiomatic call (`fluvie render <key> --out file.mp4`, a `POST /render`
-  snippet returning an MP4, an MCP tool call). An always-visible line: "Same
-  deterministic frames, whichever door you use." The "Try it live" lane is
+  snippet returning an MP4, an MCP tool call). An always-visible line: "The same
+  video, whichever door you use." The "Try it live" lane is
   emphasized for cold visitors. The CLI lane carries the canonical render command.
 - **Motion:** Only the selected or hovered door "opens" (a door-ajar lift or a light
   sweep) and its CTA slides into focus. Panel content cross-dissolves with reserved
@@ -375,10 +367,10 @@ This is the open-source section the page must include. See the
 
   | Platform | Local (FFmpeg) | Server API | On-device |
   | --- | --- | --- | --- |
-  | Desktop | yes, fluvie_cli (installation) | yes, fluvie_api client (rendering-on-a-server) | yes, local FFmpeg (the CLI) |
-  | Android | — | yes, fluvie_api client (rendering-on-a-server) | yes, fluvie_mobile_encoder (on-device-mobile-rendering) |
-  | iOS | — | yes, fluvie_api client (rendering-on-a-server) | yes, fluvie_mobile_encoder (on-device-mobile-rendering) |
-  | Web | — | yes, fluvie_api client (rendering-on-a-server) | yes, fluvie_web_encoder, ffmpeg.wasm, opt-in (on-device-web-rendering) |
+  | Desktop | yes, fluvie_cli (installation) | yes, fluvie_server client (rendering-on-a-server) | yes, local FFmpeg (the CLI) |
+  | Android | — | yes, fluvie_server client (rendering-on-a-server) | yes, fluvie_mobile_encoder (on-device-mobile-rendering) |
+  | iOS | — | yes, fluvie_server client (rendering-on-a-server) | yes, fluvie_mobile_encoder (on-device-mobile-rendering) |
+  | Web | — | yes, fluvie_server client (rendering-on-a-server) | yes, fluvie_web_encoder, ffmpeg.wasm, opt-in (on-device-web-rendering) |
 
   A one-line note under the table covers combining platforms: one app on mobile and
   web can render on-device on both by picking the renderer per platform behind a
@@ -396,13 +388,14 @@ This is the open-source section the page must include. See the
 - **Job:** Show the lowest-effort path. Describe a video in English, get a
   `VideoSpec` and an MP4. The "you do not even write the widgets" reveal.
 - **Serves / routes:** Cold visitor and expert. Routes to the AI and MCP guide
-  (docs.fluvie.dev/guides/ai-and-mcp), fluvie_ai, fluvie_mcp, and the hosted MCP at
+  (docs.fluvie.dev/guides/ai-and-mcp), fluvie_ai, fluvie_server, and the hosted MCP at
   mcp.fluvie.dev.
 - **Copy:**
   - Headline: "Or just say what you want."
   - Body: "'A 10-second product promo, brand teal, big counter to 10,000, confetti
-    on the last beat.' `fluvie_ai` turns that into a real `VideoSpec`. `fluvie_mcp`
-    lets your assistant write and render it without you opening an editor." Keep the
+    on the last beat.' `fluvie_ai` turns that into a real `VideoSpec`. The MCP server
+    in `fluvie_server` lets your assistant write and render it without you opening an
+    editor." Keep the
     honest framing: this is the optional easy mode, not the only mode.
 - **Special treatment:** A "prompt then spec then film" triptych: a chat-style
   prompt bubble, the generated `VideoSpec` code, and the rendered clip, joined by
@@ -544,8 +537,8 @@ right, render the MP4.
 fluvie render hello --out build/hello.mp4
 ```
 
-**The payoff (final card).** Run that render again. Same frames, same bytes, every
-time. That is the whole point.
+**The payoff (final card).** Change the data and render again. The cache reuses the
+rest. That is the whole point.
 
 CTAs under the call sheet: "Read the full guide" to installation, "Your first
 video" to your-first-video, and a quiet "Skip setup, scrub it live" to the demo.
@@ -612,10 +605,9 @@ people only need `fluvie`. All eight are on pub.dev. All eight are MIT.
 | --- | --- | --- | --- |
 | **fluvie** | the camera | Describe a video, render an MP4. This is the one that does the magic. | pub.dev/packages/fluvie, then your-first-video |
 | **fluvie_cli** | the projectionist | `fluvie render <key> --out file.mp4`. Headless, scriptable, no editor in sight. | pub.dev/packages/fluvie_cli, then installation |
-| **fluvie_lints** | continuity supervisor | Catches timing, determinism, and layering mistakes before they catch you. | pub.dev/packages/fluvie_lints, then cheatsheet |
+| **fluvie_lints** | continuity supervisor | Catches timing and layering mistakes before they catch you. | pub.dev/packages/fluvie_lints, then cheatsheet |
 | **fluvie_ai** | the screenwriter | Turn a plain sentence into a VideoSpec. Claude, Gemini, Mistral, or Ollama. | pub.dev/packages/fluvie_ai, then ai-and-mcp |
-| **fluvie_api** | the render server | An HTTP server plus a web-safe client. Render from anywhere, host it yourself. | pub.dev/packages/fluvie_api, then rendering-on-a-server |
-| **fluvie_mcp** | the assistant's hands | An MCP server so your AI can write and render videos for you, end to end. | pub.dev/packages/fluvie_mcp, then mcp.fluvie.dev |
+| **fluvie_server** | the studio you host | Render API, MCP server, and a docs helper in one binary. Host the full AI stack yourself. | pub.dev/packages/fluvie_server, then rendering-on-a-server |
 | **fluvie_mobile_encoder** | the on-device camera operator | Render to MP4 on the phone itself, no FFmpeg and nothing leaves the device. | pub.dev/packages/fluvie_mobile_encoder, then on-device-mobile-rendering |
 | **fluvie_web_encoder** | the in-browser camera operator | Render to MP4 in the browser with ffmpeg.wasm, opt-in, nothing leaves the page. | pub.dev/packages/fluvie_web_encoder, then on-device-web-rendering |
 
@@ -625,10 +617,10 @@ people only need `fluvie`. All eight are on pub.dev. All eight are MIT.
 
 Section 8. Heading: "MIT. Inspect it, fork it, host it, keep it."
 
-Lead: "No black box and no per-render bill. The renderer is open and the frames are
-deterministic, so the output is auditable: anyone can re-run your render and get the
-exact same frames. Self-host the API, vendor the code, or just read how the timing
-model actually works. It is free, and it stays free."
+Lead: "No black box and no per-render bill. The renderer is open, so you can read
+exactly how every frame is drawn, fork it, and host it yourself. Self-host the API,
+vendor the code, or just read how the timing model actually works. It is free, and
+it stays free."
 
 Pillars (each a claim with its Fluvie-specific consequence, so it never reads as
 boilerplate):
@@ -757,9 +749,9 @@ next click.
   The final router (11) sends them to the live demo. Next click: demo.fluvie.dev.
 - **Flutter dev.** The hero (1) shows real widget code and the `hide Animation` wink.
   The clever bit (3) lands the "oh, that is nice" with the move-the-title cascade. The
-  proof (4) sells determinism ("diff frames like JSON"). At peak intent,
-  getting-started (5) is a copy-paste path to a rendered MP4 ending on the
-  byte-identical payoff. The crew (7) shows how it scales, open source (8) seals
+  payoff (4) sells batch-and-cache ("write one, render a thousand"). At peak
+  intent, getting-started (5) is a copy-paste path to a rendered MP4. The crew (7)
+  shows how it scales, open source (8) seals
   trust, and "pick your seat" (9) shows it fits their pipeline. Next click: Get
   started or installation, or they copy the commands in-page.
 - **Existing user.** The sticky nav (0) lets them jump out at once to Docs, Demo,
@@ -789,16 +781,12 @@ These are choices to make in design, with a recommended default.
 4. **Live GitHub stats.** The nav and the open-source section want live star, release,
    and issue counts. Decide whether to wire the GitHub API (with a static fallback) at
    launch or ship static numbers. Either way a failed fetch must degrade gracefully.
-5. **Determinism widget honesty.** The "two renders, one hash" widget is simulated on
-   a static page. Present it as a clearly labeled demonstration of a real property, not
-   a live render. Recommended: ship two genuinely identical pre-rendered hashes rather
-   than fabricated ones.
-6. **Persona quick-routes in the nav.** Optional "New here / Flutter dev / I already
+5. **Persona quick-routes in the nav.** Optional "New here / Flutter dev / I already
    use Fluvie" affordance near the top. Faster routing, but more nav chrome. Recommended:
    rely on the hero and the final router unless analytics say otherwise.
-7. **AI section placement.** It currently sits after the render forks. If the
+6. **AI section placement.** It currently sits after the render forks. If the
    no-widgets reveal should hit the cold visitor earlier, move it up near the gallery.
-8. **Tagline consistency.** Keep "You write widgets. Fluvie shoots the film." as the
+7. **Tagline consistency.** Keep "You write widgets. Fluvie shoots the film." as the
    one-liner. Allow the longer "Made with Flutter, rendered with FFmpeg, MIT licensed."
    only in the footer.
 

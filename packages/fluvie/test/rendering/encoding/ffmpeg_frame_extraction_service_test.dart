@@ -84,6 +84,21 @@ void main() {
     expect(frame.rgba, bytes);
   });
 
+  test('extractFrames returns a RawFrame per requested index', () async {
+    stubRunWriting(Uint8List(2 * 1 * 4));
+
+    final frames = await service.extractFrames(
+      Uri.file('/clips/a.mp4'),
+      const [0, 5],
+      width: 2,
+      height: 1,
+    );
+
+    expect(frames.keys, unorderedEquals(const [0, 5]));
+    expect(frames[0]!.frameIndex, 0);
+    expect(frames[5]!.frameIndex, 5);
+  });
+
   test('a non-zero exit throws FluvieEncodeException with the stderr tail', () async {
     stubRunWriting(Uint8List(0), exitCode: 1, stderr: 'ffmpeg: no such frame index');
 

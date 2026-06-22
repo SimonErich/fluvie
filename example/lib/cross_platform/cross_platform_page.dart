@@ -38,7 +38,10 @@ class _CrossPlatformPageState extends State<_CrossPlatformPage> {
     });
     try {
       // #docregion call
-      final bytes = await renderOnDevice(_demo());
+      final bytes = await renderOnDevice(
+        _demo(),
+        onProgress: (progress) => setState(() => _status = 'Rendering (${progress.phase.name})…'),
+      );
       // #enddocregion call
       setState(() => _status = 'Rendered ${bytes.length} bytes on this platform.');
     } on Object catch (error) {

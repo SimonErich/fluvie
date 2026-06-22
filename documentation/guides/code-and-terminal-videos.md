@@ -147,7 +147,7 @@ const Markdown(
   '# Release notes\n\n'
   '- Faster renders\n'
   '- Highlighted `Code` blocks\n\n'
-  '> Determinism is the headline.',
+  '> On-device rendering is the headline.',
 );
 ```
 
@@ -179,12 +179,12 @@ JetBrains Mono, bundled with the package. You do not register anything: the font
 ships to every render, so your monospace text looks the same on every machine.
 Pass a `style:` with your own `fontFamily` to override it.
 
-## Deterministic by construction
+## Parsed once, cached by content
 
 Every one of these elements is a pure function of its parsed content, its reveal
 progress, and its theme tokens. The parse and the highlight run once per content
 and are cached by content hash, never per frame. The same frame paints the same
-pixels every time, so code, terminal, and Markdown videos cache and golden like
+way every time, so code, terminal, and Markdown videos cache and golden like
 every other element.
 
 ## Where to next
@@ -193,5 +193,3 @@ every other element.
   text elements a code explainer sits beside.
 - [Charts and data](charts-and-data.md): the other data-driven element family,
   with the same reveal-is-intrinsic contract.
-- [Determinism and caching](../advanced/determinism-and-caching.md): why the same
-  source always renders the same frames.

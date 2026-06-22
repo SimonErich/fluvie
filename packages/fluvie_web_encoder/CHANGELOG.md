@@ -3,6 +3,30 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- `WebVideoRenderer` resolves and paints declared image media (asset, network,
+  memory) in the browser. It builds a web image resolver per render from
+  `mediaResolverProvider`, or accepts an injected `mediaResolver`.
+- In-browser video `Clip` decoding through WebCodecs. `createWebClipDecoder`
+  bridges to a page-global `FluvieClipDecoder` (a WebCodecs `VideoDecoder` plus
+  demuxer, the same way ffmpeg.wasm lives behind `FluvieFfmpeg`);
+  `WebVideoRenderer` wires it into the per-render resolver by default. Without the
+  bridge a clip fails with a clear typed error.
+- `downloadBytes` saves rendered bytes from the page as a browser download, and
+  the `WebVideoRenderer` constructor takes a `networkAllowlist` to gate network
+  image hosts.
+- A cleanup failure after a render is reported through `onWarning` instead of
+  masking the real render error.
+
+### Changed
+
+- **Breaking:** `render`'s `onProgress` now takes the unified
+  `RenderProgressCallback` (a `RenderProgress` with a `RenderPhase`): per-frame
+  capture progress, then the encoding and complete phases.
+
 ## [0.1.3] - 2026-06-22
 
 Lockstep release with the rest of the workspace; no changes to this package.

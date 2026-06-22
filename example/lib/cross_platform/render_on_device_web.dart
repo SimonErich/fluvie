@@ -7,10 +7,22 @@ import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
 ///
 /// The same `Video` the mobile path renders; here ffmpeg.wasm encodes on the
 /// page and returns the bytes directly. Audio is mixed by the shared `amix` plan.
-Future<Uint8List> renderOnDevice(Video video) => WebVideoRenderer().render(
+/// The render parameters match the mobile path one-for-one.
+Future<Uint8List> renderOnDevice(
+  Video video, {
+  Aspect aspect = Aspect.square,
+  Duration duration = const Duration(seconds: 2),
+  int fps = 30,
+  int longEdge = 480,
+  bool audio = true,
+  RenderProgressCallback? onProgress,
+  NetworkAllowlist? networkAllowlist,
+}) => WebVideoRenderer(networkAllowlist: networkAllowlist).render(
   composition: video,
-  aspect: Aspect.square,
-  duration: const Duration(seconds: 2),
-  longEdge: 480,
-  audio: true,
+  aspect: aspect,
+  duration: duration,
+  fps: fps,
+  longEdge: longEdge,
+  audio: audio,
+  onProgress: onProgress,
 );

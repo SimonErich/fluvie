@@ -27,7 +27,7 @@ The first public release.
 - Options for quality, aspect ratio, poster frame, draft frame counts, cache
   bypass, sandbox retention, and verbose output.
 - A typed exit-code contract (`0` ok, `64` usage, `1` operational failure).
-- Deterministic renders: FFmpeg is invoked with argument lists and bitexact
-  flags, so re-rendering reproduces the same output per machine.
+- Safe FFmpeg invocation: argument lists, never shell strings, with bitexact
+  flags on a single thread, so re-rendering reproduces the same file per machine.
 
 [0.1.0]: https://github.com/SimonErich/fluvie/releases/tag/v0.1.0

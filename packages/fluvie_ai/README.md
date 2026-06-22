@@ -3,7 +3,7 @@
 Author [Fluvie](https://pub.dev/packages/fluvie) videos from natural language.
 You write a prompt; a language model writes a `VideoSpec`; Fluvie renders it to a
 real video file. The model runs once, at authoring time. Rendering the spec never
-calls a model, so the output stays byte-for-byte deterministic.
+calls a model, so renders are model-free and run offline.
 
 [![pub package](https://img.shields.io/pub/v/fluvie_ai.svg)](https://pub.dev/packages/fluvie_ai)
 [![license: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)

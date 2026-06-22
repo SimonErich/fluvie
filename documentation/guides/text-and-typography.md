@@ -36,9 +36,9 @@ Widget typedHeadline() => const Typewriter(
 
 The visible glyph count is `floor(elapsed / speed)`, clamped to the string
 length. A glyph appears only when its whole reveal time has passed, so the
-reveal is byte-identical on every render. The caret blinks on a frame-pinned
-period, so it is deterministic too. Layout and entry motion still come through
-`.animate()`; the constructor only takes content.
+reveal lands on the same frames every render. The caret blinks on a frame-pinned
+period, so it lands on the same frames too. Layout and entry motion still come
+through `.animate()`; the constructor only takes content.
 
 ### Counter
 
@@ -65,12 +65,11 @@ Both presets pin a fixed locale, so the grouping and the symbol placement are
 the same on every machine. The frame is the only clock, so two renders of the
 same counter produce the same frames.
 
-## Deterministic by design
+## Frame-driven by design
 
 `Typewriter` and `Counter` read the current frame and their enclosing time
-scope, and nothing else. No `DateTime.now()`, no animation controller, no
-wall-clock. That is why their output is reproducible: same input, same frames,
-every time.
+scope, and nothing else: no animation controller, no wall-clock. That is why
+their output is reproducible: same input, same frames, every time.
 
 ## Where to next
 

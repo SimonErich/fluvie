@@ -146,20 +146,8 @@ fluvie list
 
 It prints one key per line.
 
-## One determinism note
-
-The video frames are byte-identical on every machine: the same input always
-captures the same pixels. The encoded file is byte-identical per machine,
-because FFmpeg builds differ. The encoder runs with bit-exact flags on a single
-thread, so a given FFmpeg build always produces the same bytes from the same
-frames. See [Determinism and caching](../advanced/determinism-and-caching.md)
-for the full model.
-
 ## Where to next
 
-- [Determinism and caching](../advanced/determinism-and-caching.md): why frames
-  are byte-identical everywhere and encoded files are per-machine.
-- [Templates](../advanced/templates.md): render one definition per data row,
-  byte-identically.
+- [Templates](../advanced/templates.md): render one definition per data row.
 - [Multi-aspect](../advanced/multi-aspect.md): one definition rendered to reels,
   square, landscape, and portrait.

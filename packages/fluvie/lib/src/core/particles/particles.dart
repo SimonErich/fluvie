@@ -142,7 +142,7 @@ final class Particles {
   final int count;
 
   /// The seed string behind every particle's placement; `"$seed-$i"` seeds
-  /// particle `i`, so two fields with the same seed are byte-identical.
+  /// particle `i`, so two fields with the same seed match.
   final String seed;
 
   /// The colors particles cycle through, chosen per particle from its seed.

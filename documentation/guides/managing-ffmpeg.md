@@ -67,10 +67,8 @@ fluvie render demo --out demo.mp4 --no-download
 ## Reproducible across machines
 
 Fluvie pins one exact FFmpeg build, by URL and checksum. Because every machine
-that auto-provisions gets the same build, the encoded file is byte-identical
-across machines, not just on one. The Docker render image provisions the same
-pinned build at build time, so server renders match your local ones. See
-[Determinism and caching](../advanced/determinism-and-caching.md).
+that auto-provisions gets the same build. The Docker render image provisions the
+same pinned build at build time, so server renders match your local ones.
 
 ## A note on licensing
 

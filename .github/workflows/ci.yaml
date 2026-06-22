@@ -80,7 +80,7 @@ jobs:
       - uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: packages/fluvie/coverage/lcov.info,packages/fluvie_lints/coverage/lcov.info,packages/fluvie_cli/coverage/lcov.info,packages/fluvie_api/coverage/lcov.info
+          files: packages/fluvie/coverage/lcov.info,packages/fluvie_lints/coverage/lcov.info,packages/fluvie_cli/coverage/lcov.info,packages/fluvie_server/coverage/lcov.info
         continue-on-error: true
 
   docs:
@@ -142,6 +142,27 @@ jobs:
       # from the default `melos run test`; this job opts it in.
       - run: flutter test --tags ffmpeg test/render/lessons_render_smoke_test.dart
         working-directory: example
+
+  # Compiles the in-browser example to JS. dart2js fails on any live `dart:io`
+  # reference, so this guards the web encoder (and the fluvie barrel it imports)
+  # against a regression that pulls `dart:io` into the web render path. No
+  # ffmpeg.wasm is needed: the core loads at runtime, not at build time.
+  web_build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - run: flutter build web
+        working-directory: packages/fluvie_web_encoder/example
 
   # Optional integration lane: the ffmpeg-tagged suites against the real
   # binaries. Advisory only; the required jobs above stay binary-free.

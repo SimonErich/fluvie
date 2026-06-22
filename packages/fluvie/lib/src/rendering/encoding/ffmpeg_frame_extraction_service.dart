@@ -75,6 +75,20 @@ final class FfmpegFrameExtractionService implements FrameExtractionService {
     }
   }
 
+  @override
+  Future<Map<int, RawFrame>> extractFrames(
+    Uri source,
+    Iterable<int> frameIndices, {
+    required int width,
+    required int height,
+  }) async {
+    final frames = <int, RawFrame>{};
+    for (final index in frameIndices) {
+      frames[index] = await extractFrame(source, index, width: width, height: height);
+    }
+    return frames;
+  }
+
   /// The typed extraction argument array — a frame select + scale filter, one
   /// rawvideo frame, written to the sandbox-relative [output] file.
   static List<String> _args({

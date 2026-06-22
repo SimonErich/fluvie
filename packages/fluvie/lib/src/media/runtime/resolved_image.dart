@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter/widgets.dart' as flutter;
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
+import 'package:fluvie/src/media/runtime/file_image.dart';
 import 'package:fluvie/src/media/runtime/image_resolver_scope.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
 
@@ -53,7 +52,7 @@ final class ResolvedImage extends StatelessWidget {
     // Reason: live-preview-only file and memory arms. They read the real
     // filesystem or decode bytes, which the capture path never touches.
     // coverage:ignore-start
-    FileSource(:final path) => flutter.Image.file(File(path), fit: fit),
+    FileSource(:final path) => fileImagePreview(path, fit),
     MemorySource(:final bytes) => flutter.Image.memory(bytes, fit: fit),
     // coverage:ignore-end
   };

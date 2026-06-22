@@ -39,10 +39,10 @@ final soundtrack. A clip's own audio (`ClipAudio.included`) joins the mix as one
 more track, so a video clip with sound layers under your music bed without extra
 work.
 
-One determinism note. Audio bytes are per-machine. Different FFmpeg builds encode
-the same mix to slightly different bytes, so the audio stream of your MP4 can
-differ between two machines. The video frames stay byte-identical everywhere. The
-picture is the deterministic part; the soundtrack is the per-machine part.
+One note on the encode. Audio bytes are per-machine: different FFmpeg builds
+encode the same mix to slightly different bytes, so the audio stream of your MP4
+can differ between two machines. That is expected; validate a render by how it
+plays, not by byte-comparing files.
 
 ## Beat-reactive motion
 
@@ -75,7 +75,7 @@ That paints 32 bars whose heights follow the band energy each frame. `count` set
 how many bars, `gain` scales their height, and `band` picks which band to read
 (it defaults to `AudioBand.bass`).
 
-### The determinism rule
+### Audio is analysed before frame 0
 
 The frame loop never touches live audio. Every reactive input is analysed once
 before frame 0.
@@ -87,9 +87,9 @@ is. During the frame loop, a reactive preset is a pure lookup: it reads
 `bandTable.energyAt(frame, band)` and applies the transform. No decoding, no
 analysis, no live audio happens inside a frame.
 
-This is what keeps reactive renders byte-identical. The same audio file produces
-the same band table, and the same band table produces the same pixels on frame 0
-and frame 200. Render twice and you get identical frames.
+This is what keeps reactive renders stable. The same audio file produces the
+same band table, and the same band table paints the same on frame 0 and frame
+200.
 
 ## Captions
 
@@ -259,7 +259,7 @@ Notes:
   `NetworkAudioMaterializer`. Browser fetches are also subject to CORS.
 - The web has no file system, so a local file path is not a valid source there.
   Bundle the audio as an asset or serve it over an allowlisted URL.
-- Audio bytes are per-machine on every backend (the frames stay byte-identical).
+- Audio bytes are per-machine on every backend (FFmpeg builds differ).
 
 ## Where to next
 
@@ -267,6 +267,4 @@ Notes:
   reactive presets and `Audio.sfx` placement sit beside.
 - [Charts and data](charts-and-data.md): the data story the arrow and spotlight
   annotate.
-- [Determinism and caching](../advanced/determinism-and-caching.md): why the band
-  table is analysed once and the frames stay byte-identical.
 ```

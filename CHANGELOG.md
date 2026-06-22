@@ -6,6 +6,34 @@ All notable changes to the Fluvie workspace. The format follows
 
 Per-package changelogs live next to each package.
 
+## [0.1.4] - 2026-06-22
+
+### Changed
+
+- Consolidated `fluvie_api` and `fluvie_mcp` into a single `fluvie_server`
+  package and image: the render API, the MCP server, and a new documentation
+  helper now run from one self-hostable binary, each toggled by an environment
+  variable (`FLUVIE_ENABLE_API` / `_MCP` / `_DOCS`). The `/v1` routes, the `/mcp`
+  contract, and every env var name are unchanged, so existing clients keep
+  working; the web-safe client moved to `package:fluvie_server/client.dart`.
+  Migrating an existing deployment? See [RELEASE_MIGRATION.md](RELEASE_MIGRATION.md).
+
+### Added
+
+- A documentation helper: the MCP server can search and read the bundled Fluvie
+  docs (`list_docs`, `search_docs`, `get_doc`) so a coding assistant can learn
+  Fluvie offline. Two MCP modes — `docs` (helper only) and `build` (helper plus
+  render/author tools). MCP build mode renders in-process via a `LocalRenderGateway`
+  when the API is enabled, or against a remote `FLUVIE_API_URL` otherwise.
+- Two images: `fluvie-server` (full, with the render toolchain) and a slim
+  `fluvie-server-docs` (docs/MCP only, no Flutter or ffmpeg).
+
+### Removed
+
+- The `fluvie_api` and `fluvie_mcp` packages and their images (`fluvie-api`,
+  `fluvie-mcp`). Depend on `fluvie_server` and use the `fluvie-server` /
+  `fluvie-server-docs` images instead.
+
 ## [0.1.3] - 2026-06-22
 
 On-device rendering of compositions that declare media, plus release-tooling

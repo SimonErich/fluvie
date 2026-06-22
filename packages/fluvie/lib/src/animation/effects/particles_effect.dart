@@ -15,7 +15,7 @@ import 'package:fluvie/src/core/particles/particles.dart';
 /// capture. Each particle's position, rotation, size, color, and alpha are a
 /// pure function of its index, the effect's `progress`, and
 /// `NoiseSource.valueForSeed("$seed-$i")`, so two pumps at the same frame paint
-/// byte-identical pixels (the determinism contract). `progress` advances
+/// the same pixels (so it caches and goldens). `progress` advances
 /// the field — confetti and snow fall, sparkle twinkles in place.
 final class ParticlesEffect implements PixelAnimationEffect {
   /// Creates a particle field from [spec], sampling from [noise] (the const

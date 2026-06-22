@@ -144,7 +144,7 @@ Run before shipping a landing change:
 
 - [ ] `npm run build` is green (the data guardrail passes).
 - [ ] Voice pass: short sentences, second person, no em-dashes, no banned words.
-- [ ] All eight packages present and linked. Install version string current.
+- [ ] All seven packages present and linked. Install version string current.
 - [ ] Every gallery tile has a caption, an `aria-label`, and a demo link.
 - [ ] All canonical links resolve (docs deep-links, demo, mcp, repo, pub.dev).
 - [ ] `prefers-reduced-motion` honored. Keyboard tab order and visible focus

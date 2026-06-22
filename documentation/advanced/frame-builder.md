@@ -90,7 +90,5 @@ rule and the frame cache and the goldens stop agreeing.
 
 - [Shaders and effects](shaders-and-effects.md): write a custom effect when you
   want a post-process over the rendered child rather than a new widget.
-- [Determinism and caching](determinism-and-caching.md): the determinism rule a
-  builder follows, in full.
 - [Audio and captions](../guides/audio-and-captions.md): the analysed band table
   `ctx.audio` reads, computed once before frame 0.

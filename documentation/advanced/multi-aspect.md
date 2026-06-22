@@ -106,15 +106,12 @@ element fires at the same frame in every aspect. A stagger keeps its step. What
 changes between a tall cut and a wide cut is where things sit, never when they
 happen.
 
-Each aspect is deterministic on its own terms. Render the same composition for
-the same aspect twice and the frames are byte-identical. The per-aspect renders
-each carry their own size in the cache key, so the reel and the landscape cut
-cache separately and never collide.
+Each aspect renders on its own terms. The per-aspect renders each carry their own
+size in the cache key, so the reel and the landscape cut cache separately and
+never collide.
 
 ## Where to next
 
 - [Templates](templates.md): pair multi-aspect with a data-driven template to
   fan one definition across formats and rows.
 - [Theming](theming.md): brand every aspect from one palette and type scale.
-- [Determinism and caching](determinism-and-caching.md): why each aspect renders
-  the same frames every time.

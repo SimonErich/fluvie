@@ -1,47 +1,49 @@
 part of 'media_repository.dart';
 
-/// Whether [source]'s name reads as a clip (a video container) rather than an
-/// image, by file extension. The image pre-resolve pass (`preResolveAll`) uses
-/// it to skip the image decode for clip sources — those resolve through the
-/// clip path (`preResolveClip`) instead.
-bool _isClipSource(MediaSource source) {
-  final name = switch (source) {
-    AssetSource(:final name) => name,
-    FileSource(:final path) => path,
-    NetworkSource(:final url) => url.path,
-    MemorySource() => '',
-  };
-  final lower = name.toLowerCase();
-  return lower.endsWith('.mp4') || lower.endsWith('.mov') || lower.endsWith('.webm');
-}
-
-/// The clip resolution path of [MediaRepository]: materialize the source to a
-/// local file, probe it, and extract the listed frames.
+/// The `dart:io` half of [MediaRepository]'s clip path: materialize the source
+/// to a local file the probe and extractor can read by path. The cache, frame
+/// diffing, decode, and lookups live in the shared [ClipResolveCache] mixin;
+/// `probeClipSource` and `extractClipFrames` (in the main class) call this.
 extension _ClipResolution on MediaRepository {
-  /// Probes [source] and extracts every frame in [sourceFrames] not already
-  /// cached, decoding each to a `ui.Image` keyed by `(source, frame)`.
-  Future<void> _resolveClip(MediaSource source, Iterable<int> sourceFrames) async {
+  /// Materializes [source], probes it for [ClipMetadata], and converts the
+  /// probe result (ffprobe fps from frames over duration). The [ClipResolveCache]
+  /// caches the result, so this runs once per source.
+  Future<ClipMetadata> _probeClipSource(MediaSource source) async {
     final probe = probeService;
-    final extractor = frameExtractor;
-    if (probe == null || extractor == null) {
+    if (probe == null) {
       throw FluvieRenderException(
-        'MediaRepository cannot resolve clip "$source" without a VideoProbeService '
-        'and a FrameExtractionService. Wire them through the providers.',
+        'MediaRepository cannot probe clip "$source" without a VideoProbeService. '
+        'Wire it through the providers.',
       );
     }
     final path = await _materializeClip(source);
-    final meta = _clipMeta[source] ?? await _probeClip(source, path, probe);
-    final frames = _clipFrames.putIfAbsent(source, () => {});
-    for (final index in sourceFrames) {
-      if (frames.containsKey(index)) continue;
-      final raw = await extractor.extractFrame(
-        Uri.file(path),
-        index,
-        width: meta.width,
-        height: meta.height,
+    final result = await probe.probe(path);
+    final fps = result.durationSeconds > 0
+        ? result.nbFrames / result.durationSeconds
+        : result.nbFrames.toDouble();
+    return (fps: fps, frameCount: result.nbFrames, width: result.width, height: result.height);
+  }
+
+  /// Extracts the [sourceFrames] of the already-materialized [source] at the clip
+  /// [meta] dimensions through the ffmpeg [FrameExtractionService].
+  Future<Map<int, RawFrame>> _extractClipFrames(
+    MediaSource source,
+    List<int> sourceFrames,
+    ClipMetadata meta,
+  ) async {
+    final extractor = frameExtractor;
+    if (extractor == null) {
+      throw FluvieRenderException(
+        'MediaRepository cannot resolve clip "$source" without a '
+        'FrameExtractionService. Wire it through the providers.',
       );
-      frames[index] = await _decodeClipFrame(source, raw);
     }
+    return extractor.extractFrames(
+      Uri.file(_clipPaths[source]!),
+      sourceFrames,
+      width: meta.width,
+      height: meta.height,
+    );
   }
 
   /// Loads the clip bytes once and writes them to a temp file the probe and
@@ -54,53 +56,5 @@ extension _ClipResolution on MediaRepository {
     final file = File('${dir.path}/clip.mp4');
     await file.writeAsBytes(bytes);
     return _clipPaths[source] = file.path;
-  }
-
-  Future<ClipMetadata> _probeClip(
-    MediaSource source,
-    String path,
-    VideoProbeService probe,
-  ) async {
-    final result = await probe.probe(path);
-    final fps = result.durationSeconds > 0
-        ? result.nbFrames / result.durationSeconds
-        : result.nbFrames.toDouble();
-    return _clipMeta[source] = (
-      fps: fps,
-      frameCount: result.nbFrames,
-      width: result.width,
-      height: result.height,
-    );
-  }
-
-  /// The extracted-or-throw lookup behind `decodedClipFrame`: asserts the
-  /// pre-pass ran, then returns the cached frame or a typed error naming it.
-  ui.Image _decodedClipFrame(MediaSource source, int sourceFrame) {
-    _assertResolved('decodedClipFrame');
-    final image = _clipFrames[source]?[sourceFrame];
-    if (image == null) {
-      throw FluvieRenderException(
-        'MediaRepository has no extracted clip frame $sourceFrame for "$source". '
-        'Was it included in the frames pre-resolved with preResolveClip?',
-      );
-    }
-    return image;
-  }
-
-  Future<ui.Image> _decodeClipFrame(MediaSource source, RawFrame raw) async {
-    try {
-      final completer = Completer<ui.Image>();
-      ui.decodeImageFromPixels(
-        raw.rgba,
-        raw.width,
-        raw.height,
-        ui.PixelFormat.rgba8888,
-        completer.complete,
-      );
-      return await completer.future;
-    } on Object catch (error) {
-      // coverage:ignore-line: defensive decode-failure wrap; valid clip bytes decode cleanly
-      throw FluvieRenderException('Failed to decode clip frame of "$source": $error.');
-    }
   }
 }

@@ -146,10 +146,10 @@ Center(
 ),
 ```
 
-## Deterministic by construction
+## A pure function of your data
 
 A chart is a pure function of its data, its reveal progress, and its theme
-tokens. The same frame paints the same pixels every time, so charts cache and
+tokens. The same frame paints the same way every time, so charts cache and
 golden like every other element.
 
 ## Where to next
@@ -158,5 +158,3 @@ golden like every other element.
   elements that headline a data story.
 - [Animating elements](timing-and-triggers.md): how `.animate()` and `Stagger`
   compose the outer motion a chart rides.
-- [Determinism and caching](../advanced/determinism-and-caching.md): why the same
-  data always renders the same chart.

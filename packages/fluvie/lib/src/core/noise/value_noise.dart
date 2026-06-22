@@ -6,11 +6,11 @@ import 'package:fluvie/src/core/noise/noise_source.dart';
 /// (FNV-style bit mixing over the low bits, no `dart:math` `Random`), and the
 /// continuous lookups smoothstep-interpolate between them. Every result is a
 /// deterministic function of its input, so two instances and two pumps always
-/// agree — the determinism contract. All outputs lie in `[0, 1]`.
+/// agree. All outputs lie in `[0, 1]`.
 ///
 /// `const ValueNoise()` so effects default to it directly; an injected
 /// `ctx.noise` provider can swap that default without changing the math, so
-/// the goldens that ride this algorithm stay byte-identical.
+/// the goldens that ride this algorithm stay stable.
 final class ValueNoise implements NoiseSource {
   /// Creates the noise source; it carries no state, so it is `const`.
   const ValueNoise();

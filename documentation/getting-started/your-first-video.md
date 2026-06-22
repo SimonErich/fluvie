@@ -55,8 +55,7 @@ From the repo root:
 dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/01_hello_video.mp4
 ```
 
-The CLI captures every frame deterministically, then FFmpeg encodes the MP4.
-Run the same command twice and you get byte-identical frames.
+The CLI captures every frame, then FFmpeg encodes the MP4.
 
 ## Preview it
 

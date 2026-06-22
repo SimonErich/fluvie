@@ -61,6 +61,12 @@ final class NoMediaResolver implements MediaResolver {
   );
 
   @override
+  Future<ClipMetadata> probeClip(MediaSource source) async => throw FluvieRenderException(
+    'NoMediaResolver cannot probe clip "$source". Wire a MediaRepository '
+    'through mediaResolverProvider to render clips.',
+  );
+
+  @override
   Future<void> preResolveClip(MediaSource source, Iterable<int> sourceFrames) async {
     throw FluvieRenderException(
       'NoMediaResolver cannot resolve clip "$source". Wire a MediaRepository '

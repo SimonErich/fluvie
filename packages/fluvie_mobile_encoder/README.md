@@ -23,7 +23,7 @@ extra download. So a video you generate on the device is private by construction
 
 ## How it works
 
-1. `OnDeviceVideoRenderer` runs Fluvie's deterministic capture loop into an
+1. `OnDeviceVideoRenderer` runs Fluvie's capture loop into an
    off-screen surface sized to your target resolution, so the live UI never
    flickers. It writes `frames.rgba` (raw RGBA8888) into an app sandbox.
 2. It hands the frames file to the platform encoder over a method channel.
@@ -78,11 +78,10 @@ Because the capture half is Fluvie's own, **every visual element, animation, and
 transition renders identically** to a desktop render. The trade-offs are at the
 encode edge:
 
-- **Determinism**: the captured frames are byte-identical on every machine (so
-  Fluvie's frame goldens still hold), but the encoded MP4 is per-device. Hardware
-  encoders are not bit-exact across chips, so do not byte-compare a phone's MP4
-  against a desktop's. Validate structurally (frame count, duration, resolution)
-  or by decoding back within a tolerance.
+- **The encoded file is per-device**: hardware encoders are not bit-exact across
+  chips, so do not byte-compare a phone's MP4 against a desktop's. Validate
+  structurally (frame count, duration, resolution) or by decoding back within a
+  tolerance.
 - **Export formats**: MP4 (H.264 or HEVC) only. GIF and transparent WebM have no
   hardware path; render those on a desktop or server.
 
@@ -117,7 +116,7 @@ it. Looping beds and network sources are not honored on-device yet.
 | --- | --- | --- |
 | Android (API 24+) | `MediaCodec` + `MediaMuxer` | supported |
 | iOS (12+) | `AVAssetWriter` + VideoToolbox | supported |
-| Desktop / web | none | use `fluvie_cli` or `fluvie_api` |
+| Desktop / web | none | use `fluvie_cli` or `fluvie_server` |
 
 On an unsupported platform the encoder throws a `FluvieMobileEncoderException`
 with code `unsupported_platform`.

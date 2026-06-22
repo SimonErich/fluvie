@@ -40,9 +40,9 @@ final spec = VideoSpec.fromJson(jsonDecode(jsonText) as Map<String, Object?>);
 final video = buildVideo(spec);
 ```
 
-`buildVideo` is a pure function. The same spec always builds the same video, so
-the render stays byte-for-byte deterministic. The model that wrote the spec runs
-once, at authoring time, never inside the frame loop.
+`buildVideo` is a pure function. The same spec always builds the same video. The
+model that wrote the spec runs once, at authoring time, never inside the frame
+loop.
 
 ## Save
 
@@ -165,8 +165,8 @@ fluvie generate "a 6s vertical title card, dark gradient, fade-in headline" \
   --out promo.mp4 --spec-out promo.fluvie.json
 ```
 
-Refine the saved spec conversationally; re-rendering the same spec is always
-byte-identical:
+Refine the saved spec conversationally; re-rendering the same spec gives the same
+video:
 
 ```sh
 fluvie edit promo.fluvie.json "make the headline yellow and add a logo" \

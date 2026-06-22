@@ -50,6 +50,9 @@ final class FakeLessonMedia implements MediaResolver {
   Future<void> preResolveAll(Iterable<MediaSource> sources) async => _ready = true;
 
   @override
+  Future<ClipMetadata> probeClip(MediaSource source) async => _clipMeta;
+
+  @override
   Future<void> preResolveClip(MediaSource source, Iterable<int> sourceFrames) async =>
       _ready = true;
 

@@ -7,7 +7,7 @@ editor, or a batch pipeline.
 ## Quick start
 
 ```sh
-cp deploy/env/api.env.example deploy/env/api.env   # set API_TOKEN and CLEANUP_TOKEN
+cp deploy/env/server.env.example deploy/env/server.env   # set API_TOKEN and CLEANUP_TOKEN
 docker compose -f deploy/docker-compose.yml up --build
 ```
 
@@ -30,9 +30,12 @@ curl -s http://localhost:8080/v1/renders/rnd_... \
 curl -L -o demo.mp4 "<the downloadUrl from above>"
 ```
 
-The package is `fluvie_api`. The server is `dart compile exe`; the image carries
-the Flutter SDK and ffmpeg because rendering captures frames with `flutter test`
-then encodes with ffmpeg. No display server is needed.
+The package is [`fluvie_server`](https://pub.dev/packages/fluvie_server): one binary
+that also hosts the [MCP server](ai-and-mcp.md) at `/mcp` and a documentation helper
+at `/v1/docs`, each toggled by an environment variable. The server is
+`dart compile exe`; the image carries the Flutter SDK and ffmpeg because rendering
+captures frames with `flutter test` then encodes with ffmpeg. No display server is
+needed.
 
 ## What you can render
 
@@ -129,7 +132,7 @@ The example app renders either way:
   path.
 - Web or hosted, via the API: build with
   `--dart-define=FLUVIE_API_URL=https://your-server` (and
-  `--dart-define=FLUVIE_API_TOKEN=...`). The app calls `fluvie_api` and shows the
+  `--dart-define=FLUVIE_API_TOKEN=...`). The app calls `fluvie_server` and shows the
   download URL.
 
 On-device rendering on mobile is supported by
@@ -137,7 +140,7 @@ On-device rendering on mobile is supported by
 loop in the running app and encodes with the platform's native hardware encoder,
 so nothing leaves the device. On the web it is not wired yet (the in-browser
 ffmpeg encoder is unconnected), so the hosted web example renders through
-`fluvie_api`.
+`fluvie_server`.
 
 ## Where to next
 
@@ -145,5 +148,3 @@ ffmpeg encoder is unconnected), so the hosted web example renders through
   `spec`, `prompt`, and `edit` endpoints produce and consume.
 - [Exporting your video](exporting-your-video.md): the local command-line
   renderer the server wraps, and every export format.
-- [Determinism and caching](../advanced/determinism-and-caching.md): why the same
-  spec renders the same bytes on every machine.

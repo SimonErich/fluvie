@@ -7,14 +7,25 @@ import 'package:fluvie_mobile_encoder/fluvie_mobile_encoder.dart';
 ///
 /// The same `Video` the web path renders; here the platform's hardware encoder
 /// writes the file, which is read back to bytes. Audio is mixed and muxed
-/// natively.
-Future<Uint8List> renderOnDevice(Video video) async {
-  final file = await OnDeviceVideoRenderer().render(
+/// natively. The render parameters match the web path one-for-one.
+Future<Uint8List> renderOnDevice(
+  Video video, {
+  Aspect aspect = Aspect.square,
+  Duration duration = const Duration(seconds: 2),
+  int fps = 30,
+  int longEdge = 480,
+  bool audio = true,
+  RenderProgressCallback? onProgress,
+  NetworkAllowlist? networkAllowlist,
+}) async {
+  final file = await OnDeviceVideoRenderer(networkAllowlist: networkAllowlist).render(
     composition: video,
-    aspect: Aspect.square,
-    duration: const Duration(seconds: 2),
-    longEdge: 480,
-    audio: true,
+    aspect: aspect,
+    duration: duration,
+    fps: fps,
+    longEdge: longEdge,
+    audio: audio,
+    onProgress: onProgress,
   );
   return file.readAsBytes();
 }

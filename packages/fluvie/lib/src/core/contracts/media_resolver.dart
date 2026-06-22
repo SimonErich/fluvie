@@ -64,6 +64,14 @@ abstract interface class MediaResolver {
   /// implementations throw on an unresolved or non-image source.
   ui.Image decodedImageFor(MediaSource source);
 
+  /// Probes clip [source] for its [ClipMetadata] (fps, frame count, size) and
+  /// caches it, so the render's clip pre-pass can plan which source frames to
+  /// extract before calling [preResolveClip].
+  ///
+  /// Idempotent: a probed source is served from cache. Throws a
+  /// `FluvieRenderException` when the source cannot be probed.
+  Future<ClipMetadata> probeClip(MediaSource source);
+
   /// Probes [source] and extracts every source frame in [sourceFrames],
   /// decoding each to a `ui.Image` cached by `(source, frame)` so paint can
   /// read it synchronously.

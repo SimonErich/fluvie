@@ -80,12 +80,11 @@ the resource exists:
 These are not part of the fast gate. Run a tagged suite directly with
 `flutter test --tags ffmpeg`.
 
-## Determinism proofs
+## Goldens for visual regression
 
-Where it matters, prove reproducibility in a test. Render twice and assert the
-captured frames are byte-identical. Use the same seed and assert the same
-sequence. The render harness self-test does exactly this; see
-[Determinism and caching](../advanced/determinism-and-caching.md).
+Lock in how a render looks with an Alchemist golden (the `golden` tag). Seeded
+effects (`noise(seed)` / `random(seed)`) keep a golden stable from run to run, so
+a diff means the output actually changed. The Linux baseline is authoritative.
 
 ## Coverage
 
@@ -115,5 +114,3 @@ melos run docs:lint             # every dart fence has a code-excerpt directive
 - [Coverage and the ignore policy](coverage.md): the 97% floor and when an
   ignore is allowed.
 - [Contributing overview](overview.md): the workflow and the quality gate.
-- [Determinism and caching](../advanced/determinism-and-caching.md): the
-  contract every render test relies on.

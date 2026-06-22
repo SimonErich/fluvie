@@ -1,3 +1,5 @@
+import 'package:fluvie/src/core/render_phase.dart';
+
 /// A render-pipeline failure: a capture that could not produce a frame, a
 /// boundary that is missing or the wrong render object, a dimension mismatch,
 /// or any other fault between the frame loop and the encoder's input.
@@ -16,6 +18,14 @@ class FluvieRenderException implements Exception {
   /// What went wrong, in one actionable sentence.
   final String message;
 
+  /// The render stage this failure happened in, when known.
+  ///
+  /// Stamped by `runStage` (not at the throw site), so a caught error says
+  /// whether capture or encode broke. Null when thrown outside a staged render.
+  RenderPhase? stage;
+
   @override
-  String toString() => 'FluvieRenderException: $message';
+  String toString() => stage == null
+      ? 'FluvieRenderException: $message'
+      : 'FluvieRenderException [${stage!.name}]: $message';
 }

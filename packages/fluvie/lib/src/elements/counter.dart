@@ -13,7 +13,7 @@ import 'package:fluvie/src/timing/time_scope_provider.dart';
 import 'package:intl/intl.dart' show NumberFormat;
 
 /// The locale every built-in [Counter] format pins, so the grouping and symbol
-/// placement are byte-identical across machines (no ambient locale, no
+/// placement stay the same across machines (no ambient locale, no
 /// `DateTime`).
 const String _fixedLocale = 'en_US';
 

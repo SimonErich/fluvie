@@ -21,18 +21,15 @@ import 'package:fluvie/src/templates/video_template.dart';
 /// This is distinct from [render], which renders a fixed `Video` widget: Dart
 /// has no overloading, so `render(video, aspect:)` and `renderTemplate(template,
 /// props:)` are separate free functions. The template form reuses [render]
-/// rather than duplicating the shell, so both share the same scope chain and
-/// determinism contract.
+/// rather than duplicating the shell, so both share the same scope chain.
 ///
-/// Rendering the same [template] for the same [props] (and the same [aspect])
-/// twice produces byte-identical frames — the headline determinism contract the
-/// byte-identical-per-Props test proves. An error in `template.build(props)`
-/// (for example a `Video` the props leave with no scenes) surfaces unchanged.
+/// An error in `template.build(props)` (for example a `Video` the props leave
+/// with no scenes) surfaces unchanged.
 ///
 /// The built `Video` is wrapped in a left-to-right [Directionality] before
 /// capture: a `VideoTemplate.build` returns a bare `Video`, and the render
-/// canvas has no ambient locale, so the template path supplies the deterministic
-/// LTR default its `Text` needs (the same wrap the example compositions add by
+/// canvas has no ambient locale, so the template path supplies the LTR default
+/// its `Text` needs (the same wrap the example compositions add by
 /// hand around `render(video, aspect:)`).
 ///
 /// The host owns the pumping mechanics through [pumpWidget] and [pumpFrame],

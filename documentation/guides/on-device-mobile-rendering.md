@@ -16,7 +16,7 @@ final file = await renderer.render(
   duration: const Duration(seconds: 4),
   longEdge: 480,
   audio: _withAudio, // mix and mux the lesson's music bed on the device
-  onProgress: (phase) => debugPrint('on-device render: ${phase.name}'),
+  onProgress: (progress) => debugPrint('on-device render: ${progress.phase.name}'),
 );
 ```
 
@@ -64,18 +64,17 @@ Because the capture half is Fluvie's own, every element, animation, and
 transition renders identically to a desktop render. The trade-offs are all at the
 encode edge:
 
-- **Determinism narrows.** The captured frames stay byte-identical on every
-  machine, so frame goldens still hold. The encoded MP4 does not: hardware
-  encoders are not bit-exact across chips, so the file is per-device. Validate a
-  mobile render structurally (frame count, duration, resolution) or by decoding it
-  back within a tolerance, never by byte-comparing it to a desktop render.
+- **The encoded file is per-device.** Hardware encoders are not bit-exact across
+  chips, so the MP4 a phone writes will not match a desktop render byte for byte.
+  Validate a mobile render structurally (frame count, duration, resolution) or by
+  decoding it back within a tolerance, never by byte-comparing the files.
 - **Audio is opt-in.** Declare `Audio` on your `Video` as usual and pass
   `audio: true` to encode it; the renderer materializes, mixes, and muxes the
   tracks with the platform audio encoder. Looping beds work on both platforms, and
   network audio is supported opt-in (see [Audio](#audio)). Left off, a `Video` with
   audio renders silent and warns once.
 - **MP4 only.** H.264 or HEVC. GIF and transparent WebM have no hardware path;
-  render those with `fluvie_cli` or `fluvie_api`.
+  render those with `fluvie_cli` or `fluvie_server`.
 
 ## Audio
 
@@ -104,6 +103,17 @@ Pass `codec: MobileVideoCodec.hevc` for smaller files where the device supports
 it. The bitrate scales with resolution and frame rate by default (`defaultBitRate`);
 pass an explicit `bitRate:` to override it.
 
+## Saving and progress
+
+`render` returns the `File` it wrote. By default that file lives in a fresh temp
+sandbox; pass `outputFile:` to have the encoder write straight to a path you
+choose (for example one from `path_provider`), and that file is returned.
+
+`render` reports progress through `onProgress`, a `RenderProgress` carrying the
+current phase (`capturing`, `encoding`, `complete`). To restrict which hosts
+network images may load from, pass a `networkAllowlist` to the
+`OnDeviceVideoRenderer` constructor.
+
 ## Platform support
 
 | Platform | Encoder | Status |
@@ -128,6 +138,3 @@ encoder, asserting the frames file and the encode request.
   want FFmpeg's full encode (audio, GIF, transparency) or a shared render service.
 - [Exporting your video](exporting-your-video.md): every export format the
   desktop and server renderers support.
-- [Determinism and caching](../advanced/determinism-and-caching.md): why the same
-  input produces the same frames on every machine, and what that means for the
-  per-device encode here.

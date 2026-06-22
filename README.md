@@ -23,9 +23,9 @@ handles continuity, and FFmpeg runs the projector. No timeline to scrub, no
 keyframe spreadsheet, no 2am debugging because frame 412 is one pixel off.
 
 - **Declarative.** Compose `Scene`s and elements like any Flutter screen.
-- **Deterministic.** The same input renders byte-identical frames, every time. Caching, golden tests, and batch rendering just work.
+- **Cacheable.** The frame cache keys on content, so caching, golden tests, and batch rendering just work.
 - **Headless.** Render from the CLI, an HTTP API, or an MCP server. No display needed.
-- **Conversational.** Ask for a video in plain language and get a deterministic spec back.
+- **Conversational.** Ask for a video in plain language and get a spec back.
 
 ## Quick start
 
@@ -186,10 +186,9 @@ CI, on a server, or from an AI assistant.
 | --- | --- | --- |
 | [`fluvie`](packages/fluvie) | The library. Describe a video, render an MP4. | [![pub](https://img.shields.io/pub/v/fluvie.svg)](https://pub.dev/packages/fluvie) |
 | [`fluvie_cli`](packages/fluvie_cli) | Headless renderer. Capture with `flutter test`, encode with FFmpeg. | [![pub](https://img.shields.io/pub/v/fluvie_cli.svg)](https://pub.dev/packages/fluvie_cli) |
-| [`fluvie_lints`](packages/fluvie_lints) | Lint rules that catch timing and determinism mistakes. | [![pub](https://img.shields.io/pub/v/fluvie_lints.svg)](https://pub.dev/packages/fluvie_lints) |
-| [`fluvie_ai`](packages/fluvie_ai) | Author a video from a prompt. A model writes a deterministic spec. | [![pub](https://img.shields.io/pub/v/fluvie_ai.svg)](https://pub.dev/packages/fluvie_ai) |
-| [`fluvie_api`](packages/fluvie_api) | HTTP render server (local or S3) plus a web-safe client. | [![pub](https://img.shields.io/pub/v/fluvie_api.svg)](https://pub.dev/packages/fluvie_api) |
-| [`fluvie_mcp`](packages/fluvie_mcp) | MCP server. Let Claude (or any assistant) author and render for you. | [![pub](https://img.shields.io/pub/v/fluvie_mcp.svg)](https://pub.dev/packages/fluvie_mcp) |
+| [`fluvie_lints`](packages/fluvie_lints) | Lint rules that catch timing and layering mistakes. | [![pub](https://img.shields.io/pub/v/fluvie_lints.svg)](https://pub.dev/packages/fluvie_lints) |
+| [`fluvie_ai`](packages/fluvie_ai) | Author a video from a prompt. A model writes a spec. | [![pub](https://img.shields.io/pub/v/fluvie_ai.svg)](https://pub.dev/packages/fluvie_ai) |
+| [`fluvie_server`](packages/fluvie_server) | One self-hostable server: render API (local or S3), MCP server, and a docs helper, plus a web-safe client. | [![pub](https://img.shields.io/pub/v/fluvie_server.svg)](https://pub.dev/packages/fluvie_server) |
 | [`fluvie_mobile_encoder`](packages/fluvie_mobile_encoder) | Render to MP4 fully on-device on Android and iOS, no FFmpeg. | [![pub](https://img.shields.io/pub/v/fluvie_mobile_encoder.svg)](https://pub.dev/packages/fluvie_mobile_encoder) |
 | [`fluvie_web_encoder`](packages/fluvie_web_encoder) | Render to MP4 fully in the browser with ffmpeg.wasm, opt-in. | [![pub](https://img.shields.io/pub/v/fluvie_web_encoder.svg)](https://pub.dev/packages/fluvie_web_encoder) |
 
@@ -200,13 +199,13 @@ own machine, on a server you call, or on the user's own device.
 
 | Platform | Local (FFmpeg binary) | Server API | On-device |
 | --- | --- | --- | --- |
-| Desktop (Linux/macOS/Windows) | ✅ [`fluvie_cli`](https://docs.fluvie.dev/getting-started/installation/) | ✅ [`fluvie_api` client](https://docs.fluvie.dev/guides/rendering-on-a-server/) | ✅ local FFmpeg (the CLI itself) |
-| Android | — | ✅ [`fluvie_api` client](https://docs.fluvie.dev/guides/rendering-on-a-server/) | ✅ [`fluvie_mobile_encoder`](https://docs.fluvie.dev/guides/on-device-mobile-rendering/) (native) |
-| iOS | — | ✅ [`fluvie_api` client](https://docs.fluvie.dev/guides/rendering-on-a-server/) | ✅ [`fluvie_mobile_encoder`](https://docs.fluvie.dev/guides/on-device-mobile-rendering/) (native) |
-| Web (browser) | — | ✅ [`fluvie_api` client](https://docs.fluvie.dev/guides/rendering-on-a-server/) | ✅ [`fluvie_web_encoder`](https://docs.fluvie.dev/guides/on-device-web-rendering/) (ffmpeg.wasm, opt-in) |
+| Desktop (Linux/macOS/Windows) | ✅ [`fluvie_cli`](https://docs.fluvie.dev/getting-started/installation/) | ✅ [`fluvie_server` client](https://docs.fluvie.dev/guides/rendering-on-a-server/) | ✅ local FFmpeg (the CLI itself) |
+| Android | — | ✅ [`fluvie_server` client](https://docs.fluvie.dev/guides/rendering-on-a-server/) | ✅ [`fluvie_mobile_encoder`](https://docs.fluvie.dev/guides/on-device-mobile-rendering/) (native) |
+| iOS | — | ✅ [`fluvie_server` client](https://docs.fluvie.dev/guides/rendering-on-a-server/) | ✅ [`fluvie_mobile_encoder`](https://docs.fluvie.dev/guides/on-device-mobile-rendering/) (native) |
+| Web (browser) | — | ✅ [`fluvie_server` client](https://docs.fluvie.dev/guides/rendering-on-a-server/) | ✅ [`fluvie_web_encoder`](https://docs.fluvie.dev/guides/on-device-web-rendering/) (ffmpeg.wasm, opt-in) |
 
 - **Local** runs FFmpeg on your own machine. It is the full feature set (audio,
-  GIF, transparency) and the baseline for byte-identical output. This is the CLI
+  GIF, transparency) and the reference platform for golden images. This is the CLI
   and CI path.
 - **Server API** keeps the client thin: the app sends a spec, a render server runs
   FFmpeg, the app gets a file back. It works on every platform and keeps app

@@ -39,8 +39,8 @@ This is lesson 01, verbatim. Render it to an MP4 with the
 ## Why Fluvie
 
 - **Declarative.** Compose `Scene`s and elements like any Flutter tree.
-- **Deterministic.** The same input renders byte-identical frames every time, so
-  caching, golden tests, and batch rendering all work.
+- **Cacheable.** The frame cache keys on content, so caching, golden tests, and
+  batch rendering all work.
 - **Complete.** Text, images, video clips, charts, code and terminal scenes,
   diagrams, audio, captions, transitions, effects, templates, and multi-aspect
   export, all on one public API.
@@ -50,7 +50,7 @@ This is lesson 01, verbatim. Render it to an MP4 with the
 A video can also be a JSON `VideoSpec`: save it, load it back, and render it. The
 companion [`fluvie_ai`](https://pub.dev/packages/fluvie_ai) package writes that
 spec from a prompt with a language model, so you can generate a video from
-natural language. The spec is deterministic, so the render stays byte-identical.
+natural language. The spec is plain data: save it, diff it, and re-render it.
 See the
 [authoring guide](https://docs.fluvie.dev/guides/ai-and-mcp/).
 

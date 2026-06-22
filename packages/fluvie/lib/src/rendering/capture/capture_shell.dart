@@ -60,9 +60,8 @@ typedef CaptureShell = ({Widget tree, SnapshotCaptureScope? mountedSnapshotScope
 /// tables and beat grids reach the reactive effects and `Trigger.beat`
 /// resolution. The [controller] drives the frame clock; the host pumps it.
 ///
-/// Pure widget construction — no async, no wall-clock — so two builds of the
-/// same composition produce an identical chain (the determinism contract the
-/// renders-twice tests prove).
+/// Pure widget construction, no async, no wall-clock, so the same composition
+/// produces the same chain.
 CaptureShell buildCaptureShell({
   required Widget composition,
   required GlobalKey boundaryKey,

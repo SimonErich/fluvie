@@ -13,7 +13,7 @@ parts that need your accounts and credentials.
 | push to `main` (docs change) | `docs.yml` | builds the docs site (`web/docs`) and deploys it to GitHub Pages (docs.fluvie.dev) |
 | push to `main` (`web/site` change) | `website.yml` | builds the landing (`web/site`, Astro) and publishes it to the `fluvie_website` repo, whose Pages serves fluvie.dev |
 | tag `v0.1.0` (umbrella) | `publish.yml` | publishes every package to pub.dev via OIDC (one shared version) |
-| tag `v0.1.0` (umbrella) | `images.yml` | builds and pushes the api/mcp/demo images to ghcr.io, then pings the Dokploy redeploy webhooks |
+| tag `v0.1.0` (umbrella) | `images.yml` | builds and pushes the server/server-docs/demo images to ghcr.io, then pings the Dokploy redeploy webhooks |
 
 One tag does everything: publish a GitHub Release for `v0.1.0` (or push the tag)
 and pub.dev publishing, the image build, and the Dokploy redeploy all fire.
@@ -25,8 +25,8 @@ and pub.dev publishing, the image build, and the Dokploy redeploy all fire.
 | docs.fluvie.dev | **GitHub Pages** (free, this repo) | `docs.yml` builds `web/docs` and deploys |
 | fluvie.dev (landing) | **GitHub Pages** (the `fluvie_website` repo) | `website.yml` builds `web/site` and publishes it there |
 | demo.fluvie.dev | **Dokploy** | image `fluvie-demo` (static Flutter web) |
-| api.fluvie.dev | **Dokploy** | image `fluvie-api` (the renderer) |
-| mcp.fluvie.dev | **Dokploy** | image `fluvie-mcp` |
+| api.fluvie.dev | **Dokploy** | image `fluvie-server` (the renderer) |
+| mcp.fluvie.dev | **Dokploy** | image `fluvie-server-docs` |
 
 GitHub Pages allows one custom domain per repo, so docs.fluvie.dev serves from
 this repo and fluvie.dev serves from the separate `fluvie_website` repo. The API,
@@ -36,7 +36,7 @@ MCP, and demo services run as Dokploy containers.
 
 All packages share one version and publish from one umbrella tag, but pub.dev
 must trust this repo first. For every package (`fluvie`, `fluvie_cli`,
-`fluvie_lints`, `fluvie_ai`, `fluvie_api`, `fluvie_mcp`, `fluvie_mobile_encoder`,
+`fluvie_lints`, `fluvie_ai`, `fluvie_server`, `fluvie_mobile_encoder`,
 `fluvie_web_encoder`):
 
 1. Reserve the name with a first manual publish from the package directory:
@@ -44,11 +44,19 @@ must trust this repo first. For every package (`fluvie`, `fluvie_cli`,
    cd packages/fluvie && dart pub publish
    ```
    Publish `fluvie` first, then `fluvie_cli`/`fluvie_lints`, then
-   `fluvie_ai`/`fluvie_api`/`fluvie_mcp` (later ones depend on the earlier ones).
+   `fluvie_ai`/`fluvie_server` (later ones depend on the earlier ones).
 2. On each package's pub.dev page, open **Admin → Automated publishing** and
    enable publishing from GitHub Actions for `SimonErich/fluvie` with the tag
    pattern **`v{{version}}`** (the umbrella tag — the same for every package, so
    one `v0.1.2` release publishes them all).
+
+`fluvie_server` is new as of 0.1.4, so it has no Admin page yet: do its first
+manual publish (`cd packages/fluvie_server && dart pub publish`) before the
+tagged release, then set its tag pattern to `v{{version}}`. The retired
+`fluvie_api` and `fluvie_mcp` packages are no longer in the workspace, so the
+tagged release will not republish them; their existing pub.dev versions stay up
+(pub.dev packages cannot be deleted). Optionally mark them **discontinued** on
+pub.dev so consumers see they moved to `fluvie_server`.
 
 ## 3. One-time: GitHub Pages for docs.fluvie.dev
 
@@ -62,8 +70,9 @@ must trust this repo first. For every package (`fluvie`, `fluvie_cli`,
 The images publish to `ghcr.io/simonerich/<name>` using the built-in
 `GITHUB_TOKEN`, so there is nothing to configure to push. After the first
 `images` run, open each package under your GitHub **Packages** and set it to
-**public** so anyone can pull without auth. Images: `fluvie-api`, `fluvie-mcp`,
-`fluvie-demo`.
+**public** so anyone can pull without auth. Images: `fluvie-server`, `fluvie-server-docs`,
+`fluvie-demo`. The old `fluvie-api` and `fluvie-mcp` images are no longer built;
+delete those ghcr packages once the new ones are live.
 
 ## 5. DNS (your registrar)
 
@@ -72,8 +81,8 @@ The images publish to `ghcr.io/simonerich/<name>` using the built-in
 | `docs.fluvie.dev` | GitHub Pages (CNAME to `simonerich.github.io`) |
 | `fluvie.dev` | GitHub Pages (CNAME to `simonerich.github.io`, served from `fluvie_website`) |
 | `demo.fluvie.dev` | your Dokploy host (the `fluvie-demo` app) |
-| `api.fluvie.dev` | your Dokploy host (the `fluvie-api` app) |
-| `mcp.fluvie.dev` | your Dokploy host (the `fluvie-mcp` app) |
+| `api.fluvie.dev` | your Dokploy host (the `fluvie-server` app) |
+| `mcp.fluvie.dev` | your Dokploy host (the `fluvie-server-docs` app) |
 
 ## 6. Deploy the services with Dokploy
 
@@ -93,16 +102,16 @@ container's port, not a host port. The local `docker-compose.yml` host ports
 | mcp.fluvie.dev | `8080` |
 | demo.fluvie.dev | `80` |
 
-The render API and the MCP server listen on `8080` (override with `PORT`); the
-demo is a static site behind nginx on `80`. Pointing a domain at the
+The full server and the slim docs server listen on `8080` (override with `PORT`);
+the demo is a static site behind nginx on `80`. Pointing a domain at the
 wrong port is what yields a Bad Gateway.
 
-- **api.fluvie.dev** (`fluvie-api`, `deploy/api.Dockerfile`): set `API_TOKEN` and
+- **api.fluvie.dev** (`fluvie-server`, `deploy/server.Dockerfile`): set `API_TOKEN` and
   `CLEANUP_TOKEN`. For server-side AI also set `ANTHROPIC_API_KEY` (or another
   provider key); leave it unset to keep prompt-based renders off. Add a volume for
-  `/data/renders`, or configure S3 (see `deploy/env/api.env.example`). Set
+  `/data/renders`, or configure S3 (see `deploy/env/server.env.example`). Set
   `PUBLIC_BASE_URL=https://api.fluvie.dev`.
-- **mcp.fluvie.dev** (`fluvie-mcp`, `deploy/mcp.Dockerfile`): set
+- **mcp.fluvie.dev** (`fluvie-server-docs`, `deploy/server-docs.Dockerfile`): set
   `FLUVIE_API_URL=https://api.fluvie.dev`, `FLUVIE_API_TOKEN` to the API token, and
   `FLUVIE_MCP_TOKEN` to a token clients must send.
 - **demo.fluvie.dev** (`fluvie-demo`, `deploy/demo.Dockerfile`): the API URL is
@@ -112,18 +121,18 @@ wrong port is what yields a Bad Gateway.
 ### Auto-redeploy on a new image
 
 After `images.yml` pushes the images, it pings a Dokploy deploy webhook for each
-service so api, mcp, and demo redeploy themselves. To enable it:
+service so server, server-docs, and demo redeploy themselves. To enable it:
 
 1. In Dokploy, open each app and copy its **Webhook URL** (the deploy/auto-deploy
    webhook under the app's settings).
 2. Point each app's image at a moving tag so the redeploy pulls the new build:
-   `ghcr.io/simonerich/fluvie-api:latest` (or `:0.1`). A pinned `:0.1.0` would
+   `ghcr.io/simonerich/fluvie-server:latest` (or `:0.1`). A pinned `:0.1.0` would
    just re-pull the old image.
 3. Store the URLs as repo secrets (Settings -> Secrets and variables -> Actions),
    or with the CLI:
    ```sh
-   gh secret set DOKPLOY_WEBHOOK_API  --body 'https://<dokploy-host>/<webhook-path>'
-   gh secret set DOKPLOY_WEBHOOK_MCP  --body 'https://<dokploy-host>/<webhook-path>'
+   gh secret set DOKPLOY_WEBHOOK_SERVER  --body 'https://<dokploy-host>/<webhook-path>'
+   gh secret set DOKPLOY_WEBHOOK_SERVER_DOCS  --body 'https://<dokploy-host>/<webhook-path>'
    gh secret set DOKPLOY_WEBHOOK_DEMO --body 'https://<dokploy-host>/<webhook-path>'
    ```
 
@@ -173,9 +182,8 @@ Notes:
 ## Local dry run
 
 ```sh
-# the services (api :8080, demo :8081, mcp :8084)
-cp deploy/env/api.env.example deploy/env/api.env   # set API_TOKEN and CLEANUP_TOKEN
-cp deploy/env/mcp.env.example deploy/env/mcp.env
+# the services (server :8080, demo :8081; slim docs server :8084 with --profile docs)
+cp deploy/env/server.env.example deploy/env/server.env   # set API_TOKEN and CLEANUP_TOKEN
 docker compose -f deploy/docker-compose.yml up --build
 
 # the docs site

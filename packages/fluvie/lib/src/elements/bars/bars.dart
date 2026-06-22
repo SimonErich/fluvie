@@ -19,7 +19,7 @@ import 'package:fluvie/src/theme/build_context_tokens.dart';
 /// frame and paints [count] bars whose heights track that energy times [gain].
 /// The band's energy is spread across the bars by a fixed, deterministic
 /// sub-band profile (a golden-angle bump), so even many bars read as a spectrum
-/// rather than one flat block while staying byte-identical across runs. [track]
+/// rather than one flat block while staying stable across runs. [track]
 /// scopes it to one `Audio.track` anchor; `null` reads the master mix.
 ///
 /// ```dart

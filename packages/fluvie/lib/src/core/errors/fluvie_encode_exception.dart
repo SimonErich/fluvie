@@ -22,7 +22,9 @@ class FluvieEncodeException extends FluvieRenderException {
 
   @override
   String toString() {
-    final buffer = StringBuffer('FluvieEncodeException: $message');
+    final buffer = StringBuffer('FluvieEncodeException');
+    if (stage != null) buffer.write(' [${stage!.name}]');
+    buffer.write(': $message');
     if (exitCode != null) buffer.write(' (exit code $exitCode)');
     if (stderrTail != null) buffer.write('\nstderr tail:\n$stderrTail');
     return buffer.toString();

@@ -16,8 +16,8 @@ import 'package:meta/meta.dart' show immutable;
 /// [background] colors.
 ///
 /// `@immutable` and value-equal by field, so the same props always build the
-/// same `Video` and render byte-identical frames — the data-driven-batch
-/// caching contract. Generate one stat reel per metric by mapping each
+/// same `Video` and render the same frames, so a batch caches and goldens.
+/// Generate one stat reel per metric by mapping each
 /// data row onto a `StatHighlightProps`.
 ///
 /// ```dart

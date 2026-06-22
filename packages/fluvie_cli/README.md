@@ -59,15 +59,15 @@ Render a spec file directly, with no model call:
 fluvie render --spec promo.fluvie.json --out promo.mp4
 ```
 
-The `.fluvie.json` is the reproducible artifact: re-rendering it is always
-byte-identical. See the
+The `.fluvie.json` is the reproducible artifact: re-render it any time to get the
+same video. See the
 [authoring guide](https://docs.fluvie.dev/guides/ai-and-mcp/).
 
-## Determinism
+## How renders run
 
-The same composition renders byte-identical frames every time. FFmpeg is always
-invoked with an argument list (never a shell string) and bitexact flags, so
-re-rendering reproduces the same output on the same machine.
+FFmpeg is always invoked with an argument list, never a shell string, with
+bitexact flags on a single thread. Re-rendering the same composition on the same
+machine reproduces the same file.
 
 ## Documentation
 

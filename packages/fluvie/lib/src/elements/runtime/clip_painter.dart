@@ -4,11 +4,11 @@ import 'package:fluvie/src/core/contracts/media_resolver.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/core/time_range.dart';
+import 'package:fluvie/src/elements/runtime/clip_frame_planner.dart';
 import 'package:fluvie/src/elements/runtime/clip_resampler.dart';
 import 'package:fluvie/src/media/runtime/image_resolver_scope.dart';
 import 'package:fluvie/src/rendering/runtime/frame_provider.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
-import 'package:fluvie/src/timing/time_scope_data.dart';
 import 'package:fluvie/src/timing/time_scope_provider.dart';
 
 /// Paints one pre-extracted clip frame: in capture it resamples the composition
@@ -60,7 +60,7 @@ final class ClipPainter extends StatelessWidget {
     final compFrame = FrameProvider.of(context).frame;
     final scope = TimeScopeProvider.of(context);
     final meta = resolver.clipMetadataFor(source);
-    final bounds = _trimBounds(meta);
+    final bounds = resolveClipTrimBounds(trim, meta);
     return resampleClipFrame(
       compFrame: compFrame,
       windowStart: scope.startFrame,
@@ -69,16 +69,5 @@ final class ClipPainter extends StatelessWidget {
       trimStartFrames: bounds.start,
       trimEndFrames: bounds.end,
     );
-  }
-
-  /// Resolves [trim] into source frame bounds, defaulting to the whole source.
-  ({int start, int end}) _trimBounds(ClipMetadata meta) {
-    if (trim == null) return (start: 0, end: meta.frameCount);
-    final sourceScope = TimeScopeData(
-      fps: meta.fps.round(),
-      startFrame: 0,
-      durationFrames: meta.frameCount,
-    );
-    return trim!.resolveClamped(sourceScope, min: 0, max: meta.frameCount);
   }
 }

@@ -107,7 +107,7 @@ Video  ->  off-screen capture (Fluvie)  ->  frames in memory  ->  ffmpeg.wasm  -
            inside the app's own pipeline                          (real FFmpeg, in the browser)
 ```
 
-1. `WebVideoRenderer` runs Fluvie's deterministic capture loop into the
+1. `WebVideoRenderer` runs Fluvie's capture loop into the
    `FluvieWebStage` surface, sized to your target resolution and parked
    off-screen. It writes the frames into an in-memory sandbox, never to disk.
 2. It hands the sandbox to `ffmpeg.wasm`, which runs the same argument plan a
@@ -133,13 +133,18 @@ desktop.
 - **Bundle size.** The wasm core is a few tens of megabytes. It is fetched lazily
   on the first render, not at app boot, and it ships **only** if you add the
   plugin and wire the bridge. If you want to keep the bundle light, render through
-  [`fluvie_api`](rendering-on-a-server.md) instead and skip the wasm entirely.
+  [`fluvie_server`](rendering-on-a-server.md) instead and skip the wasm entirely.
 - **Speed.** The single-threaded wasm core is slower than a native FFmpeg binary.
   Keep web renders short and modest in resolution, or move long renders to the
   server.
 - **No local files.** The browser has no file system, so a `/path/to.wav` audio
   source is not valid here. Bundle audio as an asset or serve it over an
   allowlisted URL (see [Audio](#audio)).
+- **Clips need WebCodecs.** A `Clip` decodes in the browser through WebCodecs.
+  `WebVideoRenderer` wires a decoder by default, but it needs a browser with
+  WebCodecs and the `FluvieClipDecoder` bridge on the page; without them a clip
+  fails with a clear error. Render clip compositions on the server or on mobile
+  if the page has no decoder.
 - **Requires the bridge.** Without the `FluvieFfmpeg` object in `index.html`, the
   encode step has nothing to call. The renderer fails fast with a clear error.
 
@@ -164,10 +169,39 @@ the renderer warns once through `WebVideoRenderer.onWarning` — pass
 or transparent render drops it (also warned). For the full audio API, see
 [Audio and captions](audio-and-captions.md).
 
+## Images
+
+Declared image media renders in the browser the same way it does on the desktop.
+An `Image.asset`, an allowlisted `Image.network`, or an `Image.memory` is
+resolved and decoded once before the frame loop, then painted from the decoded
+cache. There is no async pop-in and the render stays deterministic. Bundle the
+asset (loaded through `rootBundle`) or serve it from an allowlisted, CORS-enabled
+URL, exactly as for audio.
+
+Video clips decode in the browser through WebCodecs. `WebVideoRenderer` wires a
+clip decoder by default; it bridges to a `FluvieClipDecoder` object the page
+installs (the same way `FluvieFfmpeg` provides the encoder). On a browser without
+WebCodecs or that bridge, a `Clip` fails fast with a clear typed error. Render
+those compositions through the [server path](rendering-on-a-server.md) or on
+[mobile](on-device-mobile-rendering.md) instead.
+
+## Delivering the result
+
+`render` returns the MP4 bytes; nothing is downloaded for you. Hand them to
+`downloadBytes` to save the file straight from the page:
+`downloadBytes(bytes, filename: 'render.mp4')`. It wraps the bytes in a Blob and
+clicks a temporary object-URL link, so the file lands in the user's downloads
+with no server. Pass `mimeType:` for a GIF or WebM export.
+
+`render` reports progress through `onProgress`, a `RenderProgress` carrying the
+current phase (`capturing`, `encoding`, `complete`) and, while capturing, the
+frame counts. To restrict which hosts network images may load from, pass a
+`networkAllowlist` to the `WebVideoRenderer` constructor.
+
 ## Keeping the bundle light
 
 The wasm payload is part of `fluvie_web_encoder`, never of `fluvie`. An app that
-depends only on `fluvie` plus `fluvie_api` builds with no wasm at all. Adding or
+depends only on `fluvie` plus `fluvie_server` builds with no wasm at all. Adding or
 removing in-browser rendering is one line in `pubspec.yaml` plus the bridge
 `<script>`, so you can ship the API path by default and add the plugin only where
 in-browser rendering earns its size.

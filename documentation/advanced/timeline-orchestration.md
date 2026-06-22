@@ -63,7 +63,5 @@ resolves against that frame rate.
 
 - [Timing and triggers](../guides/timing-and-triggers.md): the triggers and
   anchors the timeline resolves against.
-- [Determinism and caching](determinism-and-caching.md): why a timeline-driven
-  scene renders the same way every time.
 - [Cheatsheet](../reference/cheatsheet.md): the whole shipped surface on one
   page.

@@ -56,8 +56,7 @@ logo, // scene two: a cache hit on the same bytes
 ```
 
 Two `Image.network` calls to the same URL also hash to the same bytes, so they
-share a decode even when they are separate declarations. See
-[Determinism and caching](determinism-and-caching.md) for the full model.
+share a decode even when they are separate declarations.
 
 ## Keep snapshots pre-resolved
 
@@ -78,8 +77,8 @@ an independent, deterministic process.
   landscape, and portrait. Each aspect is an independent render and caches under
   its own canvas size, so they never collide.
 
-Because every render is byte-deterministic, a batch is safe to shard: re-run
-only the rows that changed, on as many workers as you have.
+Because every render is independent, a batch is safe to shard: re-run only the
+rows that changed, on as many workers as you have.
 
 ## Keep animation lists stable
 
@@ -113,9 +112,7 @@ holds one copy per unique asset. For a quick draft, render a frame window with
 
 ## Where to next
 
-- [Determinism and caching](determinism-and-caching.md): the cache keys and why
-  every frame is reproducible.
 - [Multi-aspect](multi-aspect.md): why each aspect renders and caches
   independently.
-- [Templates](templates.md): one definition per data row, byte-identically,
-  the unit a batch shards on.
+- [Templates](templates.md): one definition per data row, the unit a batch
+  shards on.

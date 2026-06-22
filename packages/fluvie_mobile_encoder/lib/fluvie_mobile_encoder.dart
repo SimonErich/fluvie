@@ -24,5 +24,4 @@ export 'src/mobile_video_codec.dart';
 export 'src/mobile_video_encoder.dart';
 export 'src/network_audio_materializer.dart' show MobileAudioFetch, NetworkAudioMaterializer;
 export 'src/offscreen_capture_host.dart';
-export 'src/on_device_render_progress.dart';
 export 'src/on_device_video_renderer.dart';

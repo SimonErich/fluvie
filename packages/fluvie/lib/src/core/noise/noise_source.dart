@@ -16,7 +16,7 @@
 ///
 /// The algorithm (`ValueNoise`) is **final**: the render context wires this
 /// contract behind `ctx.noise` and the provider default, but does not
-/// change the math, so every effect golden stays byte-identical.
+/// change the math, so every effect golden stays stable.
 abstract interface class NoiseSource {
   /// A stable scalar in `[0, 1]` hashed from [seed]; the same string always
   /// returns the same value, on every machine.

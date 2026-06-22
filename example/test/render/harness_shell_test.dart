@@ -119,6 +119,9 @@ final class _OfflineBeatResolver implements MediaResolver {
   @override
   Future<void> preResolveAudio(Iterable<AudioSource> sources) async => _ready = true;
   @override
+  Future<ClipMetadata> probeClip(MediaSource source) async =>
+      (fps: 30.0, frameCount: 1, width: 1, height: 1);
+  @override
   Future<void> preResolveClip(MediaSource source, Iterable<int> frames) async => _ready = true;
   @override
   Future<void> preResolveSnapshots(Iterable<SnapshotSource> s, SnapshotService svc) async =>

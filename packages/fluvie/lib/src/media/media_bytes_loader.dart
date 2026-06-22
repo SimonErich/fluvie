@@ -1,9 +1,9 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show AssetBundle, rootBundle;
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
+import 'package:fluvie/src/media/io/file_bytes.dart';
 import 'package:fluvie/src/media/net/media_http_client.dart';
 import 'package:fluvie/src/media/net/network_allowlist.dart';
 
@@ -17,7 +17,7 @@ import 'package:fluvie/src/media/net/network_allowlist.dart';
 final class MediaBytesLoader {
   /// Creates a loader over the asset [bundle] (defaults to `rootBundle`), the
   /// [httpClient], the network [allowlist], and an optional file-read seam
-  /// [readFile] (defaults to `File.readAsBytes`).
+  /// [readFile] (defaults to the platform `readFileBytes`).
   ///
   /// [readFile] is injectable so a test can drive a throwing fake and exercise
   /// the typed failure wrap without depending on filesystem permissions.
@@ -27,7 +27,7 @@ final class MediaBytesLoader {
     AssetBundle? bundle,
     Future<Uint8List> Function(String path)? readFile,
   }) : bundle = bundle ?? rootBundle,
-       _readFile = readFile ?? _readBytes;
+       _readFile = readFile ?? readFileBytes;
 
   /// The bundle asset sources are read from.
   final AssetBundle bundle;
@@ -40,8 +40,6 @@ final class MediaBytesLoader {
 
   // The injectable file-read seam (see the [readFile] constructor argument).
   final Future<Uint8List> Function(String path) _readFile;
-
-  static Future<Uint8List> _readBytes(String path) => File(path).readAsBytes();
 
   /// Reads the bytes for [source]; throws a [FluvieRenderException] on any
   /// failure.
@@ -62,12 +60,10 @@ final class MediaBytesLoader {
   }
 
   Future<Uint8List> _loadFile(String path) async {
-    final file = File(path);
-    if (!file.existsSync()) {
-      throw FluvieRenderException('Media file "$path" does not exist.');
-    }
     try {
       return await _readFile(path);
+    } on FluvieRenderException {
+      rethrow;
     } on Object catch (error) {
       throw FluvieRenderException('Failed to read media file "$path": $error.');
     }

@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fluvie/src/core/contracts/disposable_resolver.dart';
 import 'package:fluvie/src/core/contracts/snapshot_service.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
@@ -437,6 +438,26 @@ void main() {
       await repo.preResolveSnapshots([html, mermaid], service);
 
       expect(service.calls, 2, reason: 'local snapshots bypass the network gate');
+    });
+  });
+
+  group('MediaRepository.dispose', () {
+    test('disposes decoded image + snapshot caches and is idempotent', () async {
+      final png = await _pngBytes();
+      final repo = _repo(assets: {'a.png': png});
+      const image = MediaSource.asset('a.png');
+      const mermaid = SnapshotSource.mermaid('graph TD; A-->B');
+      await repo.preResolveAll([image]);
+      await repo.preResolveSnapshots([mermaid], _CountingSnapshotService(png));
+      final decodedImage = repo.decodedImageFor(image);
+      final decodedSnapshot = repo.decodedSnapshotFor(mermaid);
+
+      expect(repo, isA<DisposableResolver>());
+      repo.dispose();
+
+      expect(decodedImage.debugDisposed, isTrue);
+      expect(decodedSnapshot.debugDisposed, isTrue);
+      expect(repo.dispose, returnsNormally, reason: 'a second dispose is a no-op');
     });
   });
 }

@@ -31,4 +31,15 @@ final class FakeFrameExtractionService implements FrameExtractionService {
     }
     return frame;
   }
+
+  @override
+  Future<Map<int, RawFrame>> extractFrames(
+    Uri source,
+    Iterable<int> frameIndices, {
+    required int width,
+    required int height,
+  }) async => {
+    for (final index in frameIndices)
+      index: await extractFrame(source, index, width: width, height: height),
+  };
 }

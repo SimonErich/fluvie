@@ -18,7 +18,7 @@
     {
       "key": "fluvie_lints",
       "role": "continuity supervisor",
-      "line": "Catches timing, determinism, and layering mistakes before they catch you.",
+      "line": "Catches timing and layering mistakes before they catch you.",
       "icon": "&#9671;"
     },
     {
@@ -28,16 +28,10 @@
       "icon": "&#9998;"
     },
     {
-      "key": "fluvie_api",
-      "role": "the render server",
-      "line": "An HTTP server plus a web-safe client. Render from anywhere, host it yourself.",
+      "key": "fluvie_server",
+      "role": "the studio you host",
+      "line": "Render API, MCP server, and a docs helper in one binary. Host the full AI stack yourself.",
       "icon": "&#9921;"
-    },
-    {
-      "key": "fluvie_mcp",
-      "role": "the assistant's hands",
-      "line": "An MCP server so your AI can write and render videos for you, end to end.",
-      "icon": "&#8984;"
     },
     {
       "key": "fluvie_mobile_encoder",

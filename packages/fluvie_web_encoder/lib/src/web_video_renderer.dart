@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie_web_encoder/src/clip_decoder.dart';
 import 'package:fluvie_web_encoder/src/fluvie_web_stage.dart';
 import 'package:fluvie_web_encoder/src/web_audio_materializer.dart';
 import 'package:fluvie_web_encoder/src/web_capture_host.dart';
@@ -31,11 +32,26 @@ final class WebVideoRenderer {
     WebVideoEncoder? encoder,
     WebCaptureHostFactory? hostFactory,
     WebAudioMaterializer? audioMaterializer,
+    WebClipDecoder? clipDecoder,
+    this.mediaResolver,
+    this.networkAllowlist,
   }) : _hostFactory = hostFactory ?? _defaultHostFactory,
        // coverage:ignore-line: the `?? _defaultEncoder()` default only runs in a browser.
        _encoder = encoder ?? _defaultEncoder(),
        // coverage:ignore-line: the default materializer reads rootBundle, only in a browser.
-       _audioMaterializer = audioMaterializer ?? BundleWebAudioMaterializer();
+       _audioMaterializer = audioMaterializer ?? BundleWebAudioMaterializer(),
+       _clipDecoder = clipDecoder ?? createWebClipDecoder();
+
+  /// The injected media resolver, or null to build (and dispose) one per
+  /// [render] from `mediaResolverProvider` — a `WebImageMediaResolver` on web,
+  /// which paints declared image media (asset, network, memory) and clips
+  /// through [_clipDecoder].
+  final MediaResolver? mediaResolver;
+
+  /// Restricts which hosts network media (images) may be fetched from. Applied
+  /// to the per-render resolver when none is injected; ignored when
+  /// [mediaResolver] is provided (configure the allowlist on it instead).
+  final NetworkAllowlist? networkAllowlist;
 
   /// Sink for renderer warnings (for example a `Video` declares audio but
   /// in-browser audio is off). Defaults to [debugPrint]; replace it to route
@@ -49,13 +65,18 @@ final class WebVideoRenderer {
   final WebCaptureHostFactory _hostFactory;
   final WebAudioMaterializer _audioMaterializer;
 
+  /// Decodes clip frames for the per-render resolver (WebCodecs in the browser,
+  /// a fail-on-use stub on the VM). Ignored when [mediaResolver] is injected.
+  final WebClipDecoder _clipDecoder;
+
   /// Renders [composition] for [aspect] over [duration] and returns the MP4
   /// bytes (deliver them as a browser download or upload).
   ///
   /// [longEdge] sets the canvas's longer side; [fps] and [duration] set the
   /// frame count (`duration * fps`, at least one). [export] selects GIF or
   /// transparent WebM instead of H.264; [posterFrame] adds a poster still;
-  /// [onProgress] observes the capture loop.
+  /// [onProgress] reports per-frame capture progress then the encoding and
+  /// complete phases.
   ///
   /// When [composition] is a `Video` with declared `Audio`, pass [audio] `true`
   /// to mix and mux those tracks; left `false` the render is silent and, unless
@@ -75,12 +96,17 @@ final class WebVideoRenderer {
     String compositionKey = 'render',
     Export? export,
     int? posterFrame,
-    ProgressCallback? onProgress,
+    RenderProgressCallback? onProgress,
   }) async {
-    final frameCount = _frameCountFor(duration, fps);
+    final frameCount = frameCountFor(duration, fps);
     final size = aspect.sizeFor(longEdge);
     final sandbox = MemoryRenderSandbox();
     final host = _hostFactory(Size(size.width.toDouble(), size.height.toDouble()));
+    final scope = resolverScope(
+      mediaResolver,
+      networkAllowlist: networkAllowlist,
+      clipDecoder: _clipDecoder,
+    );
     try {
       // Resolve audio inside the try so a throw here still disposes the host.
       final mix = _audioFor(
@@ -91,27 +117,47 @@ final class WebVideoRenderer {
         fps: fps,
         frameCount: frameCount,
       );
-      final manifest = await renderToSandbox(
-        composition: composition,
-        aspect: aspect,
-        frameCount: frameCount,
-        sandbox: sandbox,
-        capture: const RepaintBoundaryCaptureService(),
-        pumpWidget: host.mount,
-        pumpFrame: host.pumpFrame,
-        longEdge: longEdge,
-        fps: fps,
-        compositionKey: compositionKey,
-        export: export,
-        posterFrame: posterFrame,
-        onProgress: onProgress,
-        audioTracks: mix.tracks,
-        loadAudioBytes: _audioMaterializer.materialize,
-        audioMasterVolume: mix.masterVolume,
+      final manifest = await runStage(
+        RenderPhase.capturing,
+        () => renderToSandbox(
+          composition: composition,
+          aspect: aspect,
+          frameCount: frameCount,
+          sandbox: sandbox,
+          capture: const RepaintBoundaryCaptureService(),
+          pumpWidget: host.mount,
+          pumpFrame: host.pumpFrame,
+          longEdge: longEdge,
+          fps: fps,
+          compositionKey: compositionKey,
+          export: export,
+          posterFrame: posterFrame,
+          onProgress: (completed, total) => onProgress?.call(
+            RenderProgress(
+              RenderPhase.capturing,
+              completedFrames: completed,
+              totalFrames: total,
+              compositionKey: compositionKey,
+            ),
+          ),
+          audioTracks: mix.tracks,
+          loadAudioBytes: _audioMaterializer.materialize,
+          audioMasterVolume: mix.masterVolume,
+          resolver: scope.resolver,
+        ),
       );
-      return _encoder.encode(manifest: manifest, sandbox: sandbox);
+      onProgress?.call(RenderProgress(RenderPhase.encoding, compositionKey: compositionKey));
+      final bytes = await runStage(
+        RenderPhase.encoding,
+        () => _encoder.encode(manifest: manifest, sandbox: sandbox),
+      );
+      onProgress?.call(RenderProgress(RenderPhase.complete, compositionKey: compositionKey));
+      return bytes;
     } finally {
-      await host.dispose();
+      await runGuarded([
+        host.dispose,
+        scope.dispose,
+      ], (error, _) => onWarning('Cleanup after render failed: $error'));
     }
   }
 
@@ -152,15 +198,6 @@ final class WebVideoRenderer {
       return none;
     }
     return (tracks: mix.tracks, masterVolume: mix.masterVolume);
-  }
-
-  static int _frameCountFor(Duration duration, int fps) {
-    if (fps <= 0) throw ArgumentError.value(fps, 'fps', 'must be positive');
-    if (duration <= Duration.zero) {
-      throw ArgumentError.value(duration.toString(), 'duration', 'must be positive');
-    }
-    final frames = (duration.inMicroseconds * fps / Duration.microsecondsPerSecond).round();
-    return frames < 1 ? 1 : frames;
   }
 
   // coverage:ignore-line: binds to the live FluvieWebStage, exercised only in a browser.

@@ -66,13 +66,14 @@ custom lints enforce all of this, so a violation fails `melos run lint`.
 A forward dependency goes through an interface in the lowest stable layer, with a
 fake for tests and the real implementation injected through a Riverpod provider.
 
-## Determinism is non-negotiable
+## Capture is headless
 
-Render code has no wall-clock and no unseeded randomness. No `DateTime.now()`, no
-bare `Random()`. Randomness flows through seeded `noise(seed)` and `random(seed)`.
-The `nondeterministic_random` lint and a pre-commit grep-gate both enforce this.
-Goldens must be byte-stable: regenerate with
-`flutter test --update-goldens --tags golden` and review the PNG.
+In capture mode the frame is the only clock: no wall-clock and no async work
+inside a frame, and media is pre-resolved before the loop. For effects, prefer
+seeded `noise(seed)` and `random(seed)` so a golden stays stable run to run.
+Fluvie does not guarantee byte-identical output across machines or encoders.
+Regenerate goldens with `flutter test --update-goldens --tags golden` and review
+the PNG.
 
 ## Code standards
 
@@ -97,5 +98,3 @@ format.
 - [Testing guide](testing.md): the suites, the tags, and the fakes.
 - [Coverage and the ignore policy](coverage.md): the 97% floor and when an
   ignore is allowed.
-- [Determinism and caching](../advanced/determinism-and-caching.md): the
-  contract behind the render rules.

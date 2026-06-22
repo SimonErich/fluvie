@@ -17,8 +17,8 @@ import 'package:meta/meta.dart' show immutable;
 /// an optional [subtitle], and the brand [accent] / [background] colors.
 ///
 /// `@immutable` and value-equal by field, so the same props always build the
-/// same `Video` and render byte-identical frames — the data-driven-batch
-/// caching contract. Render one set of props for many users by mapping
+/// same `Video` and render the same frames, so a batch caches and goldens.
+/// Render one set of props for many users by mapping
 /// your data onto a `TitleIntroProps` per render.
 ///
 /// ```dart

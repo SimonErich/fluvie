@@ -24,13 +24,13 @@ extension _SnapshotResolution on MediaRepository {
         loader.allowlist.check(source.uri);
       }
       final raster = await service.rasterize(source.request);
-      _snapshots[source.cacheKey] = await _decodeBytes('snapshot "$source"', raster.bytes);
+      _snapshots[source.cacheKey] = await decodeImageBytes('snapshot "$source"', raster.bytes);
     }
   }
 
   /// The decoded raster for [source], looked up by its content-hash `cacheKey`.
   ui.Image _decodedSnapshot(SnapshotSource source) {
-    _assertResolved('decodedSnapshotFor');
+    assertResolved('decodedSnapshotFor');
     final image = _snapshots[source.cacheKey];
     if (image == null) {
       throw FluvieRenderException(

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:fluvie/src/captions/parse/srt_parser.dart';
@@ -13,16 +12,19 @@ import 'package:fluvie/src/core/captions/caption_source.dart';
 import 'package:fluvie/src/core/captions/caption_word.dart';
 import 'package:fluvie/src/core/contracts/beat_detection_service.dart';
 import 'package:fluvie/src/core/contracts/beat_grid.dart';
+import 'package:fluvie/src/core/contracts/disposable_resolver.dart';
 import 'package:fluvie/src/core/contracts/frequency_analyzer.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
 import 'package:fluvie/src/core/contracts/snapshot_service.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
+import 'package:fluvie/src/core/media/clip_source_kind.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/core/media/snapshot_source.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/media/media_bytes_loader.dart';
+import 'package:fluvie/src/media/runtime/clip_resolve_cache.dart';
+import 'package:fluvie/src/media/runtime/image_resolve_cache.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
-import 'package:fluvie/src/rendering/encoding/content_hash.dart';
 import 'package:fluvie/src/rendering/encoding/frame_extraction_service.dart';
 import 'package:fluvie/src/rendering/encoding/video_probe_service.dart';
 
@@ -36,17 +38,20 @@ part 'media_repository_snapshot.dart';
 /// before the frame loop, then serves it synchronously during the loop.
 ///
 /// [preResolveAll] does the image IO
-/// (load via [MediaBytesLoader], content-hash with the in-house [fnv1a64Hex],
+/// (load via [MediaBytesLoader], content-hash with the in-house fnv1a64Hex,
 /// decode to a `ui.Image`); [preResolveClip] probes and extracts clip frames;
 /// the snapshot, audio, reactive, and caption pre-passes live in the sibling
 /// parts. Each pass is idempotent, and every read accessor is a pure synchronous
 /// lookup, so no frame ever awaits media.
-final class MediaRepository implements MediaResolver {
+final class MediaRepository
+    with ImageResolveCache, ClipResolveCache
+    implements MediaResolver, DisposableResolver {
   /// Creates a repository over the byte [loader], with the [probeService] and
   /// [frameExtractor] the clip path needs (`null` until a clip is resolved).
   MediaRepository({required this.loader, this.probeService, this.frameExtractor});
 
   /// The per-kind byte source feeding the cache.
+  @override
   final MediaBytesLoader loader;
 
   /// Probes clip sources for their fps/dimensions; required to resolve clips.
@@ -55,11 +60,10 @@ final class MediaRepository implements MediaResolver {
   /// Extracts clip frames; required to resolve clips.
   final FrameExtractionService? frameExtractor;
 
-  final Map<MediaSource, ResolvedMedia> _resolved = {};
-  final Map<MediaSource, ui.Image> _decoded = {};
-  final Map<MediaSource, ClipMetadata> _clipMeta = {};
+  /// Local file paths the clip source was materialized to (the probe and the
+  /// frame extractor both read by path). The metadata and frame caches live in
+  /// the shared [ClipResolveCache].
   final Map<MediaSource, String> _clipPaths = {};
-  final Map<MediaSource, Map<int, ui.Image>> _clipFrames = {};
 
   // Audio, reactive, snapshot, and caption caches keyed by source value: the
   // encoder `-i`s the materialized audio, `Trigger.beat` reads the grid, the
@@ -71,17 +75,16 @@ final class MediaRepository implements MediaResolver {
   final Map<AudioSource, BandTable> _bandTables = {};
   final Map<String, ui.Image> _snapshots = {};
   final Map<CaptionSource, List<CaptionCue>> _captionCues = {};
-  bool _preResolved = false;
 
   @override
   Future<void> preResolveAll(Iterable<MediaSource> sources) async {
     await _resolveAll(sources);
-    _preResolved = true;
+    markResolved();
   }
 
   @override
   ResolvedMedia resolvedFor(MediaSource source) => _require(
-    _resolved,
+    resolved,
     source,
     'resolvedFor',
     'resolved media',
@@ -90,7 +93,7 @@ final class MediaRepository implements MediaResolver {
 
   @override
   ui.Image decodedImageFor(MediaSource source) => _require(
-    _decoded,
+    decoded,
     source,
     'decodedImageFor',
     'decoded image',
@@ -98,23 +101,30 @@ final class MediaRepository implements MediaResolver {
   );
 
   @override
+  Future<ClipMetadata> probeClip(MediaSource source) => resolveClipMeta(source);
+
+  @override
   Future<void> preResolveClip(MediaSource source, Iterable<int> sourceFrames) async {
-    await _resolveClip(source, sourceFrames);
-    _preResolved = true;
+    await resolveClipFrames(source, sourceFrames);
+    markResolved();
   }
 
   @override
-  ClipMetadata clipMetadataFor(MediaSource source) => _require(
-    _clipMeta,
-    source,
-    'clipMetadataFor',
-    'clip metadata',
-    'Was it pre-resolved with preResolveClip before the frame loop?',
-  );
+  ClipMetadata clipMetadataFor(MediaSource source) => clipMetadataLookup(source);
 
   @override
   ui.Image decodedClipFrame(MediaSource source, int sourceFrame) =>
-      _decodedClipFrame(source, sourceFrame);
+      decodedClipFrameLookup(source, sourceFrame);
+
+  @override
+  Future<ClipMetadata> probeClipSource(MediaSource source) => _probeClipSource(source);
+
+  @override
+  Future<Map<int, RawFrame>> extractClipFrames(
+    MediaSource source,
+    List<int> sourceFrames,
+    ClipMetadata meta,
+  ) => _extractClipFrames(source, sourceFrames, meta);
 
   @override
   Future<void> preResolveSnapshots(
@@ -122,7 +132,7 @@ final class MediaRepository implements MediaResolver {
     SnapshotService service,
   ) async {
     await _resolveSnapshots(sources, service);
-    _preResolved = true;
+    markResolved();
   }
 
   @override
@@ -131,7 +141,7 @@ final class MediaRepository implements MediaResolver {
   @override
   Future<void> preResolveAudio(Iterable<AudioSource> sources) async {
     await _resolveAudio(sources);
-    _preResolved = true;
+    markResolved();
   }
 
   @override
@@ -158,7 +168,7 @@ final class MediaRepository implements MediaResolver {
       fps: fps,
       totalFrames: totalFrames,
     );
-    _preResolved = true;
+    markResolved();
   }
 
   @override
@@ -182,7 +192,7 @@ final class MediaRepository implements MediaResolver {
   @override
   Future<void> preResolveCaptions(CaptionSource source) async {
     await _resolveCaptions(source);
-    _preResolved = true;
+    markResolved();
   }
 
   @override
@@ -193,4 +203,14 @@ final class MediaRepository implements MediaResolver {
     'parsed captions',
     'Was it included in the collect pass before preResolveCaptions?',
   );
+
+  @override
+  void dispose() {
+    disposeCachedImages();
+    disposeClipFrames();
+    for (final image in _snapshots.values) {
+      image.dispose();
+    }
+    _snapshots.clear();
+  }
 }

@@ -1,18 +1,17 @@
 import 'dart:io';
 
-import 'package:flutter/widgets.dart'
-    show GlobalKey, ProxyWidget, SingleChildRenderObjectWidget, Widget;
+import 'package:flutter/widgets.dart' show GlobalKey, Widget;
 import 'package:fluvie/src/audio/encoding/audio_mix_staging.dart';
 import 'package:fluvie/src/composition/runtime/aspect_scope.dart';
 import 'package:fluvie/src/composition/runtime/audio_collector.dart';
-import 'package:fluvie/src/composition/runtime/media_collector.dart' show collectMediaSources;
 import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/aspect.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart' show MediaResolver;
-import 'package:fluvie/src/core/media/media_source.dart' show MediaSource;
 import 'package:fluvie/src/rendering/capture/capture_shell.dart';
 import 'package:fluvie/src/rendering/capture/render_manifest.dart';
+import 'package:fluvie/src/rendering/collect_composition_media.dart';
+import 'package:fluvie/src/rendering/pre_resolve_clips.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
 import 'package:fluvie/src/rendering/render_service.dart';
 import 'package:fluvie/src/rendering/runtime/render_controller.dart';
@@ -66,9 +65,9 @@ typedef RenderAspectResult = ({RenderManifest manifest, RenderConfig config});
 /// media-less path (a composition that declares an `Image`/`Clip` then throws a
 /// `FluvieRenderException` naming the missing pre-resolution).
 ///
-/// Rendering the same [composition] for the same [aspect] twice produces
-/// byte-identical frames (the determinism contract the per-aspect renders-twice
-/// tests prove); the encode arg array, including the mix, is byte-identical too.
+/// Each [aspect] re-derives its size from [longEdge] and renders independently,
+/// so the same [composition] renders the same frames for that aspect; the encode
+/// arg array, including the mix, is built from the plan.
 Future<RenderAspectResult> render({
   required Widget composition,
   required Aspect aspect,
@@ -107,7 +106,8 @@ Future<RenderAspectResult> render({
   // images synchronously from the `ImageResolverScope`, so the decoded cache
   // must be warm before the tree mounts (a null resolver = a media-less render).
   if (resolver != null) {
-    await resolver.preResolveAll(_collectImageSources(composition));
+    await resolver.preResolveAll(collectCompositionMedia(composition));
+    await preResolveCompositionClips(composition: composition, resolver: resolver);
   }
   final controller = RenderController();
   final boundaryKey = GlobalKey();
@@ -167,23 +167,3 @@ Future<RenderAspectResult> render({
     audioSources: collectAudioSources(composition),
   );
 }
-
-/// Every declared [MediaSource] in [composition]'s scenes, or an empty set when
-/// it wraps no [Video] — the collect pass `preResolveAll` warms before frame 0.
-/// The `Video` is unwrapped through the transparent single-child wrappers
-/// `renderTemplate` adds (a `Directionality`), so both a bare `Video` and a
-/// wrapped one resolve their media.
-Set<MediaSource> _collectImageSources(Widget composition) {
-  final video = _videoIn(composition);
-  return video == null ? const {} : collectMediaSources(video.scenes);
-}
-
-/// The first [Video] at or below [widget], descending only the transparent
-/// single-child wrappers (`InheritedWidget`s and single-child render objects);
-/// `null` when there is none.
-Video? _videoIn(Widget widget) => switch (widget) {
-  Video() => widget,
-  ProxyWidget(:final child) => _videoIn(child),
-  SingleChildRenderObjectWidget(:final child?) => _videoIn(child),
-  _ => null,
-};

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Image;
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
 
@@ -73,6 +73,8 @@ Video _demoVideo() => Video(
       duration: 1.seconds,
       background: Background.gradient(const [Color(0xFF1A2980), Color(0xFF26D0CE)]),
       children: [
+        // A declared asset image, resolved and painted in the browser.
+        Image.asset('assets/images/swatch.png', fit: BoxFit.cover).animate([Animation.fadeIn()]),
         const Text(
           'Web!',
           style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),

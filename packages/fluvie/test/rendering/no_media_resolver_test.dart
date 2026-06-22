@@ -78,6 +78,15 @@ void main() {
       );
     });
 
+    test('probeClip throws a FluvieRenderException naming the clip source', () {
+      expect(
+        () => resolver.probeClip(const MediaSource.asset('clip.mp4')),
+        throwsA(
+          isA<FluvieRenderException>().having((e) => e.message, 'message', contains('clip.mp4')),
+        ),
+      );
+    });
+
     test('preResolveClip throws a FluvieRenderException naming the clip source', () {
       expect(
         () => resolver.preResolveClip(const MediaSource.asset('clip.mp4'), const [0, 1]),

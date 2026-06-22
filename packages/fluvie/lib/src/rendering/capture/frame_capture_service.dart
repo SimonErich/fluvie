@@ -7,9 +7,9 @@ import 'package:riverpod/riverpod.dart';
 ///
 /// The render loop owns the clock: it seeks the controller, pumps the tree,
 /// and only then asks this service for the pixels. Implementations therefore
-/// never advance time, never await anything frame-dependent, and must return
-/// byte-identical output for an identical pumped tree — that is the
-/// determinism contract the frame cache and the golden harness rely on.
+/// never advance time, never await anything frame-dependent, and capture the
+/// same pixels for an identical pumped tree, which is what the frame cache and
+/// the golden harness rely on.
 // A single-method contract is the point: the capture seam stays mockable
 // behind its provider (new-service house pattern, as with BeatGrid).
 // ignore: one_member_abstracts

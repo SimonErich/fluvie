@@ -26,7 +26,7 @@ part 'code_internals.dart';
 ///
 /// The source is highlighted **once** per content (cached by content hash) and
 /// the painter is a pure function of `(parsed spans, reveal progress, theme
-/// tokens)`, so the same frame renders byte-identically every time. [reveal]
+/// tokens)`, so the same frame renders the same every time. [reveal]
 /// drives how the code appears: [CodeReveal.instant]
 /// shows everything, [CodeReveal.typing] reveals it glyph by glyph (sharing the
 /// `Typewriter` arithmetic), and [CodeReveal.lineByLine] reveals whole lines in

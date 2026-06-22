@@ -22,7 +22,7 @@ const _doc =
     '- Faster renders\n'
     '- Highlighted code blocks\n'
     '\n'
-    '> Determinism is the headline.\n';
+    '> On-device rendering is the headline.\n';
 
 const _fenced =
     '# Example\n'

@@ -20,12 +20,11 @@ you direct, Fluvie keeps continuity, and FFmpeg runs the projector.
 ## Why people like it
 
 - **Declarative.** Compose scenes and elements like any Flutter screen.
-- **Deterministic.** The same input renders byte-identical frames every time, so
-  caching, golden tests, and batch rendering all work.
-- **Headless.** Render from the command line, an HTTP API, or an MCP server. No
-  display required.
-- **Conversational.** Ask for a video in plain language and get a deterministic
-  spec back.
+- **On-device or server.** Render in the browser, on a phone, from the command
+  line, an HTTP API, or an MCP server. No display required.
+- **Cacheable.** The same input re-renders from cache, so golden tests and batch
+  rendering stay fast.
+- **Conversational.** Ask for a video in plain language and get a spec back.
 
 ## The rest of the ecosystem
 

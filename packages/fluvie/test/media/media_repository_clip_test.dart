@@ -66,6 +66,17 @@ class _FakeExtractor implements FrameExtractionService {
       rgba: Uint8List(width * height * 4)..fillRange(0, width * height * 4, frameIndex % 256),
     );
   }
+
+  @override
+  Future<Map<int, RawFrame>> extractFrames(
+    Uri source,
+    Iterable<int> frameIndices, {
+    required int width,
+    required int height,
+  }) async => {
+    for (final index in frameIndices)
+      index: await extractFrame(source, index, width: width, height: height),
+  };
 }
 
 MediaRepository _repo({
@@ -183,6 +194,51 @@ void main() {
       () => repo.preResolveClip(_clip, [0]),
       throwsA(isA<FluvieRenderException>()),
     );
+  });
+
+  test('probeClip returns metadata and probes once (cached)', () async {
+    final probe = _FakeProbe(_probeResult);
+    final repo = _repo(
+      assets: {'clip_1s.mp4': Uint8List(16)},
+      probe: probe,
+      extractor: _FakeExtractor(),
+    );
+
+    final meta = await repo.probeClip(_clip);
+    final again = await repo.probeClip(_clip);
+
+    expect(meta.frameCount, 30);
+    expect(meta.width, 2);
+    expect(again, meta);
+    expect(probe.calls, 1, reason: 'metadata is cached after the first probe');
+  });
+
+  test('probeClip without a VideoProbeService throws a clear error', () async {
+    final repo = MediaRepository(
+      loader: MediaBytesLoader(
+        bundle: _MapBundle({'clip_1s.mp4': Uint8List(16)}),
+        httpClient: _NoHttp(),
+        allowlist: NetworkAllowlist.allowAny(),
+      ),
+      frameExtractor: _FakeExtractor(),
+    );
+
+    await expectLater(() => repo.probeClip(_clip), throwsA(isA<FluvieRenderException>()));
+  });
+
+  test('dispose releases extracted clip frames and is idempotent', () async {
+    final repo = _repo(
+      assets: {'clip_1s.mp4': Uint8List(16)},
+      probe: _FakeProbe(_probeResult),
+      extractor: _FakeExtractor(),
+    );
+    await repo.preResolveClip(_clip, [0]);
+    final frame = repo.decodedClipFrame(_clip, 0);
+
+    repo.dispose();
+
+    expect(frame.debugDisposed, isTrue);
+    expect(repo.dispose, returnsNormally, reason: 'a second dispose is a no-op');
   });
 
   tearDownAll(() {

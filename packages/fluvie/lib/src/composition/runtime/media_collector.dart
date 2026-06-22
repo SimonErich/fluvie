@@ -2,10 +2,14 @@ import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/animation/motion_target.dart';
 import 'package:fluvie/src/composition/runtime/collectible_children.dart';
 import 'package:fluvie/src/composition/scene.dart';
+import 'package:fluvie/src/core/media/clip_source_kind.dart';
 import 'package:fluvie/src/core/media/media_carrier.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/core/media/snapshot_source.dart';
+import 'package:fluvie/src/core/time_range.dart';
+import 'package:fluvie/src/elements/clip.dart';
 import 'package:fluvie/src/elements/snapshot/snapshot.dart';
+import 'package:fluvie/src/timing/placement/scene_frame_resolver.dart';
 
 /// Gathers every declared [MediaSource] from [scenes] before the frame loop —
 /// a pure structural walk over the constructor data, with no mounting and no
@@ -71,6 +75,45 @@ List<Snapshot> collectSnapshots(List<Scene> scenes) {
     if (widget is Snapshot) snapshots.add(widget);
   });
   return snapshots;
+}
+
+/// A clip-painting carrier paired with what the pre-pass plans against: the
+/// duration of its scene in frames (`windowLength`, the longest the clip can
+/// play) and its `trim` (`null` for a `Background.video`, which plays the whole
+/// source).
+typedef ClipPlan = ({MediaSource source, int windowLength, TimeRange? trim});
+
+/// Pairs every clip-painting carrier in [scenes] (a `Clip` element or a
+/// `Background.video`) with its scene duration in frames at [fps] and its trim —
+/// the input the clip pre-pass plans source frames from.
+///
+/// It reuses the shared tree walk per scene, so it finds clips wherever
+/// [collectMediaSources] finds their sources, then keeps only the clip-kind
+/// sources (`.mp4`/`.mov`/`.webm`). The window is the whole scene because that
+/// is the longest a clip can play inside it; the planner dedupes from there.
+List<ClipPlan> collectClipPlans(List<Scene> scenes, int fps) {
+  final plans = <ClipPlan>[];
+  for (var s = 0; s < scenes.length; s++) {
+    final scene = scenes[s];
+    final windowLength = resolveSceneDurationFrames(scene.duration, fps, 'scenes[$s]');
+    void visit(Widget widget) {
+      if (widget is! MediaCarrier) return;
+      final source = (widget as MediaCarrier).mediaSource;
+      if (source == null || !isClipSource(source)) return;
+      plans.add((
+        source: source,
+        windowLength: windowLength,
+        trim: widget is Clip ? widget.trim : null,
+      ));
+    }
+
+    final background = scene.background;
+    if (background != null) _walk(background, visit);
+    for (final child in scene.children) {
+      _walk(child, visit);
+    }
+  }
+  return plans;
 }
 
 /// Walks each scene's `Background` and declared children, calling [visit] for

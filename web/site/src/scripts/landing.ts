@@ -1,7 +1,7 @@
 // The landing page's interactivity, ported verbatim from the original inline
 // script: the nav theme/scroll progress, the hero scrubber, copy buttons, the
-// trigger tabs + lever, the proof "render again" demo, the gallery filter, and
-// the "pick your seat" tabs. The only change from the original is that the
+// trigger tabs + lever, the gallery filter, and the "pick your seat" tabs. The
+// only change from the original is that the
 // gallery data (GAL) is read from a build-rendered JSON element (#gal-data),
 // so the tiles come from the repo's lessons instead of a hardcoded array.
 (function () {
@@ -198,26 +198,6 @@
       if (leverFill) leverFill.style.left = v + "%";
       if (subFollowFill) subFollowFill.style.left = (v + 34) + "%";
       leverRange.setAttribute("aria-valuetext", "Title starts at " + v + "%");
-    });
-  }
-
-  // ---- proof: render again ----
-  var renderAgainBtn = $("#renderAgainBtn"), lockBadge = $("#lockBadge"),
-      renderMsg = $("#renderMsg"), renderFills = $$(".renderFill"), rendering = false, rt: number;
-  if (renderAgainBtn) {
-    renderAgainBtn.addEventListener("click", function () {
-      if (rendering) return;
-      rendering = true;
-      if (lockBadge) { lockBadge.innerHTML = '<span aria-hidden="true">&#128275;</span> ready'; lockBadge.style.color = "#6A7796"; }
-      if (renderMsg) renderMsg.textContent = "Rendering both takes...";
-      renderFills.forEach(function (f) { f.style.width = "100%"; });
-      clearTimeout(rt);
-      rt = setTimeout(function () {
-        rendering = false;
-        renderFills.forEach(function (f) { f.style.width = "0%"; });
-        if (lockBadge) { lockBadge.innerHTML = '<span aria-hidden="true">&#128274;</span> locked, identical'; lockBadge.style.color = "#7CF3C2"; }
-        if (renderMsg) renderMsg.textContent = "Done. Both renders produced the same frame hash.";
-      }, 1300);
     });
   }
 

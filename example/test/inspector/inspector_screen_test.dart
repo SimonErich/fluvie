@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/fluvie.dart' hide RenderProgress;
 import 'package:fluvie_example/inspector/inspector_screen.dart';
 import 'package:fluvie_example/inspector/providers.dart';
 import 'package:fluvie_example/inspector/render_launcher.dart';

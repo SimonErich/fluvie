@@ -7,16 +7,13 @@ that goes deeper. If you just want to render something, start here:
 dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/01.mp4
 ```
 
-## Why are my renders deterministic?
+## Will my renders look the same each time?
 
-Identical input produces identical frames, byte for byte. In capture mode the
-frame is the only clock: there is no wall-clock and no async work inside a frame.
-There is no `DateTime.now()` and no unseeded `Random()` in render code.
-Randomness flows through seeded `noise(seed)` and `random(seed)`, so a seed
-reproduces a sequence exactly.
-
-This is what makes the frame cache, golden tests, and data-driven batches safe.
-See [Determinism and caching](../advanced/determinism-and-caching.md).
+In capture mode the frame is the only clock: there is no wall-clock and no async
+work inside a frame, so a render is reproducible enough to cache and to golden
+test. Effects draw their randomness from seeded `noise(seed)` and `random(seed)`,
+so a given seed reproduces the same sequence. Fluvie does not guarantee
+byte-identical output across machines or encoders.
 
 ## Do I need FFmpeg?
 
@@ -29,12 +26,12 @@ the same way on every platform. Fluvie invokes it with an argument list, never a
 shell string, and uses bit-exact flags on a single thread so a given build
 always produces the same bytes.
 
-## Why are frames byte-identical everywhere but files are not?
+## Why does the same render produce a different MP4 on another machine?
 
-The captured frames are byte-identical on every machine. The encoded file is
-byte-identical per machine, because FFmpeg builds differ between platforms. The
-encoder runs with bit-exact flags on one thread, so the same FFmpeg build always
-produces the same file from the same frames. See
+The encoded file depends on the FFmpeg build, and builds differ between
+platforms. On one machine the encoder is steady: bit-exact flags on one thread,
+so the same build produces the same file from the same frames. Across machines
+the bytes can differ even when the picture looks the same. See
 [Exporting your video](../guides/exporting-your-video.md).
 
 ## My rendered text shows up as solid boxes. Why?
@@ -146,5 +143,3 @@ legible. See [Contributing overview](../contributing/overview.md).
 
 - [Cheatsheet](cheatsheet.md): the whole surface on one page.
 - [Migration](migration.md): old names mapped to new.
-- [Determinism and caching](../advanced/determinism-and-caching.md): why every
-  frame is reproducible.

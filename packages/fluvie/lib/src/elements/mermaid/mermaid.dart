@@ -16,8 +16,8 @@ import 'package:meta/meta.dart';
 /// live view captured mid-frame (the pre-rasterize rule).
 ///
 /// A headless Chromium lays the diagram out into an SVG string and Fluvie
-/// rasterizes that SVG in-process, so the same [source] and [theme] always yield
-/// a byte-identical raster. The renderer pre-resolves every diagram before
+/// rasterizes that SVG in-process, so the same [source] and [theme] always
+/// render the same raster. The renderer pre-resolves every diagram before
 /// capture (no "pops in when it loads"), caches it by content hash, and paints
 /// it synchronously from the enclosing `ImageResolverScope` through
 /// [ResolvedSnapshot]. A capture with no pre-resolution throws a

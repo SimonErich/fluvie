@@ -44,7 +44,7 @@ You write times symbolically and Fluvie resolves them to frames:
   element's `.show` window).
 
 The frame is the only clock. There is no wall time anywhere, which is why
-renders are deterministic and cacheable.
+renders are reproducible and cacheable.
 
 ## .animate
 
@@ -72,11 +72,11 @@ Scene(
 Every animation inside that scene now runs 18 frames unless it says
 otherwise.
 
-## Determinism
+## The frame is the only clock
 
-Identical input produces byte-identical frames. No `DateTime.now()`, no
-unseeded randomness, no async work inside a frame. This is what makes golden
-tests, frame caching, and batch rendering possible.
+Capture is headless: there is no wall-clock and no async work inside a frame, so
+a render is reproducible enough for golden tests, frame caching, and batch
+rendering. Effects pull randomness from a seed, so the same seed repeats.
 
 ## Where to next
 

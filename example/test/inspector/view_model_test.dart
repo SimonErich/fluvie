@@ -6,7 +6,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/fluvie.dart' hide RenderProgress;
 import 'package:fluvie_example/inspector/inspector_view_model.dart';
 import 'package:fluvie_example/inspector/playback_view_model.dart';
 import 'package:fluvie_example/inspector/process_render_launcher.dart';

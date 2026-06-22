@@ -49,7 +49,7 @@ class _OnDeviceRenderPageState extends State<OnDeviceRenderPage> {
         duration: const Duration(seconds: 4),
         longEdge: 480,
         audio: _withAudio, // mix and mux the lesson's music bed on the device
-        onProgress: (phase) => debugPrint('on-device render: ${phase.name}'),
+        onProgress: (progress) => debugPrint('on-device render: ${progress.phase.name}'),
       );
       // #enddocregion render
       _set('Wrote ${file.path}');

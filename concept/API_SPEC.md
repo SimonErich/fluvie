@@ -866,7 +866,7 @@ The bundled headless-Chrome rasterizer is experimental; inject a `SnapshotServic
 
 ### `Snapshot` (subtree capture)
 
-Rasterizes an arbitrary Flutter subtree once before the frame loop and paints the cached still every frame. In-process, fully deterministic — the same child always yields byte-identical pixels. Useful to freeze a busy or expensive subtree into a single image you then animate like any element.
+Rasterizes an arbitrary Flutter subtree once before the frame loop and paints the cached still every frame. In-process, so the same child renders the same still and the result caches and goldens. Useful to freeze a busy or expensive subtree into a single image you then animate like any element.
 
 ```dart
 Snapshot(child: const ComplexChart()).animate([Animation.slideIn()])
@@ -1503,8 +1503,8 @@ All tokens are `@immutable` and value-equal by field, so two identical builds pr
 
 ## 22. Reproducible randomness
 
-Organic motion that's still deterministic across frames, machines, and re-renders (so caching and goldens
-work). A lint forbids `dart:math Random()` in render code.
+Organic motion that stays stable across frames and re-renders (so caching and goldens
+work). Effects pull randomness from a seed; prefer the seeded `noise(seed)` / `random(seed)` API over `dart:math Random()` in render code.
 
 ```dart
 final n = ctx.noise('petal-$i');                 // stable per seed
@@ -1685,7 +1685,7 @@ final class RenderService {
 }
 ```
 
-All three entry points produce byte-identical frames across runs (same determinism contract the per-aspect renders-twice tests prove).
+All three entry points run the same capture pipeline, so the same composition renders the same frames for a given aspect.
 
 ---
 
@@ -1846,10 +1846,10 @@ pipeline deterministically: **transforms wrap the widget first; pixel effects ar
 layer afterward, in list order among themselves.** So `[slideFade, grain]` slides the widget, then lays
 grain over the result — regardless of list order between the two classes.
 
-### 27.7 Determinism
+### 27.7 Capture isolation
 
 `Image`/`Clip` sources are pre-resolved and cached by content hash before capture; randomness is seeded
-(§22). Identical input → identical frames → safe to cache and to golden-test.
+(§22). The frame is the only clock, so a render is reproducible enough to cache and to golden-test. Fluvie does not guarantee byte-identical output across machines or encoders.
 
 ### 27.8 Shared frame capture loop
 
@@ -1952,8 +1952,9 @@ All three share:
 - The same frame caching by content digest.
 - The same audio-mix timing math (FFmpeg nodes on desktop, `ResolvedAudioMix` on mobile/custom).
 
-Swapping the encoder never changes a frame: one composition produces byte-identical frames on all three
-backends, and the renders-twice determinism proof holds per backend.
+Swapping the encoder changes where the encode runs, not the composition: all three drive the same
+deterministic capture loop and capture the same frames. The encoded file can differ between backends
+(hardware encoders vary); each backend's renders-twice proof holds on the same machine.
 
 ### 27.13 Why complexity here is the right trade
 
@@ -1971,7 +1972,6 @@ Editor squiggles + `dart analyze` failures, with quick-fixes where possible:
 
 - `no_src_import` — flags a `package:<other>/src/...` import (single-barrel rule); suggests the public barrel.
 - `layering` — enforces the layering law: dependencies point down only (`core` ← `timing` ← features ← `diagnostics`).
-- `nondeterministic_random` — flags unseeded `Random()` and `DateTime.now()` in render code.
 - `deprecated_member` — drives migration from pre-1.0 names with quick-fixes (e.g. `KenBurnsImage` → `Image` + `Animation.kenBurns()`).
 - `dangling_anchor` — a `Trigger` references an `Anchor` never attached to an element.
 - `cyclic_trigger` — elements wait on each other, forming a cycle.
@@ -2057,11 +2057,11 @@ Identical specs share identical digests, so an AI-authored video keys the frame 
 Video buildVideo(VideoSpec spec) => spec.build();
 ```
 
-This free function is a pure function: the same spec always builds the same video byte-for-byte, making renders deterministic and cacheable. No model is called during rendering.
+This free function is a pure function: the same spec always builds the same video, so renders are reproducible and cacheable. No model is called during rendering.
 
 ### The schema
 
-`videoSpecSchema` is a JSON Schema (draft-07) that defines the spec contract. It's compiled from the same `knownElementTypes`, `knownAnimationPresets`, and `knownBackgroundKinds` that power the codecs—so the schema can never drift from the parser. Fluvie's AI authoring packages (`fluvie_ai` and `fluvie_mcp`) feed this schema to a model as the structured-output contract; `VideoSpec.fromJson` remains the authoritative validator at parse time.
+`videoSpecSchema` is a JSON Schema (draft-07) that defines the spec contract. It's compiled from the same `knownElementTypes`, `knownAnimationPresets`, and `knownBackgroundKinds` that power the codecs—so the schema can never drift from the parser. Fluvie's AI authoring surfaces (`fluvie_ai` and the MCP server in `fluvie_server`) feed this schema to a model as the structured-output contract; `VideoSpec.fromJson` remains the authoritative validator at parse time.
 
 ### Example
 
@@ -2095,7 +2095,7 @@ This free function is a pure function: the same spec always builds the same vide
 
 ### Ecosystem
 
-The companion packages `fluvie_ai` (Dart API) and `fluvie_mcp` (MCP server for assistants) emit and consume `VideoSpec`. See [AI and MCP](../documentation/guides/ai-and-mcp.md) for authoring from a prompt and connecting an assistant.
+The companion package `fluvie_ai` (Dart API) and the MCP server in `fluvie_server` (for assistants) emit and consume `VideoSpec`. See [AI and MCP](../documentation/guides/ai-and-mcp.md) for authoring from a prompt and connecting an assistant.
 
 ---
 
@@ -2108,9 +2108,8 @@ Fluvie's modular design separates authoring (which always stays light—just `pa
 | **fluvie_cli** | Headless render CLI (`fluvie render`); FFmpeg auto-provision. | `run()` (the `fluvie render` entry) / `ensureFfmpeg` | [Exporting your video](../documentation/guides/exporting-your-video.md) / [Managing FFmpeg](../documentation/guides/managing-ffmpeg.md) |
 | **fluvie_mobile_encoder** | On-device hardware encode (MediaCodec / AVAssetWriter). No FFmpeg; frames never leave the device. | `OnDeviceVideoRenderer` | [On-device mobile rendering](../documentation/guides/on-device-mobile-rendering.md) |
 | **fluvie_web_encoder** | In-browser ffmpeg.wasm encode. Opt-in, so web apps stay light. | `WebVideoRenderer` | [package README](../packages/fluvie_web_encoder/README.md) |
-| **fluvie_api** | HTTP API for local or S3 renders; web-safe client. | `ApiRenderClient` (client) / `serveFluvieApi` (server) | [Rendering on a server](../documentation/guides/rendering-on-a-server.md) |
+| **fluvie_server** | One self-hostable binary: HTTP render API (local or S3), MCP server (stdio/HTTP), and a docs helper, each toggled by env; web-safe client. | `ApiRenderClient` (client) / `serveFluvieApi` + `buildServerApp` (server) | [Rendering on a server](../documentation/guides/rendering-on-a-server.md) / [AI and MCP](../documentation/guides/ai-and-mcp.md) |
 | **fluvie_ai** | NL → deterministic `VideoSpec`; provider-agnostic LLM client. | `VideoAuthorService` / `LlmVideoAuthorService` | [AI and MCP](../documentation/guides/ai-and-mcp.md) |
-| **fluvie_mcp** | MCP server for authoring/rendering over stdio (Claude Code) or HTTP. | `McpServer` | [AI and MCP](../documentation/guides/ai-and-mcp.md) |
 
 All rendering packages are optional; the core `package:fluvie` never pulls in FFmpeg, WASM, or server deps. See [Tooling](#28-tooling) for `fluvie_lints` (available in all environments).
 
@@ -2177,7 +2176,7 @@ The design choices behind the API:
 | 22 | Default ease                          | `Ease.smooth` (ease-in-out)                                   |
 | 23 | `Box` helper                          | Kept                                                          |
 | 24 | Imports                               | Single barrel `package:fluvie/fluvie.dart`                    |
-| 25 | Authoring as data                     | `VideoSpec` is a JSON mirror; `buildVideo` is pure; `fluvie_ai`/`fluvie_mcp` emit specs |
+| 25 | Authoring as data                     | `VideoSpec` is a JSON mirror; `buildVideo` is pure; `fluvie_ai` and `fluvie_server`'s MCP emit specs |
 | 26 | Rendering backends                    | One deterministic capture loop + pluggable encoders: FFmpeg process, mobile hardware, web wasm |
 | 27 | Design tokens                         | `FluvieTokens` + `FluvieTokensScope` carry every token; `FluvieTheme` is brand-group sugar |
 | 28 | New element families                  | Code/terminal, diagrams/web, and annotation elements added as intrinsic, frame-driven elements |

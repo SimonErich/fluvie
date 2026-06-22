@@ -4,15 +4,18 @@ import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/audio/encoding/resolved_audio_track.dart';
 import 'package:fluvie/src/composition/runtime/aspect_scope.dart';
 import 'package:fluvie/src/core/aspect.dart';
+import 'package:fluvie/src/core/contracts/media_resolver.dart' show MediaResolver;
 import 'package:fluvie/src/core/export.dart';
 import 'package:fluvie/src/rendering/audio_sandbox_staging.dart';
 import 'package:fluvie/src/rendering/capture/capture_shell.dart';
 import 'package:fluvie/src/rendering/capture/frame_capture_service.dart';
 import 'package:fluvie/src/rendering/capture/render_manifest.dart';
+import 'package:fluvie/src/rendering/collect_composition_media.dart';
 import 'package:fluvie/src/rendering/encoding/content_hash.dart';
 import 'package:fluvie/src/rendering/encoding/video_encoder_service.dart';
 import 'package:fluvie/src/rendering/frame_capture_loop.dart';
 import 'package:fluvie/src/rendering/io/render_sandbox.dart';
+import 'package:fluvie/src/rendering/pre_resolve_clips.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
 import 'package:fluvie/src/rendering/runtime/render_controller.dart';
 
@@ -31,15 +34,20 @@ typedef SandboxFramePump = Future<void> Function();
 /// it through [pumpWidget] / [pumpFrame], runs the shared [runFrameCaptureLoop]
 /// into [sandbox]'s frames file, then writes `manifest.json` there. The caller
 /// (the web encoder) reads [sandbox] to feed ffmpeg.wasm and returns the encoded
-/// bytes. Rendering the same composition twice produces byte-identical frames —
-/// the same determinism contract as the file path.
+/// bytes. Rendering the same composition produces the same frames, the same as
+/// the file path.
 ///
 /// Pass [audioTracks] (resolved by `resolveAudioMix`) plus a [loadAudioBytes]
 /// loader to mix audio: each track is staged into [sandbox] by
 /// [stageResolvedAudioToSandbox] and its `amix` plan flows into the encode args,
 /// scaled by [audioMasterVolume]. With no tracks (or no loader) the plan carries
-/// `-an`, byte-identical to a video-only render. Audio rides the MP4 export only;
+/// `-an`, matching a video-only render. Audio rides the MP4 export only;
 /// the other export modes ignore it.
+///
+/// Pass a [resolver] to paint declared image media: it pre-resolves every
+/// collected `MediaSource` before the first pump and is mounted as the
+/// `ImageResolverScope`, so paint reads the decoded cache synchronously. A null
+/// [resolver] renders a media-less composition (any declared image throws).
 Future<RenderManifest> renderToSandbox({
   required Widget composition,
   required Aspect aspect,
@@ -58,6 +66,7 @@ Future<RenderManifest> renderToSandbox({
   List<ResolvedAudioTrack> audioTracks = const [],
   AudioByteLoader? loadAudioBytes,
   double audioMasterVolume = 1,
+  MediaResolver? resolver,
 }) async {
   if (audioTracks.isNotEmpty && loadAudioBytes == null) {
     throw ArgumentError.value(
@@ -73,12 +82,20 @@ Future<RenderManifest> renderToSandbox({
     fps: fps,
     frameCount: frameCount,
   );
+  // Pre-resolve declared media before the first pump: the capture shell paints
+  // images synchronously from the `ImageResolverScope`, so the decoded cache
+  // must be warm before the tree mounts (a null resolver = a media-less render).
+  if (resolver != null) {
+    await resolver.preResolveAll(collectCompositionMedia(composition));
+    await preResolveCompositionClips(composition: composition, resolver: resolver);
+  }
   final controller = RenderController();
   final boundaryKey = GlobalKey();
   final shell = buildCaptureShell(
     composition: AspectScope(aspect: aspect, child: composition),
     boundaryKey: boundaryKey,
     controller: controller,
+    resolver: resolver,
   );
   await pumpWidget(shell.tree);
 

@@ -16,7 +16,7 @@ import 'package:fluvie/src/timing/time_scope_provider.dart';
 /// scope began ([FrameProvider] is the only clock): at [speed]
 /// frames per glyph the text fills in linearly and holds once complete. A
 /// partial glyph never shows — the floor means a glyph appears only when its
-/// whole reveal time has passed, so the reveal is byte-identical on every
+/// whole reveal time has passed, so the reveal renders the same on every
 /// render.
 ///
 /// ```dart

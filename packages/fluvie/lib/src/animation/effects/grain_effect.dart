@@ -12,7 +12,7 @@ import 'package:fluvie/src/core/noise/value_noise.dart';
 /// read and no `saveLayer`, which keeps it `RepaintBoundary.toImage`-safe for
 /// capture. Every block's brightness is a pure function of its grid position
 /// sampled from [NoiseSource], so two pumps at the same `progress` paint
-/// byte-identical pixels (the determinism contract). [amount] (clamped to
+/// the same pixels (so it caches and goldens). [amount] (clamped to
 /// `[0, 1]`) scales the speckle's opacity; `progress` shifts the noise field
 /// so an animated grain shimmers without ever using a clock or unseeded
 /// `Random`.

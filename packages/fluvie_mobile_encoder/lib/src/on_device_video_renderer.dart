@@ -11,8 +11,6 @@ import 'package:fluvie_mobile_encoder/src/mobile_encode_request.dart';
 import 'package:fluvie_mobile_encoder/src/mobile_video_codec.dart';
 import 'package:fluvie_mobile_encoder/src/mobile_video_encoder.dart';
 import 'package:fluvie_mobile_encoder/src/offscreen_capture_host.dart';
-import 'package:fluvie_mobile_encoder/src/on_device_render_progress.dart';
-import 'package:riverpod/riverpod.dart';
 
 /// Builds the off-screen [CaptureHost] for a render at [size] logical pixels.
 typedef CaptureHostFactory = CaptureHost Function(Size size);
@@ -45,6 +43,7 @@ final class OnDeviceVideoRenderer {
     RenderService? service,
     MobileAudioMaterializer? audioMaterializer,
     this.mediaResolver,
+    this.networkAllowlist,
   }) : _encoder = encoder ?? const MethodChannelMobileVideoEncoder(),
        _hostFactory = hostFactory ?? _defaultHostFactory,
        _sandboxFactory = sandboxFactory ?? _defaultSandboxFactory,
@@ -69,13 +68,20 @@ final class OnDeviceVideoRenderer {
   /// [render] from `mediaResolverProvider`.
   final MediaResolver? mediaResolver;
 
+  /// Restricts which hosts network media (images) may be fetched from. Applied
+  /// to the per-render resolver when none is injected; ignored when
+  /// [mediaResolver] is provided (configure the allowlist on it instead).
+  final NetworkAllowlist? networkAllowlist;
+
   /// Renders [composition] for [aspect] over [duration] to an MP4 file.
   ///
   /// [longEdge] sets the canvas's longer side in pixels (the shorter side is
   /// derived from [aspect]); [fps] and [duration] set the frame count
   /// (`duration * fps`, at least one frame). [codec] and [bitRate] (defaulted by
   /// [defaultBitRate]) configure the encoder, and [onProgress] observes the
-  /// capture and encode phases. Returns the written MP4.
+  /// capturing → encoding → complete phases. By default the MP4 is written into a
+  /// fresh sandbox; pass [outputFile] to have the encoder write it there instead,
+  /// and that file is returned.
   ///
   /// When [composition] is a `Video` with declared `Audio`, pass [audio] `true`
   /// to decode, mix, and mux those tracks; left `false` the render is silent and,
@@ -95,30 +101,31 @@ final class OnDeviceVideoRenderer {
     bool audio = false,
     bool warnOnDroppedAudio = true,
     String compositionKey = 'render',
-    OnDeviceProgress? onProgress,
+    RenderProgressCallback? onProgress,
+    File? outputFile,
   }) async {
-    final frameCount = _frameCountFor(duration, fps);
+    final frameCount = frameCountFor(duration, fps);
     final size = aspect.sizeFor(longEdge);
     final sandbox = await _sandboxFactory();
     final host = _hostFactory(Size(size.width.toDouble(), size.height.toDouble()));
-    // Build a media resolver per render unless one was injected; the owned
-    // container is disposed in the finally once capture and encode are done.
-    final ownedContainer = mediaResolver == null ? ProviderContainer() : null;
-    final resolver = mediaResolver ?? ownedContainer!.read<MediaResolver>(mediaResolverProvider);
+    final scope = resolverScope(mediaResolver, networkAllowlist: networkAllowlist);
     try {
-      onProgress?.call(OnDeviceRenderPhase.capturing);
-      final captured = await _captureToSandbox(
-        composition: composition,
-        aspect: aspect,
-        frameCount: frameCount,
-        outDir: sandbox,
-        service: _service,
-        pumpWidget: host.mount,
-        pumpFrame: host.pumpFrame,
-        longEdge: longEdge,
-        fps: fps,
-        compositionKey: compositionKey,
-        resolver: resolver,
+      onProgress?.call(RenderProgress(RenderPhase.capturing, compositionKey: compositionKey));
+      final captured = await runStage(
+        RenderPhase.capturing,
+        () => _captureToSandbox(
+          composition: composition,
+          aspect: aspect,
+          frameCount: frameCount,
+          outDir: sandbox,
+          service: _service,
+          pumpWidget: host.mount,
+          pumpFrame: host.pumpFrame,
+          longEdge: longEdge,
+          fps: fps,
+          compositionKey: compositionKey,
+          resolver: scope.resolver,
+        ),
       );
       final manifest = captured.manifest;
       final mix = await _audioFor(
@@ -128,28 +135,34 @@ final class OnDeviceVideoRenderer {
         fps: fps,
         frameCount: frameCount,
       );
-      onProgress?.call(OnDeviceRenderPhase.encoding);
-      await _encoder.encode(
-        MobileEncodeRequest(
-          framesPath: '${sandbox.path}/${manifest.framesFileName}',
-          outputPath: '${sandbox.path}/${manifest.outputFileName}',
-          width: manifest.width,
-          height: manifest.height,
-          fps: manifest.fps,
-          frameCount: manifest.frameCount,
-          bitRate:
-              bitRate ??
-              defaultBitRate(width: manifest.width, height: manifest.height, fps: manifest.fps),
-          codec: codec,
-          audioTracks: mix.tracks,
-          audioMasterVolume: mix.masterVolume,
+      final outputPath = outputFile?.path ?? '${sandbox.path}/${manifest.outputFileName}';
+      onProgress?.call(RenderProgress(RenderPhase.encoding, compositionKey: compositionKey));
+      await runStage(
+        RenderPhase.encoding,
+        () => _encoder.encode(
+          MobileEncodeRequest(
+            framesPath: '${sandbox.path}/${manifest.framesFileName}',
+            outputPath: outputPath,
+            width: manifest.width,
+            height: manifest.height,
+            fps: manifest.fps,
+            frameCount: manifest.frameCount,
+            bitRate:
+                bitRate ??
+                defaultBitRate(width: manifest.width, height: manifest.height, fps: manifest.fps),
+            codec: codec,
+            audioTracks: mix.tracks,
+            audioMasterVolume: mix.masterVolume,
+          ),
         ),
       );
-      onProgress?.call(OnDeviceRenderPhase.complete);
-      return File('${sandbox.path}/${manifest.outputFileName}');
+      onProgress?.call(RenderProgress(RenderPhase.complete, compositionKey: compositionKey));
+      return File(outputPath);
     } finally {
-      await host.dispose();
-      ownedContainer?.dispose();
+      await runGuarded([
+        host.dispose,
+        scope.dispose,
+      ], (error, _) => onWarning('Cleanup after render failed: $error'));
     }
   }
 
@@ -189,15 +202,6 @@ final class OnDeviceVideoRenderer {
       ],
       masterVolume: mix.masterVolume,
     );
-  }
-
-  static int _frameCountFor(Duration duration, int fps) {
-    if (fps <= 0) throw ArgumentError.value(fps, 'fps', 'must be positive');
-    if (duration <= Duration.zero) {
-      throw ArgumentError.value(duration.toString(), 'duration', 'must be positive');
-    }
-    final frames = (duration.inMicroseconds * fps / Duration.microsecondsPerSecond).round();
-    return frames < 1 ? 1 : frames;
   }
 
   // coverage:ignore-line: constructs the engine-backed host, exercised only on a device.

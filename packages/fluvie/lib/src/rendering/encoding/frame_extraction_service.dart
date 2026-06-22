@@ -6,10 +6,6 @@ import 'package:fluvie/src/rendering/capture/raw_frame.dart';
 /// clip's pixels for frame *n* come from here instead of from a live player.
 /// Tests run against a canned fake; the ffmpeg-backed service supplies the
 /// pixels at render.
-// One member by design: the contract is the *type* — a canned fake in tests
-// and the ffmpeg-backed service at render are injected where a bare function
-// could not be.
-// ignore: one_member_abstracts
 abstract interface class FrameExtractionService {
   /// The decoded pixels of [source] at [frameIndex] (in the source's own
   /// frame space), scaled to exactly [width] x [height].
@@ -22,6 +18,19 @@ abstract interface class FrameExtractionService {
   Future<RawFrame> extractFrame(
     Uri source,
     int frameIndex, {
+    required int width,
+    required int height,
+  });
+
+  /// The decoded pixels of [source] at each index in [frameIndices], keyed by
+  /// index and scaled to [width] x [height] — the batch the clip pre-pass uses.
+  ///
+  /// The ffmpeg service extracts each via [extractFrame]; a platform decoder
+  /// (WebCodecs, `MediaCodec`, AVFoundation) overrides this with a single
+  /// forward-decode pass, because seeking to a keyframe per frame is far slower.
+  Future<Map<int, RawFrame>> extractFrames(
+    Uri source,
+    Iterable<int> frameIndices, {
     required int width,
     required int height,
   });

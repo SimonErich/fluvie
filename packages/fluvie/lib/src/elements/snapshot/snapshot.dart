@@ -14,7 +14,7 @@ import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
 /// external `SnapshotService`/`SnapshotSource` pipeline that `Mermaid`,
 /// `WebView`, and `Html` ride. No browser, no network, fully deterministic: the
 /// captured pixels are a pure function of the [child], so the same subtree always
-/// yields a byte-identical raster. Reach for `Snapshot` to freeze a busy or
+/// yields the same raster. Reach for `Snapshot` to freeze a busy or
 /// expensive subtree (or one that cannot be captured live) into a single image
 /// you then `.animate()` like any element.
 ///
