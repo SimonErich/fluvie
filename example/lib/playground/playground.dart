@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie_example/inspector/render_launcher.dart';
 import 'package:fluvie_example/playground/playground_code_editor.dart';
-import 'package:fluvie_example/playground/playground_video.dart';
 import 'package:fluvie_example/playground/playground_view_model.dart';
 
-/// The reusable Playground: write a Fluvie `Video build()` in the editor,
-/// validate it live, render it on the server, and watch the result.
+/// The reusable Playground editor: write a Fluvie `Video build()`, validate it
+/// on Render, and render it on the server. The rendered video shows wherever the
+/// host places it (in the demo, the centre stage, replacing the live preview).
 ///
-/// The editor (with its diagnostics summary) sits on top; below it a Render
-/// button (disabled while a check or render runs, or when the code has errors),
-/// the live render progress, and the rendered-video area. Drives the
-/// [PlaygroundViewModel]; the backend is injected through [playgroundBackendProvider].
+/// The editor with its diagnostics summary sits on top; below it a Render button
+/// (a "Validating ..." state while it checks, then the live render progress).
+/// Drives the [PlaygroundViewModel]; the backend is injected through
+/// [playgroundBackendProvider].
 final class Playground extends ConsumerStatefulWidget {
   /// Creates the Playground.
   const Playground({super.key});
@@ -34,7 +34,7 @@ class _PlaygroundState extends ConsumerState<Playground> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(flex: 3, child: PlaygroundCodeEditor(key: _editorKey)),
+          Expanded(child: PlaygroundCodeEditor(key: _editorKey)),
           const SizedBox(height: 8),
           _RenderControls(
             // Always clickable when idle: a click re-validates the current code
@@ -53,8 +53,6 @@ class _PlaygroundState extends ConsumerState<Playground> {
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ),
-          const SizedBox(height: 8),
-          Expanded(flex: 2, child: PlaygroundVideo(url: state.videoUrl)),
         ],
       ),
     );

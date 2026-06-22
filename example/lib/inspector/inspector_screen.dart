@@ -11,6 +11,8 @@ import 'package:fluvie_example/inspector/render_launcher.dart';
 import 'package:fluvie_example/inspector/render_view_model.dart';
 import 'package:fluvie_example/lessons/lessons.dart';
 import 'package:fluvie_example/playground/playground.dart';
+import 'package:fluvie_example/playground/playground_video.dart';
+import 'package:fluvie_example/playground/playground_view_model.dart';
 
 /// The inspector: the lesson list on the left, the scrubbable preview
 /// in the middle, and the structured [InspectorPanel] on the right.
@@ -48,7 +50,7 @@ final class InspectorScreen extends StatelessWidget {
             flex: 2,
             child: Column(
               children: [
-                Expanded(child: PreviewPane()),
+                Expanded(child: _CenterStage()),
                 _PlaybackBar(),
                 _RenderBar(),
               ],
@@ -86,6 +88,22 @@ final class _RightPane extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The centre stage: the rendered Playground video once one exists, otherwise
+/// the live preview of the selected lesson (which also feeds the Motions tab).
+final class _CenterStage extends ConsumerWidget {
+  const _CenterStage();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final videoUrl = ref.watch(playgroundViewModelProvider.select((s) => s.videoUrl));
+    if (videoUrl == null) return const PreviewPane();
+    return ColoredBox(
+      color: const Color(0xFF14141C),
+      child: PlaygroundVideo(url: videoUrl),
     );
   }
 }

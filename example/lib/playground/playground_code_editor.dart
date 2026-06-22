@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_code_editor/flutter_code_editor.dart';
+import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie_example/playground/default_playground_code.dart';
 import 'package:fluvie_example/playground/playground_view_model.dart';
@@ -63,10 +64,17 @@ class _PlaygroundCodeEditorState extends ConsumerState<PlaygroundCodeEditor> {
               border: Border.all(color: Theme.of(context).dividerColor),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: CodeField(
-              controller: _controller,
-              expands: true,
-              textStyle: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: CodeTheme(
+                data: CodeThemeData(styles: atomOneDarkTheme),
+                child: CodeField(
+                  controller: _controller,
+                  expands: true,
+                  background: const Color(0xFF282C34),
+                  textStyle: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+                ),
+              ),
             ),
           ),
         ),

@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie_example/inspector/render_launcher.dart';
 import 'package:fluvie_example/playground/playground.dart';
 import 'package:fluvie_example/playground/playground_backend.dart';
-import 'package:fluvie_example/playground/playground_video.dart';
 import 'package:fluvie_example/playground/playground_view_model.dart';
 import 'package:fluvie_server/client.dart';
 
@@ -41,12 +40,11 @@ FilledButton _renderButton(WidgetTester tester) =>
     tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Render'));
 
 void main() {
-  testWidgets('opens with the empty video state and an enabled render button', (tester) async {
+  testWidgets('opens with an enabled render button and a clean editor', (tester) async {
     await _pump(tester, FakePlaygroundBackend());
     await tester.pumpAndSettle();
 
-    expect(find.byType(PlaygroundVideo), findsOneWidget);
-    expect(find.textContaining('Render to see your video'), findsOneWidget);
+    expect(find.textContaining('No problems'), findsOneWidget);
     expect(_renderButton(tester).onPressed, isNotNull);
   });
 
@@ -66,7 +64,7 @@ void main() {
     expect(_renderButton(tester).onPressed, isNotNull);
   });
 
-  testWidgets('a successful render shows the video url', (tester) async {
+  testWidgets('a successful render stores the rendered video url in state', (tester) async {
     // The fake's default render result is a success with a video.mp4 URL.
     final backend = FakePlaygroundBackend();
     final container = await _pump(tester, backend);
@@ -74,7 +72,7 @@ void main() {
     await container.read(playgroundViewModelProvider.notifier).render('ok');
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('video.mp4'), findsOneWidget);
+    expect(container.read(playgroundViewModelProvider).videoUrl, contains('video.mp4'));
   });
 
   testWidgets('a running render shows a progress bar and disables the button', (tester) async {
