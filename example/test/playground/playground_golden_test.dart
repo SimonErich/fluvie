@@ -1,6 +1,7 @@
-// The one inspector shell golden (WI-22): the whole screen in its initial
-// state — lesson 01 selected, the preview at frame 0, the structured
-// inspector panel (warnings band, anchors, motion rows) in the right pane.
+// The Playground golden: the reusable widget in its idle, no-video state — the
+// seeded editor, a clean diagnostics summary, the Render button, and the
+// empty-state video area. The backend is faked so the post-frame validation
+// stays offline, and the stub (non-web) video area avoids the HTML element.
 @Tags(['golden'])
 library;
 
@@ -8,31 +9,29 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluvie_example/inspector/inspector_screen.dart';
+import 'package:fluvie_example/playground/playground.dart';
 import 'package:fluvie_example/playground/playground_view_model.dart';
 
-import '../playground/fake_playground_backend.dart';
+import 'fake_playground_backend.dart';
 
 Future<void> main() async {
   await goldenTest(
-    'inspector shell in its initial state (WI-36)',
-    fileName: 'inspector_shell',
+    'playground idle state',
+    fileName: 'playground_idle',
     builder: () => GoldenTestGroup(
       children: [
         GoldenTestScenario(
-          name: 'lesson 01 at frame 0',
+          name: 'seeded editor, no video',
           child: SizedBox(
-            width: 1280,
-            height: 800,
+            width: 520,
+            height: 760,
             child: ProviderScope(
-              // A fake backend keeps the Playground's init validation
-              // deterministic (no markers) so the shell golden is stable.
               overrides: [
                 playgroundBackendProvider.overrideWithValue(FakePlaygroundBackend()),
               ],
               child: const MaterialApp(
                 debugShowCheckedModeBanner: false,
-                home: InspectorScreen(),
+                home: Scaffold(body: Playground()),
               ),
             ),
           ),

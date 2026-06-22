@@ -10,6 +10,7 @@ import 'package:fluvie_example/inspector/providers.dart';
 import 'package:fluvie_example/inspector/render_launcher.dart';
 import 'package:fluvie_example/inspector/render_view_model.dart';
 import 'package:fluvie_example/lessons/lessons.dart';
+import 'package:fluvie_example/playground/playground.dart';
 
 /// The inspector: the lesson list on the left, the scrubbable preview
 /// in the middle, and the structured [InspectorPanel] on the right.
@@ -54,7 +55,35 @@ final class InspectorScreen extends StatelessWidget {
             ),
           ),
           VerticalDivider(width: 1),
-          Expanded(flex: 2, child: InspectorPanel()),
+          Expanded(flex: 2, child: _RightPane()),
+        ],
+      ),
+    );
+  }
+}
+
+/// The right pane: a Code tab hosting the [Playground] (the default) and a
+/// Motions tab hosting the structured [InspectorPanel].
+final class _RightPane extends StatelessWidget {
+  const _RightPane();
+
+  @override
+  Widget build(BuildContext context) {
+    return const DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          TabBar(
+            tabs: [
+              Tab(text: 'Code', icon: Icon(Icons.code)),
+              Tab(text: 'Motions', icon: Icon(Icons.movie_filter)),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [Playground(), InspectorPanel()],
+            ),
+          ),
         ],
       ),
     );

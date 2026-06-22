@@ -11,7 +11,10 @@ import 'package:fluvie/fluvie.dart' hide RenderProgress;
 import 'package:fluvie_example/inspector/inspector_screen.dart';
 import 'package:fluvie_example/inspector/providers.dart';
 import 'package:fluvie_example/inspector/render_launcher.dart';
+import 'package:fluvie_example/playground/playground_view_model.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../playground/fake_playground_backend.dart';
 
 final class _MockRenderLauncher extends Mock implements RenderLauncher {}
 
@@ -28,7 +31,12 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [renderLauncherProvider.overrideWithValue(launcher)],
+        overrides: [
+          renderLauncherProvider.overrideWithValue(launcher),
+          // The right pane now defaults to the Playground (Code tab); a fake
+          // backend keeps its init validation deterministic and offline.
+          playgroundBackendProvider.overrideWithValue(FakePlaygroundBackend()),
+        ],
         child: const MaterialApp(home: InspectorScreen()),
       ),
     );
@@ -54,11 +62,14 @@ void main() {
 
   testWidgets('the inspector panel shows the resolved schedule (WI-22)', (tester) async {
     await pumpScreen(tester);
+    // The inspector panel now lives behind the Motions tab (Code is the default).
+    await tester.tap(find.text('Motions'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400)); // finish the tab swap
 
     expect(find.text('Resolved schedule'), findsOneWidget);
     expect(find.textContaining('120 frames @ 30 fps'), findsOneWidget);
-    expect(find.text('Motions'), findsOneWidget);
+    expect(find.text('Motions'), findsWidgets); // the tab label and the panel header
     expect(find.textContaining('s0e0'), findsWidgets);
   });
 
@@ -70,6 +81,11 @@ void main() {
     await tester.pump(); // its post-frame resolution pass
 
     expect(previewedFrame(tester), 0); // a fresh lesson opens at the start
+
+    // The frame-count readout lives in the inspector panel, behind the Motions tab.
+    await tester.tap(find.text('Motions'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.textContaining('300 frames @ 30 fps'), findsOneWidget);
   });
 
