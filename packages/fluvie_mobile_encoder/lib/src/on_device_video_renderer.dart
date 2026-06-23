@@ -10,7 +10,10 @@ import 'package:fluvie_mobile_encoder/src/mobile_bitrate.dart';
 import 'package:fluvie_mobile_encoder/src/mobile_encode_request.dart';
 import 'package:fluvie_mobile_encoder/src/mobile_video_codec.dart';
 import 'package:fluvie_mobile_encoder/src/mobile_video_encoder.dart';
+import 'package:fluvie_mobile_encoder/src/native_frame_extraction_service.dart';
+import 'package:fluvie_mobile_encoder/src/native_video_probe_service.dart';
 import 'package:fluvie_mobile_encoder/src/offscreen_capture_host.dart';
+import 'package:riverpod/riverpod.dart';
 
 /// Builds the off-screen [CaptureHost] for a render at [size] logical pixels.
 typedef CaptureHostFactory = CaptureHost Function(Size size);
@@ -108,7 +111,25 @@ final class OnDeviceVideoRenderer {
     final size = aspect.sizeFor(longEdge);
     final sandbox = await _sandboxFactory();
     final host = _hostFactory(Size(size.width.toDouble(), size.height.toDouble()));
-    final scope = resolverScope(mediaResolver, networkAllowlist: networkAllowlist);
+    // Build the media resolver with the device-native clip seams (probe +
+    // frame extraction via MediaMetadataRetriever, no ffmpeg). resolverScope is
+    // bypassed here because it is shared with the web encoder and cannot import
+    // the io-only clip providers.
+    final ownedContainer = mediaResolver == null
+        ? ProviderContainer(
+            overrides: [
+              frameExtractionServiceProvider.overrideWithValue(
+                const NativeFrameExtractionService(),
+              ),
+              videoProbeServiceProvider.overrideWithValue(
+                const NativeVideoProbeService(),
+              ),
+              if (networkAllowlist != null)
+                networkAllowlistProvider.overrideWithValue(networkAllowlist!),
+            ],
+          )
+        : null;
+    final resolver = mediaResolver ?? ownedContainer!.read<MediaResolver>(mediaResolverProvider);
     try {
       onProgress?.call(RenderProgress(RenderPhase.capturing, compositionKey: compositionKey));
       final captured = await runStage(
@@ -124,7 +145,7 @@ final class OnDeviceVideoRenderer {
           longEdge: longEdge,
           fps: fps,
           compositionKey: compositionKey,
-          resolver: scope.resolver,
+          resolver: resolver,
         ),
       );
       final manifest = captured.manifest;
@@ -161,7 +182,12 @@ final class OnDeviceVideoRenderer {
     } finally {
       await runGuarded([
         host.dispose,
-        scope.dispose,
+        () async {
+          if (resolver is DisposableResolver) {
+            (resolver as DisposableResolver).dispose();
+          }
+          ownedContainer?.dispose();
+        },
       ], (error, _) => onWarning('Cleanup after render failed: $error'));
     }
   }

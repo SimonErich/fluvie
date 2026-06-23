@@ -34,10 +34,15 @@ class FluvieMobileEncoderPlugin : FlutterPlugin, MethodCallHandler {
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
-    if (call.method != "encode") {
-      result.notImplemented()
-      return
+    when (call.method) {
+      "encode" -> handleEncode(call, result)
+      "probeVideo" -> handleProbe(call, result)
+      "extractFrames" -> handleExtract(call, result)
+      else -> result.notImplemented()
     }
+  }
+
+  private fun handleEncode(call: MethodCall, result: Result) {
     val request = try {
       EncodeRequest.fromCall(call)
     } catch (e: IllegalArgumentException) {
@@ -54,6 +59,41 @@ class FluvieMobileEncoderPlugin : FlutterPlugin, MethodCallHandler {
         main.post { result.success(request.outputPath) }
       } catch (e: Exception) {
         main.post { result.error("encode_failed", e.message, null) }
+      }
+    }
+  }
+
+  private fun handleProbe(call: MethodCall, result: Result) {
+    val path = call.argument<String>("path")
+    if (path == null) {
+      result.error("bad_request", "missing string 'path'", null)
+      return
+    }
+    worker.execute {
+      try {
+        val facts = VideoFrameReader.probe(path)
+        main.post { result.success(facts) }
+      } catch (e: Exception) {
+        main.post { result.error("probe_failed", e.message, null) }
+      }
+    }
+  }
+
+  private fun handleExtract(call: MethodCall, result: Result) {
+    val path = call.argument<String>("path")
+    val indices = call.argument<List<Int>>("indices")
+    val width = call.argument<Int>("width")
+    val height = call.argument<Int>("height")
+    if (path == null || indices == null || width == null || height == null) {
+      result.error("bad_request", "missing path/indices/width/height", null)
+      return
+    }
+    worker.execute {
+      try {
+        val frames = VideoFrameReader.extractFrames(path, indices, width, height)
+        main.post { result.success(frames) }
+      } catch (e: Exception) {
+        main.post { result.error("extract_failed", e.message, null) }
       }
     }
   }
