@@ -3,6 +3,10 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.9] - 2026-06-23
+
+Lockstep maintenance release; demo (mobile layout) and CI fixes only, no library changes since 0.1.8.
+
 ## [0.1.8] - 2026-06-23
 
 ### Fixed
