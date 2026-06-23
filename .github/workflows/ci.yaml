@@ -164,6 +164,39 @@ jobs:
       - run: flutter build web
         working-directory: packages/fluvie_web_encoder/example
 
+  # Smoke-tests the demo web app (example/) in headless Chrome: it builds, serves,
+  # boots, lays out, and logs no uncaught error. Guards the web demo against build
+  # and runtime regressions. Deterministic: no API or server is needed.
+  web_smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: browser-actions/setup-chrome@v1
+        id: setup-chrome
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - name: Smoke-test the demo web app
+        env:
+          CHROME: ${{ steps.setup-chrome.outputs.chrome-path }}
+        run: melos run web:smoke
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-smoke-screenshot
+          path: example/tool/screenshots/smoke.png
+          if-no-files-found: ignore
+
   # Optional integration lane: the ffmpeg-tagged suites against the real
   # binaries. Advisory only; the required jobs above stay binary-free.
   ffmpeg_integration:

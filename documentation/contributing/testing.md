@@ -80,6 +80,19 @@ the resource exists:
 These are not part of the fast gate. Run a tagged suite directly with
 `flutter test --tags ffmpeg`.
 
+## The web demo smoke test
+
+The demo (`example/`) has a headless-Chrome smoke test: it builds the web app,
+serves it, and checks that the Flutter app boots, lays out, and logs no runtime
+error. It guards the in-browser demo and runs in CI (the `web_smoke` job).
+
+```sh
+melos run web:smoke   # build, serve, and smoke-test the demo web app
+```
+
+It needs node, python3, and a Chrome binary (set `CHROME`). Pass `SKIP_BUILD=1`
+to reuse an existing build.
+
 ## Goldens for visual regression
 
 Lock in how a render looks with an Alchemist golden (the `golden` tag). Seeded

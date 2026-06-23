@@ -1,0 +1,14 @@
+{
+  "name": "screenshots",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Headless-Chrome smoke + screenshot harness for the Fluvie demo web app.",
+  "scripts": {
+    "smoke": "node smoke.mjs",
+    "ci": "bash run.sh"
+  },
+  "dependencies": {
+    "puppeteer-core": "^23.11.1"
+  }
+}

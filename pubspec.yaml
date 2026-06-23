@@ -54,8 +54,8 @@ melos:
         dependsOn: custom_lint
 
     test:dart:
-      description: Run pure-Dart package tests (ffmpeg/download integration opt-in).
-      run: dart test --exclude-tags "ffmpeg || download"
+      description: Run pure-Dart package tests (ffmpeg/download/render/analysis opt-in).
+      run: dart test --exclude-tags "ffmpeg || download || render || analysis"
       exec:
         concurrency: 1
       packageFilters:
@@ -63,8 +63,8 @@ melos:
         dirExists: test
 
     test:flutter:
-      description: Run Flutter package tests (golden/snapshot/ffmpeg/wasm tests opt-in).
-      run: flutter test --exclude-tags "golden || snapshot || ffmpeg || wasm"
+      description: Run Flutter package tests (golden/snapshot/ffmpeg/wasm/render tests opt-in).
+      run: flutter test --exclude-tags "golden || snapshot || ffmpeg || wasm || render"
       exec:
         concurrency: 1
       packageFilters:
@@ -131,7 +131,7 @@ melos:
         Flutter package tests with coverage (ffmpeg/wasm integration excluded
         so the gate never needs the binaries; their logic is covered by the
         mocked unit suites).
-      run: flutter test --coverage --exclude-tags "ffmpeg || wasm"
+      run: flutter test --coverage --exclude-tags "ffmpeg || wasm || render"
       exec:
         concurrency: 1
       packageFilters:
@@ -139,9 +139,9 @@ melos:
         dirExists: test
 
     coverage:dart:
-      description: Pure-Dart package tests with lcov coverage (ffmpeg/download e2e excluded).
+      description: Pure-Dart package tests with lcov coverage (ffmpeg/download/render/analysis e2e excluded).
       run: >
-        dart test --exclude-tags "ffmpeg || download" --coverage=coverage &&
+        dart test --exclude-tags "ffmpeg || download || render || analysis" --coverage=coverage &&
         dart run coverage:format_coverage --lcov --in=coverage
         --out=coverage/lcov.info --report-on=lib
       exec:
@@ -237,3 +237,10 @@ melos:
         existing build/*.mp4 (ffmpeg only). The Astro gallery shows gradient posters
         by default; wire clips in per web/site/MAINTAINING.md.
       run: bash tool/web/regenerate_gallery.sh
+
+    web:smoke:
+      description: >
+        Build the demo web app, serve it, and smoke-test it in headless Chrome
+        (it boots, lays out, and logs no uncaught error). Needs node, python3, and
+        a Chrome binary (set CHROME). Set SKIP_BUILD=1 to reuse an existing build.
+      run: bash example/tool/screenshots/run.sh
