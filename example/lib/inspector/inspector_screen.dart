@@ -27,18 +27,25 @@ final class InspectorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.sizeOf(context).width < 800;
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 20,
+        titleSpacing: isMobile ? 4 : 20,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             GradientText('Fluvie', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(width: 8),
-            const Text(
-              'inspector',
-              style: TextStyle(color: FluvieColors.dmut, fontWeight: FontWeight.w500, fontSize: 16),
-            ),
+            if (!isMobile) ...[
+              const SizedBox(width: 8),
+              const Text(
+                'inspector',
+                style: TextStyle(
+                  color: FluvieColors.dmut,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16,
+                ),
+              ),
+            ],
           ],
         ),
         actions: [
@@ -53,19 +60,66 @@ final class InspectorScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: const DecoratedBox(
-        decoration: BoxDecoration(gradient: FluvieGradients.heroBackdrop),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(width: 260, child: _LessonList()),
-            VerticalDivider(width: 1, color: FluvieColors.dline),
-            Expanded(flex: 2, child: _CenterStage()),
-            VerticalDivider(width: 1, color: FluvieColors.dline),
-            Expanded(flex: 2, child: _RightPane()),
-          ],
-        ),
+      // On a phone the three columns do not fit: the lesson list moves into a
+      // drawer and the centre stage sits above the Code/Motions panel.
+      drawer: isMobile
+          ? Drawer(
+              width: 300,
+              child: Builder(
+                builder: (context) =>
+                    _LessonList(onItemTap: () => Scaffold.of(context).closeDrawer()),
+              ),
+            )
+          : null,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(gradient: FluvieGradients.heroBackdrop),
+        child: isMobile ? const _MobileBody() : const _DesktopBody(),
       ),
+    );
+  }
+}
+
+/// The wide layout: lesson list, centre stage, and the Code/Motions pane laid
+/// out in three columns.
+final class _DesktopBody extends StatelessWidget {
+  const _DesktopBody();
+
+  @override
+  Widget build(BuildContext context) => const Row(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      SizedBox(width: 260, child: _LessonList()),
+      VerticalDivider(width: 1, color: FluvieColors.dline),
+      Expanded(flex: 2, child: _CenterStage()),
+      VerticalDivider(width: 1, color: FluvieColors.dline),
+      Expanded(flex: 2, child: _RightPane()),
+    ],
+  );
+}
+
+/// The phone layout: a compact video header above the Code/Motions (or AI)
+/// panel; the lesson list lives in the drawer.
+///
+/// The header is kept mounted while the keyboard is open (so the live
+/// [PreviewPane] keeps resolving the lesson timeline) but takes no space, so the
+/// editor gets the full height to type in.
+final class _MobileBody extends StatelessWidget {
+  const _MobileBody();
+
+  @override
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final keyboardOpen = media.viewInsets.bottom > 0;
+    final videoHeight = (media.size.width * 9 / 16).clamp(150.0, media.size.height * 0.42);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Offstage(
+          offstage: keyboardOpen,
+          child: SizedBox(height: videoHeight, child: const _CenterStage()),
+        ),
+        const Expanded(child: _RightPane()),
+      ],
     );
   }
 }
@@ -208,7 +262,10 @@ final class _AiCenterPlaceholder extends StatelessWidget {
 /// The left nav: the AI Assistant first, then the lessons in registry order.
 /// Tapping an entry selects it and switches the workspace mode.
 final class _LessonList extends ConsumerWidget {
-  const _LessonList();
+  const _LessonList({this.onItemTap});
+
+  /// Called after an entry is selected — closes the drawer on the phone layout.
+  final VoidCallback? onItemTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -229,7 +286,10 @@ final class _LessonList extends ConsumerWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               selected: mode == WorkspaceMode.aiAssistant,
-              onTap: () => ref.read(workspaceModeProvider.notifier).showAiAssistant(),
+              onTap: () {
+                ref.read(workspaceModeProvider.notifier).showAiAssistant();
+                onItemTap?.call();
+              },
             ),
             const Divider(height: 1, color: FluvieColors.dline),
             const Padding(
@@ -244,6 +304,7 @@ final class _LessonList extends ConsumerWidget {
                 onTap: () {
                   ref.read(selectedLessonIndexProvider.notifier).select(index);
                   ref.read(workspaceModeProvider.notifier).showLesson();
+                  onItemTap?.call();
                 },
               ),
           ],
