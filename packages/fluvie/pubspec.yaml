@@ -1,6 +1,6 @@
 name: fluvie
 description: "Write a video like a Flutter screen: declarative widgets in, a real video file out. No timelines to scrub, no frame math."
-version: 0.1.7
+version: 0.1.8
 repository: https://github.com/SimonErich/fluvie/tree/main/packages/fluvie
 homepage: https://github.com/SimonErich/fluvie
 issue_tracker: https://github.com/SimonErich/fluvie/issues

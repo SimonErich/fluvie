@@ -3,6 +3,15 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.8] - 2026-06-23
+
+### Fixed
+
+- CORS headers are now applied to error responses (including the auth 401)
+  and preflight requests, not only successful ones. A cross-origin client
+  (the Playground) previously saw a bearer-auth 401 as a misleading CORS
+  error because the error response carried no `Access-Control-Allow-Origin`.
+
 ## [0.1.7] - 2026-06-23
 
 Lockstep maintenance release; demo and deploy fixes only, no library changes since 0.1.6.
