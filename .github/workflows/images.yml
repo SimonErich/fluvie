@@ -62,7 +62,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # ignore-error: a flaky GitHub Actions cache export (it intermittently
+          # 404s on a large mode=max layer set) must not fail the build after the
+          # image has already pushed, which would skip the redeploy webhook below.
+          cache-to: type=gha,mode=max,ignore-error=true
       # Ping this service's Dokploy webhook so it pulls the image just pushed and
       # restarts. Skipped (not failed) when the webhook secret is unset; a failed
       # build above stops the leg before this runs, leaving the other services'
