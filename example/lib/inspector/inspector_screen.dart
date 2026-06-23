@@ -1,25 +1,26 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie_example/inspector/generate_screen.dart';
 import 'package:fluvie_example/inspector/inspector_panel.dart';
-import 'package:fluvie_example/inspector/playback_view_model.dart';
 import 'package:fluvie_example/inspector/preview_pane.dart';
 import 'package:fluvie_example/inspector/providers.dart';
-import 'package:fluvie_example/inspector/render_launcher.dart';
-import 'package:fluvie_example/inspector/render_view_model.dart';
 import 'package:fluvie_example/lessons/lessons.dart';
+import 'package:fluvie_example/playground/ai_assistant_panel.dart';
 import 'package:fluvie_example/playground/playground.dart';
 import 'package:fluvie_example/playground/playground_video.dart';
 import 'package:fluvie_example/playground/playground_view_model.dart';
+import 'package:fluvie_example/theme/fluvie_colors.dart';
+import 'package:fluvie_example/theme/fluvie_gradients.dart';
+import 'package:fluvie_example/theme/fluvie_theme.dart';
+import 'package:fluvie_example/theme/widgets/film_stage.dart';
+import 'package:fluvie_example/theme/widgets/gradient_text.dart';
+import 'package:fluvie_example/theme/widgets/section_label.dart';
 
-/// The inspector: the lesson list on the left, the scrubbable preview
-/// in the middle, and the structured [InspectorPanel] on the right.
+/// The inspector: the lesson list on the left, the video centre stage in the
+/// middle, and the Code/Motions tabs on the right.
 ///
-/// Every pane is its own consumer, so a scrub rebuilds only the playback bar
-/// (the preview repaints through its frame clock, not through this tree) and
-/// a lesson tap swaps all three panes through the selection provider.
+/// Each pane is its own consumer, so a lesson tap or a Playground render rebuilds
+/// only what changed, through the selection and Playground providers.
 final class InspectorScreen extends StatelessWidget {
   /// Creates the inspector screen.
   const InspectorScreen({super.key});
@@ -28,7 +29,18 @@ final class InspectorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Fluvie inspector'),
+        titleSpacing: 20,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GradientText('Fluvie', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(width: 8),
+            const Text(
+              'inspector',
+              style: TextStyle(color: FluvieColors.dmut, fontWeight: FontWeight.w500, fontSize: 16),
+            ),
+          ],
+        ),
         actions: [
           Builder(
             builder: (context) => IconButton(
@@ -41,33 +53,44 @@ final class InspectorScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: const Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(width: 260, child: _LessonList()),
-          VerticalDivider(width: 1),
-          Expanded(
-            flex: 2,
-            child: Column(
-              children: [
-                Expanded(child: _CenterStage()),
-                _PlaybackBar(),
-                _RenderBar(),
-              ],
-            ),
-          ),
-          VerticalDivider(width: 1),
-          Expanded(flex: 2, child: _RightPane()),
-        ],
+      body: const DecoratedBox(
+        decoration: BoxDecoration(gradient: FluvieGradients.heroBackdrop),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(width: 260, child: _LessonList()),
+            VerticalDivider(width: 1, color: FluvieColors.dline),
+            Expanded(flex: 2, child: _CenterStage()),
+            VerticalDivider(width: 1, color: FluvieColors.dline),
+            Expanded(flex: 2, child: _RightPane()),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// The right pane: a Code tab hosting the [Playground] (the default) and a
-/// Motions tab hosting the structured [InspectorPanel].
-final class _RightPane extends StatelessWidget {
+/// The right pane: the AI Assistant, or a lesson's Code/Motions tabs.
+final class _RightPane extends ConsumerWidget {
   const _RightPane();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(workspaceModeProvider);
+    return Material(
+      color: FluvieColors.surface,
+      child: switch (mode) {
+        WorkspaceMode.aiAssistant => const AiAssistantPanel(),
+        WorkspaceMode.lesson => const _LessonTabs(),
+      },
+    );
+  }
+}
+
+/// A lesson's right pane: a Code tab hosting the [Playground] (the default) and
+/// a Motions tab hosting the structured [InspectorPanel].
+final class _LessonTabs extends StatelessWidget {
+  const _LessonTabs();
 
   @override
   Widget build(BuildContext context) {
@@ -92,26 +115,45 @@ final class _RightPane extends StatelessWidget {
   }
 }
 
-/// The centre stage: the freshly rendered Playground video once one exists,
-/// otherwise the selected lesson's pre-rendered `/media/<key>.mp4` (baked into
-/// the demo image, so no server render on load).
+/// The centre stage: the rendered video on a dark backdrop.
 ///
-/// The live [PreviewPane] stays mounted behind the opaque video so it is laid
-/// out — resolving the selected lesson's timeline for the Motions tab and
-/// driving the scrubber — while the video hides it.
+/// In AI Assistant mode it shows the generated video, or a placeholder before
+/// the first render. In lesson mode it shows the freshly rendered Playground
+/// video once one exists, otherwise the lesson's pre-rendered `/media/<key>.mp4`
+/// (baked into the demo image, so no server render on load); the live
+/// [PreviewPane] stays mounted behind the backdrop to resolve the lesson's
+/// timeline for the Motions tab.
 final class _CenterStage extends ConsumerWidget {
   const _CenterStage();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(workspaceModeProvider);
     final rendered = ref.watch(playgroundViewModelProvider.select((s) => s.videoUrl));
+    if (mode == WorkspaceMode.aiAssistant) {
+      final busy = ref.watch(
+        playgroundViewModelProvider.select((s) => s.rendering || s.validating),
+      );
+      final Widget content;
+      if (rendered != null) {
+        content = PlaygroundVideo(url: rendered);
+      } else if (busy) {
+        content = const _AiRenderingState();
+      } else {
+        content = const _AiCenterPlaceholder();
+      }
+      return FilmStage(
+        filename: rendered == null ? 'preview.mp4' : 'ai_video.mp4',
+        child: content,
+      );
+    }
     final lessonKey = ref.watch(selectedLessonProvider).id;
     return Stack(
       fit: StackFit.expand,
       children: [
         const PreviewPane(),
-        ColoredBox(
-          color: const Color(0xFF14141C),
+        FilmStage(
+          filename: '$lessonKey.mp4',
           child: PlaygroundVideo(url: rendered ?? '/media/$lessonKey.mp4'),
         ),
       ],
@@ -119,158 +161,94 @@ final class _CenterStage extends ConsumerWidget {
   }
 }
 
-/// The lessons, in registry order; tapping one selects it everywhere.
+/// The centre stage while the AI Assistant's generated video is rendering.
+final class _AiRenderingState extends StatelessWidget {
+  const _AiRenderingState();
+
+  @override
+  Widget build(BuildContext context) => const Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 40,
+          height: 40,
+          child: CircularProgressIndicator(color: FluvieColors.acc2),
+        ),
+        SizedBox(height: 16),
+        Text('Rendering your video ...', style: TextStyle(color: FluvieColors.dtext)),
+      ],
+    ),
+  );
+}
+
+/// The centre stage before the AI Assistant has rendered anything: a friendly
+/// prompt to describe a video.
+final class _AiCenterPlaceholder extends StatelessWidget {
+  const _AiCenterPlaceholder();
+
+  @override
+  Widget build(BuildContext context) => const Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.movie_filter_outlined, size: 48, color: FluvieColors.acc2),
+        SizedBox(height: 16),
+        Text('Your AI video will appear here', style: TextStyle(color: FluvieColors.dtext)),
+        SizedBox(height: 4),
+        Text(
+          'Describe it on the right and press Generate.',
+          style: TextStyle(color: FluvieColors.dmut, fontSize: 12),
+        ),
+      ],
+    ),
+  );
+}
+
+/// The left nav: the AI Assistant first, then the lessons in registry order.
+/// Tapping an entry selects it and switches the workspace mode.
 final class _LessonList extends ConsumerWidget {
   const _LessonList();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(workspaceModeProvider);
     final selected = ref.watch(selectedLessonIndexProvider);
-    return ListView(
-      children: [
-        for (var index = 0; index < lessons.length; index++)
-          ListTile(
-            selected: index == selected,
-            title: Text(lessons[index].title),
-            subtitle: Text(lessons[index].intro, maxLines: 2, overflow: TextOverflow.ellipsis),
-            onTap: () => ref.read(selectedLessonIndexProvider.notifier).select(index),
-          ),
-      ],
-    );
-  }
-}
-
-/// The scrubber: a slider, play/pause button, frame readout, and FPS selector.
-final class _PlaybackBar extends ConsumerWidget {
-  const _PlaybackBar();
-
-  static const _fpsOptions = [5, 10, 15, 30];
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final playback = ref.watch(playbackViewModelProvider);
-    final notifier = ref.read(playbackViewModelProvider.notifier);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Slider(
-            value: playback.frame.toDouble(),
-            max: (playback.totalFrames - 1).toDouble(),
-            onChanged: (value) => notifier.seek(value.round()),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: Icon(playback.isPlaying ? Icons.pause : Icons.play_arrow),
-                tooltip: playback.isPlaying ? 'Pause' : 'Play',
-                onPressed: playback.isPlaying ? notifier.pause : notifier.play,
+    return Theme(
+      data: buildFluvieDarkFrameTheme(),
+      child: Material(
+        color: FluvieColors.dpanel,
+        child: ListView(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.auto_awesome),
+              title: const Text('AI Assistant'),
+              subtitle: const Text(
+                'Describe a video and generate it',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              Text('frame ${playback.frame} / ${playback.totalFrames - 1}'),
-              const SizedBox(width: 12),
-              DropdownButton<int>(
-                value: playback.playFps,
-                isDense: true,
-                underline: const SizedBox.shrink(),
-                items: [
-                  for (final fps in _fpsOptions)
-                    DropdownMenuItem<int>(
-                      value: fps,
-                      child: Text(
-                        '$fps fps',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                ],
-                onChanged: (fps) {
-                  if (fps != null) notifier.setPlayFps(fps);
+              selected: mode == WorkspaceMode.aiAssistant,
+              onTap: () => ref.read(workspaceModeProvider.notifier).showAiAssistant(),
+            ),
+            const Divider(height: 1, color: FluvieColors.dline),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: SectionLabel('Lessons'),
+            ),
+            for (var index = 0; index < lessons.length; index++)
+              ListTile(
+                selected: mode == WorkspaceMode.lesson && index == selected,
+                title: Text(lessons[index].title),
+                subtitle: Text(lessons[index].intro, maxLines: 2, overflow: TextOverflow.ellipsis),
+                onTap: () {
+                  ref.read(selectedLessonIndexProvider.notifier).select(index);
+                  ref.read(workspaceModeProvider.notifier).showLesson();
                 },
               ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
-}
-
-/// The render button and the last launch's output.
-final class _RenderBar extends ConsumerWidget {
-  const _RenderBar();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final render = ref.watch(renderViewModelProvider);
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FilledButton(
-            onPressed: render.running
-                ? null
-                : () => unawaited(ref.read(renderViewModelProvider.notifier).render()),
-            child: const Text('Render MP4'),
-          ),
-          if (render.running)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: _RenderProgress(progress: render.progress),
-            ),
-          if (render.output.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 160),
-                child: SingleChildScrollView(
-                  child: Text(render.output, style: Theme.of(context).textTheme.bodySmall),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The live render progress: a bar plus an "N / M frames" readout, shown under
-/// the render button while a render runs. Before the first frame lands (or once
-/// every frame is captured and ffmpeg is encoding) the bar is indeterminate.
-final class _RenderProgress extends StatelessWidget {
-  const _RenderProgress({required this.progress});
-
-  final RenderProgress? progress;
-
-  @override
-  Widget build(BuildContext context) {
-    final progress = this.progress;
-    final encoding = progress != null && progress.isComplete;
-    final String label;
-    final double? value;
-    if (progress == null) {
-      // Only before the total is known (it is seeded up front, so this is rare).
-      label = 'Starting ...';
-      value = null;
-    } else if (encoding) {
-      // Every frame captured; ffmpeg is muxing. Hold the bar full, not back to
-      // indeterminate, so it never appears to "restart".
-      label = 'Encoding ...';
-      value = 1;
-    } else {
-      label =
-          '${progress.completed} / ${progress.total} frames '
-          '(${(progress.fraction * 100).round()}%)';
-      value = progress.fraction;
-    }
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        LinearProgressIndicator(value: value),
-        const SizedBox(height: 4),
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
-      ],
     );
   }
 }

@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_example/inspector/generate_view_model.dart';
+import 'package:fluvie_example/theme/fluvie_colors.dart';
+import 'package:fluvie_example/theme/fluvie_text_theme.dart';
+import 'package:fluvie_example/theme/widgets/code_window.dart';
+import 'package:fluvie_example/theme/widgets/gradient_button.dart';
 
 /// The "Generate with AI" panel: a prompt box that authors a [VideoSpec] from
 /// natural language, then shows a summary and the validated spec JSON.
@@ -47,7 +51,7 @@ class _GeneratePanelState extends ConsumerState<GeneratePanel> {
             ),
           ),
           const SizedBox(height: 12),
-          FilledButton.icon(
+          GradientButton(
             onPressed: state.busy
                 ? null
                 : () => unawaited(
@@ -57,10 +61,10 @@ class _GeneratePanelState extends ConsumerState<GeneratePanel> {
                 ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
                 : const Icon(Icons.auto_awesome),
-            label: Text(state.busy ? 'Generating…' : 'Generate'),
+            label: state.busy ? 'Generating…' : 'Generate',
           ),
           if (state.error != null)
             Padding(
@@ -95,18 +99,14 @@ class _SpecResult extends StatelessWidget {
           Text(summary, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           Expanded(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(8),
-              color: const Color(0xFF14141C),
+            child: CodeWindow(
+              filename: 'spec.json',
+              languageLabel: 'JSON',
               child: SingleChildScrollView(
+                padding: const EdgeInsets.all(14),
                 child: SelectableText(
                   json,
-                  style: const TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 12,
-                    color: Color(0xFFE6EDF3),
-                  ),
+                  style: fluvieMono(color: FluvieColors.codeText),
                 ),
               ),
             ),

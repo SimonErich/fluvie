@@ -50,10 +50,11 @@ void main() {
       expect(compositionForKey('does_not_exist'), isNull);
     });
 
-    test('the known keys are exactly demo, multi_scene, and the lessons (WI-35)', () {
+    test('the known keys are exactly demo, multi_scene, starter, and the lessons (WI-35)', () {
       expect(knownCompositionKeys, [
         'demo',
         'multi_scene',
+        'starter',
         '01_hello_video',
         '02_text_and_motion',
         '03_timing_and_triggers',

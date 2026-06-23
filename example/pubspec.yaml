@@ -28,6 +28,7 @@ dev_dependencies:
   custom_lint: ^0.8.1
   flutter_test:
     sdk: flutter
+  fluvie_cli: ^0.1.0
   fluvie_lints:
     # A path (not hosted) constraint: the custom_lint plugin host replicates
     # this dependency and must resolve it without pub.dev.
@@ -40,3 +41,13 @@ flutter:
   assets:
     - assets/fixtures/
     - assets/audio/
+  fonts:
+    - family: Sora
+      fonts:
+        - asset: assets/fonts/Sora.ttf
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope.ttf
+    - family: JetBrains Mono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono.ttf

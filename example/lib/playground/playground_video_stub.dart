@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluvie_example/theme/fluvie_colors.dart';
 
 /// The non-web Playground video area (VM, mobile, tests).
 ///
@@ -16,32 +17,24 @@ final class PlaygroundVideo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final url = this.url;
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      alignment: Alignment.center,
-      padding: const EdgeInsets.all(24),
+    return Center(
       child: url == null
-          ? Column(
+          ? const Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.movie_outlined, size: 40, color: scheme.onSurfaceVariant),
-                const SizedBox(height: 12),
-                const Text('Render to see your video'),
+                Icon(Icons.movie_outlined, size: 40, color: FluvieColors.acc2),
+                SizedBox(height: 12),
+                Text('Render to see your video', style: TextStyle(color: FluvieColors.dtext)),
               ],
             )
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.check_circle_outline, size: 40, color: scheme.primary),
+                const Icon(Icons.check_circle_outline, size: 40, color: FluvieColors.dotGreen),
                 const SizedBox(height: 12),
-                const Text('Your video is ready'),
+                const Text('Your video is ready', style: TextStyle(color: FluvieColors.dtext)),
                 const SizedBox(height: 8),
-                SelectableText(url, style: Theme.of(context).textTheme.bodySmall),
+                SelectableText(url, style: const TextStyle(color: FluvieColors.dmut, fontSize: 12)),
               ],
             ),
     );

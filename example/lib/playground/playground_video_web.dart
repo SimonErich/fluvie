@@ -1,6 +1,7 @@
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
+import 'package:fluvie_example/theme/fluvie_colors.dart';
 import 'package:web/web.dart' as web;
 
 /// The web Playground video area: an HTML `<video controls>` for the rendered
@@ -21,22 +22,14 @@ final class PlaygroundVideo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final url = this.url;
-    final scheme = Theme.of(context).colorScheme;
     if (url == null) {
-      return Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(24),
+      return const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.movie_outlined, size: 40, color: scheme.onSurfaceVariant),
-            const SizedBox(height: 12),
-            const Text('Render to see your video'),
+            Icon(Icons.movie_outlined, size: 40, color: FluvieColors.acc2),
+            SizedBox(height: 12),
+            Text('Render to see your video', style: TextStyle(color: FluvieColors.dtext)),
           ],
         ),
       );
@@ -47,10 +40,11 @@ final class PlaygroundVideo extends StatelessWidget {
         ..src = url
         ..controls = true
         ..style.width = '100%'
-        ..style.height = '100%';
+        ..style.height = '100%'
+        ..style.objectFit = 'contain';
     });
     return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(12),
       child: HtmlElementView(viewType: viewType),
     );
   }

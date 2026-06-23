@@ -39,3 +39,30 @@ final timelineProbeProvider = Provider<TimelineProbe>((ref) {
 /// The render backend for this platform/config (local desktop or `fluvie_server`);
 /// tests override this with a mock so no process or HTTP call happens.
 final renderLauncherProvider = Provider<RenderLauncher>((ref) => createRenderLauncher());
+
+/// Which workspace the inspector shows: a [lessons] entry or the AI Assistant.
+enum WorkspaceMode {
+  /// A selected lesson: the Code/Motions tabs and its cached preview.
+  lesson,
+
+  /// The AI Assistant: a prompt that generates and renders a video.
+  aiAssistant,
+}
+
+/// Tracks the selected workspace; the left nav drives it and the centre stage
+/// and right pane both switch on it.
+final class WorkspaceModeNotifier extends Notifier<WorkspaceMode> {
+  @override
+  WorkspaceMode build() => WorkspaceMode.lesson;
+
+  /// Shows a lesson (a lesson tap also selects which one).
+  void showLesson() => state = WorkspaceMode.lesson;
+
+  /// Shows the AI Assistant.
+  void showAiAssistant() => state = WorkspaceMode.aiAssistant;
+}
+
+/// The selected workspace (see [WorkspaceModeNotifier]).
+final workspaceModeProvider = NotifierProvider<WorkspaceModeNotifier, WorkspaceMode>(
+  WorkspaceModeNotifier.new,
+);

@@ -1,11 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_code_editor/flutter_code_editor.dart';
-import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie_example/playground/default_playground_code.dart';
 import 'package:fluvie_example/playground/playground_view_model.dart';
+import 'package:fluvie_example/theme/fluvie_code_theme.dart';
+import 'package:fluvie_example/theme/fluvie_colors.dart';
+import 'package:fluvie_example/theme/fluvie_text_theme.dart';
+import 'package:fluvie_example/theme/widgets/code_window.dart';
 import 'package:fluvie_server/client.dart';
 import 'package:highlight/languages/dart.dart' as highlight_dart;
+
+/// The single Dart [CodeController] the Playground edits, held in a provider so
+/// the editor, the Render action, and the AI Assistant all read and write the
+/// same source.
+///
+/// Seeded with [defaultPlaygroundCode]. Set `fullText` to replace the whole
+/// snippet (the AI Assistant does this with freshly generated code); reading
+/// `fullText` gives the complete source for validation and rendering.
+final playgroundCodeControllerProvider = Provider<CodeController>((ref) {
+  final controller = CodeController(
+    text: defaultPlaygroundCode,
+    language: highlight_dart.dart,
+    // A no-op so the built-in analyzer never overwrites the markers we set from
+    // the server's validation (which runs only on Render).
+    analyzer: const _NoOpAnalyzer(),
+  );
+  ref.onDispose(controller.dispose);
+  return controller;
+});
 
 /// The Playground's Dart editor: a syntax-highlighted [CodeField] whose gutter
 /// markers and one-line "N problems" summary come from the server's validation.
@@ -13,66 +35,33 @@ import 'package:highlight/languages/dart.dart' as highlight_dart;
 /// Validation runs only when the user hits Render (driven by the parent
 /// `Playground`), never on its own; the built-in analyzer is a no-op so it
 /// cannot overwrite the server-sourced markers in [PlaygroundViewModel].
-final class PlaygroundCodeEditor extends ConsumerStatefulWidget {
-  /// Creates the editor, seeded with [defaultPlaygroundCode].
+final class PlaygroundCodeEditor extends ConsumerWidget {
+  /// Creates the editor over the shared [playgroundCodeControllerProvider].
   const PlaygroundCodeEditor({super.key});
 
-  /// Reads the current editor text via the editor's [GlobalKey], so a parent
-  /// (the Playground) can render exactly what is on screen.
-  static String codeOf(GlobalKey key) {
-    final state = key.currentState;
-    return state is _PlaygroundCodeEditorState ? state._controller.fullText : '';
-  }
-
   @override
-  ConsumerState<PlaygroundCodeEditor> createState() => _PlaygroundCodeEditorState();
-}
-
-class _PlaygroundCodeEditorState extends ConsumerState<PlaygroundCodeEditor> {
-  late final CodeController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = CodeController(
-      text: defaultPlaygroundCode,
-      language: highlight_dart.dart,
-      // A no-op so the built-in analyzer never overwrites the markers we set
-      // from the server's validation (which runs only on Render).
-      analyzer: const _NoOpAnalyzer(),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(playgroundCodeControllerProvider);
     final state = ref.watch(playgroundViewModelProvider);
-    _controller.analysisResult = AnalysisResult(
+    controller.analysisResult = AnalysisResult(
       issues: [for (final d in state.diagnostics) _toIssue(d)],
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).dividerColor),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(5),
-              child: CodeTheme(
-                data: CodeThemeData(styles: atomOneDarkTheme),
-                child: CodeField(
-                  controller: _controller,
-                  expands: true,
-                  background: const Color(0xFF282C34),
-                  textStyle: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+          child: CodeWindow(
+            filename: 'video.dart',
+            child: CodeTheme(
+              data: CodeThemeData(styles: fluvieCodeTheme),
+              child: CodeField(
+                controller: controller,
+                expands: true,
+                background: FluvieColors.dark,
+                textStyle: fluvieMono(
+                  fontSize: 12.5,
+                  height: 1.5,
+                  color: FluvieColors.codeText,
                 ),
               ),
             ),

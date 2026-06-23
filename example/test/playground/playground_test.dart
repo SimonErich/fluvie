@@ -7,6 +7,7 @@ import 'package:fluvie_example/inspector/render_launcher.dart';
 import 'package:fluvie_example/playground/playground.dart';
 import 'package:fluvie_example/playground/playground_backend.dart';
 import 'package:fluvie_example/playground/playground_view_model.dart';
+import 'package:fluvie_example/theme/widgets/gradient_button.dart';
 import 'package:fluvie_server/client.dart';
 
 import 'fake_playground_backend.dart';
@@ -36,8 +37,8 @@ Future<ProviderContainer> _pump(WidgetTester tester, PlaygroundBackend backend) 
   return container;
 }
 
-FilledButton _renderButton(WidgetTester tester) =>
-    tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Render'));
+GradientButton _renderButton(WidgetTester tester) =>
+    tester.widget<GradientButton>(find.widgetWithText(GradientButton, 'Render'));
 
 void main() {
   testWidgets('opens with an enabled render button and a clean editor', (tester) async {

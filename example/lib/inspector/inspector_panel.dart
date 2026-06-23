@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_example/inspector/inspector_view_model.dart';
 import 'package:fluvie_example/inspector/playback_view_model.dart';
+import 'package:fluvie_example/theme/fluvie_colors.dart';
+import 'package:fluvie_example/theme/fluvie_text_theme.dart';
 
 /// The structured inspector panel: renders the selected lesson's
 /// [InspectorModel] as a timing warnings band, a tappable anchor list, and the
@@ -81,7 +83,11 @@ final class _Header extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: theme.textTheme.titleSmall),
-          if (subtitle != null) Text(subtitle!, style: theme.textTheme.bodySmall),
+          if (subtitle != null)
+            Text(
+              subtitle!,
+              style: fluvieMono(fontSize: 11, color: FluvieColors.muted),
+            ),
         ],
       ),
     );
@@ -133,7 +139,10 @@ final class _AnchorRow extends StatelessWidget {
     dense: true,
     leading: const Icon(Icons.anchor, size: 18),
     title: Text(anchor.name),
-    trailing: Text('frame ${anchor.frame}'),
+    trailing: Text(
+      'frame ${anchor.frame}',
+      style: fluvieMono(fontSize: 11, color: FluvieColors.muted),
+    ),
     onTap: () => onJump(anchor.frame),
   );
 }
@@ -156,7 +165,10 @@ final class _MotionRow extends StatelessWidget {
       leading: const Icon(Icons.movie_filter, size: 18),
       title: Text(motion.ownerId),
       subtitle: Text(label),
-      trailing: Text('${motion.startFrame}..${motion.endFrame}'),
+      trailing: Text(
+        '${motion.startFrame}..${motion.endFrame}',
+        style: fluvieMono(fontSize: 11, color: FluvieColors.muted),
+      ),
       onTap: () => onJump(motion.jumpFrame),
     );
   }

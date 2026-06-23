@@ -27,6 +27,7 @@ const String _spec = String.fromEnvironment('FLUVIE_RENDER_SPEC');
 const String _prompt = String.fromEnvironment('FLUVIE_AI_PROMPT');
 const String _baseSpec = String.fromEnvironment('FLUVIE_AI_BASE_SPEC');
 const String _specOut = String.fromEnvironment('FLUVIE_RENDER_SPEC_OUT');
+const String _aiProvider = String.fromEnvironment('FLUVIE_AI_PROVIDER');
 
 void main() {
   testWidgets('the capture harness renders the keyed composition', (tester) async {
@@ -67,6 +68,7 @@ void main() {
           prompt: _prompt,
           specOut: _specOut,
           basePath: _baseSpec,
+          provider: _aiProvider,
           lastFrame: lastFrame,
         );
       });

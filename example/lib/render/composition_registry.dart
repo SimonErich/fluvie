@@ -2,12 +2,15 @@ import 'package:fluvie_example/render/composition_entry.dart';
 import 'package:fluvie_example/render/demo_composition.dart';
 import 'package:fluvie_example/render/lesson_entries.dart';
 import 'package:fluvie_example/render/multi_scene_composition.dart';
+import 'package:fluvie_example/render/starter_composition.dart';
 
 /// Every composition the capture harness can render, in registration order:
-/// the `demo` acceptance, the `multi_scene` acceptance, and every lesson.
+/// the `demo` acceptance, the `multi_scene` acceptance, the `starter` (what
+/// `fluvie init` scaffolds), and every lesson.
 final List<CompositionEntry> _entries = [
   demoComposition,
   multiSceneComposition,
+  starterComposition,
   ...lessonEntries,
 ];
 
