@@ -24,11 +24,15 @@ curl -s -X POST http://localhost:8080/v1/renders \
 # Poll the job.
 curl -s http://localhost:8080/v1/renders/rnd_... \
   -H "Authorization: Bearer $API_TOKEN"
-# => {"id":"rnd_...","status":"succeeded","video":{"downloadUrl":"http://localhost:8080/v1/files/rnd_.../video?token=..."}}
+# => {"id":"rnd_...","status":"succeeded","code":"Video build() { ... }","spec":{"fluvieSpec":1,"scenes":[...]},"video":{"downloadUrl":"http://localhost:8080/v1/files/rnd_.../video?token=..."}}
 
 # Download the file.
 curl -L -o demo.mp4 "<the downloadUrl from above>"
 ```
+
+For AI `prompt` and `edit` renders, `code` (the printed Dart `Video build()`) and
+`spec` (the authored `VideoSpec` JSON) appear early, while `status` is still
+`running`, so an editor can show the authored source before the file is ready.
 
 The package is [`fluvie_server`](https://pub.dev/packages/fluvie_server): one binary
 that also hosts the [MCP server](ai-and-mcp.md) at `/mcp` and a documentation helper
@@ -68,14 +72,15 @@ server answers `503`.
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
 | POST | `/v1/renders` | API token | Create a render job (`202`). |
-| GET | `/v1/renders/{id}` | API token | Job status, with `progress` and download links. |
+| GET | `/v1/renders/{id}` | API token | Job status, with `progress`, `code`, `spec`, and download links. |
 | GET | `/v1/files/{id}/{kind}` | public: none, private: token | Download `video` or `poster`. |
 | POST | `/v1/maintenance/cleanup` | Cleanup token | Delete expired files. |
 | GET | `/v1/schema/video-spec` | none | The `VideoSpec` JSON schema, for an editor. |
 | GET | `/v1/healthz`, `/v1/readyz` | none | Liveness and readiness. |
 
 Status codes: `202` accepted, `400` invalid body, `401` bad token, `404`
-unknown, `410` expired, `413` body too large, `503` AI not configured.
+unknown, `410` expired, `413` body too large, `429` rate limit exceeded (with a
+`Retry-After` header), `503` AI not configured.
 
 ## Local files or S3
 

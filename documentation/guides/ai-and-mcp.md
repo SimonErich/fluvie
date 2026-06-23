@@ -18,9 +18,10 @@ the spec format and the Dart API.
 
 ## Bring your own key
 
-We do not run a public endpoint that spends our API budget on your renders. You
-bring your own key, or run a local model with no key at all. That keeps Fluvie
-free for us to host and keeps your prompts private to you.
+We do not run an unmetered public endpoint for your renders. The hosted demo
+gives you a small free quota to try; for anything beyond that you bring your own
+key, or run a local model with no key at all. Your own key keeps Fluvie cheap for
+us to host and keeps your prompts private to you.
 
 | Provider | `FLUVIE_AI_PROVIDER` | API key | Sees rendered frames |
 | --- | --- | --- | --- |
@@ -29,7 +30,9 @@ free for us to host and keeps your prompts private to you.
 | Mistral | `mistral` | `MISTRAL_API_KEY` | no |
 | Ollama (local) | `ollama` | none | no |
 
-`FLUVIE_AI_MODEL` overrides the model for any provider.
+`FLUVIE_AI_MODEL` overrides the model for any provider. Pass `--provider <name>`
+to `generate`/`edit` to override `FLUVIE_AI_PROVIDER` for a single run; API keys
+always come from the environment.
 
 ## Author from a prompt
 
@@ -57,6 +60,40 @@ Render a spec again with no model call at all:
 ```sh
 fluvie render --spec promo.fluvie.json --out promo.mp4
 ```
+
+## Flutter-style (real code) generation
+
+Sometimes you want real Flutter widget code in your repo, not a JSON spec. Ask
+for it in those words: "make me a Fluvie video in Flutter style" or "give me the
+real Dart code." The assistant reaches for the `init_project` tool, which returns
+the starter composition, the dependencies, and the `fluvie init` command to
+scaffold a runnable project. See [Start a project](../getting-started/start-a-project.md).
+
+Before rendering generated code, the assistant can check it with `validate_code`.
+That runs static analysis only (it never executes the code) and returns the
+diagnostics, so a typo or a disallowed import is caught before a render starts.
+
+## Generate editable Dart from a prompt
+
+The demo Playground turns a prompt into editable Flutter-style Dart. You type a
+prompt in the AI Assistant, the browser sends only that text to the Fluvie server,
+and the server authors a `VideoSpec` with its configured model. The server then
+prints that spec to a Dart `Video build()` snippet and returns it. The snippet
+lands in the editor, where you tweak it and press Render. The browser never holds
+an API key, because the model runs server-side.
+
+Two pieces make this work, and you can use either on its own:
+
+- The spec-to-Dart printer is `printVideoSpecJson(Map)` in
+  [`fluvie_cli`](https://pub.dev/packages/fluvie_cli). Give it a serialized
+  `VideoSpec`, get back the editable snippet. It is a pure transformation, so it
+  never calls a model or renders. It is `@experimental` while the printed shape
+  settles.
+- The same transformation is the `spec_to_dart` MCP tool below.
+
+The printed Dart is the same code the Playground shows. It uses the public barrel
+only, so it compiles in a real project. See [the Playground](playground.md) for
+the editor and [authoring with specs](authoring-with-specs.md) for the spec format.
 
 ## Run a local model (no key)
 
@@ -96,6 +133,7 @@ Fluvie code for you:
 | `list_docs` | List every documentation page. |
 | `search_docs` | Full-text search the documentation. |
 | `get_doc` | Read one page in full. |
+| `init_project` | Start a project or add a composition in real Flutter/Dart code. |
 | `get_video_spec_schema` | Fetch the spec schema to author against. |
 
 **Build mode** adds the render and authoring tools on top, so the assistant can
@@ -104,10 +142,17 @@ own API, or a remote one via `FLUVIE_API_URL`):
 
 | Tool | What it does |
 | --- | --- |
-| `generate_video` | Author from a prompt and render. |
-| `edit_video` | Refine an existing spec with a plain-language change. |
+| `generate_video` | Author from a prompt and render. Returns the download URL and the printed Dart `code`. |
+| `edit_video` | Refine an existing spec with a plain-language change. Returns the download URL and the printed Dart `code`. |
+| `spec_to_dart` | Convert a `VideoSpec` (JSON) into an editable `Video build()` snippet. Pure: no model, no render. |
+| `validate_code` | Statically check a `Video build()` snippet before rendering. |
 | `render_video` | Render a spec you already have. |
 | `render_composition` | Render a registered composition by key. |
+
+`generate_video` and `edit_video` now return that printed Dart `code` next to the
+download URL, so the assistant can hand you editable widget code and the finished
+video in one reply. `spec_to_dart` does only the conversion, for when you have a
+spec and want the code without a render.
 
 ### Run it
 
@@ -171,6 +216,31 @@ you set a provider key, `generate_video` and `edit_video` work end to end; if no
 the server still renders specs and registered compositions and returns a clear error
 for prompt-based calls. For a tiny docs-only endpoint with no render toolchain, use
 the slim `fluvie-server-docs` image.
+
+## Host server-side AI without overspending
+
+You can run the prompt path on your own key and still bound the cost. The hosted
+demo does this: generation runs on the operator's key, pinned to a cheap model,
+behind a per-IP rate limit and a daily quota.
+
+Pin the model with `FLUVIE_AI_MODEL`. A small model keeps each call cheap:
+
+```sh
+export ANTHROPIC_API_KEY=sk-...
+export FLUVIE_AI_MODEL=claude-haiku-...   # a cheap model for the public path
+```
+
+Then bound how often any one IP can spend your key. These apply to the LLM-cost
+path only (prompt and edit); spec and code renders are not limited:
+
+| Variable | Default | What it does |
+| --- | --- | --- |
+| `FLUVIE_AI_RATE_LIMIT` | `5` | Calls allowed per window, per IP. |
+| `FLUVIE_AI_RATE_WINDOW` | `1m` | Width of the sliding window. |
+| `FLUVIE_AI_DAILY_QUOTA` | `50` | Calls allowed per UTC day, per IP. |
+
+A request over either limit returns HTTP `429` with a `Retry-After` header that
+says how long to wait. Set a limit to `0` to switch that one check off.
 
 ## Where to next
 

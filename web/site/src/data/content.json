@@ -22,6 +22,12 @@
       "icon": "&#9671;"
     },
     {
+      "key": "fluvie_validate",
+      "role": "the table read",
+      "line": "Check a Video build() snippet before you render it: the analyzer plus the lint rules, run in-process, never executed.",
+      "icon": "&#9678;"
+    },
+    {
       "key": "fluvie_ai",
       "role": "the screenwriter",
       "line": "Turn a plain sentence into a VideoSpec. Claude, Gemini, Mistral, or Ollama.",

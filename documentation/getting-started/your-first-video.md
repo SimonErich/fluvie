@@ -65,6 +65,8 @@ plays.
 
 ## Where to next
 
+- [Start a project](start-a-project.md): scaffold this as a runnable project with
+  `fluvie init`.
 - [Core concepts](core-concepts.md): Video, Scene, Time, animate, Defaults.
 - [Timing and triggers](../guides/timing-and-triggers.md): make elements
   react to each other.

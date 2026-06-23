@@ -26,6 +26,7 @@ export default defineConfig({
           label: 'Getting started',
           items: [
             { label: 'Installation', slug: 'getting-started/installation' },
+            { label: 'Start a project', slug: 'getting-started/start-a-project' },
             { label: 'Your first video', slug: 'getting-started/your-first-video' },
             { label: 'Core concepts', slug: 'getting-started/core-concepts' },
           ],

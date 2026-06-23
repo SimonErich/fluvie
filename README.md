@@ -25,7 +25,7 @@ keyframe spreadsheet, no 2am debugging because frame 412 is one pixel off.
 - **Declarative.** Compose `Scene`s and elements like any Flutter screen.
 - **Cacheable.** The frame cache keys on content, so caching, golden tests, and batch rendering just work.
 - **Headless.** Render from the CLI, an HTTP API, or an MCP server. No display needed.
-- **Conversational.** Ask for a video in plain language and get a spec back.
+- **Conversational.** Describe a video in plain language; a model writes editable Fluvie code (or a spec) and renders it.
 
 ## Quick start
 
@@ -68,14 +68,17 @@ Video helloVideo() => Video(
 
 ```sh
 dart pub global activate fluvie_cli
-fluvie render hello --out hello.mp4
+fluvie init                            # scaffold a runnable starter (or add one to your app)
+fluvie render starter --out starter.mp4
 ```
 
-You do not need to install FFmpeg: the first render downloads a pinned,
-checksum-verified build and caches it (run `fluvie ffmpeg install` to fetch it
-ahead of time, or point `--ffmpeg` / `FLUVIE_FFMPEG` at your own). The
-[getting started guide](https://docs.fluvie.dev/getting-started/your-first-video/)
-wires the render key in one step. Full source:
+`fluvie init` writes a starter video in real Flutter code and wires everything to
+preview, render, and test it. You do not need to install FFmpeg: the first render
+downloads a pinned, checksum-verified build and caches it (run
+`fluvie ffmpeg install` to fetch it ahead of time, or point `--ffmpeg` /
+`FLUVIE_FFMPEG` at your own). The
+[getting started guide](https://docs.fluvie.dev/getting-started/start-a-project/)
+walks through it. Full source:
 [`example/lib/lessons/01_hello_video.dart`](example/lib/lessons/01_hello_video.dart).
 
 ## See what it can do
@@ -165,8 +168,10 @@ Full source: [`example/lib/lessons/12_the_kitchen_sink.dart`](example/lib/lesson
 ## Examples
 
 Twelve runnable lessons live in [`example/lib/lessons/`](example/lib/lessons),
-from "Hello, Fluvie" to the kitchen sink. Try them in the browser at
-[demo.fluvie.dev](https://demo.fluvie.dev), or run the gallery locally:
+from "Hello, Fluvie" to the kitchen sink. Try them at
+[demo.fluvie.dev](https://demo.fluvie.dev): write and render a `Video` in the
+**Playground**, or describe one in the **AI Assistant** and let a model write and
+render the code. Or run the gallery locally:
 
 ```sh
 flutter run --enable-impeller   # from the repo root; Impeller for the live preview

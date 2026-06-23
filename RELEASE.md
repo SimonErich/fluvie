@@ -144,8 +144,16 @@ Dokploy, so it has no redeploy webhook.)
 
 The demo renders through `api.fluvie.dev`. To keep cost and abuse down:
 
-- Do not set a provider key on the public API, so the AI tools stay off there.
-  The demo still renders the built-in lessons and any spec it is given.
+- To enable the AI Assistant on the public API, set a provider key (for example
+  `ANTHROPIC_API_KEY`) plus `FLUVIE_AI_MODEL` pinned to a cheap model
+  (for example `claude-haiku-...`). This reverses the earlier guidance to leave
+  the key unset: a per-IP quota now bounds the cost, so the demo can author from a
+  prompt on your key. Leave the key unset to keep prompt-based renders off; spec
+  and code renders still work.
+- Tune the AI quota with `FLUVIE_AI_RATE_LIMIT` (calls per window, default 5),
+  `FLUVIE_AI_RATE_WINDOW` (default `1m`), and `FLUVIE_AI_DAILY_QUOTA` (per UTC
+  day, default 50). These apply to the prompt/edit path only. A request over a
+  limit returns `429` with a `Retry-After` header.
 - Keep `RENDER_CONCURRENCY=1` and a short `FILE_TTL`.
 - Put the API behind Dokploy/Traefik rate limiting if you expose it widely.
 

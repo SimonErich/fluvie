@@ -252,6 +252,9 @@ identically; only the encoder differs. This is the canonical support table.
 
 Notes:
 
+- A `Clip`'s embedded audio is demuxed from the video and folded into this same
+  mix on every renderer — including the browser, where `ffmpeg.wasm` demuxes the
+  clip's track — unless the clip is `ClipAudio.muted`.
 - Audio rides the MP4 export only. GIF, transparent WebM, and image sequences
   carry no sound.
 - "Network (allowlist)" needs an explicit allowlist of hosts. On-device it is

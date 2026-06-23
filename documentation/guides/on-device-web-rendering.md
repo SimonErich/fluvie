@@ -97,21 +97,68 @@ fetch step rather than committing it. A runnable demo, with that step and the
 bridge wired up, lives in
 [`packages/fluvie_web_encoder/example`](https://github.com/SimonErich/fluvie/tree/main/packages/fluvie_web_encoder/example).
 
+**4. Install the clip-decoder bridge — only if you render `Clip`s.**
+
+A `Clip` decodes in the browser through WebCodecs, behind a second page-global
+object, `FluvieClipDecoder`. It demuxes the clip's MP4 with
+[mp4box.js](https://github.com/gpac/mp4box.js) and decodes the samples it reads
+with a `VideoDecoder`, returning RGBA pixels per source frame — the in-browser
+analogue of the on-device native frame reader. Like the encoder bridge it loads
+its demuxer lazily, so a page that renders no clips never fetches it:
+
+```html
+<script type="module">
+  // mp4box.js is a UMD bundle (sets the MP4Box + DataStream globals); inject it
+  // lazily so the demuxer is fetched only when a clip actually renders.
+  let loading = null;
+  const loadMp4box = () => (loading ??= new Promise((ok, fail) => {
+    if (globalThis.MP4Box) return ok();
+    const s = document.createElement('script');
+    s.src = 'vendor/mp4box/mp4box.all.min.js'; // vendor mp4box.js here
+    s.onload = () => globalThis.MP4Box ? ok() : fail(new Error('no MP4Box global'));
+    s.onerror = () => fail(new Error('failed to load mp4box.js'));
+    document.head.appendChild(s);
+  }));
+
+  globalThis.FluvieClipDecoder = {
+    // probe(bytes)                          -> { fps, frameCount, width, height }
+    // extractFrames(bytes, indices, w, h)   -> Uint8Array[] (one RGBA frame each)
+    //
+    // Implement both with `await loadMp4box()`, `MP4Box.createFile()` to demux
+    // the track's samples + its avcC/hvcC description, a WebCodecs `VideoDecoder`
+    // to decode them, and an `OffscreenCanvas` + `getImageData` to read RGBA.
+    // Indices are presentation-order (frame 0 = first displayed).
+  };
+</script>
+```
+
+A complete, working bridge (sample extraction, codec description,
+presentation-order reindexing, error handling) lives in
+[reday](https://github.com/SimonErich/reday)'s `web/index.html`; vendor mp4box.js
+under `web/vendor/` with a fetch step, the same way you vendor the wasm core. A
+browser without WebCodecs, or that can't decode the clip's codec (Safari and some
+headless Chromium builds can't do H.264), fails fast with a clear typed error.
+
 ## How it works
 
-A normal Fluvie render is two steps: capture the widget tree to raw frames, then
+A normal Fluvie render is two steps: capture the widget tree to frames, then
 encode those frames with FFmpeg. On the web both steps run on the page.
 
 ```text
-Video  ->  off-screen capture (Fluvie)  ->  frames in memory  ->  ffmpeg.wasm  ->  MP4 bytes
-           inside the app's own pipeline                          (real FFmpeg, in the browser)
+Video  ->  off-screen capture (Fluvie)  ->  PNG frame sequence  ->  ffmpeg.wasm  ->  MP4 bytes
+           inside the app's own pipeline    in memory (one file/frame)  (real FFmpeg, in the browser)
 ```
 
 1. `WebVideoRenderer` runs Fluvie's capture loop into the
    `FluvieWebStage` surface, sized to your target resolution and parked
-   off-screen. It writes the frames into an in-memory sandbox, never to disk.
-2. It hands the sandbox to `ffmpeg.wasm`, which runs the same argument plan a
-   desktop render would, reading the frames and writing the output in its
+   off-screen. Each captured frame is encoded to a PNG and written to an
+   in-memory sandbox as a numbered image sequence (`frame_000000.png`, …), never
+   to disk. Encoding per frame keeps capture memory flat — one frame at a time —
+   instead of holding every raw frame at once, so a longer render no longer
+   overflows the browser tab during capture.
+2. It hands the sandbox to `ffmpeg.wasm`, which runs the same H.264 encode and
+   audio-mix plan a desktop render would — reading the PNG image sequence as its
+   input (the desktop path reads a raw stream) and writing the output in its
    in-memory file system.
 3. The renderer reads the encoded file back and returns it as a `Uint8List`.
 
@@ -163,11 +210,45 @@ constructing the renderer with a `BundleWebAudioMaterializer` that has a
 audio host must allow your page's origin. Local file paths are not valid in the
 browser (there is no file system).
 
+A `Clip`'s own audio track is mixed in too when `audio: true`: `ffmpeg.wasm`
+demuxes the AAC straight from the clip's MP4 and the mix delays and trims it to
+where the clip plays, using the **same** plan as on mobile and the desktop. So a
+clip composition is not silent in the browser — see [Clips](#clips).
+
 If a `Video` declares audio but you leave `audio` off, the render is silent and
 the renderer warns once through `WebVideoRenderer.onWarning` — pass
 `warnOnDroppedAudio: false` to silence it. Audio rides the MP4 export only; a GIF
 or transparent render drops it (also warned). For the full audio API, see
 [Audio and captions](audio-and-captions.md).
+
+## Clips
+
+A `Clip` plays its real frames in the browser through **WebCodecs** — no FFmpeg
+for the decode. `WebVideoRenderer` wires a decoder by default; it bridges to the
+`FluvieClipDecoder` object the page installs (the same way `FluvieFfmpeg` provides
+the encoder), which demuxes the clip's MP4 with mp4box.js and decodes the samples
+it reads with a `VideoDecoder`. The **same** resample math the desktop uses picks
+the source frames, so motion matches a desktop render. A clip's embedded audio is
+mixed in when you pass `audio: true` (see [Audio](#audio)).
+
+The browser has no file system to stream frames to, so — unlike the
+[mobile](on-device-mobile-rendering.md#clips) path, which streams clip frames to
+disk — the web decoder holds every frame it extracts **in memory**, at the source
+resolution. Memory therefore scales with the clip's length × resolution: a short
+reel is fine, but a long or high-resolution clip can exhaust a browser tab. Keep
+in-browser clips short and known, and render long or full-resolution clips on the
+[server](rendering-on-a-server.md) or [mobile](on-device-mobile-rendering.md) path.
+
+A clip's `trim` and its `ClipAudio` policy are the same shared behavior as every
+other renderer: `trim` selects which source frames the decoder is asked for (only
+those are decoded), and a `ClipAudio.muted` clip contributes no audio track. The
+decoder is created and closed per render, and a wedged decode (a corrupt clip, or
+exhausted hardware decoder sessions) fails with a clear typed error after a
+watchdog timeout rather than hanging the render.
+
+Clips need a browser with WebCodecs that can decode the clip's codec. Chrome and
+Edge decode H.264; **Safari and some headless Chromium builds cannot**, and a
+browser missing WebCodecs or the bridge fails fast with a clear typed error.
 
 ## Images
 
@@ -177,13 +258,6 @@ resolved and decoded once before the frame loop, then painted from the decoded
 cache. There is no async pop-in and the render stays deterministic. Bundle the
 asset (loaded through `rootBundle`) or serve it from an allowlisted, CORS-enabled
 URL, exactly as for audio.
-
-Video clips decode in the browser through WebCodecs. `WebVideoRenderer` wires a
-clip decoder by default; it bridges to a `FluvieClipDecoder` object the page
-installs (the same way `FluvieFfmpeg` provides the encoder). On a browser without
-WebCodecs or that bridge, a `Clip` fails fast with a clear typed error. Render
-those compositions through the [server path](rendering-on-a-server.md) or on
-[mobile](on-device-mobile-rendering.md) instead.
 
 ## Delivering the result
 

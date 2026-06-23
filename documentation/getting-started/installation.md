@@ -3,6 +3,10 @@
 Fluvie turns a Flutter widget tree into a real MP4. You write the video as
 code, preview it like an app, and render it with the Fluvie CLI and FFmpeg.
 
+In a hurry? `fluvie init` scaffolds a runnable starter for you, in a new project
+or alongside an existing one. See [Start a project](start-a-project.md). To set
+it up by hand, read on.
+
 Add the package to your `pubspec.yaml`:
 
 ```yaml
@@ -57,6 +61,7 @@ including loading the real fonts so text never falls back to the boxy test font.
 
 ## Where to next
 
+- [Start a project](start-a-project.md): scaffold a runnable starter with `fluvie init`.
 - [Your first video](your-first-video.md): build and render lesson 01.
 - [Core concepts](core-concepts.md): the ideas behind every Fluvie video.
 - [Managing FFmpeg](../guides/managing-ffmpeg.md): how Fluvie finds, downloads, and pins FFmpeg.

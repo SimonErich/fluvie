@@ -157,6 +157,7 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 | `TimelineProbe` + `TimelineProbeScope` | mount above a `Video` to receive its `ResolvedTimeline` |
 | `debugTimeline(timeline)` | a fixed-width text table of every animation |
 | `InspectorModel.fromTimeline(...)` | the inspector's value model: motions, anchors, warnings |
+| `printVideoSpecJson(Map)` (`package:fluvie_cli`, experimental) | turn a `VideoSpec` into an editable `Video build()` snippet; pure, no model, no render |
 
 ## Where to next
 

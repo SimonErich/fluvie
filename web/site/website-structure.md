@@ -386,17 +386,21 @@ This is the open-source section the page must include. See the
 ### 10. Or just say what you want (AI + MCP)
 
 - **Job:** Show the lowest-effort path. Describe a video in English, get a
-  `VideoSpec` and an MP4. The "you do not even write the widgets" reveal.
+  `VideoSpec` and an MP4. In the Playground the AI Assistant writes editable
+  Flutter-style Dart you can read and refine, server-side, so the browser never
+  holds a key. The "you do not even write the widgets, unless you want to" reveal.
 - **Serves / routes:** Cold visitor and expert. Routes to the AI and MCP guide
-  (docs.fluvie.dev/guides/ai-and-mcp), fluvie_ai, fluvie_server, and the hosted MCP at
-  mcp.fluvie.dev.
+  (docs.fluvie.dev/guides/ai-and-mcp), the Playground (demo.fluvie.dev), fluvie_ai,
+  fluvie_server, and the hosted MCP at mcp.fluvie.dev.
 - **Copy:**
   - Headline: "Or just say what you want."
   - Body: "'A 10-second product promo, brand teal, big counter to 10,000, confetti
-    on the last beat.' `fluvie_ai` turns that into a real `VideoSpec`. The MCP server
-    in `fluvie_server` lets your assistant write and render it without you opening an
-    editor." Keep the
-    honest framing: this is the optional easy mode, not the only mode.
+    on the last beat.' `fluvie_ai` turns that into a real `VideoSpec`. In the
+    Playground, the AI Assistant writes editable Flutter-style Dart into the editor,
+    so you can read it and refine it with another sentence. The model runs on the
+    server, so your browser never holds a key. The MCP server in `fluvie_server`
+    lets your assistant do the same from a chat." Keep the honest framing: this is
+    the optional easy mode, not the only mode.
 - **Special treatment:** A "prompt then spec then film" triptych: a chat-style
   prompt bubble, the generated `VideoSpec` code, and the rendered clip, joined by
   the same left-to-right connector motif as the hero. A narrative callback that

@@ -16,6 +16,28 @@ and press **Render**. The editor validates your code first (a "Validating ..."
 state), shows any errors inline, and renders only when it is clean. The result
 plays on the left, replacing the default video.
 
+## Generate with AI
+
+You do not have to start from a blank editor. Type a prompt into the AI Assistant,
+such as "a 6 second vertical title card on a dark gradient," and press generate.
+The browser sends the prompt to the server. The server authors the video with its
+configured model and returns editable Flutter-style Dart, which lands in the
+editor. From there it is normal code: edit it and press Render.
+
+You can keep refining with the AI too. A follow-up prompt edits the current
+video, changing only what you ask, so "make it red" recolours the title without
+disturbing the rest.
+
+The model runs server-side, so the browser never holds an API key. On the hosted
+demo, generation uses the operator's key behind a free daily quota, so you can try
+it without signing up. The same prompt path is available over MCP and the CLI; see
+[AI and MCP](ai-and-mcp.md) for those and for the deploy and cost settings.
+
+A polling client sees the generated code early. The render job carries a `code`
+field that the server fills as soon as it has authored the snippet, before the
+video finishes. A client polling `GET /v1/renders/{id}` reads `code` while
+`status` is still `running`, so it can show the editable Dart while the render runs.
+
 ## The two endpoints
 
 The Playground talks to a [`fluvie_server`](rendering-on-a-server.md). Both calls
