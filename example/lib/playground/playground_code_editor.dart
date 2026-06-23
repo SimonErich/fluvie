@@ -52,16 +52,29 @@ final class PlaygroundCodeEditor extends ConsumerWidget {
         Expanded(
           child: CodeWindow(
             filename: 'video.dart',
-            child: CodeTheme(
-              data: CodeThemeData(styles: fluvieCodeTheme),
-              child: CodeField(
-                controller: controller,
-                expands: true,
-                background: FluvieColors.dark,
-                textStyle: fluvieMono(
-                  fontSize: 12.5,
-                  height: 1.5,
-                  color: FluvieColors.codeText,
+            // The app's light inputDecorationTheme (filled, near-white) would
+            // otherwise paint the editor's internal TextField and wash the code
+            // out; drop the fill and border so the dark background shows through.
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                inputDecorationTheme: const InputDecorationTheme(
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
+              ),
+              child: CodeTheme(
+                data: CodeThemeData(styles: fluvieCodeTheme),
+                child: CodeField(
+                  controller: controller,
+                  expands: true,
+                  background: FluvieColors.dark,
+                  textStyle: fluvieMono(
+                    fontSize: 12.5,
+                    height: 1.5,
+                    color: FluvieColors.codeText,
+                  ),
                 ),
               ),
             ),
