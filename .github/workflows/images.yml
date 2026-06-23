@@ -55,10 +55,18 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest
       - uses: docker/build-push-action@v6
+        # Disable the post-push GitHub build summary/record upload and the
+        # provenance attestation: both call the flaky GitHub Actions API, which
+        # has been 404ing and failing the step AFTER the image already pushed —
+        # which then skips the redeploy webhook below. The image is all we need.
+        env:
+          DOCKER_BUILD_SUMMARY: false
+          DOCKER_BUILD_RECORD_UPLOAD: false
         with:
           context: .
           file: ${{ matrix.dockerfile }}
           push: true
+          provenance: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
