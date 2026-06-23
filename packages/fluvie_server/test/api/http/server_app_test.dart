@@ -487,6 +487,19 @@ void main() {
       final response = await send(app(), 'GET', '/v1/healthz');
       expect(response.headers.containsKey('access-control-allow-origin'), isFalse);
     });
+
+    test('an auth 401 from a configured origin still carries the allow-origin', () async {
+      final handler = app(env: const {'CORS_ALLOW_ORIGINS': 'https://app.test'});
+      final response = await send(
+        handler,
+        'POST',
+        '/v1/validate',
+        headers: const {'origin': 'https://app.test'},
+        body: {'code': 'x'},
+      );
+      expect(response.statusCode, 401);
+      expect(response.headers['access-control-allow-origin'], 'https://app.test');
+    });
   });
 }
 
