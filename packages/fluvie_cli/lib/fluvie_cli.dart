@@ -5,6 +5,7 @@ library;
 export 'src/capture_process.dart' show resolveProjectDir;
 export 'src/cli_failure.dart';
 export 'src/cli_runner.dart';
+export 'src/codegen/dart_spec_printer.dart' show printVideoSpecJson;
 export 'src/edit_command.dart';
 export 'src/export_flags.dart';
 export 'src/ffmpeg/ffmpeg_cache.dart';
@@ -13,6 +14,8 @@ export 'src/ffmpeg/ffmpeg_release.dart' show pinnedFfmpegBuildLabel, pinnedFfmpe
 export 'src/ffmpeg_command.dart';
 export 'src/ffmpeg_gate.dart' show ensureFfmpeg;
 export 'src/generate_command.dart';
+export 'src/init_command.dart';
+export 'src/init_prompt.dart' show InitPrompt, LineReader;
 export 'src/process_runner.dart';
 export 'src/render_command.dart';
 export 'src/render_defines.dart';

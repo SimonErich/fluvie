@@ -314,6 +314,29 @@ void main() {
       expect(resolveProjectDir(cwd: root), '${root.absolute.path}/example');
     });
 
+    test('resolves a standalone project whose harness sits directly in it', () {
+      final root = Directory.systemTemp.createTempSync('fluvie_cli_standalone_');
+      addTearDown(() => root.deleteSync(recursive: true));
+      File(
+        '${root.path}/test/render/capture_harness_test.dart',
+      ).createSync(recursive: true);
+      final lib = Directory('${root.path}/lib/videos')..createSync(recursive: true);
+
+      expect(resolveProjectDir(cwd: root), root.absolute.path);
+      expect(resolveProjectDir(cwd: lib), root.absolute.path);
+    });
+
+    test('prefers a standalone harness over an "example" subproject in the same dir', () {
+      final root = Directory.systemTemp.createTempSync('fluvie_cli_both_');
+      addTearDown(() => root.deleteSync(recursive: true));
+      File('${root.path}/test/render/capture_harness_test.dart').createSync(recursive: true);
+      File(
+        '${root.path}/example/test/render/capture_harness_test.dart',
+      ).createSync(recursive: true);
+
+      expect(resolveProjectDir(cwd: root), root.absolute.path);
+    });
+
     test('fails with a --project hint when no harness is found', () {
       final empty = Directory.systemTemp.createTempSync('fluvie_cli_no_project_');
       addTearDown(() => empty.deleteSync(recursive: true));

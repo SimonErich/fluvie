@@ -10,26 +10,32 @@ const String runCaptureUnknownKeyMarker = 'fluvie-unknown-key:';
 
 /// Locates the Flutter project hosting the capture harness.
 ///
-/// An explicit [project] is used verbatim. Otherwise the default `example`
-/// project is auto-discovered by walking up from [cwd] (default:
-/// [Directory.current]) until a directory contains
-/// `example/test/render/capture_harness_test.dart` — so the CLI works from
-/// the repo root and from inside `packages/fluvie_cli` alike.
+/// An explicit [project] is used verbatim. Otherwise the harness is
+/// auto-discovered by walking up from [cwd] (default: [Directory.current]),
+/// checking two layouts at each level:
+///
+/// 1. a standalone project (for example one scaffolded by `fluvie init`) whose
+///    harness sits directly under its own `test/render/`, and
+/// 2. the Fluvie monorepo, whose harness lives in the bundled `example` project.
+///
+/// So the CLI works from a scaffolded project root, from the repo root, and from
+/// inside `packages/fluvie_cli` alike.
 String resolveProjectDir({String? project, Directory? cwd}) {
   if (project != null) return project;
+  const harness = 'test/render/capture_harness_test.dart';
   var dir = (cwd ?? Directory.current).absolute;
   while (true) {
-    final candidate = '${dir.path}/example';
-    if (File('$candidate/test/render/capture_harness_test.dart').existsSync()) {
-      return candidate;
-    }
+    if (File('${dir.path}/$harness').existsSync()) return dir.path;
+    final example = '${dir.path}/example';
+    if (File('$example/$harness').existsSync()) return example;
     final parent = dir.parent;
     if (parent.path == dir.path) {
       throw const CliFailure(
-        'Could not find an "example" project with the capture harness '
-        '(test/render/capture_harness_test.dart) in the working directory or '
-        'any parent. Pass --project pointing at the Flutter project to '
-        'capture from.',
+        'Could not find a Fluvie capture harness '
+        '(test/render/capture_harness_test.dart) in the working directory, its '
+        '"example" project, or any parent. Run `fluvie init` to scaffold a '
+        'project, or pass --project pointing at the Flutter project to capture '
+        'from.',
       );
     }
     dir = parent;

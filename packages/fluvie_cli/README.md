@@ -15,6 +15,38 @@ dart pub global activate fluvie_cli
 
 You also need FFmpeg on your PATH.
 
+## Start a project
+
+`fluvie init` gets you going. Inside an existing Flutter project it drops a
+starter composition (real Flutter widget code) and wires a render harness so
+`fluvie render` works; run it outside a Flutter project and it scaffolds a
+minimal, runnable Fluvie project with `flutter create`.
+
+```sh
+fluvie init            # prompts for a location/name; press Enter for the default
+```
+
+It is the one interactive command. Run it without prompts in CI or scripts:
+
+```sh
+fluvie init --yes                          # accept every default
+fluvie init --name intro --path lib/videos/intro.dart --yes
+fluvie init --dir my_reel --yes            # scaffold a new project (no Flutter project here)
+```
+
+Useful options:
+
+- `--name <name>`: the composition name (the render key and file name).
+- `--path <file>`: where to write the composition in an existing project.
+- `--dir <project>`: the directory for a new project.
+- `--no-render`: skip the render harness in an existing project.
+- `--force`: overwrite files that already exist.
+- `--yes`: accept defaults; do not prompt.
+
+After it runs, `flutter pub get`, then `flutter run` to preview and
+`fluvie render <name> --out <name>.mp4` to render. See the
+[start a project guide](https://docs.fluvie.dev/getting-started/start-a-project/).
+
 ## Render
 
 ```sh
@@ -62,6 +94,11 @@ fluvie render --spec promo.fluvie.json --out promo.mp4
 The `.fluvie.json` is the reproducible artifact: re-render it any time to get the
 same video. See the
 [authoring guide](https://docs.fluvie.dev/guides/ai-and-mcp/).
+
+The package also exports `printVideoSpecJson(Map)`, a public function that
+converts a `VideoSpec` to an editable Dart `Video build()` snippet. It is a pure
+transformation (no model call, no render) and is `@experimental`. See the
+[AI and MCP guide](https://docs.fluvie.dev/guides/ai-and-mcp/).
 
 ## How renders run
 

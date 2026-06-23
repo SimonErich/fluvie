@@ -1,8 +1,36 @@
+import 'dart:io';
+
 import 'package:fluvie_cli/fluvie_cli.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('run', () {
+    test('--help mentions the init command', () async {
+      final out = StringBuffer();
+      final err = StringBuffer();
+
+      await run(['--help'], out: out, err: err);
+
+      expect(out.toString(), contains('init'));
+    });
+
+    test('the init command dispatches to the injected command', () async {
+      final out = StringBuffer();
+      final err = StringBuffer();
+      final empty = Directory.systemTemp.createTempSync('fluvie_runner_init_');
+      addTearDown(() => empty.deleteSync(recursive: true));
+
+      final code = await run(
+        ['init'],
+        out: out,
+        err: err,
+        init: InitCommand(workingDirectory: empty, readLine: () => 'n'),
+      );
+
+      expect(code, 0);
+      expect(out.toString(), contains('Nothing created'));
+    });
+
     test('--help prints usage to out and exits 0', () async {
       final out = StringBuffer();
       final err = StringBuffer();
