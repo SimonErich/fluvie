@@ -3,6 +3,14 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.5] - 2026-06-23
+
+### Added
+
+- `fluvie init` scaffolds a new Fluvie project or adds Fluvie to an existing
+  Flutter app from an embedded starter template, prompting only for what it
+  cannot infer.
+
 ## [0.1.4] - 2026-06-22
 
 Lockstep release. Documentation only: the README describes reproducible renders

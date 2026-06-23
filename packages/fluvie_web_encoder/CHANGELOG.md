@@ -3,6 +3,13 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.5] - 2026-06-23
+
+### Changed
+
+- Frames are encoded to one PNG each through the engine codec, keeping peak
+  memory bounded to a single frame instead of buffering every raw frame.
+
 ## [0.1.4] - 2026-06-22
 
 ### Added

@@ -3,6 +3,16 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.5] - 2026-06-23
+
+### Added
+
+- Per-client in-memory rate limiting in front of the render and validate
+  routes.
+- A canonical spec-to-Dart printer that produces the editable code the
+  Playground shows.
+- An `init` MCP tool that mirrors `fluvie init` for agents.
+
 ## [0.1.4] - 2026-06-22
 
 The first release of `fluvie_server`. It consolidates the former `fluvie_api` and

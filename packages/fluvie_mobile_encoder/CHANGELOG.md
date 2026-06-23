@@ -3,6 +3,15 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.5] - 2026-06-23
+
+### Added
+
+- On-device `FrameExtractionService` and `VideoProbeService` backed by the
+  platform decoder (`MediaMetadataRetriever` / AVFoundation), so on-device
+  renders need no ffmpeg. Probed dimensions are capped to the render
+  resolution.
+
 ## [0.1.4] - 2026-06-22
 
 ### Added

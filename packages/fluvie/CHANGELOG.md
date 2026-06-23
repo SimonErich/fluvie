@@ -3,6 +3,16 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.5] - 2026-06-23
+
+### Added
+
+- Non-fatal spec diagnostics: an unknown spec property is surfaced on the
+  default render path instead of being silently dropped, backed by the
+  JSON-schema variants and defs.
+- A pluggable `ClipFramePreparer` contract so a host can pre-resolve clip
+  frames without ffmpeg.
+
 ## [0.1.4] - 2026-06-22
 
 ### Added
