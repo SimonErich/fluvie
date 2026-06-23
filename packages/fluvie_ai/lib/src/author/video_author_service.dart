@@ -86,7 +86,21 @@ class LlmVideoAuthorService implements VideoAuthorService {
     if (decoded is! Map<String, Object?>) {
       throw FluvieSpecError('Model output was not a JSON object');
     }
-    return VideoSpec.fromJson(decoded);
+    try {
+      final spec = VideoSpec.fromJson(decoded);
+      // Promote unknown properties (which `fromJson` would silently drop) to a
+      // FluvieSpecError so the repair loop corrects an off-schema spec instead
+      // of rendering one whose gradients, font sizes, or positions were dropped.
+      assertNoUnknownSpecProps(decoded);
+      return spec;
+    } on FluvieSpecError {
+      rethrow;
+    } catch (error) {
+      // A decoded-but-out-of-range value (e.g. {"repeat":{"times":0}}) trips a
+      // core assertion rather than a FluvieSpecError. Convert it so the repair
+      // loop corrects it instead of crashing the author with an AssertionError.
+      throw FluvieSpecError('The spec contains a value Fluvie rejects: $error');
+    }
   }
 
   /// Strips a leading/trailing markdown code fence a model may add despite the

@@ -43,6 +43,36 @@ void main() {
       );
     });
 
+    test('repairs an off-schema spec whose extra properties Fluvie would drop', () async {
+      const offSchema =
+          '{"fluvieSpec":1,"size":"square","fps":30,"scenes":[{"duration":"2s",'
+          '"children":[{"type":"Box","fill":{"kind":"gradient"},"width":"100%"}]}]}';
+      final client = FakeAiClient([offSchema, _validSpec]);
+      final service = LlmVideoAuthorService(client: client);
+
+      final spec = await service.author('x');
+
+      expect(spec.scenes, hasLength(1));
+      expect(client.requests, hasLength(2)); // one repair round
+      expect(client.requests.last.messages.last.text, contains('does not recognize'));
+    });
+
+    test('repairs an out-of-range value that trips a core assertion', () async {
+      // {"repeat":{"times":0}} decodes to Repeat.times(0), which trips an assert
+      // (not a FluvieSpecError); the author must repair it, not crash.
+      const outOfRange =
+          '{"fluvieSpec":1,"size":"square","fps":30,"scenes":[{"duration":"2s",'
+          '"children":[{"type":"Text","text":"Hi","animate":'
+          '[{"preset":"fadeIn","repeat":{"times":0}}]}]}]}';
+      final client = FakeAiClient([outOfRange, _validSpec]);
+      final service = LlmVideoAuthorService(client: client);
+
+      final spec = await service.author('x');
+
+      expect(spec.scenes, hasLength(1));
+      expect(client.requests, hasLength(2)); // repaired, not crashed
+    });
+
     test('throws after the repair budget is exhausted', () async {
       final service = LlmVideoAuthorService(
         client: FakeAiClient(['bad', 'bad', 'bad', 'bad']),
@@ -85,6 +115,17 @@ void main() {
       expect(prompt, contains('JSON Schema'));
       expect(prompt, contains('fadeIn'));
       expect(prompt, contains('"#RRGGBB"'));
+    });
+
+    test('teaches the per-type element fields so the model cannot invent props', () {
+      final prompt = buildAuthorSystemPrompt(videoSpecSchema);
+      // Typography is nested under "style"; gradients are scene backgrounds;
+      // Box size is a parent fraction; scenes center children by default.
+      expect(prompt, contains('never invent'));
+      expect(prompt, contains('"style"'));
+      expect(prompt, contains('fraction of the parent'));
+      expect(prompt, contains('"kind": "gradient"'));
+      expect(prompt, contains('centers its children'));
     });
   });
 
