@@ -5,8 +5,14 @@ import 'package:flutter/widgets.dart' hide Animation, Image;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
+import 'package:fluvie_web_encoder/src/png_frame_encoder.dart' show encodeFramePng;
 
 import 'fake_wasm_runtime.dart';
+
+/// An identity frame "encoder": stores each frame's raw RGBA under its PNG name
+/// so a test can assert the bounded-memory per-frame files and their pixel bytes
+/// without a real engine PNG round-trip.
+Future<Uint8List> _passthroughFrame(Uint8List rgba, int width, int height) async => rgba;
 
 /// A [WebAudioMaterializer] that returns fixed bytes for any source.
 class _FakeAudioMaterializer implements WebAudioMaterializer {
@@ -102,6 +108,7 @@ void main() {
     final renderer = WebVideoRenderer(
       encoder: WebVideoEncoder(runtime: runtime),
       hostFactory: (size) => host = _TesterHost(tester, size),
+      frameEncoder: _passthroughFrame,
     );
 
     final bytes = await tester.runAsync(
@@ -114,8 +121,12 @@ void main() {
     );
 
     expect(bytes, isNotEmpty);
-    expect(runtime.files['frames.rgba']!.length, 3 * 64 * 64 * 4);
-    expect(runtime.lastArgs, contains('frames.rgba'));
+    // Each frame is its own bounded-size PNG file (raw bytes via the passthrough
+    // encoder), fed to ffmpeg as the image2 sequence — not one giant raw buffer.
+    final frameFiles = runtime.files.keys.where((n) => n.startsWith('frame_')).toList();
+    expect(frameFiles, hasLength(3));
+    expect(runtime.files['frame_000000.png']!.length, 64 * 64 * 4);
+    expect(runtime.lastArgs, contains('frame_%06d.png'));
     expect(host.disposed, isTrue);
   });
 
@@ -128,6 +139,7 @@ void main() {
       encoder: WebVideoEncoder(runtime: runtime),
       hostFactory: (size) => _TesterHost(tester, size),
       mediaResolver: resolver,
+      frameEncoder: _passthroughFrame,
     );
 
     await tester.runAsync(
@@ -149,10 +161,11 @@ void main() {
 
     // The declared image was collected and pre-resolved before frame 0 ...
     expect(resolver.preResolved, contains(const MediaSource.asset('fixtures/swatch.png')));
-    // ... and painted from the decoded cache: the centre pixel is swatch green.
-    final frames = runtime.files['frames.rgba']!;
+    // ... and painted from the decoded cache: the first frame's centre pixel is
+    // swatch green (raw RGBA, stored under its PNG name via the passthrough).
+    final frame0 = runtime.files['frame_000000.png']!;
     const centre = (64 ~/ 2 * 64 + 64 ~/ 2) * 4;
-    expect(frames.sublist(centre, centre + 4), [0x2E, 0xCC, 0x71, 0xFF]);
+    expect(frame0.sublist(centre, centre + 4), [0x2E, 0xCC, 0x71, 0xFF]);
   });
 
   testWidgets('reports per-frame capture progress, then encoding and complete', (tester) async {
@@ -209,6 +222,7 @@ void main() {
     final renderer = WebVideoRenderer(
       encoder: WebVideoEncoder(runtime: runtime),
       hostFactory: (size) => _TesterHost(tester, size),
+      frameEncoder: _passthroughFrame,
     );
 
     await tester.runAsync(
@@ -220,7 +234,10 @@ void main() {
       ),
     );
 
-    expect(runtime.files['frames.rgba']!.length, 64 * 64 * 4); // exactly 1 frame
+    // Exactly one frame file (one PNG), proving the sub-frame duration rounded up.
+    final frameFiles = runtime.files.keys.where((n) => n.startsWith('frame_')).toList();
+    expect(frameFiles, ['frame_000000.png']);
+    expect(runtime.files['frame_000000.png']!.length, 64 * 64 * 4);
   });
 
   testWidgets('with audio:true it stages the track and mixes it into the args', (tester) async {
@@ -325,6 +342,18 @@ void main() {
     expect(warnings, hasLength(1));
     expect(warnings.single, contains('MP4'));
     expect(runtime.files.keys.any((name) => name.startsWith('audio_0_')), isFalse);
+  });
+
+  testWidgets('encodeFramePng turns raw RGBA into real PNG bytes', (tester) async {
+    await tester.runAsync(() async {
+      final rgba = Uint8List(4 * 4 * 4);
+      for (var i = 0; i < rgba.length; i++) {
+        rgba[i] = 0xFF; // opaque white
+      }
+      final png = await encodeFramePng(rgba, 4, 4);
+      // The 8-byte PNG signature proves a real encode (not the raw bytes).
+      expect(png.sublist(0, 8), [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+    });
   });
 
   test('rejects a non-positive fps', () {

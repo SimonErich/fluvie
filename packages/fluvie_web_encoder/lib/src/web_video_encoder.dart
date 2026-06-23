@@ -28,7 +28,12 @@ final class WebVideoEncoder {
   }) async {
     await (_loading ??= _runtime.load());
     for (final name in fileInputNames(manifest.ffmpegArgs)) {
-      await _runtime.writeFile(name, await sandbox.readBytes(name));
+      // An `image2` `%0Nd` pattern (the bounded-memory PNG frame input) is not a
+      // single file: expand it to the per-frame files and copy each in.
+      final files = name.contains('%') ? expandImagePattern(name, manifest.frameCount) : [name];
+      for (final file in files) {
+        await _runtime.writeFile(file, await sandbox.readBytes(file));
+      }
     }
     final exitCode = await _runtime.exec(manifest.ffmpegArgs);
     if (exitCode != 0) {
@@ -38,6 +43,20 @@ final class WebVideoEncoder {
     await sandbox.writeBytes(manifest.outputFileName, output);
     return output;
   }
+}
+
+/// Expands an `image2` [pattern] like `frame_%06d.png` into [count] concrete
+/// frame file names (`frame_000000.png`, `frame_000001.png`, …) — the per-frame
+/// PNG inputs ffmpeg.wasm reads via the pattern. A pattern with no `%0Nd` token
+/// is returned unchanged.
+List<String> expandImagePattern(String pattern, int count) {
+  final match = RegExp(r'%0(\d+)d').firstMatch(pattern);
+  if (match == null) return [pattern];
+  final pad = int.parse(match.group(1)!);
+  return [
+    for (var i = 0; i < count; i++)
+      pattern.replaceFirst(match.group(0)!, i.toString().padLeft(pad, '0')),
+  ];
 }
 
 /// The names following `-i` in [args] that are real files to copy into the wasm

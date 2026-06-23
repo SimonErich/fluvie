@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_web_encoder/src/clip_decoder.dart';
 import 'package:fluvie_web_encoder/src/fluvie_web_stage.dart';
+import 'package:fluvie_web_encoder/src/png_frame_encoder.dart';
 import 'package:fluvie_web_encoder/src/web_audio_materializer.dart';
 import 'package:fluvie_web_encoder/src/web_capture_host.dart';
 import 'package:fluvie_web_encoder/src/web_video_encoder.dart';
@@ -33,6 +34,7 @@ final class WebVideoRenderer {
     WebCaptureHostFactory? hostFactory,
     WebAudioMaterializer? audioMaterializer,
     WebClipDecoder? clipDecoder,
+    FrameEncoder? frameEncoder,
     this.mediaResolver,
     this.networkAllowlist,
   }) : _hostFactory = hostFactory ?? _defaultHostFactory,
@@ -40,7 +42,8 @@ final class WebVideoRenderer {
        _encoder = encoder ?? _defaultEncoder(),
        // coverage:ignore-line: the default materializer reads rootBundle, only in a browser.
        _audioMaterializer = audioMaterializer ?? BundleWebAudioMaterializer(),
-       _clipDecoder = clipDecoder ?? createWebClipDecoder();
+       _clipDecoder = clipDecoder ?? createWebClipDecoder(),
+       _frameEncoder = frameEncoder ?? encodeFramePng;
 
   /// The injected media resolver, or null to build (and dispose) one per
   /// [render] from `mediaResolverProvider` — a `WebImageMediaResolver` on web,
@@ -68,6 +71,11 @@ final class WebVideoRenderer {
   /// Decodes clip frames for the per-render resolver (WebCodecs in the browser,
   /// a fail-on-use stub on the VM). Ignored when [mediaResolver] is injected.
   final WebClipDecoder _clipDecoder;
+
+  /// Compresses each captured frame to PNG so the render stages bounded-memory
+  /// per-frame files instead of one giant raw buffer. Defaults to the engine PNG
+  /// codec; a test injects a fake to avoid a real engine.
+  final FrameEncoder _frameEncoder;
 
   /// Renders [composition] for [aspect] over [duration] and returns the MP4
   /// bytes (deliver them as a browser download or upload).
@@ -144,6 +152,7 @@ final class WebVideoRenderer {
           loadAudioBytes: _audioMaterializer.materialize,
           audioMasterVolume: mix.masterVolume,
           resolver: scope.resolver,
+          frameEncoder: _frameEncoder,
         ),
       );
       onProgress?.call(RenderProgress(RenderPhase.encoding, compositionKey: compositionKey));
