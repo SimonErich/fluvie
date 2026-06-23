@@ -51,7 +51,7 @@ void main() {
     );
     final resolver = _RecordingResolver({_clip: (fps: 30.0, frameCount: 30, width: 2, height: 2)});
 
-    await preResolveCompositionClips(composition: video, resolver: resolver);
+    await preResolveCompositionClips(composition: video, resolver: resolver, totalFrames: 4);
 
     expect(resolver.probed, [_clip]);
     expect(resolver.extracted[_clip], [0, 1, 2, 3]);
@@ -65,7 +65,7 @@ void main() {
     );
     final resolver = _RecordingResolver({_clip: (fps: 15.0, frameCount: 30, width: 2, height: 2)});
 
-    await preResolveCompositionClips(composition: video, resolver: resolver);
+    await preResolveCompositionClips(composition: video, resolver: resolver, totalFrames: 4);
 
     expect(resolver.extracted[_clip], [0, 1], reason: 'frames 0 and 1 each cover two comp frames');
   });
@@ -79,9 +79,33 @@ void main() {
     );
     final resolver = _RecordingResolver({_clip: (fps: 24.0, frameCount: 30, width: 2, height: 2)});
 
-    await preResolveCompositionClips(composition: video, resolver: resolver);
+    await preResolveCompositionClips(composition: video, resolver: resolver, totalFrames: 24);
 
     expect(resolver.extracted[_clip], List.generate(24, (i) => i));
+  });
+
+  test('a clip held into a later scene extracts the frame it is clamped to', () async {
+    // Regression: a clip in scene 1 keeps painting (held on its last source
+    // frame) while scene 2 is on screen. The in-window plan floors composition
+    // frame 149 to source 148, but off-screen in scene 2 the resampler clamps to
+    // the trim end (149) — so 149 must be extracted too, across the whole comp.
+    final video = Video(
+      scenes: [
+        Scene(duration: const Time.frames(150), children: [Clip.asset('clip.mp4')]),
+        Scene(duration: const Time.frames(150), children: [fluvie.Image.asset('photo.png')]),
+      ],
+    );
+    final resolver = _RecordingResolver({
+      _clip: (fps: 30.0, frameCount: 150, width: 2, height: 2),
+    });
+
+    await preResolveCompositionClips(
+      composition: video,
+      resolver: resolver,
+      totalFrames: 300,
+    );
+
+    expect(resolver.extracted[_clip], contains(149));
   });
 
   test('a composition with no clips probes and extracts nothing', () async {
@@ -92,7 +116,7 @@ void main() {
     );
     final resolver = _RecordingResolver(const {});
 
-    await preResolveCompositionClips(composition: video, resolver: resolver);
+    await preResolveCompositionClips(composition: video, resolver: resolver, totalFrames: 4);
 
     expect(resolver.probed, isEmpty);
     expect(resolver.extracted, isEmpty);

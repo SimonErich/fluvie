@@ -71,6 +71,18 @@ class SceneSpec {
     );
   }
 
+  /// The keys a scene object reads. The single source of truth for the
+  /// per-scene unknown-property check; it must stay in step with the keys
+  /// [SceneSpec.fromJson] consumes.
+  static const Set<String> knownKeys = {
+    'duration',
+    'background',
+    'children',
+    'enter',
+    'exit',
+    'motionDefaults',
+  };
+
   /// How long the scene lasts.
   final Time duration;
 

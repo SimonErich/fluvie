@@ -34,7 +34,8 @@ Future<AudioMixPlan> stageResolvedAudioToSandbox({
   for (var i = 0; i < tracks.length; i++) {
     final track = tracks[i];
     final name = 'audio_${i}_${audioSourceFromString(track.source).cacheKey}';
-    await sandbox.writeBytes(name, await loadBytes(track.source));
+    final bytes = await loadBytes(track.source);
+    await sandbox.writeBytes(name, bytes);
     nodes.add(AudioTrackNode.fromResolved(track, name: name));
   }
   return buildAudioMixPlan(nodes, masterVolume: masterVolume);

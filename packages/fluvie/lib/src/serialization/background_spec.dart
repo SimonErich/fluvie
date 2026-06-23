@@ -16,6 +16,19 @@ const Set<String> knownBackgroundKinds = {
   'vhs',
 };
 
+/// The properties each background variant reads, beyond the `kind` key. The
+/// single source of truth shared by the parser's unknown-property check and
+/// `videoSpecSchema`; it must stay in step with what `buildBackground` reads.
+const Map<String, Set<String>> knownBackgroundProps = {
+  'color': {'color'},
+  'gradient': {'colors', 'begin', 'end'},
+  'radial': {'colors'},
+  'image': {'source', 'fit'},
+  'video': {'source'},
+  'noise': {'scale'},
+  'vhs': {},
+};
+
 /// The data form of a [Background]: a `kind` plus that variant's properties.
 ///
 /// [buildBackground] turns it into a real [Background] widget.

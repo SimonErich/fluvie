@@ -23,6 +23,15 @@ final class VideoEncoderService {
   /// Sandbox-relative name of the raw RGBA8888 input stream.
   static const String framesFileName = 'frames.rgba';
 
+  /// Sandbox-relative `image2` pattern for the PNG frame sequence — the
+  /// bounded-memory web input where each frame is its own small PNG file
+  /// (`frame_000000.png`, `frame_000001.png`, …) instead of one raw buffer.
+  static const String framesPngPattern = 'frame_%06d.png';
+
+  /// The sandbox file name of the PNG frame at zero-based [index], matching
+  /// [framesPngPattern]'s six-digit zero-padded numbering.
+  static String framesPngName(int index) => 'frame_${index.toString().padLeft(6, '0')}.png';
+
   /// Sandbox-relative name of the encoded MP4 output (the default container).
   static const String outputFileName = 'out.mp4';
 
@@ -44,21 +53,40 @@ final class VideoEncoderService {
   /// caller destructures a plan into these two seam values. Non-MP4 export
   /// modes carry no audio. Pure and deterministic: equal inputs produce an
   /// equal array.
+  /// Set [framesArePng] for the bounded-memory web path: the input is the
+  /// [framesPngPattern] PNG sequence instead of the raw [framesFileName] stream.
+  /// The desktop/mobile/server paths leave it `false` (raw RGBA), byte-identical
+  /// to before.
   List<String> planEncodeArgs(
     RenderConfig config, {
     List<FfmpegAudioNode> audio = const [],
     FfmpegAudioMix? amix,
     Export? export,
+    bool framesArePng = false,
   }) {
-    final builder = FfmpegArgsBuilder()
-      ..addRawVideoInput(
+    final builder = FfmpegArgsBuilder();
+    _addFramesInput(builder, config, framesArePng: framesArePng);
+    _setOutput(builder, config, export: export, audio: audio, amix: amix);
+    return builder.build();
+  }
+
+  /// Adds the captured-frames input to [builder]: the [framesPngPattern] PNG
+  /// sequence when [framesArePng], else the raw RGBA [framesFileName] stream.
+  void _addFramesInput(
+    FfmpegArgsBuilder builder,
+    RenderConfig config, {
+    required bool framesArePng,
+  }) {
+    if (framesArePng) {
+      builder.addImageSequenceInput(pattern: framesPngPattern, fps: config.fps);
+    } else {
+      builder.addRawVideoInput(
         name: framesFileName,
         width: config.width,
         height: config.height,
         fps: config.fps,
       );
-    _setOutput(builder, config, export: export, audio: audio, amix: amix);
-    return builder.build();
+    }
   }
 
   /// Dispatches the right output setter on [builder] for [export]'s mode.
@@ -99,15 +127,14 @@ final class VideoEncoderService {
   /// The ffmpeg argument array for the SECOND poster invocation: reads
   /// [framesFileName] and writes one frame at
   /// [posterFrame] to [posterFileName]. Pure and deterministic.
-  List<String> planPosterArgs(RenderConfig config, {required int posterFrame}) {
-    final builder = FfmpegArgsBuilder()
-      ..addRawVideoInput(
-        name: framesFileName,
-        width: config.width,
-        height: config.height,
-        fps: config.fps,
-      )
-      ..setPosterOutput(name: posterFileName, frameIndex: posterFrame, fps: config.fps);
+  List<String> planPosterArgs(
+    RenderConfig config, {
+    required int posterFrame,
+    bool framesArePng = false,
+  }) {
+    final builder = FfmpegArgsBuilder();
+    _addFramesInput(builder, config, framesArePng: framesArePng);
+    builder.setPosterOutput(name: posterFileName, frameIndex: posterFrame, fps: config.fps);
     return builder.build();
   }
 }

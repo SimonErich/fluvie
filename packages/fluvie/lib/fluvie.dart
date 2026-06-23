@@ -119,7 +119,12 @@ export 'src/rendering/capture/frame_capture_service.dart';
 export 'src/rendering/capture/raw_frame.dart';
 export 'src/rendering/capture/render_manifest.dart';
 export 'src/rendering/capture/repaint_boundary_capture_service.dart';
+export 'src/rendering/encoding/ffmpeg_frame_extraction_service.dart'
+    show frameExtractionServiceProvider;
 export 'src/rendering/encoding/frame_cache.dart';
+export 'src/rendering/encoding/frame_extraction_service.dart' show FrameExtractionService;
+export 'src/rendering/encoding/video_probe_service.dart'
+    show VideoProbeResult, VideoProbeService, videoProbeServiceProvider;
 export 'src/rendering/io/file_render_sandbox.dart' show FileRenderSandbox;
 export 'src/rendering/io/memory_render_sandbox.dart' show MemoryRenderSandbox;
 export 'src/rendering/io/render_sandbox.dart';
@@ -136,7 +141,8 @@ export 'src/rendering/render_progress.dart' show RenderProgress, RenderProgressC
 export 'src/rendering/render_service.dart';
 export 'src/rendering/render_stage.dart' show runStage;
 export 'src/rendering/render_template.dart' show renderTemplate;
-export 'src/rendering/render_to_sandbox.dart' show SandboxFramePump, SandboxMount, renderToSandbox;
+export 'src/rendering/render_to_sandbox.dart'
+    show FrameEncoder, SandboxFramePump, SandboxMount, renderToSandbox;
 export 'src/rendering/runtime/frame_provider.dart';
 export 'src/rendering/runtime/render_controller.dart';
 export 'src/rendering/runtime/render_controller_scope.dart';
@@ -144,9 +150,12 @@ export 'src/rendering/runtime/render_mode.dart';
 export 'src/rendering/runtime/render_mode_context.dart';
 export 'src/serialization/anchor_table.dart' show AnchorTable;
 export 'src/serialization/animation_spec.dart' show AnimationSpec, knownAnimationPresets;
-export 'src/serialization/background_spec.dart' show BackgroundSpec, knownBackgroundKinds;
-export 'src/serialization/element_spec.dart' show ElementSpec, knownElementTypes;
+export 'src/serialization/background_spec.dart'
+    show BackgroundSpec, knownBackgroundKinds, knownBackgroundProps;
+export 'src/serialization/element_spec.dart' show ElementSpec, knownElementProps, knownElementTypes;
 export 'src/serialization/scene_spec.dart' show SceneSpec;
+export 'src/serialization/spec_validation.dart'
+    show FluvieSpecWarning, assertNoUnknownSpecProps, unknownSpecProps;
 export 'src/serialization/video_spec.dart' show VideoSpec, buildVideo;
 export 'src/serialization/video_spec_schema.dart' show videoSpecSchema;
 export 'src/templates/builtin/stat_highlight.dart' show StatHighlight, StatHighlightProps;

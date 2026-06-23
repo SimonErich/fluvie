@@ -7,6 +7,7 @@ import 'package:fluvie/src/composition/runtime/audio_collector.dart';
 import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/aspect.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
+import 'package:fluvie/src/core/contracts/clip_frame_preparer.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart' show MediaResolver;
 import 'package:fluvie/src/rendering/capture/capture_shell.dart';
 import 'package:fluvie/src/rendering/capture/render_manifest.dart';
@@ -107,7 +108,11 @@ Future<RenderAspectResult> render({
   // must be warm before the tree mounts (a null resolver = a media-less render).
   if (resolver != null) {
     await resolver.preResolveAll(collectCompositionMedia(composition));
-    await preResolveCompositionClips(composition: composition, resolver: resolver);
+    await preResolveCompositionClips(
+      composition: composition,
+      resolver: resolver,
+      totalFrames: frameCount,
+    );
   }
   final controller = RenderController();
   final boundaryKey = GlobalKey();
@@ -117,11 +122,23 @@ Future<RenderAspectResult> render({
     controller: controller,
     resolver: resolver,
   );
+  final preparer = resolver != null && resolver is ClipFramePreparer
+      ? resolver as ClipFramePreparer
+      : null;
+  // Warm the first frame's clip window before the tree mounts: the initial
+  // pumpWidget builds at frame 0, before the capture loop's first decode-ahead,
+  // so without this the first build's synchronous clip lookup would miss (that
+  // build is not captured — the loop re-pumps frame 0 — but it would still throw).
+  await preparer?.prepareClipFrames(0);
   await pumpWidget(shell.tree);
   final manifest = await service.captureToDirectory(
     config: config,
     outDir: outDir,
     pump: (frame) async {
+      // Decode-ahead: a streaming resolver warms just the clip frames this
+      // composition frame paints before the tree builds, so paint's
+      // synchronous clip lookup is a hit without holding every frame in memory.
+      await preparer?.prepareClipFrames(frame);
       controller.seek(frame);
       shell.mountedSnapshotScope?.resetCursor();
       await pumpFrame();

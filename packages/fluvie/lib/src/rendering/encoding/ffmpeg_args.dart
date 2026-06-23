@@ -54,6 +54,19 @@ final class FfmpegArgsBuilder {
     ]);
   }
 
+  /// Declares a PNG image-sequence frame-stream input read from the
+  /// sandbox-relative `image2` [pattern] (one `%0Nd` token, e.g.
+  /// `frame_%06d.png`) at [fps], starting at frame index 0.
+  ///
+  /// Unlike [addRawVideoInput] no size or pixel format is set: each PNG carries
+  /// its own dimensions and format. This is the browser encoder's bounded-memory
+  /// input — one small PNG per frame instead of a single multi-gigabyte raw
+  /// buffer — and the web encoder expands the pattern to the actual frame files.
+  void addImageSequenceInput({required String pattern, required int fps}) {
+    validateFfmpegName(pattern, 'pattern', allowImagePattern: true);
+    _inputs.add(['-framerate', '$fps', '-start_number', '0', '-i', pattern]);
+  }
+
   /// Declares a `lavfi` generated input described by [graph]
   /// (for example `testsrc=duration=1`). The graph must be non-empty and not
   /// start with `-`, so it can never be parsed as a flag.

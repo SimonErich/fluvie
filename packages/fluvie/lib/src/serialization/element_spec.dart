@@ -7,6 +7,17 @@ import 'package:fluvie/src/serialization/element_builder.dart';
 /// The element types the spec can build.
 const Set<String> knownElementTypes = {'Text', 'Box', 'Image', 'Counter'};
 
+/// The content properties each element type reads, beyond the reserved keys
+/// (`type`, `anchor`, `animate`). This is the single source of truth shared by
+/// the parser's unknown-property check and `videoSpecSchema`; it must stay in
+/// step with what `buildElement` actually reads in `element_builder.dart`.
+const Map<String, Set<String>> knownElementProps = {
+  'Text': {'text', 'style'},
+  'Box': {'color', 'size'},
+  'Image': {'source', 'fit'},
+  'Counter': {'to', 'from', 'duration', 'style'},
+};
+
 /// The data form of one scene child: a `type`, its content `props`, an optional
 /// `anchor` id, and the `animate` list applied through `.animate(...)`.
 ///

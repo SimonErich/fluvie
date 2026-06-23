@@ -9,12 +9,15 @@ export 'package:fluvie/src/media/media_providers_common.dart';
 
 /// The media resolver used by the native render pipeline: a real
 /// [MediaRepository] over the injected loader plus the clip probe/extraction
-/// services. Overridable with a fake in tests; `NoMediaResolver` stays exported
+/// services, streaming clip frames through an on-disk [FileClipFrameStore] so a
+/// full-resolution or long clip never has to hold every decoded frame in
+/// memory. Overridable with a fake in tests; `NoMediaResolver` stays exported
 /// as the deliberate media-less choice.
 final mediaResolverProvider = Provider<MediaResolver>(
   (ref) => MediaRepository(
     loader: ref.watch(mediaBytesLoaderProvider),
     probeService: ref.watch(videoProbeServiceProvider),
     frameExtractor: ref.watch(frameExtractionServiceProvider),
+    clipFrameStore: FileClipFrameStore(),
   ),
 );

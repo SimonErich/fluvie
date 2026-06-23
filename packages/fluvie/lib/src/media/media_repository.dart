@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:fluvie/src/captions/parse/srt_parser.dart';
@@ -12,6 +13,7 @@ import 'package:fluvie/src/core/captions/caption_source.dart';
 import 'package:fluvie/src/core/captions/caption_word.dart';
 import 'package:fluvie/src/core/contracts/beat_detection_service.dart';
 import 'package:fluvie/src/core/contracts/beat_grid.dart';
+import 'package:fluvie/src/core/contracts/clip_frame_preparer.dart';
 import 'package:fluvie/src/core/contracts/disposable_resolver.dart';
 import 'package:fluvie/src/core/contracts/frequency_analyzer.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
@@ -45,14 +47,32 @@ part 'media_repository_snapshot.dart';
 /// lookup, so no frame ever awaits media.
 final class MediaRepository
     with ImageResolveCache, ClipResolveCache
-    implements MediaResolver, DisposableResolver {
+    implements MediaResolver, DisposableResolver, ClipFramePreparer {
   /// Creates a repository over the byte [loader], with the [probeService] and
   /// [frameExtractor] the clip path needs (`null` until a clip is resolved).
-  MediaRepository({required this.loader, this.probeService, this.frameExtractor});
+  ///
+  /// Pass a [clipFrameStore] to stream clip frames through it (decoding only a
+  /// bounded window during the loop); leave it null to decode every clip frame
+  /// up front. The capture loop drives the streaming window through
+  /// [prepareClipFrames]; a null store makes that a no-op.
+  MediaRepository({
+    required this.loader,
+    this.probeService,
+    this.frameExtractor,
+    this.clipFrameStore,
+  });
 
   /// The per-kind byte source feeding the cache.
   @override
   final MediaBytesLoader loader;
+
+  /// The on-disk store clip frames stream through, or null to decode every clip
+  /// frame up front (overrides the cache's null default).
+  @override
+  final ClipFrameStore? clipFrameStore;
+
+  @override
+  Future<void> prepareClipFrames(int compFrame) => prepareClipFramesForComposition(compFrame);
 
   /// Probes clip sources for their fps/dimensions; required to resolve clips.
   final VideoProbeService? probeService;
@@ -208,6 +228,8 @@ final class MediaRepository
   void dispose() {
     disposeCachedImages();
     disposeClipFrames();
+    // Delete the on-disk clip-frame store in the background (dispose is sync).
+    unawaited(clipFrameStore?.dispose() ?? Future<void>.value());
     for (final image in _snapshots.values) {
       image.dispose();
     }

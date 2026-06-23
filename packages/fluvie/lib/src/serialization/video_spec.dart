@@ -90,6 +90,20 @@ class VideoSpec {
   /// The schema version this build reads and writes.
   static const int schemaVersion = 1;
 
+  /// The top-level keys a [VideoSpec] document reads. The single source of truth
+  /// for the document-root unknown-property check; it must stay in step with the
+  /// keys [VideoSpec.fromJson] consumes.
+  static const Set<String> knownKeys = {
+    'fluvieSpec',
+    'size',
+    'fps',
+    'poster',
+    'export',
+    'motionDefaults',
+    'transition',
+    'scenes',
+  };
+
   /// The scenes, played back-to-back. Never empty.
   final List<SceneSpec> scenes;
 

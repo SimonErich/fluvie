@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/audio/encoding/resolved_audio_track.dart';
@@ -24,6 +25,14 @@ typedef SandboxMount = Future<void> Function(Widget tree);
 
 /// Pumps the host one frame after the controller seeks.
 typedef SandboxFramePump = Future<void> Function();
+
+/// Compresses one captured frame's raw RGBA pixels to encoder-ready bytes.
+///
+/// The browser passes a PNG encoder here so each frame is written to its own
+/// small `frame_NNNNNN.png` file as it is captured, instead of accumulating
+/// every raw frame into one multi-gigabyte buffer that overflows browser/wasm
+/// memory. With no encoder the render writes the single raw RGBA stream.
+typedef FrameEncoder = Future<Uint8List> Function(Uint8List rgba, int width, int height);
 
 /// Renders [composition] for [aspect] into [sandbox] without touching the file
 /// system — the in-memory, `dart:io`-free capture-and-plan path the web encoder
@@ -67,6 +76,7 @@ Future<RenderManifest> renderToSandbox({
   AudioByteLoader? loadAudioBytes,
   double audioMasterVolume = 1,
   MediaResolver? resolver,
+  FrameEncoder? frameEncoder,
 }) async {
   if (audioTracks.isNotEmpty && loadAudioBytes == null) {
     throw ArgumentError.value(
@@ -87,7 +97,11 @@ Future<RenderManifest> renderToSandbox({
   // must be warm before the tree mounts (a null resolver = a media-less render).
   if (resolver != null) {
     await resolver.preResolveAll(collectCompositionMedia(composition));
-    await preResolveCompositionClips(composition: composition, resolver: resolver);
+    await preResolveCompositionClips(
+      composition: composition,
+      resolver: resolver,
+      totalFrames: frameCount,
+    );
   }
   final controller = RenderController();
   final boundaryKey = GlobalKey();
@@ -105,22 +119,42 @@ Future<RenderManifest> renderToSandbox({
     fluvieVersion: fluvieRenderVersion,
   );
   await sandbox.create();
-  final sink = sandbox.openFrames(VideoEncoderService.framesFileName);
-  try {
+  // The browser path (frameEncoder set) writes one bounded-size PNG per frame as
+  // it is captured; every other backend appends raw RGBA to one frames stream.
+  final framesArePng = frameEncoder != null;
+  Future<void> pump(int frame) async {
+    controller.seek(frame);
+    await pumpFrame();
+  }
+
+  if (framesArePng) {
     await runFrameCaptureLoop(
       config: config,
       digest: digest,
-      pump: (frame) async {
-        controller.seek(frame);
-        await pumpFrame();
-      },
+      pump: pump,
       boundaryKey: boundaryKey,
-      sink: sink,
       capture: capture,
+      onFrame: (raw) async {
+        final png = await frameEncoder(raw.rgba, raw.width, raw.height);
+        await sandbox.writeBytes(VideoEncoderService.framesPngName(raw.frameIndex), png);
+      },
       onProgress: onProgress,
     );
-  } finally {
-    await sink.close();
+  } else {
+    final sink = sandbox.openFrames(VideoEncoderService.framesFileName);
+    try {
+      await runFrameCaptureLoop(
+        config: config,
+        digest: digest,
+        pump: pump,
+        boundaryKey: boundaryKey,
+        sink: sink,
+        capture: capture,
+        onProgress: onProgress,
+      );
+    } finally {
+      await sink.close();
+    }
   }
 
   final audioPlan = (audioTracks.isEmpty || loadAudioBytes == null)
@@ -137,7 +171,9 @@ Future<RenderManifest> renderToSandbox({
     height: config.height,
     fps: config.fps,
     frameCount: config.frameCount,
-    framesFileName: VideoEncoderService.framesFileName,
+    framesFileName: framesArePng
+        ? VideoEncoderService.framesPngPattern
+        : VideoEncoderService.framesFileName,
     outputFileName: encoder.outputNameFor(export),
     renderDigest: digest,
     ffmpegArgs: encoder.planEncodeArgs(
@@ -145,11 +181,12 @@ Future<RenderManifest> renderToSandbox({
       audio: audioPlan?.tracks ?? const [],
       amix: audioPlan?.amix,
       export: export,
+      framesArePng: framesArePng,
     ),
     posterFileName: posterFrame == null ? null : VideoEncoderService.posterFileName,
     posterArgs: posterFrame == null
         ? null
-        : encoder.planPosterArgs(config, posterFrame: posterFrame),
+        : encoder.planPosterArgs(config, posterFrame: posterFrame, framesArePng: framesArePng),
   );
   await sandbox.writeText('manifest.json', jsonEncode(manifest.toJson()));
   return manifest;

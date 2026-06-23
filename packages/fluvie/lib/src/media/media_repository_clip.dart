@@ -58,3 +58,45 @@ extension _ClipResolution on MediaRepository {
     return _clipPaths[source] = file.path;
   }
 }
+
+/// A [ClipFrameStore] that keeps each extracted clip frame in its own file
+/// under a temp directory — the on-device/desktop store, so a clip's frames
+/// live on disk instead of the heap and the resolver only ever decodes the
+/// small window the current composition frame needs.
+///
+/// The directory is created lazily on the first [put] (a render with no clip
+/// never makes one) and removed wholesale by [dispose]. Frames are addressed by
+/// the resolver's opaque per-clip key plus the source-frame index; the keys are
+/// generated, never attacker-controlled, so the paths are safe.
+final class FileClipFrameStore implements ClipFrameStore {
+  Directory? _dir;
+
+  Future<Directory> _ensureDir() async =>
+      _dir ??= await Directory.systemTemp.createTemp('fluvie_clip_frames_');
+
+  @override
+  Future<void> put(String clipKey, int frame, Uint8List rgba) async {
+    final dir = await _ensureDir();
+    final file = File('${dir.path}/$clipKey/$frame.rgba');
+    await file.parent.create(recursive: true);
+    await file.writeAsBytes(rgba);
+  }
+
+  @override
+  Future<Uint8List?> get(String clipKey, int frame) async {
+    final dir = _dir;
+    if (dir == null) return null;
+    final file = File('${dir.path}/$clipKey/$frame.rgba');
+    if (!file.existsSync()) return null;
+    return file.readAsBytes();
+  }
+
+  @override
+  Future<void> dispose() async {
+    final dir = _dir;
+    _dir = null;
+    if (dir != null && dir.existsSync()) {
+      await dir.delete(recursive: true);
+    }
+  }
+}

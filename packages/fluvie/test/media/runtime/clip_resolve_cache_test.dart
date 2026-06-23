@@ -15,14 +15,43 @@ import 'package:fluvie/src/media/runtime/clip_resolve_cache.dart';
 import 'package:fluvie/src/media/runtime/image_resolve_cache.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
 
+/// An in-memory [ClipFrameStore] for the streaming-mode tests (the real
+/// on-device store writes files; this keeps the raw bytes in a map).
+final class _MemoryClipFrameStore implements ClipFrameStore {
+  final Map<String, Uint8List> _frames = {};
+  bool disposed = false;
+
+  @override
+  Future<void> put(String clipKey, int frame, Uint8List rgba) async =>
+      _frames['$clipKey#$frame'] = rgba;
+
+  @override
+  Future<Uint8List?> get(String clipKey, int frame) async => _frames['$clipKey#$frame'];
+
+  @override
+  Future<void> dispose() async {
+    disposed = true;
+    _frames.clear();
+  }
+}
+
 /// A minimal resolver that mixes in the cache under test and serves canned
-/// metadata and 2x2 frames, counting probe and extract calls.
+/// metadata and 2x2 frames, counting probe and extract calls. Pass a `store`
+/// (and optional `windowCapacity`) to exercise the streaming decode-ahead path.
 final class _FakeClipCache with ImageResolveCache, ClipResolveCache {
-  _FakeClipCache(this._meta);
+  _FakeClipCache(this._meta, {ClipFrameStore? store, int windowCapacity = 16})
+    : clipFrameStore = store,
+      clipWindowCapacity = windowCapacity;
 
   final ClipMetadata _meta;
   int probeCalls = 0;
   final extracted = <int>[];
+
+  @override
+  final ClipFrameStore? clipFrameStore;
+
+  @override
+  final int clipWindowCapacity;
 
   // The clip path never touches the byte loader, so the image-cache seam can
   // stay unimplemented in this harness.
@@ -115,5 +144,100 @@ void main() {
 
     expect(frame.debugDisposed, isTrue);
     expect(cache.disposeClipFrames, returnsNormally, reason: 'a second dispose is a no-op');
+  });
+
+  group('streaming mode (a clip-frame store)', () {
+    test('extracts frames into the store, not the decode-all cache', () async {
+      final store = _MemoryClipFrameStore();
+      final cache = _FakeClipCache(_meta, store: store)..markResolved();
+
+      await cache.resolveClipFrames(_clip, [0, 1, 2]);
+
+      expect(
+        cache.clipFrames[_clip] ?? const {},
+        isEmpty,
+        reason: 'streaming mode never fills the in-memory decode-all cache',
+      );
+      expect(await store.get('clip0', 0), isNotNull);
+      expect(await store.get('clip0', 2), isNotNull);
+    });
+
+    test('prepareClipFrames decodes the resampled frame for paint to read', () async {
+      final store = _MemoryClipFrameStore();
+      final cache = _FakeClipCache(_meta, store: store)
+        ..markResolved()
+        ..registerClipPlan(
+          source: _clip,
+          windowStart: 0,
+          windowLength: 30,
+          compFps: 30,
+          trimStartFrames: 0,
+          trimEndFrames: 30,
+        );
+      await cache.resolveClipFrames(_clip, [0, 10, 15, 20]);
+
+      // Composition frame 15 at 30fps over a 30fps source maps to source 15.
+      await cache.prepareClipFramesForComposition(15);
+
+      expect(cache.decodedClipFrameLookup(_clip, 15).width, 2);
+    });
+
+    test('an off-window composition frame warms the clamped boundary frame', () async {
+      // Regression: a clip in a later scene still paints (clamped to its first
+      // source frame) while an earlier scene is on screen, so prepare must warm
+      // that clamped frame for composition frames before the clip's window —
+      // not skip them.
+      final store = _MemoryClipFrameStore();
+      final cache = _FakeClipCache(_meta, store: store)
+        ..markResolved()
+        ..registerClipPlan(
+          source: _clip,
+          windowStart: 30,
+          windowLength: 30,
+          compFps: 30,
+          trimStartFrames: 0,
+          trimEndFrames: 30,
+        );
+      await cache.resolveClipFrames(_clip, [0]);
+
+      // Composition frame 0 is before the window (windowStart 30): the resampler
+      // clamps it to the trim start (source 0), which paint then reads.
+      await cache.prepareClipFramesForComposition(0);
+
+      expect(cache.decodedClipFrameLookup(_clip, 0).width, 2);
+    });
+
+    test('the decode window evicts least-recently-used beyond capacity', () async {
+      final store = _MemoryClipFrameStore();
+      final cache = _FakeClipCache(_meta, store: store, windowCapacity: 2)
+        ..markResolved()
+        ..registerClipPlan(
+          source: _clip,
+          windowStart: 0,
+          windowLength: 30,
+          compFps: 30,
+          trimStartFrames: 0,
+          trimEndFrames: 30,
+        );
+      await cache.resolveClipFrames(_clip, [0, 1, 2]);
+
+      // comp frame f maps 1:1 to source f here; three frames, capacity two.
+      for (final f in [0, 1, 2]) {
+        await cache.prepareClipFramesForComposition(f);
+      }
+
+      expect(
+        () => cache.decodedClipFrameLookup(_clip, 0),
+        throwsA(
+          isA<FluvieRenderException>().having(
+            (e) => e.message,
+            'message',
+            contains('decode window'),
+          ),
+        ),
+        reason: 'the oldest frame was evicted',
+      );
+      expect(cache.decodedClipFrameLookup(_clip, 2).width, 2);
+    });
   });
 }

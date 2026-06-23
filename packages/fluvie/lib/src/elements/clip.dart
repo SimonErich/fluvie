@@ -56,6 +56,18 @@ final class Clip extends StatelessWidget implements MediaCarrier {
     super.key,
   }) : source = MediaSource.network(url);
 
+  /// A video file on disk at [path] (must end in `.mp4`/`.mov`/`.webm` so the
+  /// clip path recognizes it). For a scoped-storage source the caller copies it
+  /// to a readable app-private path first.
+  Clip.file(
+    String path, {
+    this.trim,
+    this.audio = const ClipAudio.included(),
+    this.shared,
+    this.fit,
+    super.key,
+  }) : source = MediaSource.file(path);
+
   /// The declared media this clip plays — the key the collect pass gathers and
   /// the resolver pre-resolves.
   final MediaSource source;
