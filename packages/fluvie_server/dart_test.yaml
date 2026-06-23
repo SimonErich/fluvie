@@ -2,3 +2,6 @@ tags:
   render:
     description: End-to-end render tests; need a Flutter SDK and ffmpeg, plus the
       example render project. CI gates these per platform.
+  analysis:
+    description: Tests that drive the in-process analyzer (package resolution per
+      snippet); slow, so excluded from the fast unit run.

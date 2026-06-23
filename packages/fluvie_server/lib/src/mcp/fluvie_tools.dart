@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:fluvie_server/client.dart';
+import 'package:fluvie_server/src/api/render/render_code_printer.dart' show printSpecMap;
 import 'package:fluvie_server/src/mcp/mcp_tool.dart';
 import 'package:fluvie_server/src/mcp/render_gateway.dart';
 
@@ -14,7 +15,9 @@ List<McpTool> buildFluvieTools(RenderGateway gateway) => [
     name: 'generate_video',
     description:
         'Author a Fluvie video from a natural-language prompt and render it. '
-        'Returns a download URL.',
+        'Returns a download URL. This authors a JSON VideoSpec; if the user asks '
+        'for real Flutter/Dart widget code or to start a project, use init_project '
+        'instead.',
     inputSchema: const {
       'type': 'object',
       'properties': {
@@ -64,6 +67,26 @@ List<McpTool> buildFluvieTools(RenderGateway gateway) => [
         ),
       ),
     ),
+  ),
+  McpTool(
+    name: 'validate_code',
+    description:
+        'Statically check Fluvie Dart code (a top-level `Video build()` written in '
+        'real Flutter widget code) before rendering. Returns analyzer diagnostics; '
+        'it never runs the code. Use it to verify the format of a Flutter-style / '
+        'real-code composition before you render or scaffold it.',
+    inputSchema: const {
+      'type': 'object',
+      'properties': {
+        'code': {
+          'type': 'string',
+          'description': 'Dart source defining a top-level `Video build()`.',
+        },
+      },
+      'required': ['code'],
+    },
+    handler: (args) async =>
+        _describeValidation(await gateway.validate(_requireString(args, 'code'))),
   ),
   McpTool(
     name: 'render_video',
@@ -125,7 +148,52 @@ List<McpTool> buildFluvieTools(RenderGateway gateway) => [
       const JsonEncoder.withIndent('  ').convert(await gateway.fetchSpecSchema()),
     ),
   ),
+  McpTool(
+    name: 'spec_to_dart',
+    description:
+        'Convert a Fluvie VideoSpec (JSON) into an editable, Flutter-style Dart '
+        '`Video build()` snippet — the same code the Playground shows. A pure '
+        'transformation: it never calls an LLM or renders. Use it to turn an '
+        'authored or hand-written spec into real widget code a user can edit.',
+    inputSchema: const {
+      'type': 'object',
+      'properties': {
+        'spec': {'type': 'object', 'description': 'A serialized Fluvie VideoSpec.'},
+      },
+      'required': ['spec'],
+    },
+    handler: (args) async {
+      try {
+        return McpToolResult.text(printSpecMap(_requireMap(args, 'spec')));
+      } on FormatException catch (error) {
+        return McpToolResult.text(
+          'Could not convert the spec to Dart: ${error.message}',
+          isError: true,
+        );
+      }
+    },
+  ),
 ];
+
+McpToolResult _describeValidation(ApiValidationResult result) {
+  if (result.diagnostics.isEmpty) {
+    return McpToolResult.text('OK: no problems found. The code is ready to render.');
+  }
+  final lines = [
+    if (result.ok)
+      'OK to render, with ${result.diagnostics.length} warning(s)/note(s):'
+    else
+      'Not ready to render. Fix these:',
+    for (final d in result.diagnostics) _formatDiagnostic(d),
+  ];
+  return McpToolResult.text(lines.join('\n'), isError: !result.ok);
+}
+
+String _formatDiagnostic(ApiCodeDiagnostic diagnostic) {
+  final code = diagnostic.code == null ? '' : ' (${diagnostic.code})';
+  return '  ${diagnostic.severity.name} ${diagnostic.line}:${diagnostic.column} '
+      '${diagnostic.message}$code';
+}
 
 McpToolResult _describe(RenderJobView job) {
   final lines = <String>[];
@@ -134,6 +202,8 @@ McpToolResult _describe(RenderJobView job) {
   if (video != null) lines.add('Video: $video');
   if (poster != null) lines.add('Poster: $poster');
   if (lines.isEmpty) lines.add('Render finished, but no downloadable file was returned.');
+  final code = job.code;
+  if (code != null) lines.add('\nFlutter-style Dart (editable):\n$code');
   return McpToolResult.text(lines.join('\n'));
 }
 

@@ -62,6 +62,33 @@ void main() {
       expect(job.video!.downloadUrl.toString(), 'https://api.test/v.mp4');
     });
 
+    test('validate posts the code and returns the diagnostics', () async {
+      final client = _MockClient();
+      when(
+        () => client.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
+      ).thenAnswer(
+        (_) async => http.Response(
+          jsonEncode({
+            'ok': false,
+            'diagnostics': [
+              {'severity': 'error', 'message': 'boom', 'line': 1, 'column': 1},
+            ],
+          }),
+          200,
+        ),
+      );
+      final gateway = ApiRenderGateway(baseUrl: Uri.parse('https://api.test/'), httpClient: client);
+
+      final result = await gateway.validate('Video build() {}');
+
+      expect(result.ok, isFalse);
+      expect(result.diagnostics.single.message, 'boom');
+    });
+
     test('close closes the HTTP client', () {
       final client = _MockClient();
       when(client.close).thenReturn(null);

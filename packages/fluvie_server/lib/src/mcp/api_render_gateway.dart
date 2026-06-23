@@ -34,6 +34,9 @@ final class ApiRenderGateway implements RenderGateway {
       _client.renderAndWait(request, timeout: _timeout);
 
   @override
+  Future<ApiValidationResult> validate(String code) => _client.validate(code);
+
+  @override
   Future<Map<String, Object?>> fetchSpecSchema() async {
     final response = await _http.get(
       _baseUrl.resolve('v1/schema/video-spec'),

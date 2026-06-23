@@ -155,6 +155,28 @@ void main() {
     expect(job.expiresAt, now.add(const Duration(hours: 1)));
   });
 
+  test('a render exposes code and spec in the job as soon as the runner emits them', () async {
+    const printed = 'Video build() => Video(scenes: const []);';
+    const spec = <String, Object?>{
+      'fluvieSpec': 1,
+      'scenes': [
+        {'duration': '2s'},
+      ],
+    };
+    final job = await queue(FakeRenderRunner(code: printed, spec: spec)).enqueue(
+      const PromptRenderRequest('a promo', null, _noOptions),
+      visibility: StoreVisibility.private,
+    );
+    // The fake emits code+spec via onAuthored before completing; the queue
+    // persists both at the same moment.
+    final withCode = await _eventually(jobs, job.id, (j) => j.code != null);
+    expect(withCode.code, printed);
+    expect(withCode.spec, spec);
+    final done = await _eventually(jobs, job.id, (j) => j.status == JobStatus.succeeded);
+    expect(done.code, printed);
+    expect(done.spec, spec);
+  });
+
   test('a render with no poster records a null posterKey', () async {
     final job = await queue(FakeRenderRunner(writePoster: false)).enqueue(
       const KeyRenderRequest('demo', _noOptions),
@@ -225,6 +247,7 @@ final class _ThrowingRunner implements RenderRunner {
     RenderRequest request, {
     required Directory workDir,
     void Function(RenderProgress)? onProgress,
+    void Function(String code, Map<String, Object?> spec)? onAuthored,
   }) async => throw StateError('boom');
 }
 
@@ -238,6 +261,7 @@ final class _GatedRunner implements RenderRunner {
     RenderRequest request, {
     required Directory workDir,
     void Function(RenderProgress)? onProgress,
+    void Function(String code, Map<String, Object?> spec)? onAuthored,
   }) async {
     await _gate.future;
     await workDir.create(recursive: true);

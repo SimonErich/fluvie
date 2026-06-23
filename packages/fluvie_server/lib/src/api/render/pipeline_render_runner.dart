@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:fluvie_cli/fluvie_cli.dart';
 import 'package:fluvie_server/src/api/render/code_render_setup.dart';
+import 'package:fluvie_server/src/api/render/render_code_printer.dart';
 import 'package:fluvie_server/src/api/render/render_request.dart';
 import 'package:fluvie_server/src/api/render/render_runner.dart';
 
@@ -54,12 +55,14 @@ final class PipelineRenderRunner implements RenderRunner {
     RenderRequest request, {
     required Directory workDir,
     void Function(RenderProgress)? onProgress,
+    void Function(String code, Map<String, Object?> spec)? onAuthored,
   }) async {
     await workDir.create(recursive: true);
     final (ext, contentType) = _formatTarget(request.options.format);
     final outPath = '${workDir.path}/video.$ext';
     final specOut = '${workDir.path}/spec.fluvie.json';
     final progressFile = '${workDir.path}/progress';
+    final isAiRender = request is PromptRenderRequest || request is EditRenderRequest;
     // A code render stages an isolated, per-render harness under the project and
     // runs flutter test against it, forwarding NO aiEnv (the untrusted snippet
     // must never see the AI keys). Every other request drives the permanent
@@ -81,6 +84,12 @@ final class PipelineRenderRunner implements RenderRunner {
     if (onProgress != null) {
       poll = Timer.periodic(_pollInterval, (_) => _emit(progressFile, onProgress));
     }
+    // For an AI render, the harness writes the authored spec during capture
+    // (before the encode finishes); the watcher surfaces the printed code and
+    // the decoded spec early, together.
+    final codeWatcher = isAiRender
+        ? SpecCodeWatcher(specPath: specOut, interval: _pollInterval, onAuthored: onAuthored)
+        : null;
     final out = StringBuffer();
     final err = StringBuffer();
     try {
@@ -126,6 +135,8 @@ final class PipelineRenderRunner implements RenderRunner {
     } finally {
       staging?.cleanup();
       poll?.cancel();
+      // Print the spec one last time if the poll never caught it (a fast render).
+      codeWatcher?.flush();
       if (onProgress != null) _emit(progressFile, onProgress);
     }
 
@@ -133,13 +144,14 @@ final class PipelineRenderRunner implements RenderRunner {
       throw const RenderFailure('Render produced no output file');
     }
     final poster = File(_posterPath(outPath));
-    final spec = File(specOut);
-    final keepsSpec = request is PromptRenderRequest || request is EditRenderRequest;
+    final specFile = File(specOut);
     return RenderOutcome(
       videoPath: outPath,
       videoContentType: contentType,
       posterPath: poster.existsSync() ? poster.path : null,
-      specPath: keepsSpec && spec.existsSync() ? spec.path : null,
+      specPath: isAiRender && specFile.existsSync() ? specFile.path : null,
+      code: codeWatcher?.code,
+      spec: codeWatcher?.spec,
     );
   }
 

@@ -25,6 +25,9 @@ void main() {
       expect(config.ffmpegPath, isNull);
       expect(config.corsAllowOrigins, isEmpty);
       expect(config.aiEnv, isEmpty);
+      expect(config.aiRateLimit.limit, 5);
+      expect(config.aiRateLimit.window, const Duration(minutes: 1));
+      expect(config.aiRateLimit.dailyQuota, 50);
     });
 
     test('derives the signing key from API_TOKEN when none is set', () {
@@ -64,6 +67,18 @@ void main() {
       expect(config.renderProject, '/srv/app');
       expect(config.ffmpegPath, '/opt/ffmpeg');
       expect(config.aiEnv, {'FLUVIE_AI_PROVIDER': 'gemini', 'GEMINI_API_KEY': 'gk'});
+    });
+
+    test('parses the AI rate-limit env with safe defaults', () {
+      final config = serverConfigFromEnvironment({
+        ...base(),
+        'FLUVIE_AI_RATE_LIMIT': '10',
+        'FLUVIE_AI_RATE_WINDOW': '30s',
+        'FLUVIE_AI_DAILY_QUOTA': '200',
+      });
+      expect(config.aiRateLimit.limit, 10);
+      expect(config.aiRateLimit.window, const Duration(seconds: 30));
+      expect(config.aiRateLimit.dailyQuota, 200);
     });
   });
 

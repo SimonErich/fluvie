@@ -48,5 +48,38 @@ void main() {
       const view = RenderJobView(id: 'a', status: 'queued');
       expect(view.toJson(), {'id': 'a', 'status': 'queued'});
     });
+
+    test('round-trips the printed Dart code when present', () {
+      const code = 'Video build() => Video(scenes: const []);';
+      const view = RenderJobView(id: 'a', status: 'running', code: code);
+      expect(view.toJson()['code'], code);
+      final round = RenderJobView.fromJson(view.toJson());
+      expect(round.code, code);
+    });
+
+    test('code is null when absent', () {
+      final view = RenderJobView.fromJson(const {'id': 'a', 'status': 'queued'});
+      expect(view.code, isNull);
+      expect(view.toJson().containsKey('code'), isFalse);
+    });
+
+    test('round-trips the authored spec when present', () {
+      const spec = <String, Object?>{
+        'fluvieSpec': 1,
+        'scenes': [
+          {'duration': '2s'},
+        ],
+      };
+      const view = RenderJobView(id: 'a', status: 'running', spec: spec);
+      expect(view.toJson()['spec'], spec);
+      final round = RenderJobView.fromJson(view.toJson());
+      expect(round.spec, spec);
+    });
+
+    test('spec is null when absent', () {
+      final view = RenderJobView.fromJson(const {'id': 'a', 'status': 'queued'});
+      expect(view.spec, isNull);
+      expect(view.toJson().containsKey('spec'), isFalse);
+    });
   });
 }

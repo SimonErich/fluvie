@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:fluvie_server/src/api/config/duration_parsing.dart';
 import 'package:fluvie_server/src/api/config/s3_config.dart';
+import 'package:fluvie_server/src/api/ratelimit/rate_limit_config.dart';
 import 'package:meta/meta.dart';
 
 /// Which storage backend serves rendered files.
@@ -38,6 +39,7 @@ final class ServerConfig {
     required this.ffmpegPath,
     required this.corsAllowOrigins,
     required this.aiEnv,
+    required this.aiRateLimit,
   });
 
   /// Bind address (default `0.0.0.0`).
@@ -93,6 +95,9 @@ final class ServerConfig {
 
   /// AI provider/model/key env vars forwarded to the render project.
   final Map<String, String> aiEnv;
+
+  /// Per-IP limits applied to the LLM-cost render path (prompt/edit only).
+  final RateLimitConfig aiRateLimit;
 }
 
 /// Thrown when the environment is missing a required value or holds a bad one.
@@ -154,6 +159,11 @@ ServerConfig serverConfigFromEnvironment(Map<String, String> env) {
       for (final key in _aiEnvKeys)
         if (_trimToNull(env[key]) != null) key: env[key]!,
     },
+    aiRateLimit: RateLimitConfig(
+      limit: _int(env, 'FLUVIE_AI_RATE_LIMIT', RateLimitConfig.defaults.limit),
+      window: _duration(env, 'FLUVIE_AI_RATE_WINDOW', RateLimitConfig.defaults.window),
+      dailyQuota: _int(env, 'FLUVIE_AI_DAILY_QUOTA', RateLimitConfig.defaults.dailyQuota),
+    ),
   );
 }
 

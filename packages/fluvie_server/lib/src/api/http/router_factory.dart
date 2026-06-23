@@ -22,6 +22,7 @@ Router buildRouter(ServerDependencies deps) {
     signer: deps.signer,
     fileStore: deps.fileStore,
     codeValidator: deps.codeValidator,
+    rateLimiter: deps.rateLimiter,
   );
   final job = JobHandler(
     jobStore: deps.jobStore,

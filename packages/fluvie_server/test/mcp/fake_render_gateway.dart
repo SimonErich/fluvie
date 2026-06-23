@@ -9,17 +9,24 @@ final class FakeRenderGateway implements RenderGateway {
   FakeRenderGateway({
     this.job = const RenderJobView(id: 'job', status: 'succeeded'),
     this.schema = const {'type': 'object'},
+    this.validation = const ApiValidationResult(ok: true, diagnostics: []),
     this.failure,
   });
 
   /// The request passed to the most recent [render] call.
   ApiRenderRequest? lastRequest;
 
+  /// The code passed to the most recent [validate] call.
+  String? lastValidatedCode;
+
   /// The job [render] returns.
   RenderJobView job;
 
   /// The schema [fetchSpecSchema] returns.
   Map<String, Object?> schema;
+
+  /// The result [validate] returns.
+  ApiValidationResult validation;
 
   /// When set, [render] throws this instead of returning [job].
   Exception? failure;
@@ -33,6 +40,12 @@ final class FakeRenderGateway implements RenderGateway {
     final error = failure;
     if (error != null) throw error;
     return job;
+  }
+
+  @override
+  Future<ApiValidationResult> validate(String code) async {
+    lastValidatedCode = code;
+    return validation;
   }
 
   @override

@@ -2,6 +2,7 @@ import 'package:fluvie_server/src/api/cleanup/retention_service.dart';
 import 'package:fluvie_server/src/api/config/server_config.dart';
 import 'package:fluvie_server/src/api/jobs/job_store.dart';
 import 'package:fluvie_server/src/api/jobs/render_queue.dart';
+import 'package:fluvie_server/src/api/ratelimit/rate_limiter.dart';
 import 'package:fluvie_server/src/api/storage/file_store.dart';
 import 'package:fluvie_server/src/api/storage/signed_token.dart';
 import 'package:fluvie_server/src/api/validate/code_validation_service.dart';
@@ -20,6 +21,7 @@ final class ServerDependencies {
     required this.retention,
     required this.signer,
     required this.codeValidator,
+    this.rateLimiter = RateLimiter.disabled,
     this.schemaJson = '{}',
     this.now = _systemUtcNow,
   });
@@ -44,6 +46,12 @@ final class ServerDependencies {
 
   /// Validates submitted Playground code (analysis only; never executes it).
   final CodeValidationService codeValidator;
+
+  /// Guards the LLM-cost render path (prompt/edit) against per-IP abuse.
+  ///
+  /// Defaults to [RateLimiter.disabled] so non-public deployments and tests opt
+  /// in explicitly; the server factory injects the real in-memory limiter.
+  final RateLimiter rateLimiter;
 
   /// The `VideoSpec` JSON schema served at `/v1/schema/video-spec`.
   final String schemaJson;

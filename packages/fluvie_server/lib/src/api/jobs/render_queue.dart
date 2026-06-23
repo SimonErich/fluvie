@@ -98,6 +98,13 @@ final class RenderQueue {
           job = job.copyWith(progress: progress);
           unawaited(jobStore.update(job));
         },
+        onAuthored: (code, spec) {
+          // Surface the printed code and the decoded spec the moment the runner
+          // has them (typically before the video finishes), so a polling client
+          // sees code first and can reuse the spec as an edit base.
+          job = job.copyWith(code: code, spec: spec);
+          unawaited(jobStore.update(job));
+        },
       );
       final keys = await _store(job, outcome);
       job = job.copyWith(
@@ -105,6 +112,8 @@ final class RenderQueue {
         finishedAt: _now(),
         videoKey: keys.video,
         posterKey: keys.poster,
+        code: outcome.code,
+        spec: outcome.spec,
       );
     } on RenderFailure catch (failure) {
       job = job.copyWith(status: JobStatus.failed, finishedAt: _now(), error: failure.message);

@@ -12,6 +12,8 @@ import 'package:fluvie_server/src/api/render/render_request.dart';
 import 'package:fluvie_server/src/api/render/render_runner.dart';
 import 'package:fluvie_server/src/api/storage/in_memory_file_store.dart';
 import 'package:fluvie_server/src/api/storage/signed_token.dart';
+import 'package:fluvie_server/src/api/validate/code_validation_result.dart';
+import 'package:fluvie_server/src/api/validate/code_validation_service.dart';
 import 'package:fluvie_server/src/mcp/local_render_gateway.dart';
 import 'package:test/test.dart';
 
@@ -46,7 +48,11 @@ void main() {
     return dir;
   }
 
-  ServerDependencies depsFor(RenderRunner runner, {String schemaJson = '{}'}) {
+  ServerDependencies depsFor(
+    RenderRunner runner, {
+    String schemaJson = '{}',
+    CodeValidationService? validator,
+  }) {
     final queue = RenderQueue(
       runner: runner,
       jobStore: jobs,
@@ -62,7 +68,7 @@ void main() {
       fileStore: files,
       retention: DefaultRetentionService(jobs, files),
       signer: DownloadTokenSigner(config.downloadSigningKey),
-      codeValidator: FakeCodeValidationService(),
+      codeValidator: validator ?? FakeCodeValidationService(),
       schemaJson: schemaJson,
     );
   }
@@ -71,8 +77,9 @@ void main() {
     RenderRunner runner, {
     String schemaJson = '{}',
     Duration timeout = const Duration(seconds: 10),
+    CodeValidationService? validator,
   }) => LocalRenderGateway(
-    depsFor(runner, schemaJson: schemaJson),
+    depsFor(runner, schemaJson: schemaJson, validator: validator),
     pollInterval: const Duration(milliseconds: 5),
     timeout: timeout,
     wait: _noWait,
@@ -168,6 +175,39 @@ void main() {
     });
   });
 
+  group('LocalRenderGateway.validate', () {
+    test('maps the in-process validator result to the client result', () async {
+      final validator = FakeCodeValidationService(
+        result: const CodeValidationResult([
+          CodeDiagnostic(
+            severity: CodeDiagnosticSeverity.error,
+            message: 'boom',
+            line: 3,
+            column: 4,
+            code: 'bad',
+          ),
+        ]),
+      );
+      final gateway = gatewayFor(FakeRenderRunner(), validator: validator);
+
+      final result = await gateway.validate('Video build() {}');
+
+      expect(validator.calls.single, 'Video build() {}');
+      expect(result.ok, isFalse);
+      expect(result.diagnostics.single.message, 'boom');
+      expect(result.diagnostics.single.code, 'bad');
+    });
+
+    test('reports ok for a clean snippet', () async {
+      final gateway = gatewayFor(FakeRenderRunner());
+
+      final result = await gateway.validate('Video build() => Video(scenes: const []);');
+
+      expect(result.ok, isTrue);
+      expect(result.diagnostics, isEmpty);
+    });
+  });
+
   test('close is a no-op (deps are shared, not owned)', () {
     final gateway = gatewayFor(FakeRenderRunner());
 
@@ -182,5 +222,6 @@ final class _NeverRunner implements RenderRunner {
     RenderRequest request, {
     required Directory workDir,
     void Function(RenderProgress)? onProgress,
+    void Function(String code, Map<String, Object?> spec)? onAuthored,
   }) => Completer<RenderOutcome>().future;
 }

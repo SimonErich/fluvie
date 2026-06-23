@@ -8,6 +8,11 @@ abstract interface class RenderGateway {
   /// Submits [request] and waits for the render to finish.
   Future<RenderJobView> render(ApiRenderRequest request);
 
+  /// Statically validates Fluvie Dart [code] (a top-level `Video build()`
+  /// snippet) without rendering it, so a model can check the format before a
+  /// render. The code is never executed.
+  Future<ApiValidationResult> validate(String code);
+
   /// Fetches the `VideoSpec` JSON Schema the model authors against.
   Future<Map<String, Object?>> fetchSpecSchema();
 

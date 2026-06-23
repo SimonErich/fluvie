@@ -6,6 +6,7 @@ import 'package:fluvie_server/src/api/config/server_config.dart';
 import 'package:fluvie_server/src/api/http/server_dependencies.dart';
 import 'package:fluvie_server/src/api/jobs/file_job_store.dart';
 import 'package:fluvie_server/src/api/jobs/render_queue.dart';
+import 'package:fluvie_server/src/api/ratelimit/in_memory_rate_limiter.dart';
 import 'package:fluvie_server/src/api/render/pipeline_render_runner.dart';
 import 'package:fluvie_server/src/api/storage/file_store.dart';
 import 'package:fluvie_server/src/api/storage/local_file_store.dart';
@@ -49,6 +50,11 @@ ServerDependencies buildServerDependencies(ServerConfig config, {String schemaJs
       projectRoot: config.renderProject != null
           ? Directory(config.renderProject!)
           : Directory.current,
+    ),
+    rateLimiter: InMemoryRateLimiter(
+      limit: config.aiRateLimit.limit,
+      window: config.aiRateLimit.window,
+      dailyQuota: config.aiRateLimit.dailyQuota,
     ),
     schemaJson: schemaJson,
   );

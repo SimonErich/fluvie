@@ -46,6 +46,13 @@ void main() {
             progress: const RenderProgress(completed: 48, total: 48),
             videoKey: 'a/video.mp4',
             posterKey: 'a/poster.png',
+            code: 'Video build() => Video(scenes: const []);',
+            spec: const {
+              'fluvieSpec': 1,
+              'scenes': [
+                {'duration': '2s'},
+              ],
+            },
           ),
         );
         final got = await store.get('a');
@@ -53,6 +60,13 @@ void main() {
         expect(got.progress, const RenderProgress(completed: 48, total: 48));
         expect(got.videoKey, 'a/video.mp4');
         expect(got.posterKey, 'a/poster.png');
+        expect(got.code, 'Video build() => Video(scenes: const []);');
+        expect(got.spec, {
+          'fluvieSpec': 1,
+          'scenes': [
+            {'duration': '2s'},
+          ],
+        });
       });
 
       test('expiredBefore yields only jobs at or before the cutoff', () async {

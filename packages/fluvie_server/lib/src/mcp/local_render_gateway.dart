@@ -67,6 +67,10 @@ final class LocalRenderGateway implements RenderGateway {
   }
 
   @override
+  Future<ApiValidationResult> validate(String code) async =>
+      ApiValidationResult.fromJson((await _deps.codeValidator.validate(code)).toJson());
+
+  @override
   Future<Map<String, Object?>> fetchSpecSchema() async {
     final decoded = jsonDecode(_deps.schemaJson);
     if (decoded is! Map) {

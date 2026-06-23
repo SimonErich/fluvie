@@ -93,6 +93,8 @@ final class FileJobStore implements JobStore {
         : {'completed': job.progress!.completed, 'total': job.progress!.total},
     'videoKey': job.videoKey,
     'posterKey': job.posterKey,
+    'code': job.code,
+    'spec': job.spec,
     'error': job.error,
   };
 
@@ -115,6 +117,8 @@ final class FileJobStore implements JobStore {
             ),
       videoKey: json['videoKey'] as String?,
       posterKey: json['posterKey'] as String?,
+      code: json['code'] as String?,
+      spec: json['spec'] as Map<String, Object?>?,
       error: json['error'] as String?,
     );
   }

@@ -13,6 +13,8 @@ final class RenderOutcome {
     required this.videoContentType,
     this.posterPath,
     this.specPath,
+    this.code,
+    this.spec,
   });
 
   /// Absolute path of the rendered video.
@@ -26,6 +28,15 @@ final class RenderOutcome {
 
   /// Absolute path of the authored spec JSON (prompt/edit), or `null`.
   final String? specPath;
+
+  /// The printed Dart `Video build()` snippet for an AI (prompt/edit) render,
+  /// or `null` for other kinds and when the authored spec could not be printed.
+  final String? code;
+
+  /// The decoded authored `VideoSpec` for an AI (prompt/edit) render, or `null`
+  /// for other kinds and when the authored spec could not be read. Set at the
+  /// same moment as [code]; the client hands it back as the `base` of an edit.
+  final Map<String, Object?>? spec;
 }
 
 /// Runs one render to completion, writing its outputs under a working directory.
@@ -36,10 +47,17 @@ final class RenderOutcome {
 abstract interface class RenderRunner {
   /// Renders [request] into [workDir], reporting live frame [onProgress], and
   /// returns the produced paths. Throws [RenderFailure] on any failure.
+  ///
+  /// [onAuthored] fires once with the printed Dart snippet and the decoded spec
+  /// as soon as an AI (prompt/edit) render's authored spec is available,
+  /// typically before the video finishes, so a polling client can show the code
+  /// (and reuse the spec) first. It never fires for other render kinds or when
+  /// the spec cannot be printed.
   Future<RenderOutcome> run(
     RenderRequest request, {
     required Directory workDir,
     void Function(RenderProgress)? onProgress,
+    void Function(String code, Map<String, Object?> spec)? onAuthored,
   });
 }
 

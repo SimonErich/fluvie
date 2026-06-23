@@ -4,6 +4,7 @@ import 'package:fluvie_server/src/config/mcp_mode.dart';
 import 'package:fluvie_server/src/docs/doc_search_service.dart';
 import 'package:fluvie_server/src/docs/doc_tools.dart';
 import 'package:fluvie_server/src/mcp/fluvie_tools.dart';
+import 'package:fluvie_server/src/mcp/init_tool.dart';
 import 'package:fluvie_server/src/mcp/mcp_tool.dart';
 import 'package:fluvie_server/src/mcp/render_gateway.dart';
 
@@ -19,6 +20,7 @@ List<McpTool> buildServerTools({
   String schemaJson = '{}',
 }) => [
   if (docs != null) ...buildDocTools(docs),
+  buildInitProjectTool(),
   if (mode == McpMode.build && gateway != null)
     ...buildFluvieTools(gateway)
   else

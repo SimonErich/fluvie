@@ -6,6 +6,8 @@ import 'package:fluvie_server/src/api/http/api_error.dart';
 import 'package:fluvie_server/src/api/http/job_response.dart';
 import 'package:fluvie_server/src/api/http/json_body.dart';
 import 'package:fluvie_server/src/api/jobs/render_queue.dart';
+import 'package:fluvie_server/src/api/ratelimit/client_ip.dart';
+import 'package:fluvie_server/src/api/ratelimit/rate_limiter.dart';
 import 'package:fluvie_server/src/api/render/code_import_policy.dart';
 import 'package:fluvie_server/src/api/render/render_request.dart';
 import 'package:fluvie_server/src/api/storage/file_store.dart';
@@ -25,6 +27,7 @@ final class RenderHandler {
     required this.signer,
     required this.fileStore,
     required this.codeValidator,
+    required this.rateLimiter,
     this.maxCodeBytes = 64 * 1024,
   });
 
@@ -43,6 +46,9 @@ final class RenderHandler {
   /// Statically validates a Playground `code` snippet before it is enqueued
   /// (analysis only; never executes it).
   final CodeValidationService codeValidator;
+
+  /// Guards the LLM-cost path (prompt/edit) against per-IP abuse.
+  final RateLimiter rateLimiter;
 
   /// The largest accepted `code` snippet, in bytes.
   final int maxCodeBytes;
@@ -64,6 +70,11 @@ final class RenderHandler {
       if (rejection != null) return rejection;
     }
     _ensureAiConfigured(renderRequest);
+    // The 503 above wins over rate limiting: an unconfigured server has no LLM
+    // cost to guard. Only the prompt/edit path (the LLM callers) is throttled;
+    // key/spec/code renders skip it entirely.
+    final throttled = await _rejectOverRateLimit(renderRequest, request);
+    if (throttled != null) return throttled;
     final job = await queue.enqueue(
       renderRequest,
       visibility: _visibility(body),
@@ -88,6 +99,27 @@ final class RenderHandler {
     }
     final result = await codeValidator.validate(code);
     return result.ok ? null : _unprocessable(result);
+  }
+
+  /// Returns a 429 [Response] when an LLM-cost render (prompt/edit) from this
+  /// client is over its rate limit, or `null` when the request may proceed.
+  /// Non-LLM renders (key/spec/code) are never throttled.
+  Future<Response?> _rejectOverRateLimit(RenderRequest request, Request httpRequest) async {
+    if (request is! PromptRenderRequest && request is! EditRenderRequest) return null;
+    final decision = await rateLimiter.check(clientIp(httpRequest));
+    if (decision.allowed) return null;
+    final seconds = decision.retryAfter!.inSeconds;
+    return Response(
+      429,
+      body: jsonEncode({
+        'error': {
+          'code': 'rate_limited',
+          'message': 'Too many AI render requests. Retry in ${seconds}s.',
+          'retryAfterSeconds': seconds,
+        },
+      }),
+      headers: {'content-type': 'application/json', 'retry-after': '$seconds'},
+    );
   }
 
   static Response _unprocessable(CodeValidationResult result) => Response(

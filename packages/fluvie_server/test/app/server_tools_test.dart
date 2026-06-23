@@ -19,9 +19,18 @@ void main() {
 
     expect(
       names(tools),
-      containsAll(['list_docs', 'search_docs', 'get_doc', 'get_video_spec_schema']),
+      containsAll(['list_docs', 'search_docs', 'get_doc', 'init_project', 'get_video_spec_schema']),
     );
     expect(names(tools), isNot(contains('generate_video')));
+  });
+
+  test('init_project is available in both modes (it needs no backend)', () async {
+    expect(names(buildServerTools(mode: McpMode.docs)), contains('init_project'));
+    final build = buildServerTools(mode: McpMode.build, gateway: FakeRenderGateway());
+    expect(names(build), contains('init_project'));
+
+    final result = await build.firstWhere((t) => t.name == 'init_project').handler(const {});
+    expect(result.content.single['text'], contains('fluvie init'));
   });
 
   test('build mode adds the render tools from the gateway', () {
@@ -51,10 +60,10 @@ void main() {
     expect(names(tools), contains('generate_video'));
   });
 
-  test('docs mode without docs is just the schema tool', () {
+  test('docs mode without docs is the init and schema tools', () {
     final tools = buildServerTools(mode: McpMode.docs);
 
-    expect(names(tools), ['get_video_spec_schema']);
+    expect(names(tools), ['init_project', 'get_video_spec_schema']);
   });
 
   test('the bundled schema tool serves the configured schema', () async {

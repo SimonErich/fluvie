@@ -10,12 +10,14 @@ import 'package:fluvie_server/src/api/jobs/in_memory_job_store.dart';
 import 'package:fluvie_server/src/api/jobs/job_status.dart';
 import 'package:fluvie_server/src/api/jobs/render_job.dart';
 import 'package:fluvie_server/src/api/jobs/render_queue.dart';
+import 'package:fluvie_server/src/api/ratelimit/rate_limiter.dart';
 import 'package:fluvie_server/src/api/storage/in_memory_file_store.dart';
 import 'package:fluvie_server/src/api/storage/signed_token.dart';
 import 'package:fluvie_server/src/api/validate/code_validation_result.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 
+import '../ratelimit/fake_rate_limiter.dart';
 import '../render/fakes/fake_render_runner.dart';
 import '../validate/fake_code_validation_service.dart';
 
@@ -46,6 +48,7 @@ void main() {
     FakeRenderRunner? runner,
     RetentionService? retention,
     FakeCodeValidationService? codeValidator,
+    RateLimiter? rateLimiter,
   }) {
     final cfg = config(env);
     final queue = RenderQueue(
@@ -70,6 +73,7 @@ void main() {
         retention: retention ?? DefaultRetentionService(jobs, files),
         signer: DownloadTokenSigner(cfg.downloadSigningKey),
         codeValidator: codeValidator ?? FakeCodeValidationService(),
+        rateLimiter: rateLimiter ?? FakeRateLimiter(),
         schemaJson: r'{"$id":"video-spec"}',
         now: () => now,
       ),
@@ -189,6 +193,25 @@ void main() {
       }
     });
 
+    test('429 with Retry-After for a prompt render over the rate limit', () async {
+      final response = await send(
+        app(
+          env: const {'ANTHROPIC_API_KEY': 'sk'},
+          rateLimiter: FakeRateLimiter(
+            decision: const RateLimitDecision.deny(Duration(seconds: 30)),
+          ),
+        ),
+        'POST',
+        '/v1/renders',
+        headers: {...auth, 'x-forwarded-for': '203.0.113.5'},
+        body: {'prompt': 'a promo'},
+      );
+      expect(response.statusCode, 429);
+      expect(response.headers['retry-after'], '30');
+      final json = jsonDecode(await response.readAsString()) as Map<String, Object?>;
+      expect((json['error']! as Map)['code'], 'rate_limited');
+    });
+
     test('202 for an ollama prompt render (no key needed)', () async {
       final response = await send(
         app(env: const {'FLUVIE_AI_PROVIDER': 'ollama'}),
@@ -266,6 +289,20 @@ void main() {
       final video = json['video']! as Map<String, Object?>;
       expect(video['downloadUrl'], contains('/v1/files/rnd_0/video'));
       expect(video['downloadUrl'], contains('token='), reason: 'private link is signed');
+    });
+
+    test('exposes the printed code in the job view for an AI render', () async {
+      const printed = 'Video build() => Video(scenes: const []);';
+      final handler = app(
+        env: const {'ANTHROPIC_API_KEY': 'sk'},
+        runner: FakeRenderRunner(code: printed),
+      );
+      await send(handler, 'POST', '/v1/renders', headers: auth, body: {'prompt': 'a promo'});
+      await waitDone('rnd_0');
+
+      final response = await send(handler, 'GET', '/v1/renders/rnd_0', headers: auth);
+      final json = jsonDecode(await response.readAsString()) as Map<String, Object?>;
+      expect(json['code'], printed);
     });
 
     test('410 when a succeeded job file has been cleaned up', () async {

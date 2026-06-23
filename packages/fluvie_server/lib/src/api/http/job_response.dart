@@ -32,6 +32,8 @@ Future<RenderJobView> buildJobView(
     error: job.error,
     video: video,
     poster: poster,
+    code: job.code,
+    spec: job.spec,
     createdAt: job.createdAt,
     expiresAt: job.expiresAt,
   );

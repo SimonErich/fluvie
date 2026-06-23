@@ -38,6 +38,8 @@ final class RenderJob {
     this.progress,
     this.videoKey,
     this.posterKey,
+    this.code,
+    this.spec,
     this.error,
   });
 
@@ -90,6 +92,15 @@ final class RenderJob {
   /// The stored key of the poster, or `null` when none was produced.
   final String? posterKey;
 
+  /// The printed Dart `Video build()` snippet for an AI (prompt/edit) render,
+  /// or `null` for other kinds and before the spec has been authored.
+  final String? code;
+
+  /// The decoded authored `VideoSpec` for an AI (prompt/edit) render, or `null`
+  /// for other kinds and before the spec has been authored. Set at the same
+  /// moment as [code]; the client hands it back as the `base` of a surgical edit.
+  final Map<String, Object?>? spec;
+
   /// The failure message when [status] is [JobStatus.failed].
   final String? error;
 
@@ -101,6 +112,8 @@ final class RenderJob {
     RenderProgress? progress,
     String? videoKey,
     String? posterKey,
+    String? code,
+    Map<String, Object?>? spec,
     String? error,
   }) => RenderJob(
     id: id,
@@ -114,6 +127,8 @@ final class RenderJob {
     progress: progress ?? this.progress,
     videoKey: videoKey ?? this.videoKey,
     posterKey: posterKey ?? this.posterKey,
+    code: code ?? this.code,
+    spec: spec ?? this.spec,
     error: error ?? this.error,
   );
 }

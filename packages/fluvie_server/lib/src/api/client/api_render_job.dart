@@ -50,6 +50,8 @@ final class RenderJobView {
     this.error,
     this.video,
     this.poster,
+    this.code,
+    this.spec,
     this.createdAt,
     this.expiresAt,
   });
@@ -67,6 +69,8 @@ final class RenderJobView {
       error: json['error'] as String?,
       video: video == null ? null : FileLink.fromJson(video),
       poster: poster == null ? null : FileLink.fromJson(poster),
+      code: json['code'] as String?,
+      spec: json['spec'] as Map<String, Object?>?,
       createdAt: _time(json['createdAt'] as String?),
       expiresAt: _time(json['expiresAt'] as String?),
     );
@@ -92,6 +96,21 @@ final class RenderJobView {
 
   /// The poster link, present once succeeded (when a poster was requested).
   final FileLink? poster;
+
+  /// The printed Dart `Video build()` snippet for an AI (prompt/edit) render,
+  /// or `null` for code/spec/key renders and before the spec has been authored.
+  ///
+  /// Populated as soon as the authored spec is available (typically before the
+  /// video finishes encoding), so a polling client can show the code first.
+  final String? code;
+
+  /// The decoded authored `VideoSpec` for an AI (prompt/edit) render, or `null`
+  /// for code/spec/key renders and before the spec has been authored.
+  ///
+  /// Populated at the same moment as [code] (typically before the video finishes
+  /// encoding). The Playground hands this back as the `base` of a surgical edit
+  /// so the AI Assistant can amend the last authored video.
+  final Map<String, Object?>? spec;
 
   /// When the job was created.
   final DateTime? createdAt;
@@ -121,6 +140,8 @@ final class RenderJobView {
     'error': ?error,
     'video': ?video?.toJson(),
     'poster': ?poster?.toJson(),
+    'code': ?code,
+    'spec': ?spec,
     'createdAt': ?createdAt?.toUtc().toIso8601String(),
     'expiresAt': ?expiresAt?.toUtc().toIso8601String(),
   };

@@ -10,6 +10,10 @@ import 'package:test/test.dart';
 
 class _MockProcessRunner extends Mock implements ProcessRunner {}
 
+/// The absolutized FLUVIE_RENDER_SPEC_OUT path the runner passed as a define.
+String _specOutOf(List<String> argv) =>
+    argv.firstWhere((a) => a.startsWith('--dart-define=FLUVIE_RENDER_SPEC_OUT=')).split('=').last;
+
 const _banner8 = 'ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers';
 const _encodeArgs = ['-f', 'rawvideo', '-i', 'frames.rgba', 'out.mp4'];
 
@@ -214,6 +218,117 @@ void main() {
       ),
       throwsA(isA<RenderFailure>()),
     );
+  });
+
+  test('a prompt render prints the authored spec into outcome.code and exposes the spec', () async {
+    stubProbe();
+    when(
+      () => runner.run(
+        'flutter',
+        any(),
+        workingDirectory: any(named: 'workingDirectory'),
+        environment: any(named: 'environment'),
+      ),
+    ).thenAnswer((invocation) async {
+      // The harness authors the spec to the FLUVIE_RENDER_SPEC_OUT define path
+      // during capture.
+      final argv = invocation.positionalArguments[1] as List<String>;
+      File(_specOutOf(argv)).writeAsStringSync(
+        jsonEncode({
+          'fluvieSpec': 1,
+          'size': 'square',
+          'fps': 30,
+          'scenes': [
+            {
+              'duration': '2s',
+              'children': [
+                {'type': 'Text', 'text': 'hi'},
+              ],
+            },
+          ],
+        }),
+      );
+      File('${sandbox.path}/frames.rgba').writeAsBytesSync(List.filled(8, 0));
+      File('${sandbox.path}/manifest.json').writeAsStringSync(jsonEncode(_manifest()));
+      return const ProcessRunResult(exitCode: 0, stdout: '', stderr: '');
+    });
+    stubEncode();
+    final authored = <(String, Map<String, Object?>)>[];
+
+    final outcome = await makeRunner(aiEnv: const {'ANTHROPIC_API_KEY': 'sk'}).run(
+      const PromptRenderRequest(
+        'a promo',
+        null,
+        (format: null, aspect: null, quality: null, poster: null),
+      ),
+      workDir: workDir,
+      onAuthored: (code, spec) => authored.add((code, spec)),
+    );
+
+    expect(outcome.code, contains('Video build()'));
+    expect(outcome.code, contains("Text('hi')"));
+    expect(outcome.spec, containsPair('fluvieSpec', 1));
+    expect(outcome.spec, containsPair('size', 'square'));
+    expect(authored, isNotEmpty, reason: 'code+spec are surfaced early via onAuthored');
+    expect(authored.last.$1, outcome.code);
+    expect(authored.last.$2, outcome.spec);
+  });
+
+  test('a malformed authored spec leaves code null without failing the render', () async {
+    stubProbe();
+    when(
+      () => runner.run(
+        'flutter',
+        any(),
+        workingDirectory: any(named: 'workingDirectory'),
+        environment: any(named: 'environment'),
+      ),
+    ).thenAnswer((invocation) async {
+      final argv = invocation.positionalArguments[1] as List<String>;
+      // A spec the printer rejects (unknown element type) must not fail the video.
+      File(_specOutOf(argv)).writeAsStringSync(
+        jsonEncode({
+          'scenes': [
+            {
+              'duration': '1s',
+              'children': [
+                {'type': 'Bogus'},
+              ],
+            },
+          ],
+        }),
+      );
+      File('${sandbox.path}/frames.rgba').writeAsBytesSync(List.filled(8, 0));
+      File('${sandbox.path}/manifest.json').writeAsStringSync(jsonEncode(_manifest()));
+      return const ProcessRunResult(exitCode: 0, stdout: '', stderr: '');
+    });
+    stubEncode();
+
+    final outcome = await makeRunner(aiEnv: const {'ANTHROPIC_API_KEY': 'sk'}).run(
+      const PromptRenderRequest(
+        'a promo',
+        null,
+        (format: null, aspect: null, quality: null, poster: null),
+      ),
+      workDir: workDir,
+    );
+
+    expect(File(outcome.videoPath).existsSync(), isTrue, reason: 'the video still returns');
+    expect(outcome.code, isNull);
+    expect(outcome.spec, isNull);
+  });
+
+  test('a key render never produces code or spec', () async {
+    stubProbe();
+    stubCapture();
+    stubEncode();
+
+    final outcome = await makeRunner().run(
+      const KeyRenderRequest('demo', (format: null, aspect: null, quality: null, poster: null)),
+      workDir: workDir,
+    );
+    expect(outcome.code, isNull);
+    expect(outcome.spec, isNull);
   });
 
   test('a transparent format maps to a webm content type', () async {
