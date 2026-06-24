@@ -1,0 +1,12 @@
+# Test fixtures deliberately build dangling anchors and relative-times-without-
+# scope to exercise the timing diagnostics, so the custom_lint rules that flag
+# those in authoring code are noise here. Disable them at the source for tests
+# only; lib/ keeps full enforcement. This also keeps `dart analyze` quiet now
+# that many workspace packages enable the custom_lint plugin and it surfaces
+# plugin lints through analyze that it previously did not.
+include: ../analysis_options.yaml
+
+custom_lint:
+  rules:
+    - dangling_anchor: false
+    - relative_outside_scope: false
