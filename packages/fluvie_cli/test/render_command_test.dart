@@ -247,7 +247,7 @@ void main() {
       final captured = verify(
         () => runner.run('flutter', any(), workingDirectory: captureAny(named: 'workingDirectory')),
       ).captured;
-      expect(captured.single, endsWith('/example'));
+      expect(captured.single, endsWith('/examples/gallery'));
     });
 
     test('--ffmpeg routes both the probe and the encode to the explicit binary', () async {
