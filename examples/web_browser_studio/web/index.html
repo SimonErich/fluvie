@@ -32,6 +32,7 @@
     }
 
     const ffmpeg = new FFmpeg();
+    ffmpeg.on('log', ({ message }) => console.log('FFMPEG: ' + message));
     let loaded = null;
     async function loadFfmpeg() {
       await ffmpeg.load({
@@ -46,6 +47,113 @@
       exec: (args) => ffmpeg.exec(args),
       readFile: (name) => ffmpeg.readFile(name),
     };
+  </script>
+
+  <!--
+    The FluvieClipDecoder bridge: demuxes a clip's MP4 with mp4box.js and decodes
+    its samples with a WebCodecs VideoDecoder, returning RGBA per source frame -
+    the in-browser analogue of the native frame reader behind Clip.asset. mp4box.js
+    is vendored by tool/fetch_ffmpeg.sh into web/vendor/mp4box/ and loaded lazily,
+    so a page that renders no clips never fetches it.
+  -->
+  <script type="module">
+    let mp4boxLoading = null;
+    const loadMp4box = () => (mp4boxLoading ??= new Promise((ok, fail) => {
+      if (globalThis.MP4Box) return ok();
+      const s = document.createElement('script');
+      s.src = 'vendor/mp4box/mp4box.all.min.js';
+      s.onload = () => (globalThis.MP4Box ? ok() : fail(new Error('mp4box.js: no MP4Box global')));
+      s.onerror = () => fail(new Error('failed to load vendor/mp4box/mp4box.all.min.js'));
+      document.head.appendChild(s);
+    }));
+
+    // Demux every video sample plus the track info from the clip bytes.
+    async function demux(bytes) {
+      await loadMp4box();
+      return new Promise((resolve, reject) => {
+        const file = MP4Box.createFile();
+        const samples = [];
+        let track = null;
+        file.onError = (e) => reject(new Error('mp4box demux: ' + e));
+        file.onReady = (info) => {
+          track = info.videoTracks && info.videoTracks[0];
+          if (!track) return reject(new Error('clip has no video track'));
+          file.setExtractionOptions(track.id, null, { nbSamples: track.nb_samples });
+          file.start();
+        };
+        file.onSamples = (id, user, list) => {
+          for (const s of list) samples.push(s);
+          if (track && samples.length >= track.nb_samples) resolve({ file, track, samples });
+        };
+        const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+        ab.fileStart = 0;
+        file.appendBuffer(ab);
+        file.flush();
+      });
+    }
+
+    // The avcC/hvcC/... record a VideoDecoder needs for length-prefixed samples.
+    function description(file, track) {
+      const trak = file.getTrackById(track.id);
+      for (const entry of trak.mdia.minf.stbl.stsd.entries) {
+        const box = entry.avcC || entry.hvcC || entry.vpcC || entry.av1C;
+        if (!box) continue;
+        // mp4box.js exposes DataStream as its own global, not a MP4Box property.
+        const ds = new DataStream(undefined, 0, DataStream.BIG_ENDIAN);
+        box.write(ds);
+        return new Uint8Array(ds.buffer, 8); // strip the 8-byte box header
+      }
+      return undefined;
+    }
+
+    async function probe(bytes) {
+      const { track } = await demux(bytes);
+      const seconds = track.movie_duration / track.movie_timescale;
+      const frameCount = track.nb_samples;
+      return {
+        fps: seconds > 0 ? frameCount / seconds : 30,
+        frameCount,
+        width: track.video ? track.video.width : track.track_width,
+        height: track.video ? track.video.height : track.track_height,
+      };
+    }
+
+    async function extractFrames(bytes, indices, width, height) {
+      const { file, track, samples } = await demux(bytes);
+      const canvas = new OffscreenCanvas(width, height);
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      // VideoDecoder may emit frames out of presentation order (B-frames), so
+      // capture each frame's RGBA with its timestamp and sort afterwards.
+      const frames = [];
+      await new Promise((resolve, reject) => {
+        const decoder = new VideoDecoder({
+          output: (frame) => {
+            try {
+              ctx.drawImage(frame, 0, 0, width, height);
+              frames.push({ t: frame.timestamp, rgba: new Uint8Array(ctx.getImageData(0, 0, width, height).data) });
+            } finally {
+              frame.close();
+            }
+          },
+          error: (e) => reject(e),
+        });
+        decoder.configure({ codec: track.codec, description: description(file, track) });
+        for (const s of samples) {
+          decoder.decode(new EncodedVideoChunk({
+            type: s.is_sync ? 'key' : 'delta',
+            timestamp: (1e6 * s.cts) / track.timescale,
+            duration: (1e6 * s.duration) / track.timescale,
+            data: s.data,
+          }));
+        }
+        decoder.flush().then(resolve).catch(reject);
+      });
+      frames.sort((a, b) => a.t - b.t);
+      const last = frames.length - 1;
+      return indices.map((i) => frames[Math.max(0, Math.min(last, i))].rgba);
+    }
+
+    globalThis.FluvieClipDecoder = { probe, extractFrames };
   </script>
 </head>
 <body>

@@ -35,9 +35,16 @@ class _MakerScreenState extends ConsumerState<MakerScreen> {
     // The headless e2e builds with --dart-define=FLUVIE_E2E=true and waits for
     // the render marker, so it does not have to click the Flutter canvas.
     if (const bool.fromEnvironment('FLUVIE_E2E')) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => ref.read(makerViewModelProvider.notifier).makeMp4(),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await ref.read(makerViewModelProvider.notifier).makeMp4();
+        final result = ref.read(makerViewModelProvider);
+        if (result.status == MakerStatus.failed) {
+          // Surface the failure so the harness fails fast with the reason; the
+          // success marker is logged from the download path.
+          // ignore: avoid_print
+          print('FLUVIE_E2E_ERROR ${result.error}');
+        }
+      });
     }
   }
 

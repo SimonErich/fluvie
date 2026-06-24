@@ -70,6 +70,9 @@ Video memePromo({
               child: Clip.asset(
                 KittenAssets.clip,
                 fit: BoxFit.cover,
+                // The kitten clip is silent; mute it so the audio mix does not
+                // try to pull a track it does not have (the bed comes from music).
+                audio: const ClipAudio.muted(),
               ).animate([Animation.fadeIn(delay: 0.5.seconds)]),
             ),
           ),

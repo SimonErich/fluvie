@@ -53,5 +53,10 @@ pubspec_overrides.yaml
 # into examples/gallery/web/media and bundled into build/web/media. Never committed.
 examples/gallery/web/media/
 
-# Vendored ffmpeg.wasm for the in-browser example (fetched by tool/fetch_ffmpeg.sh).
+# Vendored web runtime for the in-browser example (fetched by tool/fetch_ffmpeg.sh):
+# ffmpeg.wasm (the encoder) and mp4box.js (the clip demuxer).
 examples/*/web/ffmpeg/
+examples/*/web/vendor/
+
+# The web render e2e harness installs puppeteer here with `npm ci`.
+tool/web/e2e/node_modules/
