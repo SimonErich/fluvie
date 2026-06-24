@@ -20,15 +20,24 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+// The render pre-pass collector, reached off the authoring barrel like the
+// harness, so the sweep can detect and skip generative lessons.
+import 'package:fluvie/src/composition/runtime/generative_collector.dart';
 import 'package:fluvie_example/lessons/lessons.dart';
 import 'package:fluvie_example/render/composition_registry.dart';
 
 import 'render_harness.dart';
 
-/// The 12 gallery lesson keys, in order. `demo`/`multi_scene` are covered by the
-/// CLI e2e (`packages/fluvie_cli/test/render_e2e_test.dart`); this suite is the
-/// exhaustive lesson sweep.
-final List<String> _lessonKeys = [for (final lesson in lessons) lesson.id];
+/// The gallery lesson keys to render, in order. `demo`/`multi_scene` are covered
+/// by the CLI e2e (`packages/fluvie_cli/test/render_e2e_test.dart`); this suite
+/// is the exhaustive lesson sweep. Generative lessons are excluded: they resolve
+/// media through an external AI provider, which the headless capture harness has
+/// no keys or `GenerativeResolverScope` for, so they are covered by the
+/// generative-tagged tests, not this offline smoke.
+final List<String> _lessonKeys = [
+  for (final lesson in lessons)
+    if (collectGenerativeSources(lesson.video().scenes).isEmpty) lesson.id,
+];
 
 /// Counts the encoded video stream's frames in [path] via ffprobe, invoked with
 /// an argument LIST (never a shell string). Prefers the muxer's `nb_frames`; for
