@@ -128,7 +128,10 @@ final class WebVideoRenderer {
       final manifest = await runStage(
         RenderPhase.capturing,
         () => renderToSandbox(
-          composition: composition,
+          // The offscreen capture host mounts this with no app ancestors, so the
+          // tree needs an ambient Directionality for Text/RichText to lay out.
+          // Audio is already resolved into `mix` above, so the wrap is mount-only.
+          composition: Directionality(textDirection: TextDirection.ltr, child: composition),
           aspect: aspect,
           frameCount: frameCount,
           sandbox: sandbox,

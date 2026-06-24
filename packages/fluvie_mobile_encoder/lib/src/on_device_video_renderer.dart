@@ -135,7 +135,11 @@ final class OnDeviceVideoRenderer {
       final captured = await runStage(
         RenderPhase.capturing,
         () => _captureToSandbox(
-          composition: composition,
+          // The offscreen capture host mounts this with no app ancestors, so the
+          // tree needs an ambient Directionality for Text/RichText to lay out
+          // (the CLI capture harness wraps the same way). _audioFor below reads
+          // the raw Video, so the wrap stays off the audio path.
+          composition: Directionality(textDirection: TextDirection.ltr, child: composition),
           aspect: aspect,
           frameCount: frameCount,
           outDir: sandbox,
