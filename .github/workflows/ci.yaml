@@ -366,10 +366,15 @@ jobs:
       - run: flutter build web --release --dart-define=FLUVIE_E2E=true
         working-directory: examples/web_browser_studio
       - name: Render in the browser and assert the marker
+        # WebCodecs H.264 decode needs Chrome's proprietary codecs; the
+        # setup-chrome Chromium build omits them (NotSupportedError), so use the
+        # runner's pre-installed Google Chrome, which the real target browsers
+        # ship. Falls back to run.sh's own detection if it is somehow absent.
         env:
-          CHROME: ${{ steps.setup-chrome.outputs.chrome-path }}
           BUILD_DIR: examples/web_browser_studio/build/web
-        run: bash tool/web/e2e/run.sh
+        run: |
+          export CHROME="$(command -v google-chrome || command -v google-chrome-stable || true)"
+          bash tool/web/e2e/run.sh
 
   # Advisory: render on the server (started in the background) and assert.
   example_web_server_render:
