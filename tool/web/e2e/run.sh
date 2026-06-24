@@ -5,7 +5,7 @@
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-build_dir="${BUILD_DIR:?set BUILD_DIR to the app's build/web directory}"
+build_dir="${BUILD_DIR:?set BUILD_DIR to the built web directory (build/web)}"
 port="${PORT:-$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()')}"
 
 if [ -z "${CHROME:-}" ]; then
