@@ -39,7 +39,9 @@ Video birthdayCard({
     poster: 2.seconds,
     audio: [
       Audio.music(song, fadeIn: const Time.seconds(0.4), fadeOut: const Time.seconds(0.6)),
-      const Audio.sfx(KittenAssets.meowSfx, at: Trigger.sceneStart),
+      // A one-shot sfx is composition-scoped, so it fires at null (start) or
+      // Trigger.at(<time>); a scene/element trigger has no mix-level frame.
+      const Audio.sfx(KittenAssets.meowSfx, at: Trigger.at(Time.seconds(0.4))),
     ],
     scenes: [
       Scene(
