@@ -62,6 +62,10 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
         // The headless end-to-end harness reads this marker from the console.
         // ignore: avoid_print
         print('FLUVIE_E2E_RESULT ok url=${next.downloadUrl}');
+      } else if (next.status == SubmitStatus.failed && previous?.status != SubmitStatus.failed) {
+        // Surface the failure so the harness fails fast with the reason.
+        // ignore: avoid_print
+        print('FLUVIE_E2E_ERROR ${next.error}');
       }
     });
     return Scaffold(

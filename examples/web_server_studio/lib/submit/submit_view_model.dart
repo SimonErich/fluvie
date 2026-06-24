@@ -19,7 +19,9 @@ class SubmitViewModel extends Notifier<SubmitState> {
     tagline: 'Cozy paws, happy days',
     accentHex: '#FF8FB1',
     serverUrl: _defaultServerUrl,
-    apiToken: '',
+    // Empty for a real user (they paste their token); the headless e2e bakes one
+    // in with --dart-define=FLUVIE_API_TOKEN so the auto-submit authenticates.
+    apiToken: String.fromEnvironment('FLUVIE_API_TOKEN'),
   );
 
   /// Sets the headline.

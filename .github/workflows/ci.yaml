@@ -397,13 +397,18 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/renders"
           FLUVIE_ENABLE_API=true HOST=127.0.0.1 PORT=8080 \
+            API_TOKEN=e2e-render-token \
+            CLEANUP_TOKEN=e2e-cleanup-token \
             RENDER_PROJECT="$PWD/examples/gallery" \
             LOCAL_STORAGE_DIR="$RUNNER_TEMP/renders" \
             CORS_ALLOW_ORIGINS="*" \
             VIDEO_SPEC_SCHEMA_PATH="$PWD/packages/fluvie_server/assets/video_spec_schema.json" \
             dart run packages/fluvie_server/bin/fluvie_server.dart &
           for _ in $(seq 1 60); do curl -fsS http://127.0.0.1:8080/healthz >/dev/null 2>&1 && break; sleep 2; done
-      - run: flutter build web --release --dart-define=FLUVIE_E2E=true --dart-define=FLUVIE_API_URL=http://127.0.0.1:8080
+          # Fail loudly if the server never came up, instead of letting the render
+          # time out later with no signal.
+          curl -fsS http://127.0.0.1:8080/healthz >/dev/null
+      - run: flutter build web --release --dart-define=FLUVIE_E2E=true --dart-define=FLUVIE_API_URL=http://127.0.0.1:8080 --dart-define=FLUVIE_API_TOKEN=e2e-render-token
         working-directory: examples/web_server_studio
       - name: Render via the server and assert
         env:
