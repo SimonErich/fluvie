@@ -129,7 +129,7 @@ class _FakeClipDecoder implements WebClipDecoder {
   }
 }
 
-const ClipMetadata _clipMeta = (fps: 30.0, frameCount: 30, width: 2, height: 2);
+const ClipMetadata _clipMeta = (fps: 30.0, frameCount: 30, width: 2, height: 2, hasAudio: false);
 
 Future<Uint8List> _rgbaOf(ui.Image image) async {
   final data = await image.toByteData();

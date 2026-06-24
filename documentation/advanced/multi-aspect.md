@@ -4,7 +4,7 @@ Write a video once, render it to reels, square, landscape, and portrait. An
 `Adaptive` widget branches its layout per aspect, and `render(video, aspect:)`
 picks the variant. Lesson 11 lays one subtree out four ways:
 
-<!-- code-excerpt "example/lib/lessons/11_templates_and_aspects.dart (adaptive)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/11_templates_and_aspects.dart (adaptive)" -->
 ```dart
 child: Adaptive(
   reels: () => _aspectStack('Built for reels'),
@@ -22,7 +22,7 @@ four aspects, rendering each one, and what stays the same across them.
 
 `Aspect` names the aspect-ratio families:
 
-<!-- code-excerpt "example/lib/snippets/phase_11_snippets.dart (aspect-families)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_11_snippets.dart (aspect-families)" -->
 ```dart
 Aspect.reels, // vertical 9:16, for Reels, Shorts, TikTok, Stories
 Aspect.square, // 1:1, for feed posts
@@ -39,7 +39,7 @@ and a `1920 by 1080` landscape frame.
 `render(video, aspect:)` re-derives the canvas size from the aspect and renders
 the composition for it. Loop over the aspects to fan one definition out:
 
-<!-- code-excerpt "example/lib/snippets/phase_14_snippets.dart (render-aspect)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_14_snippets.dart (render-aspect)" -->
 ```dart
 Future<void> renderForAspects({
   required Widget composition,
@@ -73,7 +73,7 @@ example app and the CLI supply them. From the command line, the same job is
 `Adaptive` covers a whole subtree. When one element wants to branch its own
 layout, read the aspect directly with `AspectScope.of(context)`:
 
-<!-- code-excerpt "example/lib/snippets/phase_14_snippets.dart (aspect-of)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_14_snippets.dart (aspect-of)" -->
 ```dart
 Widget headlineForAspect() => Builder(
   builder: (context) {

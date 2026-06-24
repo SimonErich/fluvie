@@ -30,8 +30,14 @@
     {
       "key": "fluvie_ai",
       "role": "the screenwriter",
-      "line": "Turn a plain sentence into a VideoSpec. Claude, Gemini, Mistral, or Ollama.",
+      "line": "Turn a plain sentence into a VideoSpec, or drop AI-generated images, video, and audio straight into a scene.",
       "icon": "&#9998;"
+    },
+    {
+      "key": "ai_abstracted",
+      "role": "the talent agency",
+      "line": "One set of contracts for every AI provider and medium: text, image, video, speech, sound, and music.",
+      "icon": "&#9651;"
     },
     {
       "key": "fluvie_server",
@@ -64,6 +70,7 @@
     { "key": "09", "title": "Diagrams and web pages", "teaches": "A Mermaid reveal, a Markdown explainer, inline HTML.", "category": "code", "clip": false },
     { "key": "10", "title": "Audio and captions", "teaches": "Beat detection, a bar visualizer on the bass, SRT subtitles.", "category": "audio", "clip": false },
     { "key": "11", "title": "Templates and aspects", "teaches": "A StatHighlight template, an Adaptive layout, a FluvieTheme.", "category": "basics", "clip": false },
-    { "key": "12", "title": "The kitchen sink", "teaches": "Every idea in one reel: beat-synced pop, captions, effects.", "category": "transitions", "clip": true }
+    { "key": "12", "title": "The kitchen sink", "teaches": "Every idea in one reel: beat-synced pop, captions, effects.", "category": "transitions", "clip": true },
+    { "key": "13", "title": "Generative content", "teaches": "AI-generated image, video, music, and speech, cached in the project by prompt.", "category": "media", "clip": false }
   ]
 }

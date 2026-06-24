@@ -52,9 +52,9 @@ function publishedPackages(): Set<string> {
   return names;
 }
 
-/// Lesson numbers on disk: `example/lib/lessons/NN_*.dart`.
+/// Lesson numbers on disk: `examples/gallery/lib/lessons/NN_*.dart`.
 function lessonKeys(): Set<string> {
-  const dir = join(repoRoot, 'example', 'lib', 'lessons');
+  const dir = join(repoRoot, 'examples', 'gallery', 'lib', 'lessons');
   const keys = new Set<string>();
   for (const file of readdirSync(dir)) {
     const match = /^(\d\d)_.*\.dart$/.exec(file);

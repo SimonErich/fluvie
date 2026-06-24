@@ -3,7 +3,7 @@
 Text in Fluvie is plain Flutter `Text`. You style it the Flutter way and add
 motion with `.animate()`. There is no special text widget to learn:
 
-<!-- code-excerpt "example/lib/snippets/phase_08_snippets.dart (text-animate)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_08_snippets.dart (text-animate)" -->
 ```dart
 Widget animatedTitle() => const Text(
   'Made with Fluvie',
@@ -25,7 +25,7 @@ elements whose behaviour is driven by the frame, so you never write a tween.
 `Typewriter` reveals a string one glyph at a time. You set the speed in frames
 per glyph and, if you want, a blinking caret:
 
-<!-- code-excerpt "example/lib/snippets/phase_08_snippets.dart (typewriter)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_08_snippets.dart (typewriter)" -->
 ```dart
 Widget typedHeadline() => const Typewriter(
   'Typed out one glyph at a time.',
@@ -45,7 +45,7 @@ through `.animate()`; the constructor only takes content.
 `Counter` tweens a number from one value to another and formats it with `intl`'s
 `NumberFormat`. Use it for stats, prices, and percentages:
 
-<!-- code-excerpt "example/lib/snippets/phase_08_snippets.dart (counter)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_08_snippets.dart (counter)" -->
 ```dart
 Widget viewsCounter() =>
     Counter(to: 12500, duration: 2.seconds, format: NumberFormat.compact()); // "12.5K"
@@ -55,7 +55,7 @@ The displayed value is `lerp(from, to, ease(progress))` over the resolved
 duration. The default ease is linear, the motion a counter wants. Two presets
 cover the common formats:
 
-<!-- code-excerpt "example/lib/snippets/phase_08_snippets.dart (counter-presets)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_08_snippets.dart (counter-presets)" -->
 ```dart
 Widget priceTag() => Counter.currency(to: 4999); // "$4,999"
 Widget shareOfVoice() => Counter.percent(to: 0.87); // "87%"

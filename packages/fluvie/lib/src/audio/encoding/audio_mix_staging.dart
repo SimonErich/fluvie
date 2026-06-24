@@ -23,12 +23,16 @@ import 'package:fluvie/src/timing/time_scope_data.dart';
 /// shifts the track by); a music track carries no `at:` and never delays.
 /// [totalFrames] is the composition window the sfx `at:` resolves against, so a
 /// relative `Trigger.at` measures its fraction against the whole render.
+/// Pass [extraNodes] to add already-staged tracks to the mix (the clip-embedded
+/// audio the render layer stages from a video file); they join the `amix` after
+/// the declared [tracks].
 Future<AudioMixPlan> stageAudioMix({
   required List<Audio> tracks,
   required MediaResolver resolver,
   required Directory sandbox,
   required int fps,
   int totalFrames = 0,
+  List<AudioTrackNode> extraNodes = const [],
 }) async {
   final nodes = <AudioTrackNode>[];
   final scope = TimeScopeData(fps: fps, startFrame: 0, durationFrames: totalFrames);
@@ -40,6 +44,7 @@ Future<AudioMixPlan> stageAudioMix({
     await File(materialized).copy('${sandbox.path}/$name');
     nodes.add(_nodeFor(track, name: name, fps: fps, scope: scope));
   }
+  nodes.addAll(extraNodes);
   return buildAudioMixPlan(nodes);
 }
 

@@ -35,7 +35,8 @@ render-integration tests.
 ## Where things live
 
 - `packages/fluvie` — the library. `packages/fluvie_lints` — custom lints.
-- `packages/fluvie_cli` — the headless renderer. `example/` — the 12 lessons.
+- `packages/fluvie_cli` — the headless renderer. `examples/gallery/` — the 12 lessons.
+- `examples/` — one small app per rendering path (CLI, desktop, mobile, browser, server) sharing `examples/kitten_kit`.
 - `documentation/` — the guides, reference, and contributing pages.
 
 ## Reporting issues

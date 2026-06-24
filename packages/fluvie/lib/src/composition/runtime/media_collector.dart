@@ -1,14 +1,16 @@
 import 'package:flutter/widgets.dart';
-import 'package:fluvie/src/animation/motion_target.dart';
-import 'package:fluvie/src/composition/runtime/collectible_children.dart';
+import 'package:fluvie/src/composition/runtime/scene_tree_walk.dart';
 import 'package:fluvie/src/composition/scene.dart';
+import 'package:fluvie/src/core/contracts/generative_resolver.dart';
 import 'package:fluvie/src/core/media/clip_audio.dart';
 import 'package:fluvie/src/core/media/clip_source_kind.dart';
+import 'package:fluvie/src/core/media/generative_kind.dart';
 import 'package:fluvie/src/core/media/media_carrier.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/core/media/snapshot_source.dart';
 import 'package:fluvie/src/core/time_range.dart';
 import 'package:fluvie/src/elements/clip.dart';
+import 'package:fluvie/src/elements/generative_media.dart';
 import 'package:fluvie/src/elements/snapshot/snapshot.dart';
 import 'package:fluvie/src/timing/placement/scene_frame_resolver.dart';
 
@@ -29,12 +31,20 @@ import 'package:fluvie/src/timing/placement/scene_frame_resolver.dart';
 /// result is a `Set`, so the same declaration across scenes resolves once (the
 /// cache deduplicates by value equality). The render harness hands this set to
 /// `MediaResolver.preResolveAll` before frame 0.
-Set<MediaSource> collectMediaSources(List<Scene> scenes) {
+///
+/// When a [generative] resolver is given (after its `generateAll` ran), a
+/// `GenerativeMedia` of a visual kind folds in as its produced file-backed
+/// `MediaSource`, so generated images and videos pre-resolve through the same
+/// pass as hand-written `Image`/`Clip`.
+Set<MediaSource> collectMediaSources(List<Scene> scenes, {GenerativeResolver? generative}) {
   final sources = <MediaSource>{};
-  _walkScenes(scenes, (widget) {
-    if (widget is! MediaCarrier) return;
-    final source = (widget as MediaCarrier).mediaSource;
-    if (source != null) sources.add(source);
+  walkSceneTree(scenes, (widget) {
+    if (widget is MediaCarrier) {
+      final source = (widget as MediaCarrier).mediaSource;
+      if (source != null) sources.add(source);
+    } else if (generative != null && widget is GenerativeMedia && widget.source.isVisual) {
+      sources.add(generative.mediaFor(widget.source));
+    }
   });
   return sources;
 }
@@ -50,7 +60,7 @@ Set<MediaSource> collectMediaSources(List<Scene> scenes) {
 /// scenes rasterizes once (the cache deduplicates by value equality).
 Set<SnapshotSource> collectSnapshotSources(List<Scene> scenes) {
   final sources = <SnapshotSource>{};
-  _walkScenes(scenes, (widget) {
+  walkSceneTree(scenes, (widget) {
     if (widget is! MediaCarrier) return;
     final source = (widget as MediaCarrier).snapshotSource;
     if (source != null) sources.add(source);
@@ -72,7 +82,7 @@ Set<SnapshotSource> collectSnapshotSources(List<Scene> scenes) {
 /// `SnapshotCaptureScope` above the composition for the frame loop.
 List<Snapshot> collectSnapshots(List<Scene> scenes) {
   final snapshots = <Snapshot>[];
-  _walkScenes(scenes, (widget) {
+  walkSceneTree(scenes, (widget) {
     if (widget is Snapshot) snapshots.add(widget);
   });
   return snapshots;
@@ -97,7 +107,7 @@ typedef ClipPlan = ({
 /// [collectMediaSources] finds their sources, then keeps only the clip-kind
 /// sources (`.mp4`/`.mov`/`.webm`). The window is the whole scene because that
 /// is the longest a clip can play inside it; the planner dedupes from there.
-List<ClipPlan> collectClipPlans(List<Scene> scenes, int fps) {
+List<ClipPlan> collectClipPlans(List<Scene> scenes, int fps, {GenerativeResolver? generative}) {
   final plans = <ClipPlan>[];
   var windowStart = 0;
   for (var s = 0; s < scenes.length; s++) {
@@ -105,6 +115,16 @@ List<ClipPlan> collectClipPlans(List<Scene> scenes, int fps) {
     final windowLength = resolveSceneDurationFrames(scene.duration, fps, 'scenes[$s]');
     final start = windowStart;
     void visit(Widget widget) {
+      if (widget is GenerativeMedia && widget.source.kind == GenerativeKind.video) {
+        if (generative == null) return;
+        plans.add((
+          source: generative.mediaFor(widget.source),
+          windowStart: start,
+          windowLength: windowLength,
+          trim: widget.trim,
+        ));
+        return;
+      }
       if (widget is! MediaCarrier) return;
       final source = (widget as MediaCarrier).mediaSource;
       if (source == null || !isClipSource(source)) return;
@@ -117,9 +137,9 @@ List<ClipPlan> collectClipPlans(List<Scene> scenes, int fps) {
     }
 
     final background = scene.background;
-    if (background != null) _walk(background, visit);
+    if (background != null) walkWidgetTree(background, visit);
     for (final child in scene.children) {
-      _walk(child, visit);
+      walkWidgetTree(child, visit);
     }
     windowStart += windowLength;
   }
@@ -141,13 +161,32 @@ typedef ClipAudioPlan = ({
 /// tracking each scene's cumulative start frame so the mix can delay a clip's
 /// audio to where the clip plays. Walks the same per-scene tree as
 /// [collectClipPlans]; a muted clip or a non-clip source contributes nothing.
-List<ClipAudioPlan> collectClipAudioPlans(List<Scene> scenes, int fps) {
+List<ClipAudioPlan> collectClipAudioPlans(
+  List<Scene> scenes,
+  int fps, {
+  GenerativeResolver? generative,
+}) {
   final plans = <ClipAudioPlan>[];
   var startFrame = 0;
   for (var s = 0; s < scenes.length; s++) {
     final scene = scenes[s];
     final windowLength = resolveSceneDurationFrames(scene.duration, fps, 'scenes[$s]');
     void visit(Widget widget) {
+      // A generated video (for example Veo 3) keeps its embedded audio track,
+      // delayed to its scene window exactly like a `Clip`, so the two stay in
+      // sync because they are the same produced file.
+      if (widget is GenerativeMedia && widget.source.kind == GenerativeKind.video) {
+        if (generative == null || widget.audio.muted) return;
+        if (!generative.metaFor(widget.source).hasAudio) return;
+        plans.add((
+          source: generative.mediaFor(widget.source),
+          startFrame: startFrame,
+          windowFrames: windowLength,
+          audio: widget.audio,
+          trim: widget.trim,
+        ));
+        return;
+      }
       if (widget is! Clip || widget.audio.muted) return;
       final source = widget.mediaSource;
       if (source == null || !isClipSource(source)) return;
@@ -161,53 +200,11 @@ List<ClipAudioPlan> collectClipAudioPlans(List<Scene> scenes, int fps) {
     }
 
     final background = scene.background;
-    if (background != null) _walk(background, visit);
+    if (background != null) walkWidgetTree(background, visit);
     for (final child in scene.children) {
-      _walk(child, visit);
+      walkWidgetTree(child, visit);
     }
     startFrame += windowLength;
   }
   return plans;
-}
-
-/// Walks each scene's `Background` and declared children, calling [visit] for
-/// every widget found in pre-order build sequence — the one tree walk every
-/// collector shares. [collectMediaSources]/[collectSnapshotSources] filter to
-/// [MediaCarrier]s; [collectSnapshots] filters to [Snapshot]s.
-void _walkScenes(List<Scene> scenes, void Function(Widget widget) visit) {
-  for (final scene in scenes) {
-    final background = scene.background;
-    if (background != null) _walk(background, visit);
-    for (final child in scene.children) {
-      _walk(child, visit);
-    }
-  }
-}
-
-/// Visits [widget] then recurses into its declared children in build order — the
-/// multi-child layouts (`Column`/`Row`/`Stack`/`Wrap` via
-/// [MultiChildRenderObjectWidget]), the single-child wrappers
-/// (`Center`/`Align`/`Padding`/`SizedBox` via [SingleChildRenderObjectWidget]),
-/// a [MotionTarget] (the `.animate()` wrapper), and Fluvie's own
-/// [CollectibleChildren] wrappers (`DeviceFrame`/`Frame`/`Snapshot`, which are
-/// `StatelessWidget`s the shape match cannot otherwise see into). Other widgets
-/// are leaves to the walk: it never mounts or builds anything.
-void _walk(Widget widget, void Function(Widget widget) visit) {
-  visit(widget);
-  switch (widget) {
-    case CollectibleChildren(:final collectibleChildren):
-      for (final child in collectibleChildren) {
-        _walk(child, visit);
-      }
-    case MotionTarget(:final child):
-      _walk(child, visit);
-    case MultiChildRenderObjectWidget(:final children):
-      for (final child in children) {
-        _walk(child, visit);
-      }
-    case SingleChildRenderObjectWidget(:final child?):
-      _walk(child, visit);
-    case ProxyWidget(:final child):
-      _walk(child, visit);
-  }
 }

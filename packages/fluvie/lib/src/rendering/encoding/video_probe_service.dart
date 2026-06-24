@@ -29,6 +29,7 @@ final class VideoProbeResult {
     required this.height,
     required this.nbFrames,
     required this.durationSeconds,
+    this.hasAudio = false,
   });
 
   /// The codec name of the first video stream (for example `h264`).
@@ -45,6 +46,9 @@ final class VideoProbeResult {
 
   /// The container-reported duration in seconds.
   final double durationSeconds;
+
+  /// Whether the file carries at least one audio stream.
+  final bool hasAudio;
 }
 
 /// The real [VideoProbeService]: spawns `ffprobe` through a [ProcessRunner]
@@ -103,6 +107,9 @@ final class FfprobeVideoProbeService implements VideoProbeService {
             orElse: () => const {},
           )
         : const <String, Object?>{};
+    final hasAudio =
+        streams is List<Object?> &&
+        streams.whereType<Map<String, Object?>>().any((s) => s['codec_type'] == 'audio');
     final format = decoded['format'];
     final duration = format is Map<String, Object?> ? format['duration'] : null;
     final codec = video['codec_name'];
@@ -130,6 +137,7 @@ final class FfprobeVideoProbeService implements VideoProbeService {
         parse: double.parse,
         filePath: filePath,
       ),
+      hasAudio: hasAudio,
     );
   }
 

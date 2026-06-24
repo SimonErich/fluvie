@@ -111,6 +111,18 @@ services:
       - "8081:80"
     restart: unless-stopped
 
+  # The example web apps (in-browser meme maker at /, server-render studio at
+  # /server/). The render API URL for the server studio is baked at build time.
+  fluvie-examples:
+    build:
+      context: ..
+      dockerfile: deploy/examples.Dockerfile
+      args:
+        FLUVIE_API_URL: ${FLUVIE_API_URL:-http://localhost:8080}
+    ports:
+      - "8082:80"
+    restart: unless-stopped
+
 volumes:
   fluvie-renders:
   minio-data:

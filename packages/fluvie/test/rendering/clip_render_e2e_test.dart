@@ -35,7 +35,7 @@ class _NoHttp implements MediaHttpClient {
 class _WhiteClipDecoder implements WebClipDecoder {
   @override
   Future<ClipMetadata> probe(Uint8List bytes) async =>
-      (fps: 30.0, frameCount: 30, width: 32, height: 32);
+      (fps: 30.0, frameCount: 30, width: 32, height: 32, hasAudio: false);
 
   @override
   Future<Map<int, RawFrame>> extractFrames(

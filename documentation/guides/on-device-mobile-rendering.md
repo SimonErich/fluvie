@@ -7,7 +7,7 @@ adds, on Android and iOS.
 
 You write the same `Video` you would render anywhere. Only the renderer changes:
 
-<!-- code-excerpt "example/lib/on_device/on_device_page.dart (render)" -->
+<!-- code-excerpt "examples/gallery/lib/on_device/on_device_page.dart (render)" -->
 ```dart
 final renderer = OnDeviceVideoRenderer();
 final file = await renderer.render(

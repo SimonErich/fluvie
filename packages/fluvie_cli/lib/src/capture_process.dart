@@ -15,8 +15,9 @@ const String runCaptureUnknownKeyMarker = 'fluvie-unknown-key:';
 /// checking two layouts at each level:
 ///
 /// 1. a standalone project (for example one scaffolded by `fluvie init`) whose
-///    harness sits directly under its own `test/render/`, and
-/// 2. the Fluvie monorepo, whose harness lives in the bundled `example` project.
+///    harness sits directly under its own `test/render/`,
+/// 2. a sibling `example/` project (a package's bundled example), and
+/// 3. the Fluvie monorepo's gallery example under `examples/gallery`.
 ///
 /// So the CLI works from a scaffolded project root, from the repo root, and from
 /// inside `packages/fluvie_cli` alike.
@@ -28,14 +29,18 @@ String resolveProjectDir({String? project, Directory? cwd}) {
     if (File('${dir.path}/$harness').existsSync()) return dir.path;
     final example = '${dir.path}/example';
     if (File('$example/$harness').existsSync()) return example;
+    // The Fluvie monorepo's gallery example lives one level deeper (the
+    // examples/ restructure), so a render from the repo root finds it here.
+    final gallery = '${dir.path}/examples/gallery';
+    if (File('$gallery/$harness').existsSync()) return gallery;
     final parent = dir.parent;
     if (parent.path == dir.path) {
       throw const CliFailure(
         'Could not find a Fluvie capture harness '
-        '(test/render/capture_harness_test.dart) in the working directory, its '
-        '"example" project, or any parent. Run `fluvie init` to scaffold a '
-        'project, or pass --project pointing at the Flutter project to capture '
-        'from.',
+        '(test/render/capture_harness_test.dart) in the working directory, a '
+        'nested "example" or "examples/gallery" project, or any parent. Run '
+        '`fluvie init` to scaffold a project, or pass --project pointing at the '
+        'Flutter project to capture from.',
       );
     }
     dir = parent;

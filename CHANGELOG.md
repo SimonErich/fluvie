@@ -6,6 +6,39 @@ All notable changes to the Fluvie workspace. The format follows
 
 Per-package changelogs live next to each package.
 
+## [0.1.10] - 2026-06-24
+
+### Added
+
+- AI generative media: declare AI-generated image, video, and audio sources with
+  `GenerativeMedia` / `GenerativeAudio` and resolve them before the frame loop
+  through the new `GenerativeResolver` seam (default `NoGenerativeResolver`), so
+  generated clips and music fold back in as plain media and stay in sync. A new
+  provider-agnostic `ai_abstracted` package (Gemini/Veo, OpenAI, Flux, ElevenLabs,
+  Suno, with fakes) powers it, bound in `fluvie_ai`.
+- A set of focused, kitten-themed example apps under `examples/`, one per
+  rendering path, sharing a new `examples/kitten_kit` package (theme, sample
+  media, and reusable composition builders):
+  - `cli_quickstart`: render a composition from the terminal with the CLI.
+  - `desktop_studio`: a Linux desktop studio that renders to a file via the CLI.
+  - `mobile_purrfect`: an Android app that renders on-device with the native encoder.
+  - `web_browser_studio`: a meme maker that renders fully in the browser (ffmpeg.wasm).
+  - `web_server_studio`: a promo studio that renders on a Fluvie render server.
+- End-to-end coverage for the example apps in CI: per-app build jobs, a real CLI
+  render with an ffprobe assertion, and advisory GUI/wasm/emulator render jobs.
+  The web apps are also served from a new `fluvie-examples` Docker image, and the
+  builds upload as workflow artifacts.
+- An [example apps guide](documentation/guides/example-apps.md).
+
+### Changed
+
+- Moved the lesson gallery from `example/` to `examples/gallery/` (the package
+  name stays `fluvie_example`) and updated every reference: the melos workspace
+  and scripts, CI workflows, Docker images, the website build, the documentation
+  code-excerpts, and the tool scripts.
+- `fluvie_cli` project discovery also probes an `examples/gallery` subproject, so
+  the relocated gallery resolves from the repo root.
+
 ## [0.1.4] - 2026-06-22
 
 ### Changed

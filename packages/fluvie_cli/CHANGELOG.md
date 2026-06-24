@@ -3,6 +3,14 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.10] - 2026-06-24
+
+### Changed
+
+- Capture-harness auto-discovery also probes an `examples/gallery` subproject, so
+  `fluvie render` and `fluvie list` resolve the relocated monorepo gallery from
+  the repo root.
+
 ## [0.1.9] - 2026-06-23
 
 Lockstep maintenance release; demo (mobile layout) and CI fixes only, no library changes since 0.1.8.

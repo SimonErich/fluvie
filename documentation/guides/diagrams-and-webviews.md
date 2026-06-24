@@ -4,7 +4,7 @@ Draw a Mermaid diagram, render a web page, or rasterize any Flutter subtree, the
 paint the result as a still in your video. Each of these elements turns into one
 decoded image before frame 0 and the same image paints every frame:
 
-<!-- code-excerpt "example/lib/lessons/09_diagrams_and_webviews.dart (mermaid)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/09_diagrams_and_webviews.dart (mermaid)" -->
 ```dart
 child: const Mermaid(
   _flow,
@@ -47,7 +47,7 @@ they apply.
 `Snapshot(child)` rasterizes a Flutter subtree to one image, in process, with no
 browser. This path is fully deterministic and runs in the gate today.
 
-<!-- code-excerpt "example/lib/snippets/phase_13_snippets.dart (snapshot)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_13_snippets.dart (snapshot)" -->
 ```dart
 Snapshot(
   child: Center(
@@ -70,7 +70,7 @@ an expensive or non-deterministic subtree into one stable image.
 `Mermaid(source, {theme, reveal})` takes the diagram source as its first
 argument. The source string is the only required input:
 
-<!-- code-excerpt "example/lib/snippets/phase_13_snippets.dart (mermaid)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_13_snippets.dart (mermaid)" -->
 ```dart
 const Mermaid('graph LR; A --> B; B --> C;');
 ```
@@ -79,7 +79,7 @@ const Mermaid('graph LR; A --> B; B --> C;');
 
 Pass a `MermaidTheme` to `theme`. Two presets ship:
 
-<!-- code-excerpt "example/lib/snippets/phase_13_snippets.dart (mermaid-theme)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_13_snippets.dart (mermaid-theme)" -->
 ```dart
 Mermaid(source, theme: const MermaidTheme.dark()),
 Mermaid(source, theme: const MermaidTheme.light()),
@@ -94,7 +94,7 @@ wins over the inherited one for that element.
 
 `reveal` is a `MermaidReveal` and has three modes:
 
-<!-- code-excerpt "example/lib/snippets/phase_13_snippets.dart (mermaid-reveal)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_13_snippets.dart (mermaid-reveal)" -->
 ```dart
 Mermaid(src, reveal: MermaidReveal.none), // the whole diagram at once (default)
 Mermaid(src, reveal: MermaidReveal.fadeNodes(1.seconds)), // nodes fade in over the window
@@ -111,7 +111,7 @@ frame, so a 4 second reveal costs the same as no reveal at render time.
 `Html(source, {viewport})` renders an HTML string to one image at a fixed
 viewport. `WebView.url(uri, {viewport, scroll, clip})` does the same for a URL:
 
-<!-- code-excerpt "example/lib/snippets/phase_13_snippets.dart (webview)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_13_snippets.dart (webview)" -->
 ```dart
 Html('<h1>fluvie.dev</h1>', viewport: const SnapshotViewport(width: 720, height: 405)),
 WebView.url('https://fluvie.dev', viewport: const SnapshotViewport(width: 1280, height: 720)),
@@ -136,7 +136,7 @@ bezel and notch, a browser address bar and traffic lights, or a tablet bezel.
 The frame draws no raster and runs no service. It composes over any child,
 including a snapshot:
 
-<!-- code-excerpt "example/lib/lessons/09_diagrams_and_webviews.dart (browser)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/09_diagrams_and_webviews.dart (browser)" -->
 ```dart
 child: const DeviceFrame.browser(
   url: 'https://fluvie.dev',
@@ -154,7 +154,7 @@ takes an optional `url:` string for the address bar. The chrome colors come from
 `Markdown` from the code-and-terminal phase composes here too. It parses a
 document once and renders it to widgets, with the same intrinsic reveal:
 
-<!-- code-excerpt "example/lib/lessons/09_diagrams_and_webviews.dart (markdown)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/09_diagrams_and_webviews.dart (markdown)" -->
 ```dart
 child: const Markdown(
   _notes,

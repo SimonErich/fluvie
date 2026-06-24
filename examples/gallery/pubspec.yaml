@@ -1,0 +1,53 @@
+name: fluvie_example
+description: "The Fluvie lesson gallery: twelve runnable lessons plus a scrubbable inspector."
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_code_editor: ^0.3.5
+  flutter_highlight: ^0.7.0
+  flutter_riverpod: ^3.3.2
+  fluvie: ^0.1.0
+  fluvie_ai: ^0.1.0
+  fluvie_mobile_encoder: ^0.1.0
+  fluvie_server: ^0.1.0
+  fluvie_web_encoder: ^0.1.0
+  highlight: ^0.7.0
+  web: ^1.1.0
+
+dev_dependencies:
+  alchemist: ^0.14.0
+  custom_lint: ^0.8.1
+  flutter_test:
+    sdk: flutter
+  fluvie_cli: ^0.1.0
+  fluvie_lints:
+    # A path (not hosted) constraint: the custom_lint plugin host replicates
+    # this dependency and must resolve it without pub.dev.
+    path: ../../packages/fluvie_lints
+  http: ^1.5.0
+  mocktail: ^1.0.5
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/fixtures/
+    - assets/audio/
+  fonts:
+    - family: Sora
+      fonts:
+        - asset: assets/fonts/Sora.ttf
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope.ttf
+    - family: JetBrains Mono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono.ttf

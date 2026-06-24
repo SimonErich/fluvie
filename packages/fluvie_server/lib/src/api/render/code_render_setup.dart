@@ -84,7 +84,7 @@ String _uniqueId() {
 }
 
 // The generated harness source. This mirrors `playgroundHarnessSource` in
-// example/lib/render/code_composition.dart (the example tests that copy); both
+// examples/gallery/lib/render/code_composition.dart (the example tests that copy); both
 // build the entry via `compositionFromVideo(user.build)` and drive the shared
 // `runCaptureHarness`, reading the same FLUVIE_RENDER_* defines as the permanent
 // harness. The render_harness helper lives in the example test tree, reached by

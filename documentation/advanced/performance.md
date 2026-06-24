@@ -49,7 +49,7 @@ decode.
 Each asset is keyed by the hash of its bytes, so identical declarations share
 one load. Reuse a declaration to get the cache hit:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (reuse-media)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (reuse-media)" -->
 ```dart
 logo, // scene one: one decode
 logo, // scene two: a cache hit on the same bytes
@@ -87,7 +87,7 @@ per-frame `Builder` rebuilds each frame, so a fresh list literal inside that
 builder registers a new token after resolution and throws. Hoist the list to a
 stable field instead:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (stable-list)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (stable-list)" -->
 ```dart
 Builder(
   builder: (context) => const Text('Stable', style: _line).animate(_stablePop),

@@ -40,7 +40,7 @@ Future<ui.Image> _frameImage(int tag) async {
 Future<FakeMediaResolver> _clipResolver(Map<int, ui.Image> frames) async {
   final resolver = FakeMediaResolver(
     const {},
-    metadata: {_asset: (fps: 30, frameCount: 30, width: 4, height: 4)},
+    metadata: {_asset: (fps: 30, frameCount: 30, width: 4, height: 4, hasAudio: false)},
     clipFrames: {_asset: frames},
   );
   await resolver.preResolveClip(_asset, frames.keys);

@@ -4,7 +4,7 @@ Most of the time, `.animate()` on each element is all you need. When you want
 to place many animations on one shared clock, reach for `Timeline`. It is an
 opt-in, GSAP-style builder that records steps against a running playhead:
 
-<!-- code-excerpt "example/lib/snippets/phase_08_snippets.dart (timeline)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_08_snippets.dart (timeline)" -->
 ```dart
 Timeline introTimeline(Anchor title, Anchor subtitle, List<Anchor> bullets, Anchor cta) =>
     Timeline(defaults: const Defaults(duration: Time.seconds(0.5)))
@@ -47,7 +47,7 @@ so it never reaches the per-frame path.
 Hand a `Timeline` to `Scene.sequence` and the scene adopts the timeline's
 derived length. You declare the structure once and the scene runs on it:
 
-<!-- code-excerpt "example/lib/snippets/phase_08_snippets.dart (scene-sequence)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_08_snippets.dart (scene-sequence)" -->
 ```dart
 Scene sequencedScene(Timeline timeline) => Scene.sequence(
   timeline: timeline,

@@ -50,5 +50,8 @@ pubspec_overrides.yaml
 .fluvie_playground/
 
 # Pre-rendered demo videos: generated at image-build time (deploy/demo.Dockerfile)
-# into example/web/media and bundled into build/web/media. Never committed.
-example/web/media/
+# into examples/gallery/web/media and bundled into build/web/media. Never committed.
+examples/gallery/web/media/
+
+# Vendored ffmpeg.wasm for the in-browser example (fetched by tool/fetch_ffmpeg.sh).
+examples/*/web/ffmpeg/

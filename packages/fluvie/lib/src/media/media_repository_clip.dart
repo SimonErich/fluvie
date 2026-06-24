@@ -21,7 +21,13 @@ extension _ClipResolution on MediaRepository {
     final fps = result.durationSeconds > 0
         ? result.nbFrames / result.durationSeconds
         : result.nbFrames.toDouble();
-    return (fps: fps, frameCount: result.nbFrames, width: result.width, height: result.height);
+    return (
+      fps: fps,
+      frameCount: result.nbFrames,
+      width: result.width,
+      height: result.height,
+      hasAudio: result.hasAudio,
+    );
   }
 
   /// Extracts the [sourceFrames] of the already-materialized [source] at the clip

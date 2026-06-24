@@ -4,7 +4,7 @@ Brand a video from one palette and one type scale. Wrap a subtree in a
 `FluvieTheme` and its descendants read the brand colors and the type ladder from
 `context.fluvie`. Lesson 11 sets a brand and a scale once:
 
-<!-- code-excerpt "example/lib/lessons/11_templates_and_aspects.dart (theme)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/11_templates_and_aspects.dart (theme)" -->
 ```dart
 const _brand = Palette(
   bg: Color(0xFF0E1116),
@@ -17,7 +17,7 @@ final _type = TypeScale.fromBase(40, ratio: 1.3);
 Text reads those tokens at the call site, picking the display role and the brand
 accent:
 
-<!-- code-excerpt "example/lib/snippets/phase_11_snippets.dart (themed-text)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_11_snippets.dart (themed-text)" -->
 ```dart
 Builder(
   builder: (context) => Text(
@@ -37,7 +37,7 @@ groups, and the precedence rule.
 inherits from the nearest theme above, so themes nest and an inner theme
 overrides only the fields it sets:
 
-<!-- code-excerpt "example/lib/snippets/phase_11_snippets.dart (fluvie-theme)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_11_snippets.dart (fluvie-theme)" -->
 ```dart
 FluvieTheme(
   palette: const Palette(
@@ -60,7 +60,7 @@ captions, annotations) picks the brand up with no change at the call site.
 `Palette` is the brand color set. It carries the backdrop, the accent, the
 foreground that reads on the backdrop, and an optional raised-surface pair:
 
-<!-- code-excerpt "example/lib/snippets/phase_11_snippets.dart (palette)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_11_snippets.dart (palette)" -->
 ```dart
 const Palette(
   bg: Color(0xFF0E1116), // the backdrop
@@ -73,7 +73,7 @@ const Palette(
 
 Read it via `context.fluvie.brand`:
 
-<!-- code-excerpt "example/lib/snippets/phase_11_snippets.dart (brand-access)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_11_snippets.dart (brand-access)" -->
 ```dart
 context.fluvie.brand.bg,
 context.fluvie.brand.accent,
@@ -89,14 +89,14 @@ chart cycles through. For brand colors, reach for `.brand`.
 `TypeScale.fromBase` derives five text roles from one base size and a ratio.
 Each role steps the body size up or down by the ratio:
 
-<!-- code-excerpt "example/lib/snippets/phase_11_snippets.dart (type-scale)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_11_snippets.dart (type-scale)" -->
 ```dart
 TypeScale.fromBase(40, ratio: 1.3);
 ```
 
 The five roles, largest to smallest:
 
-<!-- code-excerpt "example/lib/snippets/phase_11_snippets.dart (type-roles)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_11_snippets.dart (type-roles)" -->
 ```dart
 context.fluvie.type.display, // hero numbers and full-screen statements
 context.fluvie.type.title, // scene headings and the main on-screen line

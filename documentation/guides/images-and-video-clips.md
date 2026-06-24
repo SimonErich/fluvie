@@ -4,7 +4,7 @@ Drop a photo into a scene with `Image`, and a video with `Clip`. Both are
 Fluvie's own widgets, both animate with `.animate()`, and both are resolved
 before the first frame so nothing pops in when it loads:
 
-<!-- code-excerpt "example/lib/lessons/05_images_and_clips.dart (image-asset)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/05_images_and_clips.dart (image-asset)" -->
 ```dart
 Align(
   alignment: const Alignment(0, -0.15),
@@ -24,7 +24,7 @@ zooms slowly with a Ken Burns move. Lesson 05 builds the whole scene.
 Fluvie defines its own `Image` (and `Clip`, `Animation`, `Tween`). The single
 barrel import hides Flutter's versions, so an unprefixed `Image` is Fluvie's:
 
-<!-- code-excerpt "example/lib/lessons/05_images_and_clips.dart (imports-fluvie)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/05_images_and_clips.dart (imports-fluvie)" -->
 ```dart
 import 'package:fluvie/fluvie.dart'; // Image and Clip are Fluvie's here
 ```
@@ -32,14 +32,14 @@ import 'package:fluvie/fluvie.dart'; // Image and Clip are Fluvie's here
 If a file also imports Flutter directly, hide the four shadowed names or import
 Flutter under a prefix:
 
-<!-- code-excerpt "example/lib/lessons/05_images_and_clips.dart (imports-flutter)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/05_images_and_clips.dart (imports-flutter)" -->
 ```dart
 import 'package:flutter/material.dart' hide Animation, Image;
 ```
 
 ## Four ways to name an image
 
-<!-- code-excerpt "example/lib/snippets/phase_08_snippets.dart (image-constructors)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_08_snippets.dart (image-constructors)" -->
 ```dart
 Image.asset('photos/me.png'),
 Image.file('/tmp/frame.png'),
@@ -50,7 +50,7 @@ Image.network('https://picsum.photos/seed/fluvie/800/800'),
 A remote image resolves the same way an asset does. Fluvie fetches, decodes,
 and caches it in the pre-resolve pass, then paints it synchronously:
 
-<!-- code-excerpt "example/lib/lessons/05_images_and_clips.dart (image-network)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/05_images_and_clips.dart (image-network)" -->
 ```dart
 Widget remotePhoto() => Image.network(
   'https://picsum.photos/seed/fluvie/800/800',
@@ -73,7 +73,7 @@ so you write the style once on the `frame:` parameter.
 
 `Clip` embeds a video. Pick the portion you want with `trim`, in source time:
 
-<!-- code-excerpt "example/lib/lessons/05_images_and_clips.dart (clip)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/05_images_and_clips.dart (clip)" -->
 ```dart
 Align(
   alignment: const Alignment(0, 0.62),

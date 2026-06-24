@@ -21,7 +21,7 @@ readonly SRC
 
 # A work area on a roomy filesystem, OUTSIDE any Fluvie checkout. It must be
 # outside the repo: a Fluvie test creates a `Directory.systemTemp` dir and
-# asserts no `example/` harness sits above it (so `resolveProjectDir` throws),
+# asserts no Fluvie capture harness sits above it (so `resolveProjectDir` throws),
 # and TMPDIR points `systemTemp` here. Nesting this inside the repo would let
 # that walk find the real harness and the test would wrongly fail. Override the
 # base with FLUVIE_VERIFY_TMP if $HOME is small or itself inside a Fluvie repo.
@@ -66,7 +66,7 @@ done
 step "render every lesson and assert its frame count (ffmpeg)"
 command -v ffmpeg >/dev/null || fail "ffmpeg not on PATH"
 command -v ffprobe >/dev/null || fail "ffprobe not on PATH"
-( cd example && CI=true flutter test --tags ffmpeg test/render/lessons_render_smoke_test.dart ) \
+( cd examples/gallery && CI=true flutter test --tags ffmpeg test/render/lessons_render_smoke_test.dart ) \
   || fail "lesson render-smoke"
 
 step "gif export + determinism (two CLI renders must be byte-identical)"

@@ -1,0 +1,34 @@
+name: mobile_purrfect
+description: "Kitten Mitten on-device studio: render a cat birthday card to MP4 on your phone."
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.3.2
+  fluvie: ^0.1.0
+  fluvie_mobile_encoder: ^0.1.0
+  image_picker: ^1.0.0
+  kitten_kit:
+    path: ../kitten_kit
+  share_plus: ^10.0.0
+
+dev_dependencies:
+  custom_lint: ^0.8.1
+  flutter_test:
+    sdk: flutter
+  fluvie_lints:
+    path: ../../packages/fluvie_lints
+  integration_test:
+    sdk: flutter
+  mocktail: ^1.0.5
+
+flutter:
+  uses-material-design: true

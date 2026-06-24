@@ -5,7 +5,7 @@ Layout in Fluvie is plain Flutter. `Center`, `Column`, `Row`, `Stack`,
 widget you lay out can carry `.animate(...)`. Lesson 02 lays out three lines
 with a `Column` and staggers them in:
 
-<!-- code-excerpt "example/lib/lessons/02_text_and_motion.dart (column-stagger)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/02_text_and_motion.dart (column-stagger)" -->
 ```dart
 const Column(
   mainAxisSize: MainAxisSize.min,
@@ -28,7 +28,7 @@ frames after the one before it. The layout knows nothing about the motion.
 A `Positioned` child animates without any ceremony. Lesson 02 pins a badge
 and chains an ambient float off its pop:
 
-<!-- code-excerpt "example/lib/lessons/02_text_and_motion.dart (previous-chain)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/02_text_and_motion.dart (previous-chain)" -->
 ```dart
 Positioned(
   top: 360,

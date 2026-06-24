@@ -49,7 +49,9 @@ void main() {
         Scene(duration: const Time.frames(4), children: [Clip.asset('clip.mp4')]),
       ],
     );
-    final resolver = _RecordingResolver({_clip: (fps: 30.0, frameCount: 30, width: 2, height: 2)});
+    final resolver = _RecordingResolver({
+      _clip: (fps: 30.0, frameCount: 30, width: 2, height: 2, hasAudio: false),
+    });
 
     await preResolveCompositionClips(composition: video, resolver: resolver, totalFrames: 4);
 
@@ -63,7 +65,9 @@ void main() {
         Scene(duration: const Time.frames(4), children: [Clip.asset('clip.mp4')]),
       ],
     );
-    final resolver = _RecordingResolver({_clip: (fps: 15.0, frameCount: 30, width: 2, height: 2)});
+    final resolver = _RecordingResolver({
+      _clip: (fps: 15.0, frameCount: 30, width: 2, height: 2, hasAudio: false),
+    });
 
     await preResolveCompositionClips(composition: video, resolver: resolver, totalFrames: 4);
 
@@ -77,7 +81,9 @@ void main() {
         Scene(duration: 1.seconds, children: [Clip.asset('clip.mp4')]),
       ],
     );
-    final resolver = _RecordingResolver({_clip: (fps: 24.0, frameCount: 30, width: 2, height: 2)});
+    final resolver = _RecordingResolver({
+      _clip: (fps: 24.0, frameCount: 30, width: 2, height: 2, hasAudio: false),
+    });
 
     await preResolveCompositionClips(composition: video, resolver: resolver, totalFrames: 24);
 
@@ -96,7 +102,7 @@ void main() {
       ],
     );
     final resolver = _RecordingResolver({
-      _clip: (fps: 30.0, frameCount: 150, width: 2, height: 2),
+      _clip: (fps: 30.0, frameCount: 150, width: 2, height: 2, hasAudio: false),
     });
 
     await preResolveCompositionClips(

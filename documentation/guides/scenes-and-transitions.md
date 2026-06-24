@@ -4,7 +4,7 @@ A video is a list of scenes. A transition is how one scene becomes the next.
 You pick the blend and Fluvie computes every frame of it. Set a default blend
 on the `Video` and it applies to every boundary:
 
-<!-- code-excerpt "example/lib/lessons/04_scenes_and_transitions.dart (video-default)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/04_scenes_and_transitions.dart (video-default)" -->
 ```dart
 transition: Transition.crossFade(0.5.seconds), // overlap is on by default
 ```
@@ -17,7 +17,7 @@ Override the default on any boundary with `Scene.enter` or `Scene.exit`.
 
 Every transition shares `Time` and `Ease`, and each names its own shape:
 
-<!-- code-excerpt "example/lib/snippets/phase_06_snippets.dart (transitions)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_06_snippets.dart (transitions)" -->
 ```dart
 Transition.cut(),
 Transition.crossFade(0.5.seconds),
@@ -49,7 +49,7 @@ choice that changes how long your video runs.
 Lesson 04 uses both. The default crossFade overlaps, so its 15 frames come off
 the total. The outro's wipe runs sequentially, so it leaves the length alone:
 
-<!-- code-excerpt "example/lib/lessons/04_scenes_and_transitions.dart (wipe-scene)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/04_scenes_and_transitions.dart (wipe-scene)" -->
 ```dart
 Scene.centered(
   duration: 3.seconds,
@@ -85,7 +85,7 @@ means "no opinion" and falls through to the next candidate.
 Give the same `Anchor` to an element in two adjacent scenes and Fluvie tweens
 its position, size, and opacity across the boundary. Declare the anchor once:
 
-<!-- code-excerpt "example/lib/lessons/04_scenes_and_transitions.dart (shared-anchor)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/04_scenes_and_transitions.dart (shared-anchor)" -->
 ```dart
 final logo = Anchor('logo');
 ```
@@ -93,7 +93,7 @@ final logo = Anchor('logo');
 Then wrap the element in a `SharedElement` with that anchor in each scene. The
 title scene shows the brand block large and centred:
 
-<!-- code-excerpt "example/lib/lessons/04_scenes_and_transitions.dart (title-scene)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/04_scenes_and_transitions.dart (title-scene)" -->
 ```dart
 Scene(
   duration: 3.seconds,
@@ -125,7 +125,7 @@ A `Camera` is a scene-wide zoom or pan. It is a property of the scene, not a
 wrapper widget, and it applies outside every element's own animation. The stats
 scene pushes its camera in while a shared logo sits in the corner:
 
-<!-- code-excerpt "example/lib/lessons/04_scenes_and_transitions.dart (camera-scene)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/04_scenes_and_transitions.dart (camera-scene)" -->
 ```dart
 Scene(
   duration: 3.seconds,

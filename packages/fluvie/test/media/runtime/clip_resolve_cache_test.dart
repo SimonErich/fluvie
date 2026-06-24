@@ -85,7 +85,7 @@ final class _FakeClipCache with ImageResolveCache, ClipResolveCache {
 }
 
 const _clip = MediaSource.asset('clip.mp4');
-const ClipMetadata _meta = (fps: 30.0, frameCount: 30, width: 2, height: 2);
+const ClipMetadata _meta = (fps: 30.0, frameCount: 30, width: 2, height: 2, hasAudio: false);
 
 void main() {
   test('resolveClipMeta probes once and caches', () async {

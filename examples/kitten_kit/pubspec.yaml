@@ -1,0 +1,31 @@
+name: kitten_kit
+description: "Shared Kitten Mitten theme, sample media, and Fluvie composition builders for the Fluvie example apps."
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fluvie: ^0.1.0
+
+dev_dependencies:
+  alchemist: ^0.14.0
+  custom_lint: ^0.8.1
+  flutter_test:
+    sdk: flutter
+  fluvie_lints:
+    # Path (not hosted): the custom_lint plugin host must resolve it locally.
+    path: ../../packages/fluvie_lints
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/fixtures/
+    - assets/audio/
+    - assets/captions/

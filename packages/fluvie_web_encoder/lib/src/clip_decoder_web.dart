@@ -26,6 +26,9 @@ final class _WebClipDecoderBridge implements WebClipDecoder {
       frameCount: result.getProperty<JSNumber>('frameCount'.toJS).toDartInt,
       width: result.getProperty<JSNumber>('width'.toJS).toDartInt,
       height: result.getProperty<JSNumber>('height'.toJS).toDartInt,
+      // The WebCodecs decoder serves frames only; the in-browser render does not
+      // mix a clip's embedded audio, so the track flag is always false here.
+      hasAudio: false,
     );
   }
 

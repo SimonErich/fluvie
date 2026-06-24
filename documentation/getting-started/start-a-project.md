@@ -46,7 +46,7 @@ existing file.
 A Fluvie video is real Flutter widget code. Two imports, then a `Video` of
 `Scene`s. Fluvie's `Animation` replaces Flutter's, so hide the Flutter one:
 
-<!-- code-excerpt "example/lib/starter/starter_video.dart (imports)" -->
+<!-- code-excerpt "examples/gallery/lib/starter/starter_video.dart (imports)" -->
 ```dart
 import 'package:flutter/material.dart' hide Animation;
 import 'package:fluvie/fluvie.dart';
@@ -55,7 +55,7 @@ import 'package:fluvie/fluvie.dart';
 Here is the whole video: one square scene, a gradient background, and a title
 that fades and pops in. You never type a frame number.
 
-<!-- code-excerpt "example/lib/starter/starter_video.dart (video)" -->
+<!-- code-excerpt "examples/gallery/lib/starter/starter_video.dart (video)" -->
 ```dart
 /// Builds the starter composition: a 4 second square clip with a title that
 /// fades and pops in. You describe what the video is; Fluvie decides when

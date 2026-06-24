@@ -4,7 +4,7 @@ A `Background` fills the whole scene behind your content. Pass it to
 `Scene(background: ...)` or mount it as a plain child; both paint the same
 pixels. Lesson 03 animates one with `gradientShift`:
 
-<!-- code-excerpt "example/lib/lessons/03_timing_and_triggers.dart (gradient-anchor)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/03_timing_and_triggers.dart (gradient-anchor)" -->
 ```dart
 Background.gradient(const [Color(0xFFE74C3C), Color(0xFF27AE60)]).animate([
   Animation.gradientShift(

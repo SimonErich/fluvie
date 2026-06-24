@@ -4,7 +4,7 @@ Add a music bed, make the picture react to the bass, and burn in subtitles.
 Lesson 10 does all three in one scene. Start with the music bed: pass an
 `Audio.music` to `Video.audio` and the encoder mixes it under the frames.
 
-<!-- code-excerpt "example/lib/lessons/10_audio_and_captions.dart (music)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/10_audio_and_captions.dart (music)" -->
 ```dart
 audio: const [
   Audio.music(_track, fadeIn: Time.seconds(0.3), fadeOut: Time.seconds(0.5)),
@@ -20,7 +20,7 @@ does: it plays, it drives reactive motion, and it sits under captions.
 
 `Video.audio` takes a list of tracks. Each track is one `Audio`:
 
-<!-- code-excerpt "example/lib/snippets/phase_10_snippets.dart (audio-constructors)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_10_snippets.dart (audio-constructors)" -->
 ```dart
 Audio.music(path), // a looping or one-shot bed for the whole video
 Audio.sfx(path), // a one-shot effect placed at a moment
@@ -50,7 +50,7 @@ You can make elements react to the energy in a frequency band. The reactive
 presets read the audio's per-frame energy and drive a transform. Pulse a badge on
 the bass band:
 
-<!-- code-excerpt "example/lib/lessons/10_audio_and_captions.dart (pulse)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/10_audio_and_captions.dart (pulse)" -->
 ```dart
 .animate([Animation.fadeIn(), Animation.pulse(on: AudioBand.bass, gain: 0.4)]);
 ```
@@ -66,7 +66,7 @@ a `track` to read one specific audio track instead.
 
 The `Bars` element draws a frequency visualizer:
 
-<!-- code-excerpt "example/lib/lessons/10_audio_and_captions.dart (bars)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/10_audio_and_captions.dart (bars)" -->
 ```dart
 Widget _bars() => const Bars(count: 32, gain: 1.2);
 ```
@@ -96,14 +96,14 @@ same band table, and the same band table paints the same on frame 0 and frame
 `Video.captions` burns a caption track over every scene. Read subtitles from an
 SRT file:
 
-<!-- code-excerpt "example/lib/lessons/10_audio_and_captions.dart (captions)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/10_audio_and_captions.dart (captions)" -->
 ```dart
 captions: const Captions.fromSrt(_captions, style: _captionStyle),
 ```
 
 Three constructors build a track:
 
-<!-- code-excerpt "example/lib/snippets/phase_10_snippets.dart (caption-constructors)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_10_snippets.dart (caption-constructors)" -->
 ```dart
 Captions.fromSrt(path), // parse a SubRip .srt file
 Captions.fromVtt(path), // parse a WebVTT .vtt file
@@ -114,7 +114,7 @@ Captions.words(cues), // inline, per-word timed cues
 pre-pass that resolves media. `words` needs no file: you pass `CaptionWord` cues
 with their own `at` times. Lesson 08 narrates its scenes word by word this way:
 
-<!-- code-excerpt "example/lib/lessons/08_code_doc_intro.dart (captions)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/08_code_doc_intro.dart (captions)" -->
 ```dart
 captions: Captions.words(
   const [
@@ -133,7 +133,7 @@ captions: Captions.words(
 
 `CaptionStyle` sets the look. Three presets ship:
 
-<!-- code-excerpt "example/lib/snippets/phase_10_snippets.dart (caption-styles)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_10_snippets.dart (caption-styles)" -->
 ```dart
 CaptionStyle.subtitle(), // a plain, readable lower-third band
 CaptionStyle.tikTok(), // bold words that pop in one at a time
@@ -148,7 +148,7 @@ its timestamp arrives.
 
 `CaptionPosition` sets where the track sits:
 
-<!-- code-excerpt "example/lib/snippets/phase_10_snippets.dart (caption-positions)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_10_snippets.dart (caption-positions)" -->
 ```dart
 CaptionPosition.bottomThird(), // the default subtitle band
 CaptionPosition.topThird(), // above the action
@@ -163,7 +163,7 @@ Pass `position:` to any caption constructor alongside `style:`.
 Annotations draw on top of a scene to point, frame, and label. They are plain
 widgets, so `.animate()` adds an outer reveal. An arrow draws on toward a point:
 
-<!-- code-excerpt "example/lib/lessons/07_charts.dart (arrow)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/07_charts.dart (arrow)" -->
 ```dart
 Positioned.fill(
   child: Arrow.to(
@@ -177,7 +177,7 @@ Positioned.fill(
 That draws a shaft from `(720, 200)` to `(910, 300)` over 0.5 seconds, with a head
 at the end. A spotlight dims the scene and opens a clear hole over a region:
 
-<!-- code-excerpt "example/lib/lessons/07_charts.dart (spotlight)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/07_charts.dart (spotlight)" -->
 ```dart
 Spotlight.on(
   region: const Rect.fromLTWH(780, 240, 240, 240),
@@ -204,7 +204,7 @@ annotation family:
 
 A title card opens lesson 08:
 
-<!-- code-excerpt "example/lib/lessons/08_code_doc_intro.dart (title)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/08_code_doc_intro.dart (title)" -->
 ```dart
 TitleCard(
   title: 'Code, on screen',

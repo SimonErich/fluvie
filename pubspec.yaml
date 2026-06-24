@@ -7,6 +7,7 @@ environment:
 
 # Native pub workspace (Dart 3.6+). Melos 7 orchestrates scripts on top of this.
 workspace:
+  - packages/ai_abstracted
   - packages/fluvie
   - packages/fluvie_lints
   - packages/fluvie_lints/example
@@ -17,7 +18,13 @@ workspace:
   - packages/fluvie_mobile_encoder
   - packages/fluvie_web_encoder
   - packages/fluvie_web_encoder/example
-  - example
+  - examples/gallery
+  - examples/kitten_kit
+  - examples/cli_quickstart
+  - examples/web_browser_studio
+  - examples/web_server_studio
+  - examples/desktop_studio
+  - examples/mobile_purrfect
 
 dev_dependencies:
   melos: ^7.0.0
@@ -55,7 +62,7 @@ melos:
 
     test:dart:
       description: Run pure-Dart package tests (ffmpeg/download/render/analysis opt-in).
-      run: dart test --exclude-tags "ffmpeg || download || render || analysis"
+      run: dart test --exclude-tags "ffmpeg || download || render || analysis || generative"
       exec:
         concurrency: 1
       packageFilters:
@@ -64,7 +71,7 @@ melos:
 
     test:flutter:
       description: Run Flutter package tests (golden/snapshot/ffmpeg/wasm/render tests opt-in).
-      run: flutter test --exclude-tags "golden || snapshot || ffmpeg || wasm || render"
+      run: flutter test --exclude-tags "golden || snapshot || ffmpeg || wasm || render || generative"
       exec:
         concurrency: 1
       packageFilters:
@@ -111,7 +118,9 @@ melos:
       exec:
         concurrency: 1
       packageFilters:
-        scope: fluvie
+        scope:
+          - fluvie
+          - kitten_kit
 
     test:
       description: Run all package tests (Dart then Flutter).
@@ -131,7 +140,7 @@ melos:
         Flutter package tests with coverage (ffmpeg/wasm integration excluded
         so the gate never needs the binaries; their logic is covered by the
         mocked unit suites).
-      run: flutter test --coverage --exclude-tags "ffmpeg || wasm || render"
+      run: flutter test --coverage --exclude-tags "ffmpeg || wasm || render || generative"
       exec:
         concurrency: 1
       packageFilters:
@@ -141,7 +150,7 @@ melos:
     coverage:dart:
       description: Pure-Dart package tests with lcov coverage (ffmpeg/download/render/analysis e2e excluded).
       run: >
-        dart test --exclude-tags "ffmpeg || download || render || analysis" --coverage=coverage &&
+        dart test --exclude-tags "ffmpeg || download || render || analysis || generative" --coverage=coverage &&
         dart run coverage:format_coverage --lcov --in=coverage
         --out=coverage/lcov.info --report-on=lib
       exec:
@@ -161,7 +170,7 @@ melos:
         Evaluate lcov reports against the 97% threshold (generated files
         excluded, // coverage:ignore markers honored — see
         documentation/contributing/coverage.md).
-      run: dart tool/check_coverage.dart --min 97 packages/fluvie packages/fluvie_lints packages/fluvie_cli packages/fluvie_server packages/fluvie_mobile_encoder packages/fluvie_web_encoder
+      run: dart tool/check_coverage.dart --min 97 packages/ai_abstracted packages/fluvie packages/fluvie_lints packages/fluvie_cli packages/fluvie_server packages/fluvie_mobile_encoder packages/fluvie_web_encoder
 
     test:tool:
       description: Root tool tests (coverage gate parser).
@@ -243,4 +252,4 @@ melos:
         Build the demo web app, serve it, and smoke-test it in headless Chrome
         (it boots, lays out, and logs no uncaught error). Needs node, python3, and
         a Chrome binary (set CHROME). Set SKIP_BUILD=1 to reuse an existing build.
-      run: bash example/tool/screenshots/run.sh
+      run: bash examples/gallery/tool/screenshots/run.sh

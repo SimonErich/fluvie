@@ -2,7 +2,7 @@
 ///
 /// These are plain source strings, kept separate from the command so each stays
 /// reviewable. The starter composition mirrors
-/// `example/lib/starter/starter_video.dart` (the compiled source the docs
+/// `examples/gallery/lib/starter/starter_video.dart` (the compiled source the docs
 /// excerpt); `starter_template_test` asserts they stay in sync.
 library;
 

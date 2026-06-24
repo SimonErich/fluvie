@@ -4,8 +4,10 @@ import 'package:fluvie/src/composition/runtime/reactive_collector.dart';
 import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
 import 'package:fluvie/src/core/contracts/beat_grid.dart';
+import 'package:fluvie/src/core/contracts/generative_resolver.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
 import 'package:fluvie/src/elements/snapshot/runtime/snapshot_capture_scope.dart';
+import 'package:fluvie/src/media/runtime/generative_resolver_scope.dart';
 import 'package:fluvie/src/media/runtime/image_resolver_scope.dart';
 import 'package:fluvie/src/rendering/capture/beat_grid_scope.dart';
 import 'package:fluvie/src/rendering/runtime/render_controller.dart';
@@ -67,6 +69,7 @@ CaptureShell buildCaptureShell({
   required GlobalKey boundaryKey,
   required RenderController controller,
   MediaResolver? resolver,
+  GenerativeResolver? generativeResolver,
   SnapshotCaptureScope? snapshotScope,
   ReactiveTracks reactiveTracks = noReactiveTracks,
 }) {
@@ -79,6 +82,12 @@ CaptureShell buildCaptureShell({
   Widget tree = RepaintBoundary(key: boundaryKey, child: inner);
   if (resolver != null) {
     tree = ImageResolverScope(resolver: resolver, child: tree);
+  }
+  // The generic generative elements map their produced source through this
+  // scope; mounted whenever a generative resolver is wired (a no-op for a
+  // composition that declares no generated media).
+  if (generativeResolver != null) {
+    tree = GenerativeResolverScope(resolver: generativeResolver, child: tree);
   }
   tree = RenderControllerScope(controller: controller, child: tree);
   // The mounted snapshot scope is a fresh instance (a fresh order cursor): the

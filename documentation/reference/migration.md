@@ -14,7 +14,7 @@ before and after:
 AnimatedText('Hello', animation: EntryAnimation.slideFade());
 ```
 
-<!-- code-excerpt "example/lib/snippets/migration_snippets.dart (migrate-animate)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-animate)" -->
 ```dart
 const Text('Hello', style: _line).animate([Animation.slideFade()]);
 ```
@@ -38,7 +38,7 @@ motion.
 AnimatedProp(animation: PropAnimation.fade(), child: Text('Hi'));
 ```
 
-<!-- code-excerpt "example/lib/snippets/migration_snippets.dart (migrate-animate)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-animate)" -->
 ```dart
 const Text('Hello', style: _line).animate([Animation.slideFade()]);
 ```
@@ -57,7 +57,7 @@ animation that plays across the group:
 Stagger(config: StaggerConfig(each: 0.1.seconds), children: [...]);
 ```
 
-<!-- code-excerpt "example/lib/snippets/migration_snippets.dart (migrate-stagger)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-stagger)" -->
 ```dart
 const Column(children: [Text('A'), Text('B')]).animate([
   Animation.fadeIn(stagger: const Stagger.each(Time.frames(6))),
@@ -76,7 +76,7 @@ and the rest) sit in the same `.animate([...])` list as everything else:
 EffectOverlay(effects: [ParticleEffect.confetti()], child: card);
 ```
 
-<!-- code-excerpt "example/lib/snippets/migration_snippets.dart (migrate-effects)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-effects)" -->
 ```dart
 const ColoredBox(color: Color(0xFF13131F)).animate([
   Animation.grain(0.12),
@@ -97,7 +97,7 @@ The `V`-prefixed wrappers (`VStack`, `VColumn`, `VRow`, `VCenter`, `VPadding`,
 VColumn(children: [VCenter(child: text)]);
 ```
 
-<!-- code-excerpt "example/lib/snippets/migration_snippets.dart (migrate-layout)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-layout)" -->
 ```dart
 const Column(
   children: [
@@ -121,7 +121,7 @@ one `Image` plus `Animation.kenBurns` and the `Frame.*` styles:
 PolaroidFrame(child: KenBurnsImage.network(url));
 ```
 
-<!-- code-excerpt "example/lib/snippets/migration_snippets.dart (migrate-image)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-image)" -->
 ```dart
 Frame.polaroid(
   child: Image.network(url, fit: BoxFit.cover).animate([Animation.kenBurns()]),
@@ -136,7 +136,7 @@ Frame.polaroid(
 EmbeddedVideo.network(url, muted: true);
 ```
 
-<!-- code-excerpt "example/lib/snippets/migration_snippets.dart (migrate-clip)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-clip)" -->
 ```dart
 Clip.network(url, audio: const ClipAudio.muted(), fit: BoxFit.cover);
 ```
@@ -167,7 +167,7 @@ templates show how). `CameraFocus` moves onto the scene as
 Loop(child: spinner);
 ```
 
-<!-- code-excerpt "example/lib/snippets/migration_snippets.dart (migrate-loop)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-loop)" -->
 ```dart
 const Text('Spinning', style: _line).animate([
   Animation.spin(repeat: const Repeat.forever()),
@@ -183,7 +183,7 @@ const Text('Spinning', style: _line).animate([
 BackgroundAudio(AudioTrack.asset(path));
 ```
 
-<!-- code-excerpt "example/lib/snippets/migration_snippets.dart (migrate-audio)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-audio)" -->
 ```dart
 Audio.music(path, fadeOut: const Time.seconds(0.5)),
 ```
@@ -198,7 +198,7 @@ plus the reactive presets (`Animation.pulse(on: AudioBand.bass)` and
 EncodingConfig(crf: 14);
 ```
 
-<!-- code-excerpt "example/lib/snippets/migration_snippets.dart (migrate-export)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-export)" -->
 ```dart
 const Export.mp4(quality: Quality.max);
 ```

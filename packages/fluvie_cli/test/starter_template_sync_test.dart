@@ -8,9 +8,11 @@ import 'package:test/test.dart';
 /// generated file never drift.
 void main() {
   test('the CLI starter template matches the example docregions', () {
-    final example = File('../../example/lib/starter/starter_video.dart');
+    final example = File('../../examples/gallery/lib/starter/starter_video.dart');
     if (!example.existsSync()) {
-      markTestSkipped('example/lib/starter/starter_video.dart not found (standalone checkout)');
+      markTestSkipped(
+        'examples/gallery/lib/starter/starter_video.dart not found (standalone checkout)',
+      );
       return;
     }
     final content = example.readAsStringSync();

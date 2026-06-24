@@ -17,3 +17,8 @@ export 'src/client/fake_ai_client.dart' show FakeAiClient;
 export 'src/client/gemini_ai_client.dart' show GeminiAiClient;
 export 'src/client/mistral_ai_client.dart' show MistralAiClient;
 export 'src/client/ollama_ai_client.dart' show OllamaAiClient;
+export 'src/generative/widgets/generative_image.dart';
+export 'src/generative/widgets/generative_music.dart';
+export 'src/generative/widgets/generative_sound_fx.dart';
+export 'src/generative/widgets/generative_speech.dart';
+export 'src/generative/widgets/generative_video.dart';

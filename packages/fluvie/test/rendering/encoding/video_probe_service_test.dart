@@ -170,6 +170,28 @@ void main() {
         ),
       );
     });
+
+    test('reports hasAudio false when the report has only a video stream', () async {
+      stubProbe();
+      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      expect(result.hasAudio, isFalse);
+    });
+
+    test('reports hasAudio true when the report carries an audio stream', () async {
+      stubProbe(
+        stdout: '''
+{
+  "streams": [
+    {"codec_type": "video", "codec_name": "h264", "width": 320, "height": 240, "nb_frames": "48"},
+    {"codec_type": "audio", "codec_name": "aac"}
+  ],
+  "format": {"duration": "1.6"}
+}
+''',
+      );
+      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      expect(result.hasAudio, isTrue);
+    });
   });
 
   group('videoProbeServiceProvider', () {

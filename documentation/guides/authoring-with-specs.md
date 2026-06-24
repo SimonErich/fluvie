@@ -34,7 +34,7 @@ its content, and an `animate` list:
 Read a spec with `VideoSpec.fromJson`, then `buildVideo` turns it into a real
 `Video` you can render:
 
-<!-- code-excerpt "example/lib/snippets/spec_serialization_snippets.dart (load)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/spec_serialization_snippets.dart (load)" -->
 ```dart
 final spec = VideoSpec.fromJson(jsonDecode(jsonText) as Map<String, Object?>);
 final video = buildVideo(spec);
@@ -48,7 +48,7 @@ loop.
 
 Write a spec back to JSON with `toJson`:
 
-<!-- code-excerpt "example/lib/snippets/spec_serialization_snippets.dart (save)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/spec_serialization_snippets.dart (save)" -->
 ```dart
 final jsonText = jsonEncode(spec.toJson());
 ```
@@ -93,7 +93,7 @@ can carry a cap, as in `"0.2r@0.8s"`.
 Every spec has a content digest. Identical specs share a digest, so an
 AI-authored video keys the frame cache and names its output reproducibly:
 
-<!-- code-excerpt "example/lib/snippets/spec_serialization_snippets.dart (digest)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/spec_serialization_snippets.dart (digest)" -->
 ```dart
 final id = spec.digest();
 ```
@@ -122,7 +122,7 @@ dart pub add fluvie_ai
 Pick a provider, set its key in the environment, then author a spec and build it
 like any other:
 
-<!-- code-excerpt "example/lib/snippets/ai_authoring_snippets.dart (author)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/ai_authoring_snippets.dart (author)" -->
 ```dart
 final client = aiClientFromEnv(Platform.environment);
 final service = LlmVideoAuthorService(client: client);

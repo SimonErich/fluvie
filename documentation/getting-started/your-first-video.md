@@ -7,7 +7,7 @@ animated title.
 Start with two imports. Fluvie's `Animation` replaces Flutter's, so hide the
 Flutter one:
 
-<!-- code-excerpt "example/lib/lessons/01_hello_video.dart (imports)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/01_hello_video.dart (imports)" -->
 ```dart
 import 'package:flutter/material.dart' hide Animation;
 import 'package:fluvie/fluvie.dart';
@@ -15,7 +15,7 @@ import 'package:fluvie/fluvie.dart';
 
 Now the whole video:
 
-<!-- code-excerpt "example/lib/lessons/01_hello_video.dart (video)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/01_hello_video.dart (video)" -->
 ```dart
 Video lesson01Video() {
   return Video(

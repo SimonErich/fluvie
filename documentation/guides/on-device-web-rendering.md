@@ -288,7 +288,7 @@ renderer per platform behind a conditional import: `OnDeviceVideoRenderer` from
 `WebVideoRenderer` from `fluvie_web_encoder` on the web. The `Video` you pass is
 identical; only the encoder differs.
 
-<!-- code-excerpt "example/lib/cross_platform/render_on_device.dart (conditional-export)" -->
+<!-- code-excerpt "examples/gallery/lib/cross_platform/render_on_device.dart (conditional-export)" -->
 ```dart
 export 'render_on_device_stub.dart'
     if (dart.library.io) 'render_on_device_mobile.dart'
@@ -298,7 +298,7 @@ export 'render_on_device_stub.dart'
 Each file exposes the same `Future<Uint8List> renderOnDevice(Video video)`; the
 mobile one reads the encoder's file back to bytes, the web one returns them
 directly. The runnable demo lives in
-[`example/lib/cross_platform`](https://github.com/SimonErich/fluvie/tree/main/example/lib/cross_platform).
+[`examples/gallery/lib/cross_platform`](https://github.com/SimonErich/fluvie/tree/main/example/lib/cross_platform).
 
 ## Testing without a browser
 

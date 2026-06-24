@@ -1,0 +1,30 @@
+name: web_browser_studio
+description: "Kitten Mitten in-browser meme maker: render an MP4 fully in the browser with ffmpeg.wasm, no backend."
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.3.2
+  fluvie: ^0.1.0
+  fluvie_web_encoder: ^0.1.0
+  kitten_kit:
+    path: ../kitten_kit
+
+dev_dependencies:
+  custom_lint: ^0.8.1
+  flutter_test:
+    sdk: flutter
+  fluvie_lints:
+    path: ../../packages/fluvie_lints
+  mocktail: ^1.0.5
+
+flutter:
+  uses-material-design: true

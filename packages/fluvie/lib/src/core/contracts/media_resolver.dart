@@ -23,12 +23,13 @@ import 'package:fluvie/src/core/media/snapshot_source.dart';
 typedef ResolvedMedia = ({Uint8List bytes, String contentHash});
 
 /// The probed facts a `Clip` needs to resample a source video deterministically
-/// — its frame rate, frame count, and pixel dimensions.
+/// — its frame rate, frame count, pixel dimensions, and whether it carries an
+/// audio track (so the encoder mixes a clip's embedded audio only when present).
 ///
 /// The render layer's `VideoProbeService` produces a richer report; the
 /// resolver hands the elements only the fields the resampler reads, in a
 /// `core`-resident value so `Clip` never imports the render layer.
-typedef ClipMetadata = ({double fps, int frameCount, int width, int height});
+typedef ClipMetadata = ({double fps, int frameCount, int width, int height, bool hasAudio});
 
 /// Pre-resolves every media source before the frame loop and serves the
 /// resolved bytes (and decoded images) **synchronously** during it.

@@ -2,6 +2,7 @@ import 'package:fluvie/src/audio/encoding/resolved_audio_track.dart';
 import 'package:fluvie/src/composition/runtime/audio_collector.dart';
 import 'package:fluvie/src/composition/runtime/media_collector.dart';
 import 'package:fluvie/src/composition/video.dart';
+import 'package:fluvie/src/core/contracts/generative_resolver.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/timing/time_scope_data.dart';
 
@@ -20,13 +21,17 @@ ResolvedAudioMix resolveAudioMix({
   required Video video,
   required int fps,
   int totalFrames = 0,
+  GenerativeResolver? generative,
 }) {
   final scope = TimeScopeData(fps: fps, startFrame: 0, durationFrames: totalFrames);
   final tracks = <ResolvedAudioTrack>[
-    for (final track in collectAudioTracks(video)) resolveAudioTrack(track, fps: fps, scope: scope),
-    // A clip's embedded audio plays where the clip plays: delayed to its scene
-    // start and trimmed to the scene window (so sequential clips don't bleed).
-    for (final plan in collectClipAudioPlans(video.scenes, fps)) _clipAudioTrack(plan, fps, scope),
+    for (final track in collectAudioTracks(video, generative: generative))
+      resolveAudioTrack(track, fps: fps, scope: scope),
+    // A clip's embedded audio (including a generated video's, for example Veo 3)
+    // plays where the clip plays: delayed to its scene start and trimmed to the
+    // scene window (so sequential clips don't bleed).
+    for (final plan in collectClipAudioPlans(video.scenes, fps, generative: generative))
+      _clipAudioTrack(plan, fps, scope),
   ];
   return ResolvedAudioMix(tracks: tracks);
 }

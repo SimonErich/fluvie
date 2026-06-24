@@ -4,7 +4,7 @@ Turn a `Map<String, num>` into an animated chart with one call. Each `Chart`
 factory grows, draws, or sweeps itself in over its own window, so you describe
 the data and the reveal happens for you:
 
-<!-- code-excerpt "example/lib/lessons/07_charts.dart (bar)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/07_charts.dart (bar)" -->
 ```dart
 Chart.bar(
   data: _revenue,
@@ -21,7 +21,7 @@ frames so the columns rise in a wave. Lesson 07 builds the whole data story.
 
 Every chart is one public type, `Chart`, with a named factory per shape:
 
-<!-- code-excerpt "example/lib/snippets/phase_07_snippets.dart (chart-constructors)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_07_snippets.dart (chart-constructors)" -->
 ```dart
 Chart.bar(data: _revenue), // columns growing from the baseline
 Chart.line(data: _revenue), // a polyline drawing on left to right
@@ -53,7 +53,7 @@ default for every reveal is `0.6.relative`.
 
 A line draws on by trimming its path left to right:
 
-<!-- code-excerpt "example/lib/lessons/07_charts.dart (line)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/07_charts.dart (line)" -->
 ```dart
 Chart.line(data: _signups, drawIn: 1500.ms).animate([Animation.fadeIn()]),
 ```
@@ -61,7 +61,7 @@ Chart.line(data: _signups, drawIn: 1500.ms).animate([Animation.fadeIn()]),
 A donut sweeps its wedges round and leaves a hole. `innerRadius` is the hole
 size as a fraction of the outer radius:
 
-<!-- code-excerpt "example/lib/lessons/07_charts.dart (donut)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/07_charts.dart (donut)" -->
 ```dart
 Chart.donut(
   data: _channels,
@@ -76,7 +76,7 @@ Chart.donut(
 reveal, so the bars rise or the markers pop one after another. It reuses the
 same `Stagger` you pass to a multi-child `.animate()`:
 
-<!-- code-excerpt "example/lib/snippets/phase_07_snippets.dart (chart-stagger)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_07_snippets.dart (chart-stagger)" -->
 ```dart
 Chart.bar(data: _revenue, stagger: const Stagger.each(Time.frames(6)));
 ```
@@ -90,7 +90,7 @@ The reveal is intrinsic; `.animate()` adds outer transforms on top. A chart is a
 plain widget, so it animates like any other element. The slide, fade, or camera
 move composes with the grow or sweep:
 
-<!-- code-excerpt "example/lib/snippets/phase_07_snippets.dart (chart-animate)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_07_snippets.dart (chart-animate)" -->
 ```dart
 Chart.bar(data: _revenue).animate([Animation.slideFade()]);
 ```
@@ -105,7 +105,7 @@ Charts read their colors from `context.fluvie`. Wrap a subtree in a
 `FluvieTokensScope` with a `FluvieTokens` value, and every chart inside picks up
 the palette:
 
-<!-- code-excerpt "example/lib/snippets/phase_07_snippets.dart (chart-tokens)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_07_snippets.dart (chart-tokens)" -->
 ```dart
 FluvieTokensScope(
   tokens: const FluvieTokens(
@@ -128,7 +128,7 @@ change.
 
 A counter headline reads like the charts it sits above:
 
-<!-- code-excerpt "example/lib/lessons/07_charts.dart (headline)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/07_charts.dart (headline)" -->
 ```dart
 Center(
   child: Column(

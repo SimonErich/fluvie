@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart' show Widget;
 import 'package:fluvie/src/composition/runtime/media_collector.dart' show collectClipPlans;
 import 'package:fluvie/src/core/contracts/clip_frame_preparer.dart';
+import 'package:fluvie/src/core/contracts/generative_resolver.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
 import 'package:fluvie/src/elements/runtime/clip_frame_planner.dart';
 import 'package:fluvie/src/rendering/collect_composition_media.dart';
@@ -31,12 +32,13 @@ Future<void> preResolveCompositionClips({
   required Widget composition,
   required MediaResolver resolver,
   required int totalFrames,
+  GenerativeResolver? generative,
 }) async {
   final video = compositionVideo(composition);
   if (video == null) return;
   final fps = video.fps;
   final preparer = resolver is ClipFramePreparer ? resolver as ClipFramePreparer : null;
-  for (final plan in collectClipPlans(video.scenes, fps)) {
+  for (final plan in collectClipPlans(video.scenes, fps, generative: generative)) {
     final meta = await resolver.probeClip(plan.source);
     final bounds = resolveClipTrimBounds(plan.trim, meta);
     final frames = planClipFrames(

@@ -6,7 +6,7 @@ Nobody computes a frame number. You name moments and react to them. Lesson
 03 shows the whole vocabulary in one scene. First, name a timeline by giving
 an animation an `Anchor`:
 
-<!-- code-excerpt "example/lib/lessons/03_timing_and_triggers.dart (gradient-anchor)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/03_timing_and_triggers.dart (gradient-anchor)" -->
 ```dart
 Background.gradient(const [Color(0xFFE74C3C), Color(0xFF27AE60)]).animate([
   Animation.gradientShift(
@@ -25,7 +25,7 @@ scene.
 
 Another element waits for the anchored animation to finish:
 
-<!-- code-excerpt "example/lib/lessons/03_timing_and_triggers.dart (after-trigger)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/03_timing_and_triggers.dart (after-trigger)" -->
 ```dart
 const Text('Hello, Fluvie', style: _title).animate([
   Animation.slideFade(at: Trigger.after(bg)),
@@ -40,7 +40,7 @@ relationship, not a constant.
 
 `.show` gives an element a window; it exists only inside it:
 
-<!-- code-excerpt "example/lib/lessons/03_timing_and_triggers.dart (show-window)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/03_timing_and_triggers.dart (show-window)" -->
 ```dart
 Positioned(
   bottom: 200,

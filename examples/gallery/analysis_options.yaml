@@ -1,0 +1,19 @@
+# The example app: root strictness + the custom_lint plugin (the lessons are
+# the primary fixture for fluvie_lints rules).
+include: ../../analysis_options.yaml
+
+analyzer:
+  plugins:
+    - custom_lint
+  exclude:
+    # Transient per-render Playground files the server writes under the render
+    # project and deletes after each render; never production code, never
+    # committed (see .gitignore).
+    - .fluvie_playground/**
+
+linter:
+  rules:
+    # The lesson files are named 01_hello_video.dart … 12_the_kitchen_sink.dart;
+    # the leading digits keep them ordered on disk, so the snake_case file-name
+    # lint is relaxed here.
+    file_names: false

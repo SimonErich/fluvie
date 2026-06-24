@@ -3,6 +3,28 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.10] - 2026-06-24
+
+### Added
+
+- Generative-media prerender seam. Declare AI-generated visual and audio sources
+  with `GenerativeMedia` / `GenerativeAudio` (`GenerativeSource`,
+  `GenerativeKind`, `GenerativeCarrier`) and resolve them before the frame loop
+  through the new `GenerativeResolver` contract (`generativeResolverProvider`,
+  defaulting to `NoGenerativeResolver`). `collectGenerativeSources` plus the now
+  generative-aware media, clip, clip-audio, and audio collectors fold each
+  produced file back in as a plain `MediaSource.file` / `AudioSource.file`, so a
+  generated video (with Veo 3 audio) and generated music mix and stay in sync like
+  local assets. The render orchestrators run generation before media
+  pre-resolution; the real backend lives in `fluvie_ai`.
+- The default FFmpeg render now mixes a clip's embedded audio. `render()` probes
+  every clip and the encoder stages the audio of any clip that carries a track
+  (regular `Clip` or a generated video such as Veo 3), delayed to its scene
+  window. `ClipMetadata` gained `hasAudio` (the probe reports it) so a silent
+  clip is never given a broken audio map.
+- `render()` and `renderToSandbox()` accept `onGenerativeProgress` to surface
+  per-asset generation progress (`GenerativeProgress`) before the frame loop.
+
 ## [0.1.9] - 2026-06-23
 
 Lockstep maintenance release; demo (mobile layout) and CI fixes only, no library changes since 0.1.8.

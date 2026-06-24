@@ -4,7 +4,7 @@ Pick what the render writes: an MP4, a GIF, an image sequence, or an
 alpha-capable overlay. Set `Video.export` to one of the four modes and Fluvie
 encodes that container. Here are all four:
 
-<!-- code-excerpt "example/lib/snippets/phase_14_snippets.dart (export-modes)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_14_snippets.dart (export-modes)" -->
 ```dart
 Export sharable() => const Export.mp4(quality: Quality.max); // H.264 MP4, CRF 14
 Export loopingThumb() => const Export.gif(fps: 12); // animated GIF at 12 fps
@@ -22,7 +22,7 @@ renderer.
 constant-rate factor (CRF), where a lower CRF means a bigger file and less
 compression:
 
-<!-- code-excerpt "example/lib/snippets/phase_14_snippets.dart (export-mp4-quality)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_14_snippets.dart (export-mp4-quality)" -->
 ```dart
 Export.mp4(quality: Quality.low), // CRF 28, smallest file, visible compression
 Export.mp4(quality: Quality.medium), // CRF 23, a rough-cut trade-off
@@ -39,7 +39,7 @@ archival master.
 `Export.gif(fps:)` writes an animated GIF. The `fps` samples the frames, since a
 GIF rarely needs the full frame rate. A lower `fps` makes a smaller file:
 
-<!-- code-excerpt "example/lib/snippets/phase_14_snippets.dart (export-gif-fps)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_14_snippets.dart (export-gif-fps)" -->
 ```dart
 Export.gif(fps: 15), // the default sample rate
 Export.gif(fps: 12), // a smaller, choppier loop
@@ -55,7 +55,7 @@ small. A GIF carries no audio.
 `frame_000000.png`, `frame_000001.png`, and so on. Reach for it when a
 compositing pipeline downstream wants individual frames rather than a container:
 
-<!-- code-excerpt "example/lib/snippets/phase_14_snippets.dart (export-image-sequence)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_14_snippets.dart (export-image-sequence)" -->
 ```dart
 const Export.imageSequence(); // one PNG per frame, into the output directory
 ```
@@ -68,7 +68,7 @@ from the exact captured pixels.
 `Export.transparent()` writes a WebM with an alpha channel, so the video can
 layer over other footage. The captured RGBA alpha is preserved end to end:
 
-<!-- code-excerpt "example/lib/snippets/phase_14_snippets.dart (export-transparent)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_14_snippets.dart (export-transparent)" -->
 ```dart
 const Export.transparent(); // VP9 WebM with a yuva420p alpha plane
 ```
@@ -82,7 +82,7 @@ audio. ProRes `.mov` with alpha is forthcoming; WebM ships today.
 `Video.poster` names a `Time`, and the render grabs that one frame as a still
 thumbnail alongside the main output. Set it on the same `Video` as the export:
 
-<!-- code-excerpt "example/lib/snippets/phase_14_snippets.dart (export-poster)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_14_snippets.dart (export-poster)" -->
 ```dart
 Video exportedReel() => Video(
   size: VideoSize.reels,

@@ -18,7 +18,7 @@ on:
     paths:
       - web/site/**
       - packages/*/pubspec.yaml
-      - example/lib/lessons/**
+      - examples/gallery/lib/lessons/**
       - .github/workflows/website.yml
   workflow_dispatch:
 

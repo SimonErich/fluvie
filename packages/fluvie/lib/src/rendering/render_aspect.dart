@@ -4,14 +4,20 @@ import 'package:flutter/widgets.dart' show GlobalKey, Widget;
 import 'package:fluvie/src/audio/encoding/audio_mix_staging.dart';
 import 'package:fluvie/src/composition/runtime/aspect_scope.dart';
 import 'package:fluvie/src/composition/runtime/audio_collector.dart';
+import 'package:fluvie/src/composition/runtime/media_collector.dart'
+    show ClipAudioPlan, collectClipAudioPlans;
 import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/aspect.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
 import 'package:fluvie/src/core/contracts/clip_frame_preparer.dart';
+import 'package:fluvie/src/core/contracts/generative_resolver.dart'
+    show GenerativeProgress, GenerativeResolver;
 import 'package:fluvie/src/core/contracts/media_resolver.dart' show MediaResolver;
 import 'package:fluvie/src/rendering/capture/capture_shell.dart';
 import 'package:fluvie/src/rendering/capture/render_manifest.dart';
+import 'package:fluvie/src/rendering/clip_audio_staging.dart';
 import 'package:fluvie/src/rendering/collect_composition_media.dart';
+import 'package:fluvie/src/rendering/no_generative_resolver.dart';
 import 'package:fluvie/src/rendering/pre_resolve_clips.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
 import 'package:fluvie/src/rendering/render_service.dart';
@@ -84,6 +90,8 @@ Future<RenderAspectResult> render({
   AudioMixStager? stageAudio,
   Iterable<AudioSource>? audioSources,
   MediaResolver? resolver,
+  GenerativeResolver generative = const NoGenerativeResolver(),
+  void Function(GenerativeProgress progress)? onGenerativeProgress,
 }) async {
   final size = aspect.sizeFor(longEdge);
   final config = RenderConfig(
@@ -93,27 +101,36 @@ Future<RenderAspectResult> render({
     frameCount: frameCount,
     cacheEnabled: cacheEnabled,
   );
+  // Pre-resolve declared and generated media before reading audio: generation
+  // produces the files, the media pre-pass warms the decode cache, and the clip
+  // pre-pass probes each clip — so the audio collector below knows which clips
+  // actually carry an audio track. A null resolver is a media-less render.
+  if (resolver != null) {
+    await generative.generateAll(
+      collectCompositionGenerative(composition),
+      onProgress: onGenerativeProgress,
+    );
+    await resolver.preResolveAll(collectCompositionMedia(composition, generative: generative));
+    await preResolveCompositionClips(
+      composition: composition,
+      resolver: resolver,
+      totalFrames: frameCount,
+      generative: generative,
+    );
+  }
   // The encoder audio mix: an explicit stager wins; otherwise a `Video`
-  // composition's own `Audio` tracks are collected and staged so a public
-  // `render(video, aspect:)` of an audio composition is not silent.
+  // composition's own `Audio` tracks (plus any generated audio and a clip's
+  // embedded audio) are collected and staged so a public `render(video, aspect:)`
+  // of an audio composition is not silent.
   final audio = _audioFor(
     composition,
     explicitStager: stageAudio,
     explicitSources: audioSources,
     fps: fps,
     totalFrames: frameCount,
+    generative: resolver != null ? generative : null,
+    resolver: resolver,
   );
-  // Pre-resolve declared media before the first pump: the capture shell paints
-  // images synchronously from the `ImageResolverScope`, so the decoded cache
-  // must be warm before the tree mounts (a null resolver = a media-less render).
-  if (resolver != null) {
-    await resolver.preResolveAll(collectCompositionMedia(composition));
-    await preResolveCompositionClips(
-      composition: composition,
-      resolver: resolver,
-      totalFrames: frameCount,
-    );
-  }
   final controller = RenderController();
   final boundaryKey = GlobalKey();
   final shell = buildCaptureShell(
@@ -121,6 +138,7 @@ Future<RenderAspectResult> render({
     boundaryKey: boundaryKey,
     controller: controller,
     resolver: resolver,
+    generativeResolver: generative,
   );
   final preparer = resolver != null && resolver is ClipFramePreparer
       ? resolver as ClipFramePreparer
@@ -163,24 +181,50 @@ Future<RenderAspectResult> render({
   required Iterable<AudioSource>? explicitSources,
   required int fps,
   required int totalFrames,
+  GenerativeResolver? generative,
+  MediaResolver? resolver,
 }) {
   if (explicitStager != null) {
     return (stageAudio: explicitStager, audioSources: explicitSources ?? const []);
   }
   if (composition is! Video) return (stageAudio: null, audioSources: const []);
-  final tracks = collectAudioTracks(composition);
-  if (tracks.isEmpty) return (stageAudio: null, audioSources: const []);
+  final tracks = collectAudioTracks(composition, generative: generative);
+  // Only clips that actually carry an audio track join the mix (each was probed
+  // above); a silent clip would otherwise fail the encoder's `[N:a]` map.
+  final clipPlans = resolver == null
+      ? const <ClipAudioPlan>[]
+      : collectClipAudioPlans(
+          composition.scenes,
+          fps,
+          generative: generative,
+        ).where((plan) => resolver.clipMetadataFor(plan.source).hasAudio).toList();
+  if (tracks.isEmpty && clipPlans.isEmpty) {
+    return (stageAudio: null, audioSources: const []);
+  }
   return (
     stageAudio: ({required resolver, required sandbox}) async {
+      // A clip's embedded audio (including a generated video's) is staged from
+      // the clip's video file and joins the same amix as the declared tracks.
+      final clipNodes = await stageClipAudio(
+        plans: clipPlans,
+        resolver: resolver,
+        sandbox: sandbox,
+        fps: fps,
+        totalFrames: totalFrames,
+      );
       final plan = await stageAudioMix(
         tracks: tracks,
         resolver: resolver,
         sandbox: sandbox,
         fps: fps,
         totalFrames: totalFrames,
+        extraNodes: clipNodes,
       );
       return (nodes: plan.tracks, amix: plan.amix);
     },
-    audioSources: collectAudioSources(composition),
+    audioSources: {
+      ...collectAudioSources(composition, generative: generative),
+      for (final plan in clipPlans) clipAudioSourceFor(plan.source),
+    },
   );
 }

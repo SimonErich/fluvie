@@ -3,7 +3,7 @@
 Five ideas carry every Fluvie video: `Video`, `Scene`, `Time`, `.animate`,
 and `Defaults`. Lesson 01 shows four of them in eighteen lines:
 
-<!-- code-excerpt "example/lib/lessons/01_hello_video.dart (video)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/01_hello_video.dart (video)" -->
 ```dart
 Video lesson01Video() {
   return Video(
@@ -60,7 +60,7 @@ during resolution.
 video over package, per field. Lesson 02 pins one duration for everything in
 the scene:
 
-<!-- code-excerpt "example/lib/lessons/02_text_and_motion.dart (defaults)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/02_text_and_motion.dart (defaults)" -->
 ```dart
 Scene(
   duration: 5.seconds,

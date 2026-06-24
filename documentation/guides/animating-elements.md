@@ -3,7 +3,7 @@
 Motion is one list. Attach `.animate([...])` to any widget and put each motion
 in the list. Fluvie works out when each one plays:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (animate-basics)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (animate-basics)" -->
 ```dart
 const Text('Hello', style: _title).animate([
   Animation.fadeIn(),
@@ -19,7 +19,7 @@ them, and how triggers and stagger work.
 
 Reach for a preset first. Each is one entry in the list:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (preset-menu)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (preset-menu)" -->
 ```dart
 Animation.fadeIn(), // opacity 0 to natural
 Animation.slideFade(from: Edge.left), // rise in while fading
@@ -46,7 +46,7 @@ They sit in the same list. See [Shaders and effects](../advanced/shaders-and-eff
 Put an enter and an exit on the same element. Each preset knows its phase, so
 you do not say when:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (compose-enter-exit)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (compose-enter-exit)" -->
 ```dart
 const Text('In and out', style: _line).animate([
   Animation.slideFade(),
@@ -62,7 +62,7 @@ List order does not set timing here; the phase does.
 Every preset takes the same tail of timing arguments. Set a `duration`, an
 `ease`, and a `delay`:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (shape-timing)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (shape-timing)" -->
 ```dart
 const Text('Late and slow', style: _line).animate([
   Animation.fadeIn(
@@ -79,7 +79,7 @@ Leave them unset and the animation inherits the `Defaults` cascade. See
 Pass a `spring` instead of a `duration` and `ease`, and the spring wins. Its
 settle time becomes the animation's span:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (spring-timing)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (spring-timing)" -->
 ```dart
 const Text('Bouncy', style: _line).animate([
   Animation.scaleIn(spring: Spring.bouncy),
@@ -94,7 +94,7 @@ your own with `Spring(stiffness:, damping:)`.
 By default an animation plays at its phase. A `Trigger` changes the start. Use
 `Trigger.after` to wait for an anchored element to finish:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (trigger-after)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (trigger-after)" -->
 ```dart
 const Text('Then me', style: _line).animate([
   Animation.slideFade(at: Trigger.after(intro)),
@@ -111,7 +111,7 @@ including `whenStarts`, `previous`, `sceneStart`, and `beat`, lives in
 One animation can play across a group of children, offset child by child. Put
 the `stagger` on the container's animation:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (stagger)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (stagger)" -->
 ```dart
 const Column(
   mainAxisSize: MainAxisSize.min,
@@ -133,7 +133,7 @@ starts the wave from the center or an edge.
 
 Loop an animation inside its span with `repeat`:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (repeat)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (repeat)" -->
 ```dart
 Animation.pulse(repeat: const Repeat.forever(yoyo: true)), // breathe back and forth
 Animation.spin(repeat: const Repeat.times(2)), // two turns, then hold
@@ -147,7 +147,7 @@ cycles, then holds. `yoyo: true` plays every other cycle in reverse.
 Set the duration and ease once on a `Scene`. Every animation inside inherits
 them unless it overrides:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (scene-defaults)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (scene-defaults)" -->
 ```dart
 Scene(
   duration: const Time.seconds(5),
@@ -167,7 +167,7 @@ comes from the video.
 When no preset fits, animate from a `Keyframe`. `Animation.from` enters from
 it; `Animation.to` exits to it. Offsets are fractions of the element's own size:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (custom-keyframe)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (custom-keyframe)" -->
 ```dart
 const Text('From the side', style: _line).animate([
   Animation.from(const Keyframe(opacity: 0, x: -0.5, scale: 0.9)),

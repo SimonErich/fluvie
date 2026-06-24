@@ -82,7 +82,7 @@ These are not part of the fast gate. Run a tagged suite directly with
 
 ## The web demo smoke test
 
-The demo (`example/`) has a headless-Chrome smoke test: it builds the web app,
+The demo (`examples/gallery/`) has a headless-Chrome smoke test: it builds the web app,
 serves it, and checks that the Flutter app boots, lays out, and logs no runtime
 error. It guards the in-browser demo and runs in CI (the `web_smoke` job).
 
@@ -113,7 +113,7 @@ The full policy is in [Coverage and the ignore policy](coverage.md).
 
 ## Doc snippets are tested too
 
-Documentation Dart fences come from compiled sources under `example/lib/`. Each
+Documentation Dart fences come from compiled sources under `examples/gallery/lib/`. Each
 snippet file has a small test that builds it, so a doc never ships dead code.
 Check the fences are in sync and free of naked Dart blocks:
 

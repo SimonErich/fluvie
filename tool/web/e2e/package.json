@@ -1,0 +1,10 @@
+{
+  "name": "fluvie-web-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Headless-Chrome render e2e for the Fluvie web example apps.",
+  "dependencies": {
+    "puppeteer-core": "^23.11.1"
+  }
+}

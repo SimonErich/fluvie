@@ -13,11 +13,11 @@ import 'package:fluvie/src/rendering/encoding/ffmpeg_frame_extraction_service.da
 /// The committed 320x240, 30fps, 1s test clip, relative to the repo root.
 /// Synthesized with:
 ///   ffmpeg -f lavfi -i testsrc=duration=1:size=320x240:rate=30 \
-///     -pix_fmt yuv420p example/assets/fixtures/clip_1s.mp4
+///     -pix_fmt yuv420p examples/gallery/assets/fixtures/clip_1s.mp4
 File _fixture() {
   for (final candidate in const [
-    'example/assets/fixtures/clip_1s.mp4',
-    '../../example/assets/fixtures/clip_1s.mp4',
+    'examples/gallery/assets/fixtures/clip_1s.mp4',
+    '../../examples/gallery/assets/fixtures/clip_1s.mp4',
   ]) {
     final file = File(candidate);
     if (file.existsSync()) return file.absolute;

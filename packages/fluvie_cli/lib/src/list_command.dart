@@ -27,7 +27,7 @@ final class ListCommand {
       'project',
       help:
           'Flutter project containing the capture harness '
-          '(default: the auto-discovered "example" project).',
+          '(default: the auto-discovered harness project).',
     );
 
   /// Runs the command; returns the exit code (`0` ok, `1` operational failure).

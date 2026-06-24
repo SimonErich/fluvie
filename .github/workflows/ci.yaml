@@ -141,7 +141,7 @@ jobs:
       # equals the lesson's video.totalFrames. ffmpeg-tagged, so it is excluded
       # from the default `melos run test`; this job opts it in.
       - run: flutter test --tags ffmpeg test/render/lessons_render_smoke_test.dart
-        working-directory: example
+        working-directory: examples/gallery
 
   # Compiles the in-browser example to JS. dart2js fails on any live `dart:io`
   # reference, so this guards the web encoder (and the fluvie barrel it imports)
@@ -164,7 +164,7 @@ jobs:
       - run: flutter build web
         working-directory: packages/fluvie_web_encoder/example
 
-  # Smoke-tests the demo web app (example/) in headless Chrome: it builds, serves,
+  # Smoke-tests the demo web app (examples/gallery/) in headless Chrome: it builds, serves,
   # boots, lays out, and logs no uncaught error. Guards the web demo against build
   # and runtime regressions. Deterministic: no API or server is needed.
   web_smoke:
@@ -194,7 +194,7 @@ jobs:
         if: always()
         with:
           name: web-smoke-screenshot
-          path: example/tool/screenshots/smoke.png
+          path: examples/gallery/tool/screenshots/smoke.png
           if-no-files-found: ignore
 
   # Optional integration lane: the ffmpeg-tagged suites against the real
@@ -216,3 +216,283 @@ jobs:
           echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
       - run: melos bootstrap
       - run: melos run test:ffmpeg
+
+  # ===========================================================================
+  # Example apps (examples/): build + real-render e2e, one per rendering path.
+  # The build and CLI-render jobs are required; the heavier GUI/wasm/emulator
+  # render jobs are advisory until their runners are proven, then promote them.
+  # ===========================================================================
+
+  # CLI render path: render the quickstart kitten promo through the real CLI and
+  # ffprobe the MP4. The most reliable example render.
+  example_cli_render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - name: Render the quickstart promo via the CLI
+        working-directory: examples/cli_quickstart
+        run: dart run fluvie_cli:fluvie render whisker_standup --out build/whisker.mp4 --frames 24
+      - name: Assert the MP4 is a valid H.264 video
+        run: |
+          test -s examples/cli_quickstart/build/whisker.mp4
+          codec=$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name \
+            -of default=noprint_wrappers=1:nokey=1 examples/cli_quickstart/build/whisker.mp4)
+          test "$codec" = "h264"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-cli-quickstart-mp4
+          path: examples/cli_quickstart/build/whisker.mp4
+          if-no-files-found: ignore
+
+  # Build the web example apps for the browser (guards the web render path
+  # against dart:io leaks and verifies the conditional render seams compile).
+  example_web_builds:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - name: Vendor ffmpeg.wasm for the in-browser app
+        run: bash examples/web_browser_studio/tool/fetch_ffmpeg.sh
+      - run: flutter build web --release
+        working-directory: examples/web_browser_studio
+      - run: flutter build web --release
+        working-directory: examples/web_server_studio
+      - uses: actions/upload-artifact@v4
+        with:
+          name: example-web-browser-studio
+          path: examples/web_browser_studio/build/web
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: example-web-server-studio
+          path: examples/web_server_studio/build/web
+          if-no-files-found: error
+
+  # Build the Linux desktop example.
+  example_desktop_build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build libgtk-3-dev
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - run: flutter config --enable-linux-desktop
+      - run: flutter build linux --release
+        working-directory: examples/desktop_studio
+      - uses: actions/upload-artifact@v4
+        with:
+          name: example-desktop-studio-linux
+          path: examples/desktop_studio/build/linux/x64/release/bundle
+          if-no-files-found: error
+
+  # Build the Android on-device example (APK).
+  example_mobile_build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - run: flutter build apk --debug
+        working-directory: examples/mobile_purrfect
+      - uses: actions/upload-artifact@v4
+        with:
+          name: example-mobile-purrfect-apk
+          path: examples/mobile_purrfect/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+
+  # Advisory: render fully in the browser with ffmpeg.wasm and assert the marker.
+  example_web_browser_render:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: browser-actions/setup-chrome@v1
+        id: setup-chrome
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - run: bash examples/web_browser_studio/tool/fetch_ffmpeg.sh
+      - run: flutter build web --release --dart-define=FLUVIE_E2E=true
+        working-directory: examples/web_browser_studio
+      - name: Render in the browser and assert the marker
+        env:
+          CHROME: ${{ steps.setup-chrome.outputs.chrome-path }}
+          BUILD_DIR: examples/web_browser_studio/build/web
+        run: bash tool/web/e2e/run.sh
+
+  # Advisory: render on the server (started in the background) and assert.
+  example_web_server_render:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: browser-actions/setup-chrome@v1
+        id: setup-chrome
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - name: Start the render server
+        run: |
+          mkdir -p "$RUNNER_TEMP/renders"
+          FLUVIE_ENABLE_API=true HOST=127.0.0.1 PORT=8080 \
+            RENDER_PROJECT="$PWD/examples/gallery" \
+            LOCAL_STORAGE_DIR="$RUNNER_TEMP/renders" \
+            CORS_ALLOW_ORIGINS="*" \
+            VIDEO_SPEC_SCHEMA_PATH="$PWD/packages/fluvie_server/assets/video_spec_schema.json" \
+            dart run packages/fluvie_server/bin/fluvie_server.dart &
+          for _ in $(seq 1 60); do curl -fsS http://127.0.0.1:8080/healthz >/dev/null 2>&1 && break; sleep 2; done
+      - run: flutter build web --release --dart-define=FLUVIE_E2E=true --dart-define=FLUVIE_API_URL=http://127.0.0.1:8080
+        working-directory: examples/web_server_studio
+      - name: Render via the server and assert
+        env:
+          CHROME: ${{ steps.setup-chrome.outputs.chrome-path }}
+          BUILD_DIR: examples/web_server_studio/build/web
+          E2E_TIMEOUT_MS: "360000"
+        run: bash tool/web/e2e/run.sh
+
+  # Advisory: render through the desktop GUI under a virtual display.
+  example_desktop_render:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg ninja-build libgtk-3-dev xvfb
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - run: flutter config --enable-linux-desktop
+      - name: Render through the GUI under xvfb
+        working-directory: examples/desktop_studio
+        run: xvfb-run -a flutter test integration_test/render_flow_test.dart -d linux
+
+  # Render on-device on a headless Android emulator: KVM-accelerated, with the
+  # AVD snapshot cached so the second run boots fast and reliably (the canonical
+  # reactivecircus two-step pattern). `-noaudio` only silences the emulator's
+  # host audio device; the MP4's AAC track is still muxed by MediaCodec.
+  #
+  # Advisory only because the emulator's software H.264 encoder + audio mux is
+  # unverified from a dev box; once this is green on a real run, drop
+  # `continue-on-error` to make the on-device render a required gate.
+  example_mobile_render:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Set up melos
+        shell: bash
+        run: |
+          dart pub global activate melos
+          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
+      - run: melos bootstrap
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - name: Cache the AVD snapshot
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-api34-google_apis-x86_64
+      - name: Create the AVD and warm a boot snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "AVD snapshot warmed."
+      - name: Render on the emulator and assert the MP4
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          working-directory: examples/mobile_purrfect
+          script: flutter test integration_test/render_on_device_test.dart

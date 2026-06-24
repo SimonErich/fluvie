@@ -14,6 +14,8 @@ you direct, Fluvie keeps continuity, and FFmpeg runs the projector.
 - **Building something?** Reach for the task [guides](guides/animating-elements.md):
   animation, audio, charts, code scenes, theming, and export.
 - **Just need a recipe?** The [cookbook](cookbook.md) has short answers to one task each.
+- **Want a working app to copy?** Browse the [example apps](guides/example-apps.md): one
+  small app per rendering path (CLI, desktop, mobile, browser, server).
 - **Want AI to direct?** See [AI and MCP](guides/ai-and-mcp.md): author a video from a
   prompt, run it locally, or point Claude at it.
 

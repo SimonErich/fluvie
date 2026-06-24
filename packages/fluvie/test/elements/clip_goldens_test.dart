@@ -41,7 +41,7 @@ Future<void> main() async {
 
   final resolver = FakeMediaResolver(
     {_clip: (bytes: Uint8List(0), contentHash: 'x')},
-    metadata: {_clip: const (fps: 30, frameCount: 30, width: 16, height: 16)},
+    metadata: {_clip: const (fps: 30, frameCount: 30, width: 16, height: 16, hasAudio: false)},
     clipFrames: {
       _clip: {0: frame0, 15: frame15, 9: frame9},
     },

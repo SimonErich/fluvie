@@ -4,7 +4,7 @@
 # helper, each toggled by environment variables (FLUVIE_ENABLE_API / _MCP / _DOCS).
 # Rendering is a two-process pipeline: capture frames with `flutter test` (headless
 # software rendering — no display server needed) then encode with ffmpeg. So the
-# image carries the Flutter SDK, ffmpeg, real fonts, the workspace (the example app
+# image carries the Flutter SDK, ffmpeg, real fonts, the workspace (the gallery example app
 # is the default RENDER_PROJECT), and the bundled documentation corpus. For a tiny
 # docs/MCP-only deployment with no render toolchain, use server-docs.Dockerfile.
 FROM debian:bookworm-slim
@@ -47,7 +47,7 @@ RUN melos bootstrap \
 
 ENV HOST=0.0.0.0 \
     PORT=8080 \
-    RENDER_PROJECT=/app/example \
+    RENDER_PROJECT=/app/examples/gallery \
     LOCAL_STORAGE_DIR=/data/renders \
     FLUVIE_DOCS_DIR=/app/documentation \
     VIDEO_SPEC_SCHEMA_PATH=/app/packages/fluvie_server/assets/video_spec_schema.json

@@ -38,6 +38,9 @@ jobs:
           - name: fluvie-demo
             dockerfile: deploy/demo.Dockerfile
             hook: DOKPLOY_WEBHOOK_DEMO
+          - name: fluvie-examples
+            dockerfile: deploy/examples.Dockerfile
+            hook: DOKPLOY_WEBHOOK_EXAMPLES
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -83,6 +86,7 @@ jobs:
           DOKPLOY_WEBHOOK_SERVER: ${{ secrets.DOKPLOY_WEBHOOK_SERVER }}
           DOKPLOY_WEBHOOK_SERVER_DOCS: ${{ secrets.DOKPLOY_WEBHOOK_SERVER_DOCS }}
           DOKPLOY_WEBHOOK_DEMO: ${{ secrets.DOKPLOY_WEBHOOK_DEMO }}
+          DOKPLOY_WEBHOOK_EXAMPLES: ${{ secrets.DOKPLOY_WEBHOOK_EXAMPLES }}
           HOOK_VAR: ${{ matrix.hook }}
         run: |
           set -euo pipefail

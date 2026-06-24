@@ -3,6 +3,23 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.10] - 2026-06-24
+
+### Added
+
+- Generative media. Provider widget sugar (`GenerativeImage.flux`/`.gemini`/
+  `.openai`, `GenerativeVideo.veo`, `GenerativeMusic.suno`,
+  `GenerativeSpeech.eleven`, `GenerativeSoundFx.eleven`) plus the
+  `GenerativeMediaResolver` that produces and caches assets under
+  `.fluvie/generative/` (keyed by prompt, seed, and options, with offline and
+  budget guards), built on the new `ai_abstracted` package. Install it with
+  `fluvieGenerativeResolverFor()` from the `dart:io` native entrypoint
+  `package:fluvie_ai/generative.dart`.
+
+### Changed
+
+- Authoring now runs on `ai_abstracted` (no duplicated provider HTTP).
+
 ## [0.1.9] - 2026-06-23
 
 Lockstep maintenance release; demo (mobile layout) and CI fixes only, no library changes since 0.1.8.

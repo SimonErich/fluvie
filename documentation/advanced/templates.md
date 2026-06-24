@@ -5,14 +5,14 @@ turns a `Props` value into a `Video`, so the same definition makes a personalize
 intro per user or a stat reel per metric. Lesson 11 reuses the built-in
 `StatHighlight` template and lifts its scene into a reel:
 
-<!-- code-excerpt "example/lib/lessons/11_templates_and_aspects.dart (template)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/11_templates_and_aspects.dart (template)" -->
 ```dart
 Scene _statCardScene() => const StatHighlight().build(_stat).scenes.single;
 ```
 
 The props feeding it are plain data:
 
-<!-- code-excerpt "example/lib/lessons/11_templates_and_aspects.dart (stat-props)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/11_templates_and_aspects.dart (stat-props)" -->
 ```dart
 const _stat = StatHighlightProps(value: 48230, label: 'minutes listened');
 ```
@@ -26,7 +26,7 @@ Subclass `VideoTemplate<Props>` and implement `build`. The `build` is a pure
 function of its props: it reads the value and returns a `Video`, with no IO and
 no wall-clock:
 
-<!-- code-excerpt "example/lib/snippets/phase_14_snippets.dart (template-define)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_14_snippets.dart (template-define)" -->
 ```dart
 class GreetingProps {
   const GreetingProps({required this.name});
@@ -66,7 +66,7 @@ API, so it doubles as a worked example of a `VideoTemplate`.
 `TitleIntro` is a centered title that pops in, with an optional subtitle that
 slides in after:
 
-<!-- code-excerpt "example/lib/snippets/phase_11_snippets.dart (title-props)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_11_snippets.dart (title-props)" -->
 ```dart
 const TitleIntroProps(title: '2025', subtitle: 'Year in review');
 ```
@@ -74,7 +74,7 @@ const TitleIntroProps(title: '2025', subtitle: 'Year in review');
 `StatHighlight` is a `Counter` headline counting up to a value, with its label
 beneath:
 
-<!-- code-excerpt "example/lib/snippets/phase_11_snippets.dart (stat-props)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_11_snippets.dart (stat-props)" -->
 ```dart
 const StatHighlightProps(value: 48230, label: 'minutes listened');
 ```
@@ -90,7 +90,7 @@ same offline capture path that `render(video, aspect:)` uses. It is a separate
 free function from `render`, because Dart has no overloading. To render a batch,
 map each data row onto its props and call `renderTemplate` once per row:
 
-<!-- code-excerpt "example/lib/snippets/phase_14_snippets.dart (template-batch)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_14_snippets.dart (template-batch)" -->
 ```dart
 Future<void> renderGreetings({
   required List<String> names,

@@ -5,7 +5,7 @@ shader: they all go in the same `.animate([...])` list as your slides and fades,
 and Fluvie applies them in a fixed order. Here are two pixel effects laid over a
 photo wall, in the same list as the slide that brings the tiles in:
 
-<!-- code-excerpt "example/lib/lessons/06_collage.dart (pixel-fx)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/06_collage.dart (pixel-fx)" -->
 ```dart
 Padding(
   padding: const EdgeInsets.fromLTRB(64, 64, 64, 180),
@@ -72,7 +72,7 @@ capture cleanly off-screen.
 `Animation.particles` lays a field of particles over the element. You describe
 the field with a `Particles` spec and a seed:
 
-<!-- code-excerpt "example/lib/snippets/phase_09_snippets.dart (particles)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_09_snippets.dart (particles)" -->
 ```dart
 Widget confettiCaption() =>
     const Text(
@@ -109,7 +109,7 @@ slides and fades like any other transform.
 sine, the same motion it has always had. Pass a seed and the sine carries a
 low-amplitude noise wobble drawn from the same seeded source as particles:
 
-<!-- code-excerpt "example/lib/snippets/phase_09_snippets.dart (float-seed)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_09_snippets.dart (float-seed)" -->
 ```dart
 Animation.float(amplitude: 0.04, seed: 'leaf-7');
 ```
@@ -125,7 +125,7 @@ hatch for effects no preset covers. Point it at a `.frag` asset registered under
 `flutter: shaders:`, and Fluvie binds `resolution` and `progress` plus your
 uniforms into the shader's float slots in a fixed order:
 
-<!-- code-excerpt "example/lib/snippets/phase_09_snippets.dart (shader)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_09_snippets.dart (shader)" -->
 ```dart
 Widget rippleLogo() => const ColoredBox(
   color: Color(0xFF101820),
@@ -150,7 +150,7 @@ When no preset fits, implement `AnimationEffect` for a transform or
 difference: implementing `PixelAnimationEffect` opts your effect into the pixel
 class, so Fluvie applies it over the transformed child:
 
-<!-- code-excerpt "example/lib/snippets/phase_09_snippets.dart (custom-effect)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_09_snippets.dart (custom-effect)" -->
 ```dart
 Widget scanlineSweepText() => const Text(
   'Sweeping in',

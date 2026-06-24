@@ -79,7 +79,7 @@ downloads a pinned, checksum-verified build and caches it (run
 `FLUVIE_FFMPEG` at your own). The
 [getting started guide](https://docs.fluvie.dev/getting-started/start-a-project/)
 walks through it. Full source:
-[`example/lib/lessons/01_hello_video.dart`](example/lib/lessons/01_hello_video.dart).
+[`examples/gallery/lib/lessons/01_hello_video.dart`](examples/gallery/lib/lessons/01_hello_video.dart).
 
 ## See what it can do
 
@@ -122,7 +122,7 @@ Video chartsVideo() => Video(
 </tr>
 </table>
 
-Full source: [`example/lib/lessons/07_charts.dart`](example/lib/lessons/07_charts.dart).
+Full source: [`examples/gallery/lib/lessons/07_charts.dart`](examples/gallery/lib/lessons/07_charts.dart).
 
 ### Layers and scenes, set to a beat
 
@@ -163,11 +163,11 @@ Video reel() => Video(
 </tr>
 </table>
 
-Full source: [`example/lib/lessons/12_the_kitchen_sink.dart`](example/lib/lessons/12_the_kitchen_sink.dart).
+Full source: [`examples/gallery/lib/lessons/12_the_kitchen_sink.dart`](examples/gallery/lib/lessons/12_the_kitchen_sink.dart).
 
 ## Examples
 
-Twelve runnable lessons live in [`example/lib/lessons/`](example/lib/lessons),
+Twelve runnable lessons live in [`examples/gallery/lib/lessons/`](examples/gallery/lib/lessons),
 from "Hello, Fluvie" to the kitchen sink. Try them at
 [demo.fluvie.dev](https://demo.fluvie.dev): write and render a `Video` in the
 **Playground**, or describe one in the **AI Assistant** and let a model write and
@@ -176,6 +176,11 @@ render the code. Or run the gallery locally:
 ```sh
 flutter run --enable-impeller   # from the repo root; Impeller for the live preview
 ```
+
+Beyond the gallery, [`examples/`](examples/) has a small kitten-themed app for
+each rendering path: a CLI quickstart, a Linux desktop studio, an Android
+on-device app, an in-browser maker, and a server-render studio. See
+[Example apps](documentation/guides/example-apps.md).
 
 > Use Impeller (`--enable-impeller`) whenever you run or preview Fluvie on the
 > desktop. It is Flutter's current renderer and draws shaders, grain, and blends
@@ -289,7 +294,7 @@ draws every glyph as a filled box, so each word looks like a bar. It means the
 real fonts were not loaded before the frames were captured. Fluvie's own render
 pipeline (the CLI, the API, and the Docker image) loads them for you. If you
 write your own capture harness, load the app fonts and set a real default font
-family before rendering (see `example/test/render/`).
+family before rendering (see `examples/gallery/test/render/`).
 
 **Shaders, grain, or blends look off when you preview on the desktop.** Run with
 Impeller, Flutter's current renderer:

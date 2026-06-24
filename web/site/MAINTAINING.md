@@ -57,7 +57,7 @@ up. Run the build from the project root (`web/site`), not elsewhere.
 `src/data/site.ts` is the guardrail. At build time it:
 
 - reads every `packages/<name>/pubspec.yaml` that is not `publish_to: none`, and
-- reads every `example/lib/lessons/NN_*.dart`,
+- reads every `examples/gallery/lib/lessons/NN_*.dart`,
 
 then compares that set against `content.json`. If a published package or a lesson
 has no entry, or `content.json` lists one that no longer exists, the build throws
@@ -71,7 +71,7 @@ comes from `packageCountWord`.
 
 ## When a new lesson or example is added
 
-A new `example/lib/lessons/NN_*.dart` means a new gallery tile.
+A new `examples/gallery/lib/lessons/NN_*.dart` means a new gallery tile.
 
 1. Add a `lessons` entry to `src/data/content.json`: `key` (NN), `title`, a
    one-sentence `teaches` line, a `category` (`basics`/`data`/`media`/`audio`/

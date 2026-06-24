@@ -106,7 +106,7 @@ timed cues. See [Audio and captions](../guides/audio-and-captions.md).
 Name the first element's timeline with an `Anchor`, then trigger the second off
 it:
 
-<!-- code-excerpt "example/lib/snippets/phase_15_snippets.dart (trigger-after)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (trigger-after)" -->
 ```dart
 const Text('Then me', style: _line).animate([
   Animation.slideFade(at: Trigger.after(intro)),
@@ -123,7 +123,7 @@ surface, including `Image`, `Animation`, `Tween`, and `Clip`, which share names
 with Flutter's. You still import Flutter for the widgets you use, with a `hide`
 so Fluvie's versions win:
 
-<!-- code-excerpt "example/lib/lessons/01_hello_video.dart (imports)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/01_hello_video.dart (imports)" -->
 ```dart
 import 'package:flutter/material.dart' hide Animation;
 import 'package:fluvie/fluvie.dart';

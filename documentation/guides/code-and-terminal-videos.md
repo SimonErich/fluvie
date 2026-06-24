@@ -4,7 +4,7 @@ Show source the way a screencast does: type it out, highlight the lines that
 matter, then run it in a terminal. `Code` and `Terminal` are frame-driven
 elements, so you describe the content and the reveal happens for you:
 
-<!-- code-excerpt "example/lib/lessons/08_code_doc_intro.dart (code)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/08_code_doc_intro.dart (code)" -->
 ```dart
 child: Code(
   _snippet,
@@ -27,7 +27,7 @@ hash, so frame N never re-parses and the same frame paints the same pixels every
 time. The highlighter is the highlight.js Dart port, which covers around 190
 languages:
 
-<!-- code-excerpt "example/lib/snippets/phase_12_snippets.dart (code-languages)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_12_snippets.dart (code-languages)" -->
 ```dart
 Code('def main():\n    print("hi")', language: 'python'),
 Code('const x = 1;', language: 'javascript'),
@@ -41,7 +41,7 @@ throwing.
 
 `reveal` is a `CodeReveal` and has three modes:
 
-<!-- code-excerpt "example/lib/snippets/phase_12_snippets.dart (code-reveal)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_12_snippets.dart (code-reveal)" -->
 ```dart
 Code(src, reveal: CodeReveal.instant), // everything at once (default)
 Code(src, reveal: CodeReveal.typing(2.frames)), // glyph by glyph, with a caret
@@ -60,7 +60,7 @@ window, so a relative time scales with the scene.
 dims every other line to the theme's dim opacity, so the eye lands on the lines
 you name. `highlightLines` tints those lines' backgrounds:
 
-<!-- code-excerpt "example/lib/snippets/phase_12_snippets.dart (code-focus)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_12_snippets.dart (code-focus)" -->
 ```dart
 Code(src, language: 'dart', focusLines: {3, 4}, highlightLines: {4});
 ```
@@ -78,7 +78,7 @@ token kind to a color and carries the editor background, gutter, line-number, di
 opacity, and highlight colors. Wrap a subtree in a `FluvieTokensScope` to theme
 every `Code` and `Terminal` inside it:
 
-<!-- code-excerpt "example/lib/snippets/phase_12_snippets.dart (code-tokens)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_12_snippets.dart (code-tokens)" -->
 ```dart
 FluvieTokensScope(
   tokens: const FluvieTokens.fallback(),
@@ -96,7 +96,7 @@ pure line diff: removed lines fade out and collapse behind a red gutter, inserte
 lines fade in and expand behind a green gutter, and kept lines slide to their new
 position:
 
-<!-- code-excerpt "example/lib/snippets/phase_12_snippets.dart (code-diff)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_12_snippets.dart (code-diff)" -->
 ```dart
 Code.diff(
   'final x = 1;',
@@ -114,7 +114,7 @@ Both sides are highlighted once and cached, so the diff colors its tokens too.
 out glyph by glyph after a prompt with a blinking caret; an `out` line streams in
 whole once its turn arrives:
 
-<!-- code-excerpt "example/lib/lessons/08_code_doc_intro.dart (terminal)" -->
+<!-- code-excerpt "examples/gallery/lib/lessons/08_code_doc_intro.dart (terminal)" -->
 ```dart
 child: const Terminal(
   chrome: TerminalChrome.macos(title: 'zsh'),
@@ -141,7 +141,7 @@ Terminal colors come from `context.fluvie.code` too.
 `Markdown` parses a CommonMark document once and renders it to widgets: headings,
 paragraphs, lists, blockquotes, and inline `code`, **bold**, and *italic* runs.
 
-<!-- code-excerpt "example/lib/snippets/phase_12_snippets.dart (markdown)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_12_snippets.dart (markdown)" -->
 ```dart
 const Markdown(
   '# Release notes\n\n'
@@ -163,7 +163,7 @@ Markdown('![logo](https://.../logo.png)')   // renders an Image
 Pass `reveal:` a `Time` to bring the top-level blocks in one after another over
 the element window:
 
-<!-- code-excerpt "example/lib/snippets/phase_12_snippets.dart (markdown-reveal)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_12_snippets.dart (markdown-reveal)" -->
 ```dart
 Markdown(source, reveal: 1.seconds);
 ```

@@ -42,7 +42,7 @@ The repo is a Melos workspace. Bootstrap it once:
 melos bootstrap
 ```
 
-The example app in `example/` is the lesson gallery and inspector. Run it
+The gallery example app in `examples/gallery/` is the lesson gallery and inspector. Run it
 from the repo root so its render button can find the CLI.
 
 ## Previewing on the desktop

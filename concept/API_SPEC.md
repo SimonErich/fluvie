@@ -1197,6 +1197,82 @@ Scene(duration: 6.seconds, children: [
 
 ---
 
+## 15b. Generative media (AI)
+
+Declare AI-generated media inline and Fluvie produces it **before** the frame
+loop, caches it by a hash of the prompt (+ optional seed + options), and then
+treats it like a local file. The provider widgets live in `package:fluvie_ai`;
+they build the provider-agnostic `GenerativeMedia` / `GenerativeAudio` primitives
+that `package:fluvie` exposes, so the generic prerender seam stays free of any
+provider knowledge.
+
+```dart
+import 'package:fluvie/fluvie.dart';
+import 'package:fluvie_ai/fluvie_ai.dart';
+
+Video(
+  scenes: [
+    Scene(
+      duration: 6.seconds,
+      children: [
+        // A generated still image, cached by prompt (no seed -> one stable result).
+        GenerativeImage.flux(prompt: 'a neon skyline at dusk').animate([Animation.kenBurns()]),
+        // A generated video; Veo 3 returns an embedded audio track kept in sync.
+        GenerativeVideo.veo(prompt: 'a man walking down the street', seconds: 6, seed: 'jf83'),
+        // A generated music bed; also drives Trigger.beat.
+        GenerativeMusic.suno(prompt: 'lofi hip hop, 90bpm', seconds: 10),
+        // A generated narration over the scene.
+        GenerativeSpeech.eleven(text: 'Welcome to Fluvie', voice: 'rachel'),
+      ],
+    ),
+  ],
+)
+```
+
+Wiring (once, where you render): build the resolver from the environment and pass
+it to the render, or install it as the `generativeResolverProvider` override.
+
+```dart
+import 'package:fluvie_ai/generative.dart';
+
+final generative = fluvieGenerativeResolverFor(); // reads provider API keys from env
+await render(composition: video, aspect: Aspect.reels, frameCount: 180, /* ... */
+            resolver: media, generative: generative);
+```
+
+### How it resolves
+
+1. `collectGenerativeSources` walks the tree for any `GenerativeCarrier`.
+2. `GenerativeResolver.generateAll` runs before media pre-resolution: a cache hit
+   reads `.fluvie/generative/<provider>/<cacheKey>.<ext>`; a miss calls the
+   provider (through `ai_abstracted`), then writes the bytes plus a `.json`
+   sidecar.
+3. The produced file folds back in as a plain `MediaSource.file` /
+   `AudioSource.file`, so the existing image, clip, and audio-mix passes handle it
+   unchanged. A generated video also rides the clip-embedded-audio path, so Veo 3
+   audio is delayed to its scene window in sync (same file).
+
+The seam is additive: no generative widget in the tree means the whole step is a
+no-op. The default `generativeResolverProvider` is a `NoGenerativeResolver` that
+errors with the install fix if a generative widget appears with no backend.
+
+### Seeds, caching, offline
+
+- No `seed` -> one stable cached result per prompt, reused forever.
+- A `seed` -> a distinct result per seed, deterministic per `(prompt, seed)`.
+- The cache dir is project-relative and committable (`FLUVIE_GENERATIVE_CACHE_DIR`
+  overrides it). `FLUVIE_GENERATIVE_OFFLINE=1` serves only cached assets (CI never
+  calls a paid API); `GenerativeConfig.maxGenerations` caps a single render.
+
+### Providers
+
+Video: Google Veo (Veo 3 audio). Images: Flux (BFL), Gemini ("Nano Banana"),
+OpenAI. Speech and sound effects: ElevenLabs. Music: Suno (via sunoapi.org). Each
+is one thin client behind a capability contract in `ai_abstracted`; adding a
+provider does not touch `fluvie`.
+
+---
+
 ## 16. Backgrounds
 
 All variants under `Background.*`. A `Background` is also a normal element, so it can be tagged with an

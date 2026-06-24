@@ -4,7 +4,7 @@ When no preset fits, drop to a builder with the raw frame clock and paint
 anything. `FrameBuilder` hands you a `FrameContext` every frame, and your builder
 returns the widget to render for that frame. Here a bar sweeps across its window:
 
-<!-- code-excerpt "example/lib/snippets/phase_14_snippets.dart (frame-builder)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_14_snippets.dart (frame-builder)" -->
 ```dart
 Widget sweepingBar() => FrameBuilder((ctx) {
   final reach = ctx.progress; // 0..1 across this element's window
@@ -47,7 +47,7 @@ curve or a tween.
 analysed audio that the effects read. Both are precomputed before the frame loop,
 so a builder that reads them stays a pure function of the frame:
 
-<!-- code-excerpt "example/lib/snippets/phase_14_snippets.dart (frame-builder-audio)" -->
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_14_snippets.dart (frame-builder-audio)" -->
 ```dart
 Widget pulsingChip(Anchor music) => FrameBuilder((ctx) {
   final wobble = ctx.noise('chip-${ctx.frame ~/ 6}') * 0.1; // seeded, reproducible

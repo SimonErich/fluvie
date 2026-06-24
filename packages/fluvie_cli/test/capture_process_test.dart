@@ -314,6 +314,18 @@ void main() {
       expect(resolveProjectDir(cwd: root), '${root.absolute.path}/example');
     });
 
+    test('auto-discovers the monorepo gallery under examples/gallery', () {
+      final root = Directory.systemTemp.createTempSync('fluvie_cli_gallery_');
+      addTearDown(() => root.deleteSync(recursive: true));
+      File(
+        '${root.path}/examples/gallery/test/render/capture_harness_test.dart',
+      ).createSync(recursive: true);
+      final nested = Directory('${root.path}/packages/fluvie_cli')..createSync(recursive: true);
+
+      expect(resolveProjectDir(cwd: nested), '${root.absolute.path}/examples/gallery');
+      expect(resolveProjectDir(cwd: root), '${root.absolute.path}/examples/gallery');
+    });
+
     test('resolves a standalone project whose harness sits directly in it', () {
       final root = Directory.systemTemp.createTempSync('fluvie_cli_standalone_');
       addTearDown(() => root.deleteSync(recursive: true));
