@@ -1,12 +1,22 @@
-# Test fixtures deliberately build dangling anchors and relative-times-without-
-# scope to exercise the timing diagnostics, so the custom_lint rules that flag
-# those in authoring code are noise here. Disable them at the source for tests
-# only; lib/ keeps full enforcement. This also keeps `dart analyze` quiet now
-# that many workspace packages enable the custom_lint plugin and it surfaces
-# plugin lints through analyze that it previously did not.
+# Test fixtures deliberately build invalid compositions (dangling anchors,
+# relative times with no enclosing scope, conflicting keyframes, cyclic
+# triggers, ...) to exercise the timing diagnostics, so the authoring lints that
+# flag those are noise here. Demote them for tests only; lib/ keeps full
+# enforcement, and the structural lints (layering, no_src_import,
+# deprecated_member) stay on everywhere.
+#
+# These are custom_lint codes. dart analyze only knows them when the custom_lint
+# plugin is loaded into analysis (it is on CI, where the plugin now surfaces them
+# through analyze; it is not in every local run), so unrecognized_error_code is
+# demoted too, otherwise the overrides would themselves be flagged off CI.
 include: ../analysis_options.yaml
 
-custom_lint:
-  rules:
-    - dangling_anchor: false
-    - relative_outside_scope: false
+analyzer:
+  errors:
+    dangling_anchor: ignore
+    relative_outside_scope: ignore
+    conflicting_keyframe_fields: ignore
+    cyclic_trigger: ignore
+    unused_anchor: ignore
+    animation_exceeds_window: ignore
+    unrecognized_error_code: ignore
