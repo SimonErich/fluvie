@@ -19,6 +19,12 @@ COPY . .
 # Resolve the workspace once at the root.
 RUN flutter pub get
 
+# Node provides the npm that vendors the ffmpeg.wasm files (the Flutter base
+# image has no Node).
+RUN apt-get update \
+      && apt-get install -y --no-install-recommends nodejs npm \
+      && rm -rf /var/lib/apt/lists/*
+
 # Vendor ffmpeg.wasm for the in-browser app, then build it at the site root.
 RUN bash examples/web_browser_studio/tool/fetch_ffmpeg.sh
 WORKDIR /src/examples/web_browser_studio

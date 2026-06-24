@@ -41,7 +41,7 @@ RUN mkdir -p examples/gallery/web/media \
              && rm -rf /tmp/fluvie_frame_cache || exit 1; \
          done
 
-WORKDIR /src/example
+WORKDIR /src/examples/gallery
 RUN flutter build web --release \
       --no-web-resources-cdn \
       --dart-define=FLUVIE_API_URL=${FLUVIE_API_URL} \
