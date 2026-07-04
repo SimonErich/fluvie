@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animation.dart';
 import 'package:fluvie/src/animation/effect_kind.dart';
-import 'package:fluvie/src/core/animation_phase.dart';
 import 'package:fluvie/src/animation/effects/bloom_effect.dart';
 import 'package:fluvie/src/animation/effects/chromatic_effect.dart';
 import 'package:fluvie/src/animation/effects/glitch_effect.dart';
@@ -11,6 +10,7 @@ import 'package:fluvie/src/animation/effects/particles_effect.dart';
 import 'package:fluvie/src/animation/effects/scanlines_effect.dart';
 import 'package:fluvie/src/animation/effects/shader_effect.dart';
 import 'package:fluvie/src/animation/effects/vignette_effect.dart';
+import 'package:fluvie/src/core/animation_phase.dart';
 import 'package:fluvie/src/core/ease.dart';
 import 'package:fluvie/src/core/edge.dart';
 import 'package:fluvie/src/core/particles/particles.dart';

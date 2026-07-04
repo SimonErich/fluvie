@@ -1,3 +1,4 @@
+// fluvie:large-file-ok: the single exhaustive spec-to-preset dispatch; each case is one delegation
 import 'package:fluvie/src/animation/animation.dart';
 import 'package:fluvie/src/core/edge.dart';
 import 'package:fluvie/src/core/errors/fluvie_spec_error.dart';

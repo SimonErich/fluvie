@@ -18,12 +18,12 @@ import 'package:fluvie/src/core/ease.dart';
 import 'package:fluvie/src/core/keyframe.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/core/time_extensions.dart';
-import 'package:fluvie/src/timing/time_scope_data.dart';
 import 'package:fluvie/src/core/trigger.dart';
 import 'package:fluvie/src/rendering/runtime/render_controller.dart';
 import 'package:fluvie/src/rendering/runtime/render_controller_scope.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
+import 'package:fluvie/src/timing/time_scope_data.dart';
 import 'package:fluvie/src/timing/timeline/debug_timeline.dart';
 import 'package:fluvie/src/timing/timeline/resolved_timeline.dart';
 

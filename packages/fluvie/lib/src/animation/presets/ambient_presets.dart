@@ -91,7 +91,7 @@ Animation buildDrift(Edge to, double distance, AmbientTail tail) => Animation.fr
   label: tail.label,
 );
 
-/// Builds `Animation.spin`: rotation `0 → 1` turn over [per], linear,
+/// Builds `Animation.spin`: rotation `0 → 1` turn over [period], linear,
 /// looping forever.
 Animation buildSpin(Time period, AmbientTail tail) => Animation.fromTo(
   const Keyframe(rotation: 0),

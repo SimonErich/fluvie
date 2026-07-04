@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/widgets.dart' show Directionality, TextDirection, Widget, debugPrint;
-import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/aspect.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart' show MediaResolver;
 import 'package:fluvie/src/core/defaults.dart';

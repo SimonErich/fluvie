@@ -100,7 +100,12 @@ final class PhotoFrame extends StatelessWidget implements CollectibleChildren {
   PhotoFrame withChild(Widget newChild) => switch (_style) {
     _FrameStyle.none => PhotoFrame.none(key: key, child: newChild),
     _FrameStyle.rounded => PhotoFrame.rounded(key: key, radius: radius, child: newChild),
-    _FrameStyle.card => PhotoFrame.card(key: key, radius: radius, elevation: elevation, child: newChild),
+    _FrameStyle.card => PhotoFrame.card(
+      key: key,
+      radius: radius,
+      elevation: elevation,
+      child: newChild,
+    ),
     _FrameStyle.polaroid => PhotoFrame.polaroid(key: key, caption: caption, child: newChild),
   };
 

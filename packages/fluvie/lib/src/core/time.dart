@@ -97,7 +97,7 @@ final class ComputedTime extends Time {
   /// Creates a time that resolves to `compute(scope)` frames.
   const ComputedTime(this.compute);
 
-  /// Computes the resolved frame count for [scope].
+  /// Computes the resolved frame count for the resolving scope.
   final int Function(TimeScope scope) compute;
 
   @override

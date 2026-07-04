@@ -31,7 +31,7 @@ final class _LabelStep extends _TimelineStep {
   final String name;
 }
 
-/// The playhead algorithm run over the recorded steps at one [fps]: the same
+/// The playhead algorithm run over the recorded steps at one fps: the same
 /// sequential walk the mutable builder used to do eagerly, now replayable so
 /// each fps gets its own absolute frames.
 final class _Resolution {

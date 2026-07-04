@@ -14,9 +14,9 @@ import 'package:fluvie/src/core/defaults.dart';
 import 'package:fluvie/src/core/ease.dart';
 import 'package:fluvie/src/core/keyframe.dart';
 import 'package:fluvie/src/core/time.dart';
-import 'package:fluvie/src/timing/time_scope_data.dart';
 import 'package:fluvie/src/core/time_extensions.dart';
 import 'package:fluvie/src/core/trigger.dart';
+import 'package:fluvie/src/timing/time_scope_data.dart';
 
 /// An enter lasting [frames] frames, linear.
 Animation _enter(int frames) =>

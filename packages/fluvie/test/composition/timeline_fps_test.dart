@@ -16,11 +16,11 @@ import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/ease.dart';
 import 'package:fluvie/src/core/keyframe.dart';
 import 'package:fluvie/src/core/time.dart';
-import 'package:fluvie/src/timing/time_scope_data.dart';
 import 'package:fluvie/src/rendering/runtime/render_controller.dart';
 import 'package:fluvie/src/rendering/runtime/render_controller_scope.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
+import 'package:fluvie/src/timing/time_scope_data.dart';
 import 'package:fluvie/src/timing/timeline/resolved_timeline.dart';
 
 Animation _enter(Time duration) =>
@@ -88,8 +88,14 @@ void main() {
     test('the schedule duration resolves per scope, not eagerly', () {
       final sequenced = _sequence();
       final duration = sequenced.timeline.duration;
-      expect(duration.resolveFrames(TimeScopeData(fps: 60, startFrame: 0, durationFrames: 0)), 150);
-      expect(duration.resolveFrames(TimeScopeData(fps: 30, startFrame: 0, durationFrames: 0)), 75);
+      expect(
+        duration.resolveFrames(const TimeScopeData(fps: 60, startFrame: 0, durationFrames: 0)),
+        150,
+      );
+      expect(
+        duration.resolveFrames(const TimeScopeData(fps: 30, startFrame: 0, durationFrames: 0)),
+        75,
+      );
     });
   });
 }

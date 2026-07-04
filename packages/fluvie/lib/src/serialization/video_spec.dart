@@ -33,7 +33,7 @@ class VideoSpec {
   VideoSpec({
     required this.scenes,
     this.size = VideoSize.reels,
-    this.fps = 30,
+    this.fps = VideoDefaults.fps,
     this.poster,
     this.export,
     this.motionDefaults,
@@ -75,7 +75,7 @@ class VideoSpec {
       scenes: scenes,
       anchors: anchors,
       size: size == null ? VideoSize.reels : decodeVideoSize(size, path: const ['size']),
-      fps: fps is int ? fps : 30,
+      fps: fps is int ? fps : VideoDefaults.fps,
       poster: poster == null ? null : decodeTime(poster, path: const ['poster']),
       export: export == null ? null : decodeExport(export, path: const ['export']),
       motionDefaults: motion == null
