@@ -157,11 +157,11 @@ void main() {
       expect(schedule.spans.single, const ResolvedSpan(110, 120));
     });
 
-    test('Trigger.after dangles locally and throws a FluvieTimingError', () {
+    test('Trigger.whenEnds dangles locally and throws a FluvieTimingError', () {
       expect(
         () => resolveLocalSchedule(
           animations: [
-            Animation.from(const Keyframe(opacity: 0), at: Trigger.after(Anchor('other'))),
+            Animation.from(const Keyframe(opacity: 0), at: Trigger.whenEnds(Anchor('other'))),
           ],
           window: null,
           sceneScope: _scene,

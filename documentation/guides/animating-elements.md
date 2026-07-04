@@ -92,12 +92,12 @@ your own with `Spring(stiffness:, damping:)`.
 ## Trigger one animation off another
 
 By default an animation plays at its phase. A `Trigger` changes the start. Use
-`Trigger.after` to wait for an anchored element to finish:
+`Trigger.whenEnds` to wait for an anchored element to finish:
 
 <!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (trigger-after)" -->
 ```dart
 const Text('Then me', style: _line).animate([
-  Animation.slideFade(at: Trigger.after(intro)),
+  Animation.slideFade(at: Trigger.whenEnds(intro)),
 ]);
 ```
 

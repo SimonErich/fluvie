@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:fluvie/fluvie.dart';
-import 'package:fluvie/rendering.dart';
 import 'package:fluvie_mobile_encoder/fluvie_mobile_encoder.dart';
 
 /// Renders [video] to MP4 bytes with the native mobile encoder (Android/iOS).

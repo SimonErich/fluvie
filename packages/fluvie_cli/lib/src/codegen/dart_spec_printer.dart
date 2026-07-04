@@ -17,7 +17,7 @@ part 'dart_spec_printer_literals.dart';
 /// call, so rendering the code matches rendering the spec.
 ///
 /// Anchors are declared once as `final` locals and referenced by variable in
-/// both the element's `.animate(anchor: ...)` and any `Trigger.after(...)`,
+/// both the element's `.animate(anchor: ...)` and any `Trigger.whenEnds(...)`,
 /// because `Anchor` identity is by reference: two `Anchor('x')` literals would
 /// name two distinct timelines.
 ///
@@ -121,7 +121,7 @@ class _Anchors {
   void _collectTrigger(Object? at) {
     if (at is! Map<String, Object?>) return;
     final reference = switch (at['kind']) {
-      'after' || 'whenStarts' => at['anchor'],
+      'whenEnds' || 'whenStarts' => at['anchor'],
       'beat' => at['track'],
       _ => null,
     };

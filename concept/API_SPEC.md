@@ -108,7 +108,7 @@ final video = Video(
 
         // Slides + fades in, but only once the gradient shift finishes.
         Text('Hello, Fluvie')
-            .animate([Animation.slideFade(from: Edge.bottom, at: Trigger.after(bg))]),
+            .animate([Animation.slideFade(from: Edge.bottom, at: Trigger.whenEnds(bg))]),
 
         // Slides in from the left over 4 seconds, then a slow Ken Burns push.
         Image.network('https://example.com/photo.jpg').animate([
@@ -341,7 +341,7 @@ sealed class Trigger {
 final intro = Anchor('intro');
 
 Text('Title').animate([Animation.pop()], anchor: intro);
-Text('Subtitle').animate([Animation.fadeIn(at: Trigger.after(intro), delay: 0.2.seconds)]);
+Text('Subtitle').animate([Animation.fadeIn(at: Trigger.whenEnds(intro), delay: 0.2.seconds)]);
 
 // chaining on one element:
 Image.asset('logo.png').animate([
@@ -374,7 +374,7 @@ while elements stay declarative. Beginners never need it; the per-element API ab
 ```dart
 final tl = Timeline(defaults: const Defaults(duration: Time.seconds(0.5)))
   ..play(title,    Animation.from(const Keyframe(y: 1)))
-  ..play(subtitle, Animation.fadeIn(), at: Trigger.after(title))
+  ..play(subtitle, Animation.fadeIn(), at: Trigger.whenEnds(title))
   ..wait(0.3.seconds)
   ..playAll(bullets, Animation.from(const Keyframe(x: -0.3)), stagger: 0.08.seconds)
   ..label('reveal')
@@ -1929,7 +1929,7 @@ Triggers let A start relative to B, so a single top-down pass isn't enough:
 3. **Detect cycles** → a build-time `FluvieTimingError` naming both anchors (never a silent hang).
 4. **Resolve** each animation to absolute `[start, end]` frames.
 
-All of this runs **inside** Fluvie. The call site only wrote `anchor: bg` and `Trigger.after(bg)`.
+All of this runs **inside** Fluvie. The call site only wrote `anchor: bg` and `Trigger.whenEnds(bg)`.
 
 ### 27.6 The unified `Animation` pipeline
 
@@ -2276,7 +2276,7 @@ The design choices behind the API:
 ### Micro-defaults I chose for you (easy to change)
 
 - `VideoSize.story` is an **alias** of `reels` (one canonical 1080×1920).
-- Trigger parameter is named **`at:`** (`at: Trigger.after(intro)`).
+- Trigger parameter is named **`at:`** (`at: Trigger.whenEnds(intro)`).
 - Multiple audio tracks **layer/mix** by default.
 - `Animation.keyframes` stops are **evenly spaced** unless explicit `at:` times are given.
 - Spring **settle threshold** drives a spring's effective duration for windowing/chaining.

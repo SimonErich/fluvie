@@ -5,7 +5,7 @@ import 'package:meta/meta.dart';
 ///
 /// Repeat is presentation, not placement: the timing resolver keeps the
 /// animation's single resolved span (so chaining via `Trigger.previous` and
-/// `Trigger.after` stays stable), and the runner replays cycles *inside* it.
+/// `Trigger.whenEnds` stays stable), and the runner replays cycles *inside* it.
 /// A `during` animation loops across its window; on enter/exit phases the
 /// span stays one cycle long, so extra cycles never render.
 ///

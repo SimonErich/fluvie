@@ -9,7 +9,7 @@ opt-in, GSAP-style builder that records steps against a running playhead:
 Timeline introTimeline(Anchor title, Anchor subtitle, List<Anchor> bullets, Anchor cta) =>
     Timeline(defaults: const Defaults(duration: Time.seconds(0.5)))
       ..play(title, Animation.slideFade())
-      ..play(subtitle, Animation.fadeIn(), at: Trigger.after(title))
+      ..play(subtitle, Animation.fadeIn(), at: Trigger.whenEnds(title))
       ..wait(0.3.seconds)
       ..playAll(bullets, Animation.slideFade(), stagger: 0.08.seconds)
       ..label('reveal')
@@ -35,7 +35,7 @@ Each call advances a playhead, the running position the next step starts from:
 
 `at:` overrides where a step starts. It accepts three things:
 
-- a `Trigger`, for example `Trigger.after(title)` to start when `title` ends;
+- a `Trigger`, for example `Trigger.whenEnds(title)` to start when `title` ends;
 - a `String` label, for example `at: 'reveal'`;
 - a `LabelRef` with offset arithmetic, for example `'reveal'.label - 0.2.seconds`.
 

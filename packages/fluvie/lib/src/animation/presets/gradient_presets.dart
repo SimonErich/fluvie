@@ -12,7 +12,7 @@ import 'package:fluvie/src/animation/presets/preset_tail.dart';
 /// The expansion is `Animation.custom(GradientShiftEffect(to), …)`, an enter
 /// by default (the rule for `custom`): start-anchored, so
 /// `delay: 0.1.relative, duration: 0.3.relative` spans 1 s → 4 s and
-/// `Trigger.after` on its anchor fires when the shift completes.
+/// `Trigger.whenEnds` on its anchor fires when the shift completes.
 Animation buildGradientShift(List<Color> to, PresetTail tail) => Animation.custom(
   GradientShiftEffect(to),
   duration: tail.duration,

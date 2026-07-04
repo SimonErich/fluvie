@@ -5,7 +5,7 @@ import 'package:fluvie/src/core/anchor.dart';
 /// In a `VideoSpec` an anchor is just a name, but the timing resolver keys its
 /// dependency graph by [Anchor] *identity* (see [Anchor]). This table
 /// guarantees that every reference to the same id — the element that declares
-/// it and every `Trigger.after`/`Trigger.whenStarts`/`Audio.track` that points
+/// it and every `Trigger.whenEnds`/`Trigger.whenStarts`/`Audio.track` that points
 /// at it — resolves to the **same** [Anchor] instance, so identity survives
 /// serialization.
 class AnchorTable {

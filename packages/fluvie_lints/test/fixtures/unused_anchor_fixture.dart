@@ -8,7 +8,7 @@ class Anchor {
 }
 
 class Trigger {
-  Trigger.after(Anchor a);
+  Trigger.whenEnds(Anchor a);
 }
 
 // A class field anchor never referenced in this file is NOT flagged: a field can
@@ -23,5 +23,5 @@ void build() {
 
   // Declared and referenced by a Trigger: not flagged.
   final intro = Anchor('intro');
-  Trigger.after(intro);
+  Trigger.whenEnds(intro);
 }

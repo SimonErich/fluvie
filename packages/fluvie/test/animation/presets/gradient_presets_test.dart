@@ -57,7 +57,7 @@ void main() {
     test('§3 timing shape: relative delay and duration resolve to the 1s→4s span', () {
       // A 10 s scene at 30 fps: delay 0.1.relative = 30 frames, duration
       // 0.3.relative = 90 frames — the shift begins 1 s in and ends at 4 s,
-      // which is exactly when `Trigger.after(bg)` fires in the quickstart.
+      // which is exactly when `Trigger.whenEnds(bg)` fires in the quickstart.
       final schedule = resolveLocalSchedule(
         animations: [
           Animation.gradientShift(

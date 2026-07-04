@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' hide Animation, Image;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 Video build() {
@@ -21,7 +21,7 @@ Video build() {
           Box(
             color: Color(0xFF00A0FF),
             size: Size(200, 120),
-          ).animate([Animation.slideFade(from: Edge.left, at: Trigger.after(title))]),
+          ).animate([Animation.slideFade(from: Edge.left, at: Trigger.whenEnds(title))]),
         ],
       ),
       Scene(

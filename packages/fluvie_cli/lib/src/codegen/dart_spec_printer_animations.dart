@@ -128,8 +128,8 @@ String _trigger(Object? raw, _Anchors anchors) {
         if (map['every'] != null) 'every: ${_num(map['every'])}',
         if (map['track'] != null) 'track: ${anchors.variableFor(map['track']! as String)}',
       ])})';
-    case 'after':
-      return 'Trigger.after(${anchors.variableFor(map['anchor']! as String)})';
+    case 'whenEnds':
+      return 'Trigger.whenEnds(${anchors.variableFor(map['anchor']! as String)})';
     case 'whenStarts':
       return 'Trigger.whenStarts(${anchors.variableFor(map['anchor']! as String)})';
   }

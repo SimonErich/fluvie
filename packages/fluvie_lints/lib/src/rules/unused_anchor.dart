@@ -7,7 +7,7 @@ import 'package:custom_lint_builder/custom_lint_builder.dart';
 
 /// Flags an `Anchor` that is declared but never referenced
 /// (`unused_anchor`). A dangling handle is dead weight and usually a sign the
-/// author forgot to wire a `Trigger.after(...)`.
+/// author forgot to wire a `Trigger.whenEnds(...)`.
 ///
 /// Conservative and syntactic: it only fires on a local or top-level `final`
 /// whose initializer is exactly `Anchor(...)` and whose name appears nowhere

@@ -8,7 +8,7 @@ class Anchor {
 }
 
 class Trigger {
-  static Trigger after(Anchor a) => Trigger();
+  static Trigger whenEnds(Anchor a) => Trigger();
   static Trigger whenStarts(Anchor a) => Trigger();
   Trigger();
 }
@@ -20,7 +20,7 @@ class Element {
 void build() {
   // Waited on but never attached in this body: dangling.
   final ghost = Anchor('ghost');
-  Trigger.after(ghost);
+  Trigger.whenEnds(ghost);
 
   // Waited on AND attached via anchor:: not dangling.
   final intro = Anchor('intro');

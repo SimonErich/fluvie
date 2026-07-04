@@ -9,6 +9,6 @@ Widget build() {
   final loop = Anchor('loop');
   // expect_lint: cyclic_trigger
   return const Box().animate([
-    Animation.fadeIn(at: Trigger.after(loop)),
+    Animation.fadeIn(at: Trigger.whenEnds(loop)),
   ], anchor: loop);
 }

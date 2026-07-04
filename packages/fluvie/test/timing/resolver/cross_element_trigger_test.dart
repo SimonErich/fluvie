@@ -32,7 +32,7 @@ void main() {
           element(
             'subtitle',
             animations: [
-              anim(at: Trigger.after(hero), timing: const Tween(Time.frames(20))),
+              anim(at: Trigger.whenEnds(hero), timing: const Tween(Time.frames(20))),
             ],
           ),
         ]),
@@ -55,7 +55,7 @@ void main() {
             'subtitle',
             animations: [
               anim(
-                at: Trigger.after(hero),
+                at: Trigger.whenEnds(hero),
                 delay: 0.5.seconds,
                 timing: const Tween(Time.frames(20)),
               ),
@@ -131,7 +131,7 @@ void main() {
           element(
             'cta',
             animations: [
-              anim(at: Trigger.after(hero), timing: const Tween(Time.frames(20))),
+              anim(at: Trigger.whenEnds(hero), timing: const Tween(Time.frames(20))),
             ],
           ),
         ]),
@@ -150,7 +150,7 @@ void main() {
           element(
             'cta',
             animations: [
-              anim(at: Trigger.after(hero), timing: const Tween(Time.frames(20))),
+              anim(at: Trigger.whenEnds(hero), timing: const Tween(Time.frames(20))),
             ],
           ),
         ]),
@@ -174,7 +174,7 @@ void main() {
             animations: [
               anim(
                 phase: AnimationPhase.exit,
-                at: Trigger.after(hero),
+                at: Trigger.whenEnds(hero),
                 timing: const Tween(Time.frames(20)),
               ),
             ],
@@ -299,7 +299,7 @@ void main() {
               element(
                 'cta',
                 animations: [
-                  anim(at: Trigger.after(card), timing: const Tween(Time.frames(24))),
+                  anim(at: Trigger.whenEnds(card), timing: const Tween(Time.frames(24))),
                 ],
               ),
             ],

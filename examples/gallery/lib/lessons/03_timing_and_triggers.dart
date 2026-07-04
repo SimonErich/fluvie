@@ -6,13 +6,13 @@ const _title = TextStyle(color: Colors.white, fontSize: 72, fontWeight: FontWeig
 const _caption = TextStyle(color: Colors.white, fontSize: 40);
 
 /// Lesson 03 — the quickstart shape: an anchored gradient shift, a title
-/// gated on [Trigger.after], and a guest visible only inside a `.show`
+/// gated on [Trigger.whenEnds], and a guest visible only inside a `.show`
 /// window.
 const lesson03TimingAndTriggers = Lesson(
   id: '03_timing_and_triggers',
   title: 'Timing and triggers',
   intro:
-      'Name a timeline with an Anchor, react to it with Trigger.after, and '
+      'Name a timeline with an Anchor, react to it with Trigger.whenEnds, and '
       'bound an element with .show. Nobody computes a frame number.',
   video: lesson03Video,
 );
@@ -42,7 +42,7 @@ Video lesson03Video() {
           // #enddocregion gradient-anchor
           // #docregion after-trigger
           const Text('Hello, Fluvie', style: _title).animate([
-            Animation.slideFade(at: Trigger.after(bg)),
+            Animation.slideFade(at: Trigger.whenEnds(bg)),
           ]),
           // #enddocregion after-trigger
           // #docregion show-window

@@ -69,7 +69,7 @@ Widget springTiming() =>
 Widget triggerVocabulary(Anchor intro) =>
     // #docregion trigger-after
     const Text('Then me', style: _line).animate([
-      Animation.slideFade(at: Trigger.after(intro)),
+      Animation.slideFade(at: Trigger.whenEnds(intro)),
     ]);
 // #enddocregion trigger-after
 

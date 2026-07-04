@@ -27,7 +27,7 @@ export 'package:fluvie/src/composition/timeline_placement.dart' show TimelinePla
 /// ```dart
 /// final tl = Timeline(defaults: const Defaults(duration: Time.seconds(0.5)))
 ///   ..play(title, Animation.from(const Keyframe(y: 1)))
-///   ..play(subtitle, Animation.fadeIn(), at: Trigger.after(title))
+///   ..play(subtitle, Animation.fadeIn(), at: Trigger.whenEnds(title))
 ///   ..wait(0.3.seconds)
 ///   ..playAll(bullets, Animation.from(const Keyframe(x: -0.3)), stagger: 0.08.seconds)
 ///   ..label('reveal')
@@ -105,7 +105,7 @@ final class Timeline implements TimelineSchedule {
   /// themselves relative to it via `at: 'name'.label`.
   void label(String name) => _labels[name] = _playhead;
 
-  /// Records a placement and tracks the per-anchor end for `Trigger.after`.
+  /// Records a placement and tracks the per-anchor end for `Trigger.whenEnds`.
   void _record(Anchor target, Animation animation, int start) {
     final placement = TimelinePlacement(
       target: target,
@@ -126,14 +126,14 @@ final class Timeline implements TimelineSchedule {
   /// Resolves an `at:` argument to an absolute start frame.
   ///
   /// `null` and [Trigger.auto] mean the current playhead; [Trigger.previous]
-  /// the previous step's end; [Trigger.after] the named anchor's end;
+  /// the previous step's end; [Trigger.whenEnds] the named anchor's end;
   /// [AbsoluteTrigger] an absolute time; a `String`/[LabelRef] a label
   /// position with optional offset.
   int _resolveStart(Object? at) => switch (at) {
     null || AutoTrigger() => _playhead,
     PreviousTrigger() => _previousEnd,
     final AbsoluteTrigger trigger => trigger.time.resolveFrames(_scope),
-    final AfterTrigger trigger => _endByAnchor[trigger.anchor] ?? _playhead,
+    final WhenEndsTrigger trigger => _endByAnchor[trigger.anchor] ?? _playhead,
     final WhenStartsTrigger trigger => _startOf(trigger.anchor),
     final String name => _labelPosition(name, Time.zero),
     final LabelRef ref => _labelPosition(ref.name, ref.offset),

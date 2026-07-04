@@ -95,7 +95,7 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 | --- | --- |
 | `Trigger.auto` | the phase default |
 | `Trigger.at(time)` | explicit time in the window |
-| `Trigger.after(a)` / `Trigger.whenStarts(a)` | react to an `Anchor` |
+| `Trigger.whenEnds(a)` / `Trigger.whenStarts(a)` | react to an `Anchor` |
 | `Trigger.previous` | chain off the previous animation |
 | `Trigger.sceneStart` / `Trigger.sceneEnd` | scene boundaries |
 | `Trigger.beat(every:, track:)` | on the analysed beat grid of an audio track |

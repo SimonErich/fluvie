@@ -188,7 +188,7 @@ void main() {
           frame: 0,
           child: MotionTarget(
             animations: [
-              Animation.from(const Keyframe(opacity: 0), at: Trigger.after(Anchor('other'))),
+              Animation.from(const Keyframe(opacity: 0), at: Trigger.whenEnds(Anchor('other'))),
             ],
             child: _square,
           ),

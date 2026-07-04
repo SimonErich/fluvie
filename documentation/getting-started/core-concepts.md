@@ -85,6 +85,6 @@ rendering. Effects pull randomness from a seed, so the same seed repeats.
 - [Backgrounds and gradients](../guides/backgrounds-and-gradients.md): fills,
   textures, and `gradientShift`.
 - [Timing and triggers](../guides/timing-and-triggers.md): anchors,
-  `Trigger.after`, and `.show` windows.
+  `Trigger.whenEnds`, and `.show` windows.
 - [Scenes and transitions](../guides/scenes-and-transitions.md): crossFade,
   wipe, overlap, shared elements, and the `Camera`.

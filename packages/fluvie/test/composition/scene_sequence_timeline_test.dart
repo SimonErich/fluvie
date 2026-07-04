@@ -46,7 +46,7 @@ Animation _enter(int frames, {Trigger at = Trigger.auto}) => Animation.from(
   final two = Anchor('b2');
   final timeline = Timeline()
     ..play(title, _enter(20))
-    ..play(subtitle, _enter(15), at: Trigger.after(title))
+    ..play(subtitle, _enter(15), at: Trigger.whenEnds(title))
     ..wait(const Time.frames(9))
     ..playAll([one, two], _enter(10), stagger: const Time.frames(4));
   final children = <Widget>[

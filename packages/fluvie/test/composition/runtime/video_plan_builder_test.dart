@@ -46,7 +46,7 @@ void main() {
       expect(result.timeline.totalFrames, 90);
     });
 
-    test('cross-scene Trigger.after chains off the anchor union end', () {
+    test('cross-scene Trigger.whenEnds chains off the anchor union end', () {
       final bg = Anchor('bg');
       final anchored = ElementRegistration(
         debugOwner: 'bg',
@@ -55,7 +55,7 @@ void main() {
       );
       final follower = ElementRegistration(
         debugOwner: 'Text',
-        animations: [_enter(10, at: Trigger.after(bg))],
+        animations: [_enter(10, at: Trigger.whenEnds(bg))],
       );
       final result = buildVideoPlan(
         fps: 30,
@@ -343,7 +343,7 @@ void main() {
       final anchored = ElementRegistration(debugOwner: 'bg', anchor: bg, animations: [_enter(30)]);
       final follower = ElementRegistration(
         debugOwner: 'Text',
-        animations: [_enter(10, at: Trigger.after(bg))],
+        animations: [_enter(10, at: Trigger.whenEnds(bg))],
       );
       final scenes = [_scene(60.frames)];
       final registrations = [

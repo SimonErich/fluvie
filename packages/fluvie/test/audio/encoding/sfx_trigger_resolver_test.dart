@@ -43,7 +43,7 @@ void main() {
         throwsA(isA<FluvieTimingError>()),
       );
       expect(
-        () => resolveSfxFrame(Trigger.after(Anchor('x')), scope),
+        () => resolveSfxFrame(Trigger.whenEnds(Anchor('x')), scope),
         throwsA(isA<FluvieTimingError>()),
       );
       expect(

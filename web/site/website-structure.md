@@ -193,7 +193,7 @@ accessibility note.
     numbers to keep in sync. You never type a frame number."
 - **Special treatment:** A two-state code panel with a toggle: "The timeline way"
   (cluttered with hardcoded millisecond values) versus "The Fluvie way"
-  (`Trigger.after(title)`, `previous`, `.show(...)`). Beside it, a live
+  (`Trigger.whenEnds(title)`, `previous`, `.show(...)`). Beside it, a live
   mini-timeline in the style of the inspector. A small lever, "move the title
   earlier", visibly desyncs the hardcoded side while the Fluvie side re-flows
   correctly. This is the most persuasive dev interaction on the page.
@@ -559,7 +559,7 @@ the clips are generated (see [gallery assets](#gallery-assets-format-and-source)
 | --- | --- | --- | --- |
 | 01 | Hello, video | The smallest complete video: one scene, a gradient, a title that fades and pops. | demo.fluvie.dev (lesson 01) |
 | 02 | Text and motion | A plain Column, a staggered enter, `previous` trigger chains, and an ambient float. | lesson 02 |
-| 03 | Timing and triggers | Anchored gradient shift, `Trigger.after` gating, and `.show` windows. No frame numbers. | lesson 03 |
+| 03 | Timing and triggers | Anchored gradient shift, `Trigger.whenEnds` gating, and `.show` windows. No frame numbers. | lesson 03 |
 | 04 | Scenes and transitions | Three scenes, a crossFade, a SharedElement morph, a camera push, and a wipe. | lesson 04 |
 | 05 | Images and clips | A photo in a polaroid with Ken Burns, plus a trimmed video clip. No async pop-in. | lesson 05 |
 | 06 | A photo collage | A data-driven photo wall staggering in, grain and vignette, a seeded confetti burst. | lesson 06 |

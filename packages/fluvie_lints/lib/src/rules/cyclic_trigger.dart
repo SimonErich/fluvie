@@ -10,7 +10,7 @@ import 'package:custom_lint_builder/custom_lint_builder.dart';
 ///
 /// Conservative and syntactic. Within one function body it reads each
 /// `.animate([...], anchor: A)` call, takes A as the owner, and adds an edge
-/// `A -> B` for every `Trigger.after(B)` / `Trigger.whenStarts(B)` inside that
+/// `A -> B` for every `Trigger.whenEnds(B)` / `Trigger.whenStarts(B)` inside that
 /// call's animation list. It then looks for a cycle in that graph and flags
 /// each `.animate` whose owner sits on one. Anchors are matched by simple name
 /// only, so an indirected anchor (through a field, a helper, another file)
@@ -109,7 +109,7 @@ class _GraphScan extends RecursiveAstVisitor<void> {
     return null;
   }
 
-  /// Every `Trigger.after(B)` / `Trigger.whenStarts(B)` anchor name reachable
+  /// Every `Trigger.whenEnds(B)` / `Trigger.whenStarts(B)` anchor name reachable
   /// inside the `.animate(...)` argument list.
   static Set<String> _dependenciesOf(MethodInvocation node) {
     final finder = _TriggerDepFinder();
@@ -118,7 +118,7 @@ class _GraphScan extends RecursiveAstVisitor<void> {
   }
 }
 
-/// Collects the anchor names a `Trigger.after`/`whenStarts` waits on.
+/// Collects the anchor names a `Trigger.whenEnds`/`whenStarts` waits on.
 class _TriggerDepFinder extends RecursiveAstVisitor<void> {
   final Set<String> deps = {};
 
@@ -126,7 +126,7 @@ class _TriggerDepFinder extends RecursiveAstVisitor<void> {
   void visitMethodInvocation(MethodInvocation node) {
     final name = node.methodName.name;
     final target = node.target;
-    if ((name == 'after' || name == 'whenStarts') &&
+    if ((name == 'whenEnds' || name == 'whenStarts') &&
         target is SimpleIdentifier &&
         target.name == 'Trigger') {
       final arg = node.argumentList.arguments.singleOrNull;

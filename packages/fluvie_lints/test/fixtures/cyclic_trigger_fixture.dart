@@ -12,7 +12,7 @@ class Animation {
 }
 
 class Trigger {
-  static Trigger after(Anchor a) => Trigger();
+  static Trigger whenEnds(Anchor a) => Trigger();
   Trigger();
 }
 
@@ -26,9 +26,9 @@ void build() {
   final c = Anchor('c');
 
   // A waits for B and B waits for A: a two-node cycle. Both flagged.
-  Element().animate([Animation.fadeIn(at: Trigger.after(b))], anchor: a);
-  Element().animate([Animation.fadeIn(at: Trigger.after(a))], anchor: b);
+  Element().animate([Animation.fadeIn(at: Trigger.whenEnds(b))], anchor: a);
+  Element().animate([Animation.fadeIn(at: Trigger.whenEnds(a))], anchor: b);
 
   // C waits for A only: an acyclic dependency, not flagged.
-  Element().animate([Animation.fadeIn(at: Trigger.after(a))], anchor: c);
+  Element().animate([Animation.fadeIn(at: Trigger.whenEnds(a))], anchor: c);
 }

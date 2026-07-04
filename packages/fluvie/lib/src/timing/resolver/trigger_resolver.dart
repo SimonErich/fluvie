@@ -93,7 +93,7 @@ final class TriggerResolver {
         elementScope.startFrame + time.resolveFrames(elementScope),
       ),
       PreviousTrigger() => startAnchored(_previousEnd(node)),
-      AfterTrigger(:final anchor) => startAnchored(anchorTimeline(anchor).end),
+      WhenEndsTrigger(:final anchor) => startAnchored(anchorTimeline(anchor).end),
       WhenStartsTrigger(:final anchor) => startAnchored(anchorTimeline(anchor).start),
       final BeatTrigger beat => startAnchored(_beatFrame(beat, node, window)),
     };

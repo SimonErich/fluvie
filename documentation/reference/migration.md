@@ -16,6 +16,7 @@ change below is mechanical.
 | `NumberFormat` re-exported from the barrel | Import `package:intl/intl.dart` yourself |
 | `FfmpegProvider`, `ProcessFfmpegProvider`, `WasmFfmpegProvider`, `ffmpegProviderProvider` | `FfmpegRunner`, `ProcessFfmpegRunner`, `WasmFfmpegRunner`, `ffmpegRunnerProvider` (on the rendering barrel) |
 | `RenderService.render(provider:)` | `RenderService.render(runner:)` |
+| `Trigger.after(a)` (and the JSON trigger kind `"after"`) | `Trigger.whenEnds(a)` / `"whenEnds"` — the parallel twin of `Trigger.whenStarts(a)`; old specs fail with a rename hint |
 
 The authoring surface (`Video`, `Scene`, elements, `Animation`, `Trigger`,
 themes, specs, the preview runtime) stays on `package:fluvie/fluvie.dart`.

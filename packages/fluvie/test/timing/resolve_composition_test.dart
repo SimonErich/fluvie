@@ -148,12 +148,12 @@ void main() {
                   element(
                     'first',
                     anchor: a,
-                    animations: [anim(at: Trigger.after(b))],
+                    animations: [anim(at: Trigger.whenEnds(b))],
                   ),
                   element(
                     'second',
                     anchor: b,
-                    animations: [anim(at: Trigger.after(a))],
+                    animations: [anim(at: Trigger.whenEnds(a))],
                   ),
                 ],
               ),

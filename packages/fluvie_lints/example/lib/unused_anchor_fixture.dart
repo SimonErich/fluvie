@@ -11,6 +11,6 @@ Widget build() {
 
   // Referenced by a Trigger and attached: not flagged.
   final intro = Anchor('intro');
-  Trigger.after(intro);
+  Trigger.whenEnds(intro);
   return const Box().animate([Animation.fadeIn()], anchor: intro);
 }

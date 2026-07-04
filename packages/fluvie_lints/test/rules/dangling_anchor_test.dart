@@ -8,7 +8,7 @@ void main() {
 
   test('flags a triggered-but-unattached local anchor only', () async {
     final lines = await lintLinesFor(rule, 'dangling_anchor_fixture.dart');
-    // Line 23: Trigger.after(ghost). The intro anchor is attached, so its
+    // Line 23: Trigger.whenEnds(ghost). The intro anchor is attached, so its
     // Trigger.whenStarts is fine.
     expect(lines, [23]);
   });

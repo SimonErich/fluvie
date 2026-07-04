@@ -21,7 +21,7 @@ Rules:
   scaleIn, blurIn, blurOut, grain, vignette, spin, drift, kenBurns) over raw
   keyframes.
 - Anchors are string ids. Give an element an "anchor", then reference it from a
-  trigger with {"kind":"after","anchor":"<id>"} or {"kind":"whenStarts",...}.
+  trigger with {"kind":"whenEnds","anchor":"<id>"} or {"kind":"whenStarts",...}.
 - Colors are hex strings like "#RRGGBB". Keep each scene short and legible.
 - Use only the element types, backgrounds, and presets named in the schema.
 

@@ -111,7 +111,7 @@ final class TitleIntro extends VideoTemplate<TitleIntroProps> {
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 36, color: props.accent),
                 ).animate([
-                  Animation.slideFade(at: Trigger.after(intro), delay: 0.1.seconds),
+                  Animation.slideFade(at: Trigger.whenEnds(intro), delay: 0.1.seconds),
                 ]),
               ],
             ],

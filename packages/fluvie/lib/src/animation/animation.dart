@@ -348,7 +348,7 @@ final class Animation {
 
   /// Shifts the enclosing `Background.gradient`/`radial` toward [to] — an
   /// enter, start-anchored so relative `delay`/`duration` arithmetic holds and
-  /// `Trigger.after` fires when the shift completes.
+  /// `Trigger.whenEnds` fires when the shift completes.
   ///
   /// Expands to `Animation.custom(GradientShiftEffect(to))`: the effect
   /// publishes its shaped progress and [to] through a scope above the

@@ -4,13 +4,13 @@ import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
 import 'package:analyzer/error/listener.dart' show DiagnosticReporter;
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
-/// Flags a `Trigger.after(a)` / `Trigger.whenStarts(a)` whose anchor `a` is
+/// Flags a `Trigger.whenEnds(a)` / `Trigger.whenStarts(a)` whose anchor `a` is
 /// never attached to an element (`dangling_anchor`). The resolver would have
 /// nothing to wait for.
 ///
 /// Conservative and syntactic. It fires only when the anchor is a **local
 /// variable** inside one function body, that body references it from a
-/// `Trigger.after`/`Trigger.whenStarts`, and that same body never passes it as
+/// `Trigger.whenEnds`/`Trigger.whenStarts`, and that same body never passes it as
 /// the `anchor:` argument of any call. A local can only be attached in its own
 /// body, so an unseen attachment is impossible — the safe direction. An anchor
 /// stored in a field, a parameter, or a top-level variable is left alone (it
@@ -51,7 +51,7 @@ class DanglingAnchor extends DartLintRule {
 
 /// Gathers, within one function body: anchors declared as locals, anchor names
 /// passed as an `anchor:` argument (attached), and the names a
-/// `Trigger.after`/`whenStarts` waits on (with the offending node).
+/// `Trigger.whenEnds`/`whenStarts` waits on (with the offending node).
 class _BodyScan extends RecursiveAstVisitor<void> {
   final Set<String> localAnchors = {};
   final Set<String> attachedAnchors = {};
@@ -88,10 +88,10 @@ class _BodyScan extends RecursiveAstVisitor<void> {
     super.visitMethodInvocation(node);
   }
 
-  /// Whether [node] is `Trigger.after(x)` or `Trigger.whenStarts(x)`.
+  /// Whether [node] is `Trigger.whenEnds(x)` or `Trigger.whenStarts(x)`.
   static bool _isAfterOrWhenStarts(MethodInvocation node) {
     final name = node.methodName.name;
-    if (name != 'after' && name != 'whenStarts') return false;
+    if (name != 'whenEnds' && name != 'whenStarts') return false;
     final target = node.target;
     return target is SimpleIdentifier && target.name == 'Trigger';
   }

@@ -36,7 +36,7 @@ void main() {
       expect(timeline.warnings, isEmpty);
     });
 
-    test('a Trigger.after chain across an overlapped boundary uses the adjusted offsets', () {
+    test('a Trigger.whenEnds chain across an overlapped boundary uses the adjusted offsets', () {
       final title = Anchor('title');
       final timeline = resolveComposition(
         composition(
@@ -61,7 +61,7 @@ void main() {
                 element(
                   'badge',
                   animations: [
-                    anim(at: Trigger.after(title), timing: const Tween(Time.frames(10))),
+                    anim(at: Trigger.whenEnds(title), timing: const Tween(Time.frames(10))),
                   ],
                 ),
               ],

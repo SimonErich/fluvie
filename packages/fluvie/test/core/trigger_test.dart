@@ -12,7 +12,7 @@ String _describe(Trigger trigger) => switch (trigger) {
   PreviousTrigger() => 'previous',
   AbsoluteTrigger(:final time) => 'at($time)',
   BeatTrigger(:final every) => 'beat($every)',
-  AfterTrigger(:final anchor) => 'after($anchor)',
+  WhenEndsTrigger(:final anchor) => 'after($anchor)',
   WhenStartsTrigger(:final anchor) => 'whenStarts($anchor)',
 };
 
@@ -93,27 +93,27 @@ void main() {
     });
   });
 
-  group('Trigger.after / Trigger.whenStarts', () {
+  group('Trigger.whenEnds / Trigger.whenStarts', () {
     test('are value-equal by anchor identity', () {
       final a = Anchor('x');
       final b = Anchor('x');
-      expect(Trigger.after(a), equals(Trigger.after(a)));
-      expect(Trigger.after(a).hashCode, Trigger.after(a).hashCode);
-      expect(Trigger.after(a), isNot(equals(Trigger.after(b))));
+      expect(Trigger.whenEnds(a), equals(Trigger.whenEnds(a)));
+      expect(Trigger.whenEnds(a).hashCode, Trigger.whenEnds(a).hashCode);
+      expect(Trigger.whenEnds(a), isNot(equals(Trigger.whenEnds(b))));
       expect(Trigger.whenStarts(a), equals(Trigger.whenStarts(a)));
       expect(Trigger.whenStarts(a), isNot(equals(Trigger.whenStarts(b))));
     });
 
     test('after and whenStarts on the same anchor are different triggers', () {
       final a = Anchor('x');
-      expect(Trigger.after(a), isNot(equals(Trigger.whenStarts(a))));
+      expect(Trigger.whenEnds(a), isNot(equals(Trigger.whenStarts(a))));
     });
 
     test('expose their anchor and name it in toString', () {
       final a = Anchor('bg');
-      expect((Trigger.after(a) as AfterTrigger).anchor, same(a));
+      expect((Trigger.whenEnds(a) as WhenEndsTrigger).anchor, same(a));
       expect((Trigger.whenStarts(a) as WhenStartsTrigger).anchor, same(a));
-      expect(Trigger.after(a).toString(), contains('bg'));
+      expect(Trigger.whenEnds(a).toString(), contains('bg'));
       expect(Trigger.whenStarts(a).toString(), contains('bg'));
     });
   });
@@ -127,7 +127,7 @@ void main() {
       expect(_describe(Trigger.previous), 'previous');
       expect(_describe(const Trigger.at(Time.frames(3))), 'at(Time.frames(3))');
       expect(_describe(const Trigger.beat(every: 2)), 'beat(2)');
-      expect(_describe(Trigger.after(anchor)), 'after($anchor)');
+      expect(_describe(Trigger.whenEnds(anchor)), 'after($anchor)');
       expect(_describe(Trigger.whenStarts(anchor)), 'whenStarts($anchor)');
     });
   });

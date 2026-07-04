@@ -160,8 +160,8 @@ void main() {
 
     test('resolves anchor references to one canonical instance', () {
       final anchors = AnchorTable();
-      final json = encodeTrigger(Trigger.after(Anchor('intro')));
-      final decoded = decodeTrigger(json, anchors) as AfterTrigger;
+      final json = encodeTrigger(Trigger.whenEnds(Anchor('intro')));
+      final decoded = decodeTrigger(json, anchors) as WhenEndsTrigger;
       final again =
           decodeTrigger(encodeTrigger(Trigger.whenStarts(Anchor('intro'))), anchors)
               as WhenStartsTrigger;
@@ -170,12 +170,12 @@ void main() {
     });
 
     test('rejects anchors without an id and unknown forms', () {
-      expect(() => encodeTrigger(Trigger.after(Anchor())), throwsA(isA<FluvieSpecError>()));
+      expect(() => encodeTrigger(Trigger.whenEnds(Anchor())), throwsA(isA<FluvieSpecError>()));
       final anchors = AnchorTable();
       expect(() => decodeTrigger('whenever', anchors), throwsA(isA<FluvieSpecError>()));
       expect(() => decodeTrigger(const {'kind': 'nope'}, anchors), throwsA(isA<FluvieSpecError>()));
       expect(
-        () => decodeTrigger(const {'kind': 'after'}, anchors),
+        () => decodeTrigger(const {'kind': 'whenEnds'}, anchors),
         throwsA(isA<FluvieSpecError>()),
       );
       expect(() => decodeTrigger(7, anchors), throwsA(isA<FluvieSpecError>()));

@@ -58,7 +58,7 @@ Video multiSceneVideo() {
             'multi-scene',
             style: TextStyle(color: _white, fontSize: 24),
           ).animate([
-            Animation.slideFade(at: Trigger.after(bg), duration: const Time.frames(12)),
+            Animation.slideFade(at: Trigger.whenEnds(bg), duration: const Time.frames(12)),
           ]),
         ],
       ),

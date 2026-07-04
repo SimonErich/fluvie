@@ -21,14 +21,14 @@ Background.gradient(const [Color(0xFFE74C3C), Color(0xFF27AE60)]).animate([
 the 10 s scene and runs for 3 s, because relative times resolve against the
 scene.
 
-## React with Trigger.after
+## React with Trigger.whenEnds
 
 Another element waits for the anchored animation to finish:
 
 <!-- code-excerpt "examples/gallery/lib/lessons/03_timing_and_triggers.dart (after-trigger)" -->
 ```dart
 const Text('Hello, Fluvie', style: _title).animate([
-  Animation.slideFade(at: Trigger.after(bg)),
+  Animation.slideFade(at: Trigger.whenEnds(bg)),
 ]),
 ```
 
@@ -59,7 +59,7 @@ plays at its start, the `fadeOut` at its end.
 | --- | --- |
 | `Trigger.auto` | the phase default: enter at the window start, exit at its end |
 | `Trigger.at(time)` | at an explicit time inside the window |
-| `Trigger.after(anchor)` | when the anchored animations have finished |
+| `Trigger.whenEnds(anchor)` | when the anchored animations have finished |
 | `Trigger.whenStarts(anchor)` | when the anchored animations begin |
 | `Trigger.previous` | right after the previous animation in the same list |
 | `Trigger.sceneStart`, `Trigger.sceneEnd` | pinned to the scene boundaries |

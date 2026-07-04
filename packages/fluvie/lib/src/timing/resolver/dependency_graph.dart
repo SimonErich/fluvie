@@ -11,7 +11,7 @@ import 'package:fluvie/src/timing/resolver/anchor_registry.dart';
 ///
 /// Edge rules:
 ///
-/// * `Trigger.after` / `Trigger.whenStarts` — an edge from **every** node of
+/// * `Trigger.whenEnds` / `Trigger.whenStarts` — an edge from **every** node of
 ///   the referenced anchor's element (its timeline is the union of all of
 ///   them), so they all resolve first.
 /// * `Trigger.previous` — an edge from the prior animation on the same
@@ -30,7 +30,7 @@ final class DependencyGraph {
       _inDegree = List.filled(registry.nodes.length, 0) {
     for (final node in registry.nodes) {
       switch (node.plan.at) {
-        case AfterTrigger(:final anchor) || WhenStartsTrigger(:final anchor):
+        case WhenEndsTrigger(:final anchor) || WhenStartsTrigger(:final anchor):
           for (final dependency in registry.nodesForAnchor(anchor)) {
             _addEdge(from: dependency.index, to: node.index);
           }

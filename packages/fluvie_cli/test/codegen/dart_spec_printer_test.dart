@@ -422,7 +422,7 @@ void main() {
                 'animate': [
                   {
                     'preset': 'fadeIn',
-                    'at': {'kind': 'after', 'anchor': 'intro'},
+                    'at': {'kind': 'whenEnds', 'anchor': 'intro'},
                   },
                 ],
               },
@@ -435,7 +435,7 @@ void main() {
       // Declared exactly once.
       expect("Anchor('intro')".allMatches(code).length, 1);
       expect(code, contains('anchor: intro'));
-      expect(code, contains('Animation.fadeIn(at: Trigger.after(intro))'));
+      expect(code, contains('Animation.fadeIn(at: Trigger.whenEnds(intro))'));
     });
   });
 

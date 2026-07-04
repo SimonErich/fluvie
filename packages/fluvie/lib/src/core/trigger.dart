@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 /// ```dart
 /// final intro = Anchor('intro');
 /// Text('Title').animate([Animation.pop()], anchor: intro);
-/// Text('Sub').animate([Animation.fadeIn(at: Trigger.after(intro))]);
+/// Text('Sub').animate([Animation.fadeIn(at: Trigger.whenEnds(intro))]);
 /// ```
 @immutable
 sealed class Trigger {
@@ -39,7 +39,7 @@ sealed class Trigger {
   static const Trigger previous = PreviousTrigger();
 
   /// When [a]'s timeline **ends**.
-  static Trigger after(Anchor a) => AfterTrigger(a);
+  static Trigger whenEnds(Anchor a) => WhenEndsTrigger(a);
 
   /// When [a]'s timeline **starts**.
   static Trigger whenStarts(Anchor a) => WhenStartsTrigger(a);
@@ -148,22 +148,22 @@ final class BeatTrigger extends Trigger {
   String toString() => 'Trigger.beat(every: $every, track: $track)';
 }
 
-/// The [Trigger.after] variant: when [anchor]'s timeline ends.
-final class AfterTrigger extends Trigger {
+/// The [Trigger.whenEnds] variant: when [anchor]'s timeline ends.
+final class WhenEndsTrigger extends Trigger {
   /// Creates a trigger that fires when [anchor]'s timeline ends.
-  const AfterTrigger(this.anchor);
+  const WhenEndsTrigger(this.anchor);
 
   /// The anchored timeline to wait for; compared by identity.
   final Anchor anchor;
 
   @override
-  bool operator ==(Object other) => other is AfterTrigger && identical(other.anchor, anchor);
+  bool operator ==(Object other) => other is WhenEndsTrigger && identical(other.anchor, anchor);
 
   @override
-  int get hashCode => Object.hash(AfterTrigger, identityHashCode(anchor));
+  int get hashCode => Object.hash(WhenEndsTrigger, identityHashCode(anchor));
 
   @override
-  String toString() => 'Trigger.after($anchor)';
+  String toString() => 'Trigger.whenEnds($anchor)';
 }
 
 /// The [Trigger.whenStarts] variant: when [anchor]'s timeline starts.

@@ -157,7 +157,7 @@ the live scene, the morph follows the camera automatically.
 
 ## Where to next
 
-- [Timing and triggers](timing-and-triggers.md): anchors, `Trigger.after`, and
+- [Timing and triggers](timing-and-triggers.md): anchors, `Trigger.whenEnds`, and
   `.show` windows, the vocabulary the scenes above use.
 - [Backgrounds and gradients](backgrounds-and-gradients.md): the gradient and
   solid fills behind each scene.

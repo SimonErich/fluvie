@@ -48,7 +48,7 @@ Widget shareOfVoice() => Counter.percent(to: 0.87); // "87%"
 Timeline introTimeline(Anchor title, Anchor subtitle, List<Anchor> bullets, Anchor cta) =>
     Timeline(defaults: const Defaults(duration: Time.seconds(0.5)))
       ..play(title, Animation.slideFade())
-      ..play(subtitle, Animation.fadeIn(), at: Trigger.after(title))
+      ..play(subtitle, Animation.fadeIn(), at: Trigger.whenEnds(title))
       ..wait(0.3.seconds)
       ..playAll(bullets, Animation.slideFade(), stagger: 0.08.seconds)
       ..label('reveal')

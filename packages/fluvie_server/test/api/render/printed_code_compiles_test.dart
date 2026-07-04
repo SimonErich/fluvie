@@ -13,7 +13,7 @@ import 'package:test/test.dart';
 /// The oracle for the spec→Dart printer: every printed snippet must analyze with
 /// ZERO errors, warnings, or fluvie lints (info notes are dropped by the
 /// analyzer). This catches the printer drifting from the public API, emitting an
-/// undefined name, or producing a dangling anchor (a `Trigger.after` whose
+/// undefined name, or producing a dangling anchor (a `Trigger.whenEnds` whose
 /// `Anchor` is never declared).
 ///
 /// It uses the same [FluvieCodeAnalyzer] root the server wires up
@@ -136,7 +136,7 @@ final Map<String, Object?> _kitchenSink = {
   ],
 };
 
-/// An element `anchor` plus `Trigger.after`/`whenStarts` referencing it, and a
+/// An element `anchor` plus `Trigger.whenEnds`/`whenStarts` referencing it, and a
 /// capped relative time `0.2r@0.8s` — exercises the shared-Anchor declarations so
 /// the printed code is free of dangling anchors.
 final Map<String, Object?> _anchoredTriggers = {
@@ -163,7 +163,7 @@ final Map<String, Object?> _anchoredTriggers = {
             {
               'preset': 'slideFade',
               'from': 'left',
-              'at': {'kind': 'after', 'anchor': 'title'},
+              'at': {'kind': 'whenEnds', 'anchor': 'title'},
             },
           ],
         },

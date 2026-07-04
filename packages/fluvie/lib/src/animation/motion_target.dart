@@ -188,7 +188,7 @@ final class _MotionTargetState extends State<MotionTarget> {
   /// triggers local resolution can never satisfy.
   bool _usesCompositionTriggers() => widget.animations.any(
     (animation) => switch (animation.at) {
-      AfterTrigger() || WhenStartsTrigger() || BeatTrigger() => true,
+      WhenEndsTrigger() || WhenStartsTrigger() || BeatTrigger() => true,
       _ => false,
     },
   );

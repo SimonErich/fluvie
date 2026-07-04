@@ -32,7 +32,7 @@ Animation _fade(int frames, {Trigger at = Trigger.auto}) => Animation.from(
 );
 
 /// The §3-shaped acceptance composition minus Background (WI-18): an anchored
-/// fade, a follower gated on `Trigger.after`, and a third element chaining
+/// fade, a follower gated on `Trigger.whenEnds`, and a third element chaining
 /// `previous` off its own first animation.
 Video _quickstartVideo() {
   final bg = Anchor('bg');
@@ -48,9 +48,9 @@ Video _quickstartVideo() {
             'follower',
             key: _kFollower,
             textDirection: TextDirection.ltr,
-          ).animate([_fade(20, at: Trigger.after(bg))]),
+          ).animate([_fade(20, at: Trigger.whenEnds(bg))]),
           const SizedBox(key: _kThird, width: 10, height: 10).animate([
-            _fade(10, at: Trigger.after(bg)),
+            _fade(10, at: Trigger.whenEnds(bg)),
             Animation.to(
               const Keyframe(y: 0.5),
               duration: const Time.frames(10),

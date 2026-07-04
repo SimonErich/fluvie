@@ -82,13 +82,13 @@ void main() {
       expect(tl.duration, const Time.frames(50));
     });
 
-    test('Trigger.after chains after the named anchor ends', () {
+    test('Trigger.whenEnds chains after the named anchor ends', () {
       final a = Anchor('a');
       final b = Anchor('b');
       final tl = Timeline()
         ..play(a, _enter(30))
         ..wait(const Time.frames(100)) // move the playhead far past a's end
-        ..play(b, _enter(10), at: Trigger.after(a));
+        ..play(b, _enter(10), at: Trigger.whenEnds(a));
       expect(_placementFor(tl, b).startFrame, 30); // right after a, not the playhead
     });
 
@@ -203,7 +203,7 @@ void main() {
       // Defaults duration 0.5s @ 30fps = 15 frames for the preset animations.
       final tl = Timeline(defaults: const Defaults(duration: Time.seconds(0.5)))
         ..play(title, Animation.from(const Keyframe(y: 1)))
-        ..play(subtitle, Animation.fadeIn(), at: Trigger.after(title))
+        ..play(subtitle, Animation.fadeIn(), at: Trigger.whenEnds(title))
         ..wait(0.3.seconds)
         ..playAll([one, two], Animation.from(const Keyframe(x: -0.3)), stagger: 0.08.seconds)
         ..label('reveal')

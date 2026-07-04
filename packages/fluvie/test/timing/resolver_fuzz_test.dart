@@ -259,14 +259,14 @@ Trigger _randomTrigger(
     Trigger.sceneEnd,
     Trigger.at(Time.frames(random.nextInt(200))),
     if (animationIndex > 0) Trigger.previous,
-    if (declared.isNotEmpty) Trigger.after(declared[random.nextInt(declared.length)]),
+    if (declared.isNotEmpty) Trigger.whenEnds(declared[random.nextInt(declared.length)]),
     if (declared.isNotEmpty) Trigger.whenStarts(declared[random.nextInt(declared.length)]),
   ];
   return options[random.nextInt(options.length)];
 }
 
 /// Appends a scene whose elements form a deliberate 2- or 3-cycle of
-/// `Trigger.after` references — the back-edge the resolver must always reject.
+/// `Trigger.whenEnds` references — the back-edge the resolver must always reject.
 CompositionPlan _plantCycle(CompositionPlan plan, math.Random random) {
   final length = 2 + random.nextInt(2);
   final anchors = [for (var i = 0; i < length; i++) Anchor('cycle$i')];
@@ -278,7 +278,7 @@ CompositionPlan _plantCycle(CompositionPlan plan, math.Random random) {
         animations: [
           AnimationPlan(
             phase: AnimationPhase.enter,
-            at: Trigger.after(anchors[(i + 1) % length]),
+            at: Trigger.whenEnds(anchors[(i + 1) % length]),
           ),
         ],
       ),

@@ -12,7 +12,7 @@ import 'package:fluvie/src/serialization/video_spec.dart';
 import 'package:fluvie/src/timing/timeline/debug_timeline.dart';
 
 /// A two-scene document exercising backgrounds, presets, an anchor-driven
-/// `Trigger.after`, a stagger, an ambient preset, a transition, and export.
+/// `Trigger.whenEnds`, a stagger, an ambient preset, a transition, and export.
 Map<String, Object?> _richSpecJson() => {
   'fluvieSpec': 1,
   'size': 'square',
@@ -46,7 +46,7 @@ Map<String, Object?> _richSpecJson() => {
               'preset': 'fadeIn',
               'duration': '20f',
               'ease': 'linear',
-              'at': {'kind': 'after', 'anchor': 'intro'},
+              'at': {'kind': 'whenEnds', 'anchor': 'intro'},
             },
           ],
         },
@@ -70,7 +70,7 @@ Map<String, Object?> _richSpecJson() => {
 };
 
 /// A media-free single-scene document for mount tests (no image/media to
-/// pre-resolve): an anchored title and a follower gated on `Trigger.after`.
+/// pre-resolve): an anchored title and a follower gated on `Trigger.whenEnds`.
 Map<String, Object?> _textSpecJson() => {
   'fluvieSpec': 1,
   'size': 'square',
@@ -99,7 +99,7 @@ Map<String, Object?> _textSpecJson() => {
               'preset': 'fadeIn',
               'duration': '20f',
               'ease': 'linear',
-              'at': {'kind': 'after', 'anchor': 'intro'},
+              'at': {'kind': 'whenEnds', 'anchor': 'intro'},
             },
           ],
         },
@@ -243,7 +243,7 @@ void main() {
       final timeline = probe.value;
       expect(timeline, isNotNull);
       expect(timeline!.warnings, isEmpty);
-      // The anchored title fades 0..30; the follower's Trigger.after('intro')
+      // The anchored title fades 0..30; the follower's Trigger.whenEnds('intro')
       // links across serialization, so it starts exactly at the title's end.
       expect(timeline.rowsFor('s0e0:intro').single.startFrame, 0);
       expect(timeline.rowsFor('s0e0:intro').single.endFrame, 30);

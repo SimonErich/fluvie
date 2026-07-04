@@ -22,7 +22,7 @@ Object encodeTrigger(Trigger trigger, {List<String> path = const []}) => switch 
     'every': every,
     if (track != null) 'track': _anchorId(track, path),
   },
-  AfterTrigger(:final anchor) => {'kind': 'after', 'anchor': _anchorId(anchor, path)},
+  WhenEndsTrigger(:final anchor) => {'kind': 'whenEnds', 'anchor': _anchorId(anchor, path)},
   WhenStartsTrigger(:final anchor) => {'kind': 'whenStarts', 'anchor': _anchorId(anchor, path)},
 };
 
@@ -52,8 +52,13 @@ Trigger decodeTrigger(Object? raw, AnchorTable anchors, {List<String> path = con
           every: every is int ? every : 1,
           track: track is String ? anchors.resolve(track) : null,
         );
+      case 'whenEnds':
+        return Trigger.whenEnds(anchors.resolve(_requireId(raw['anchor'], path)));
       case 'after':
-        return Trigger.after(anchors.resolve(_requireId(raw['anchor'], path)));
+        throw FluvieSpecError(
+          'Trigger kind "after" was renamed to "whenEnds" in 0.2.0; update the spec',
+          path: path,
+        );
       case 'whenStarts':
         return Trigger.whenStarts(anchors.resolve(_requireId(raw['anchor'], path)));
     }

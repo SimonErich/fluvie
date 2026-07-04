@@ -7,7 +7,7 @@
 /// final intro = Anchor('intro');
 ///
 /// Text('Title').animate([Animation.pop()], anchor: intro);
-/// Text('Subtitle').animate([Animation.fadeIn(at: Trigger.after(intro))]);
+/// Text('Subtitle').animate([Animation.fadeIn(at: Trigger.whenEnds(intro))]);
 /// ```
 ///
 /// An anchor is a **token**: equality is reference identity, never value

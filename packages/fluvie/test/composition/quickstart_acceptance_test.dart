@@ -2,7 +2,7 @@
 // (the media path lands in Phase 8; a fixed-size stand-in carries the third
 // element's animations unchanged). Proves the whole story end to end: a
 // gradient background animates a `gradientShift` with relative timing under
-// an `Anchor`, a `Text` waits on `Trigger.after(bg)`, and the resolved
+// an `Anchor`, a `Text` waits on `Trigger.whenEnds(bg)`, and the resolved
 // timeline tells the §3 narrative — "begins 1 s in", ends at 4 s.
 //
 // The spec passes `fps: 30` and `from: Edge.bottom` explicitly even though
@@ -49,7 +49,7 @@ Video _quickstart(Anchor bg) => Video(
         // Slides + fades in, but only once the gradient shift finishes.
         const Text(
           'Hello, Fluvie',
-        ).animate([Animation.slideFade(from: Edge.bottom, at: Trigger.after(bg))]),
+        ).animate([Animation.slideFade(from: Edge.bottom, at: Trigger.whenEnds(bg))]),
         // §3 mounts Image.network here — Phase 8 media; the stand-in keeps
         // the element's two animations verbatim.
         const SizedBox(
@@ -66,7 +66,7 @@ Video _quickstart(Anchor bg) => Video(
 );
 
 void main() {
-  testWidgets('§3 quickstart: gradient anchor, Trigger.after, and the timeline narrative', (
+  testWidgets('§3 quickstart: gradient anchor, Trigger.whenEnds, and the timeline narrative', (
     tester,
   ) async {
     final bg = Anchor('bg');

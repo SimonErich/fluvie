@@ -328,7 +328,7 @@ void main() {
                       const Keyframe(opacity: 0),
                       duration: const Time.frames(20),
                       ease: Ease.linear,
-                      at: Trigger.after(bg),
+                      at: Trigger.whenEnds(bg),
                     ),
                   ]),
                 ],

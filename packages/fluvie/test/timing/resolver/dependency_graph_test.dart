@@ -77,7 +77,7 @@ void main() {
             'one',
             duration: 4.seconds,
             elements: [
-              element('follower', animations: [anim(at: Trigger.after(hero))]),
+              element('follower', animations: [anim(at: Trigger.whenEnds(hero))]),
               element('leader', anchor: hero, animations: [anim(), anim()]),
             ],
           ),
@@ -138,7 +138,7 @@ void main() {
             'one',
             duration: 4.seconds,
             elements: [
-              element('late', animations: [anim(at: Trigger.after(hero))]),
+              element('late', animations: [anim(at: Trigger.whenEnds(hero))]),
               element('leader', anchor: hero, animations: [anim()]),
               element(
                 'free',
@@ -168,13 +168,13 @@ void main() {
             'one',
             duration: 4.seconds,
             elements: [
-              element('d', animations: [anim(at: Trigger.after(b))]),
+              element('d', animations: [anim(at: Trigger.whenEnds(b))]),
               element(
                 'b',
                 anchor: b,
-                animations: [anim(at: Trigger.after(a))],
+                animations: [anim(at: Trigger.whenEnds(a))],
               ),
-              element('c', animations: [anim(at: Trigger.after(a))]),
+              element('c', animations: [anim(at: Trigger.whenEnds(a))]),
               element('a', anchor: a, animations: [anim()]),
             ],
           ),
@@ -199,12 +199,12 @@ void main() {
               element(
                 'first',
                 anchor: alpha,
-                animations: [anim(at: Trigger.after(beta))],
+                animations: [anim(at: Trigger.whenEnds(beta))],
               ),
               element(
                 'second',
                 anchor: beta,
-                animations: [anim(at: Trigger.after(alpha))],
+                animations: [anim(at: Trigger.whenEnds(alpha))],
               ),
             ],
           ),
@@ -232,7 +232,7 @@ void main() {
               element(
                 'loop',
                 anchor: selfish,
-                animations: [anim(at: Trigger.after(selfish))],
+                animations: [anim(at: Trigger.whenEnds(selfish))],
               ),
             ],
           ),
@@ -262,17 +262,17 @@ void main() {
               element(
                 'ea',
                 anchor: a,
-                animations: [anim(at: Trigger.after(c))],
+                animations: [anim(at: Trigger.whenEnds(c))],
               ),
               element(
                 'eb',
                 anchor: b,
-                animations: [anim(at: Trigger.after(a))],
+                animations: [anim(at: Trigger.whenEnds(a))],
               ),
               element(
                 'ec',
                 anchor: c,
-                animations: [anim(at: Trigger.after(b))],
+                animations: [anim(at: Trigger.whenEnds(b))],
               ),
             ],
           ),
@@ -301,12 +301,12 @@ void main() {
               element(
                 'left',
                 anchor: left,
-                animations: [anim(at: Trigger.after(right))],
+                animations: [anim(at: Trigger.whenEnds(right))],
               ),
               element(
                 'right',
                 anchor: right,
-                animations: [anim(at: Trigger.after(left))],
+                animations: [anim(at: Trigger.whenEnds(left))],
               ),
             ],
           ),
@@ -366,7 +366,7 @@ void main() {
                 element(
                   'e$i',
                   anchor: anchors[i],
-                  animations: [anim(at: Trigger.after(anchors[(i + 1) % count]))],
+                  animations: [anim(at: Trigger.whenEnds(anchors[(i + 1) % count]))],
                 ),
             ],
           ),

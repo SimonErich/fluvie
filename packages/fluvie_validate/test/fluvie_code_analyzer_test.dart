@@ -46,7 +46,7 @@ import 'package:fluvie/fluvie.dart';
 
 Video build() {
   final a = Anchor();
-  Trigger.after(a);
+  Trigger.whenEnds(a);
   return Video(scenes: const []);
 }
 ''');

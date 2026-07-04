@@ -41,7 +41,7 @@ import 'printer_oracle_printed.dart' as printed;
 
 /// The fixture spec S: two scenes; a gradient and a color background; a styled
 /// Text, a Box, a Counter; a preset with a non-default arg (`fadeIn(duration:)`),
-/// a raw `fromTo` keyframe pair, and an anchor + `Trigger.after` so the
+/// a raw `fromTo` keyframe pair, and an anchor + `Trigger.whenEnds` so the
 /// anchor-variable reconstruction is exercised end to end. Kept short (2s total)
 /// so it captures quickly.
 final Map<String, Object?> printerOracleSpec = {
@@ -75,7 +75,7 @@ final Map<String, Object?> printerOracleSpec = {
             {
               'preset': 'slideFade',
               'from': 'left',
-              'at': {'kind': 'after', 'anchor': 'title'},
+              'at': {'kind': 'whenEnds', 'anchor': 'title'},
             },
           ],
         },
