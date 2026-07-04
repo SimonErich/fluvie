@@ -1,18 +1,25 @@
-// The self-contained capture harness the fluvie CLI drives via
+// The self-contained capture harness, driven by the fluvie CLI via
 // `flutter test --dart-define`. A plain `flutter test` run skips the render, so
-// this file stays green in the normal suite. It registers every studio template.
+// this file stays green in the normal suite. It uses only the public Fluvie API
+// and is modeled on the harness `fluvie init` scaffolds. Everything outside the
+// `--- compositions ---` blocks is byte-identical across the example apps
+// (tool/test/example_harness_sync_test.dart pins it against drift).
 
 import 'dart:io';
 
 import 'package:alchemist/alchemist.dart' show loadFonts;
+// --- compositions ---
 import 'package:desktop_studio/render/templates.dart';
+// --- end compositions ---
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 
 /// Every composition this project can render, keyed for `fluvie render <key>`.
 final Map<String, Video Function()> compositions = <String, Video Function()>{
+  // --- compositions ---
   for (final template in studioTemplates) template.key: template.build,
+  // --- end compositions ---
 };
 
 const String _key = String.fromEnvironment('FLUVIE_RENDER_KEY');
@@ -23,17 +30,13 @@ const String _list = String.fromEnvironment('FLUVIE_RENDER_LIST');
 const String _format = String.fromEnvironment('FLUVIE_RENDER_FORMAT');
 
 void main() {
-  testWidgets('the capture harness renders the keyed composition', (
-    tester,
-  ) async {
+  testWidgets('the capture harness renders the keyed composition', (tester) async {
     if (bool.tryParse(_list) ?? false) {
       stdout.writeln('fluvie-keys: ${compositions.keys.join(', ')}');
       return;
     }
     if (_key.isEmpty) {
-      markTestSkipped(
-        'No FLUVIE_RENDER_KEY: this harness only runs under `fluvie render`.',
-      );
+      markTestSkipped('No FLUVIE_RENDER_KEY: this harness only runs under `fluvie render`.');
       return;
     }
     final build = compositions[_key];
@@ -44,11 +47,7 @@ void main() {
       );
       fail('Unknown render key "$_key".');
     }
-    expect(
-      _outDir,
-      isNotEmpty,
-      reason: 'FLUVIE_RENDER_OUT_DIR must point at the CLI sandbox',
-    );
+    expect(_outDir, isNotEmpty, reason: 'FLUVIE_RENDER_OUT_DIR must point at the CLI sandbox');
 
     await loadFonts();
 
@@ -71,10 +70,7 @@ void main() {
             key: boundaryKey,
             child: DefaultTextStyle.merge(
               style: const TextStyle(fontFamily: 'Roboto'),
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: video,
-              ),
+              child: Directionality(textDirection: TextDirection.ltr, child: video),
             ),
           ),
         ),

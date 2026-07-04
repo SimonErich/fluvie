@@ -1,19 +1,25 @@
 // The self-contained capture harness, driven by the fluvie CLI via
 // `flutter test --dart-define`. A plain `flutter test` run skips the render, so
 // this file stays green in the normal suite. It uses only the public Fluvie API
-// and is modeled on the harness `fluvie init` scaffolds.
+// and is modeled on the harness `fluvie init` scaffolds. Everything outside the
+// `--- compositions ---` blocks is byte-identical across the example apps
+// (tool/test/example_harness_sync_test.dart pins it against drift).
 
 import 'dart:io';
 
 import 'package:alchemist/alchemist.dart' show loadFonts;
+// --- compositions ---
 import 'package:cli_quickstart/render/whisker_composition.dart';
+// --- end compositions ---
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 
 /// Every composition this project can render, keyed for `fluvie render <key>`.
 final Map<String, Video Function()> compositions = <String, Video Function()>{
+  // --- compositions ---
   'whisker_standup': whiskerStandup,
+  // --- end compositions ---
 };
 
 const String _key = String.fromEnvironment('FLUVIE_RENDER_KEY');
