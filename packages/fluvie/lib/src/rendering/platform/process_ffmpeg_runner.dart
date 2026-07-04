@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:fluvie/src/core/errors/fluvie_encode_exception.dart';
-import 'package:fluvie/src/rendering/encoding/ffmpeg_provider.dart';
+import 'package:fluvie/src/rendering/encoding/ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_version.dart';
 import 'package:fluvie/src/rendering/platform/process_runner.dart';
 
-/// The native [FfmpegProvider]: spawns a local FFmpeg binary through a
+/// The native [FfmpegRunner]: spawns a local FFmpeg binary through a
 /// [ProcessRunner] with argument arrays, never a shell.
 ///
 /// Binary resolution, in priority order: an explicit `binaryPath`, the
@@ -15,13 +15,13 @@ import 'package:fluvie/src/rendering/platform/process_runner.dart';
 /// the `>= 6.0` floor before any work starts; failures surface as
 /// [FluvieEncodeException] carrying the exit code and the last 4 KiB of
 /// stderr — the actual FFmpeg diagnostic, not a bare "encode failed".
-final class ProcessFfmpegProvider implements FfmpegProvider {
+final class ProcessFfmpegRunner implements FfmpegRunner {
   /// Creates a provider running through `runner`.
   ///
   /// `binaryPath` pins the FFmpeg binary explicitly; otherwise `environment`
   /// (defaulting to [Platform.environment]; injectable for tests) is
   /// consulted for [environmentVariable] before falling back to `ffmpeg`.
-  ProcessFfmpegProvider({
+  ProcessFfmpegRunner({
     this._runner = const IoProcessRunner(),
     this._binaryPath,
     this._environment,
@@ -108,7 +108,7 @@ final class ProcessFfmpegProvider implements FfmpegProvider {
     if (version == null) {
       throw FluvieEncodeException(
         'The version banner of "$_binary" is unparsable; pass an explicit '
-        'binaryPath to ProcessFfmpegProvider pointing at a release FFmpeg build.',
+        'binaryPath to ProcessFfmpegRunner pointing at a release FFmpeg build.',
       );
     }
     return version;

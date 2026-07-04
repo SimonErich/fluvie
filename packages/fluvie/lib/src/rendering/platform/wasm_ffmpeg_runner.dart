@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fluvie/src/core/errors/fluvie_encode_exception.dart';
-import 'package:fluvie/src/rendering/encoding/ffmpeg_provider.dart';
+import 'package:fluvie/src/rendering/encoding/ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_version.dart';
 import 'package:fluvie/src/rendering/platform/wasm_runtime.dart';
 
@@ -12,7 +12,7 @@ typedef WasmInputReader = Future<Uint8List> Function(String name);
 /// Receives the encoded output file's bytes under its name.
 typedef WasmOutputWriter = void Function(String name, Uint8List bytes);
 
-/// The browser [FfmpegProvider]: drives ffmpeg.wasm through a [WasmRuntime].
+/// The browser [FfmpegRunner]: drives ffmpeg.wasm through a [WasmRuntime].
 ///
 /// All argument *planning* is shared with the native path (the same
 /// `FfmpegArgsBuilder` plan runs unchanged); this provider only moves bytes:
@@ -20,10 +20,10 @@ typedef WasmOutputWriter = void Function(String name, Uint8List bytes);
 /// wasm virtual file system via the injected reader, executes the plan, and
 /// hands the output bytes to the injected writer. The `sandbox` directory is
 /// unused — a browser has no real file system, so the callbacks *are* the IO.
-final class WasmFfmpegProvider implements FfmpegProvider {
+final class WasmFfmpegRunner implements FfmpegRunner {
   /// Creates a provider over `runtime`, reading inputs through `readInput`
   /// and delivering the encoded file through `writeOutput`.
-  WasmFfmpegProvider({
+  WasmFfmpegRunner({
     required this._runtime,
     required this._readInput,
     required this._writeOutput,

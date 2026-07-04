@@ -1,7 +1,7 @@
 /// An FFmpeg `major.minor` version parsed from a `-version` banner, with the
 /// `>= 6.0` floor this library requires.
 ///
-/// The floor is enforced by `ProcessFfmpegProvider` (and, independently, by
+/// The floor is enforced by `ProcessFfmpegRunner` (and, independently, by
 /// the CLI's own probe) before any encode starts; an embedded wasm runtime
 /// has no honest banner to parse, so its provider reports no version at all
 /// rather than a fabricated one.

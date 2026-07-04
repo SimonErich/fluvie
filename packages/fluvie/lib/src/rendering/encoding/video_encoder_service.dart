@@ -14,7 +14,7 @@ import 'package:fluvie/src/rendering/render_config.dart';
 /// dispatches to GIF, image sequence, or transparent WebM; `null` and
 /// [Export.mp4] keep the byte-identical H.264 path. A `posterFrame` adds a
 /// SECOND poster-extract invocation via [planPosterArgs]. The in-process
-/// `encode` convenience that runs a plan through an `FfmpegProvider` lives in
+/// `encode` convenience that runs a plan through an `FfmpegRunner` lives in
 /// the `dart:io` extension `VideoEncoderServiceIo`.
 final class VideoEncoderService {
   /// Creates the service; it is stateless and const.

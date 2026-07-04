@@ -36,7 +36,7 @@ import 'package:fluvie/src/templates/video_template.dart';
 /// The host owns the pumping mechanics through [pumpWidget] and [pumpFrame],
 /// which keeps this offline and gate-runnable (the example and goldens pass a
 /// `flutter_test` pump; the CLI passes its binding's). To encode the result, run
-/// the returned manifest's ffmpeg args through an `FfmpegProvider`.
+/// the returned manifest's ffmpeg args through an `FfmpegRunner`.
 Future<RenderAspectResult> renderTemplate<P>(
   VideoTemplate<P> template, {
   required P props,

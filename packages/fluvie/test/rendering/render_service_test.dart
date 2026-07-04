@@ -19,7 +19,7 @@ import 'package:fluvie/src/rendering/capture/frame_capture_service.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
 import 'package:fluvie/src/rendering/capture/render_manifest.dart';
 import 'package:fluvie/src/rendering/capture/repaint_boundary_capture_service.dart';
-import 'package:fluvie/src/rendering/encoding/ffmpeg_provider.dart';
+import 'package:fluvie/src/rendering/encoding/ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/encoding/frame_cache.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
 import 'package:fluvie/src/rendering/render_service.dart';
@@ -34,7 +34,7 @@ import 'fakes/fake_media_resolver.dart';
 
 class _MockMediaResolver extends Mock implements MediaResolver {}
 
-class _MockFfmpegProvider extends Mock implements FfmpegProvider {}
+class _MockFfmpegRunner extends Mock implements FfmpegRunner {}
 
 /// Counts every real capture — the spy behind the cache acceptance.
 class _CountingCapture implements FrameCaptureService {
@@ -459,7 +459,7 @@ void main() {
     testWidgets('hands the manifest args and sandbox to the provider', (tester) async {
       final (_, key, pump) = await _mountDemoTree(tester);
       final outDir = _tempDir('render');
-      final provider = _MockFfmpegProvider();
+      final provider = _MockFfmpegRunner();
       when(
         () => provider.encode(
           args: any(named: 'args'),
@@ -476,7 +476,7 @@ void main() {
           pump: pump,
           boundaryKey: key,
           compositionKey: 'demo',
-          provider: provider,
+          runner: provider,
         );
       });
 
@@ -489,7 +489,7 @@ void main() {
     testWidgets('a poster export runs the second poster invocation too', (tester) async {
       final (_, key, pump) = await _mountDemoTree(tester);
       final outDir = _tempDir('render_poster');
-      final provider = _MockFfmpegProvider();
+      final provider = _MockFfmpegRunner();
       when(
         () => provider.encode(
           args: any(named: 'args'),
@@ -506,7 +506,7 @@ void main() {
           pump: pump,
           boundaryKey: key,
           compositionKey: 'demo',
-          provider: provider,
+          runner: provider,
           export: const Export.gif(),
           posterFrame: 1,
         );

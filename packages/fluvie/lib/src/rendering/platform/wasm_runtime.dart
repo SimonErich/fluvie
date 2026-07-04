@@ -3,7 +3,7 @@ import 'dart:typed_data';
 /// A loaded ffmpeg.wasm instance with its in-memory virtual file system.
 ///
 /// This is the browser-side counterpart to `ProcessRunner`: the one seam
-/// between `WasmFfmpegProvider` and JavaScript. CI exercises the full
+/// between `WasmFfmpegRunner` and JavaScript. CI exercises the full
 /// provider logic on the VM against a mock of this contract; the real
 /// JS-interop binding lives in the conditional `wasm_runtime_bindings` and
 /// only runs in the manual, `wasm`-tagged browser harness.

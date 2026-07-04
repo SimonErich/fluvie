@@ -10,7 +10,7 @@ import 'package:fluvie/src/rendering/capture/frame_capture_service.dart';
 import 'package:fluvie/src/rendering/capture/render_manifest.dart';
 import 'package:fluvie/src/rendering/encoding/audio_graph_nodes.dart';
 import 'package:fluvie/src/rendering/encoding/content_hash.dart';
-import 'package:fluvie/src/rendering/encoding/ffmpeg_provider.dart';
+import 'package:fluvie/src/rendering/encoding/ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/encoding/frame_cache.dart';
 import 'package:fluvie/src/rendering/encoding/video_encoder_service.dart';
 import 'package:fluvie/src/rendering/frame_capture_loop.dart';
@@ -134,7 +134,7 @@ final class RenderService {
     return manifest;
   }
 
-  /// [captureToDirectory] followed by an in-process encode through [provider],
+  /// [captureToDirectory] followed by an in-process encode through [runner],
   /// returning the encoded `outDir/out.mp4`.
   Future<File> render({
     required RenderConfig config,
@@ -142,7 +142,7 @@ final class RenderService {
     required FramePump pump,
     required GlobalKey boundaryKey,
     required String compositionKey,
-    required FfmpegProvider provider,
+    required FfmpegRunner runner,
     Iterable<MediaSource> mediaSources = const [],
     Iterable<AudioSource> audioSources = const [],
     AudioMixStager? stageAudio,
@@ -163,10 +163,10 @@ final class RenderService {
       posterFrame: posterFrame,
       onProgress: onProgress,
     );
-    await provider.encode(args: manifest.ffmpegArgs, sandbox: outDir);
+    await runner.encode(args: manifest.ffmpegArgs, sandbox: outDir);
     final posterArgs = manifest.posterArgs;
     if (posterArgs != null) {
-      await provider.encode(args: posterArgs, sandbox: outDir);
+      await runner.encode(args: posterArgs, sandbox: outDir);
     }
     return File('${outDir.path}/${manifest.outputFileName}');
   }

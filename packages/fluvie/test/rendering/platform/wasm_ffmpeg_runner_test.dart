@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/core/errors/fluvie_encode_exception.dart';
-import 'package:fluvie/src/rendering/platform/wasm_ffmpeg_provider.dart';
+import 'package:fluvie/src/rendering/platform/wasm_ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/platform/wasm_runtime.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -39,7 +39,7 @@ void main() {
   final outputBytes = Uint8List.fromList(const [9, 9, 9]);
   final sandbox = Directory('unused-on-wasm');
 
-  WasmFfmpegProvider makeProvider() => WasmFfmpegProvider(
+  WasmFfmpegRunner makeProvider() => WasmFfmpegRunner(
     runtime: runtime,
     readInput: (name) async {
       readInputNames.add(name);
@@ -58,7 +58,7 @@ void main() {
     when(() => runtime.readFile(any())).thenAnswer((_) async => outputBytes);
   });
 
-  group('WasmFfmpegProvider', () {
+  group('WasmFfmpegRunner', () {
     test('probeVersion returns null (an embedded runtime has no honest banner)', () async {
       expect(await makeProvider().probeVersion(), isNull);
     });

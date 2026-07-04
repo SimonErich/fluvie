@@ -19,7 +19,7 @@ abstract interface class CaptureSink {
 /// Two backends implement it — a file-backed sandbox under a real directory
 /// (desktop/mobile, byte-identical to writing files directly) and an in-memory
 /// sandbox (web, where the browser has no file system). The capture loop and the
-/// `FfmpegProvider`s talk only to this interface, so the same deterministic
+/// `FfmpegRunner`s talk only to this interface, so the same deterministic
 /// pipeline runs on every platform.
 abstract interface class RenderSandbox {
   /// The real directory path a process-based encoder runs in, or `null` for an

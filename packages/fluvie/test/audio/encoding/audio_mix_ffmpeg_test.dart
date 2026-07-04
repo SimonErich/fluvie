@@ -11,7 +11,7 @@ import 'package:fluvie/src/audio/encoding/audio_track_node.dart';
 import 'package:fluvie/src/core/quality.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_args.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_filter_graph_builder.dart';
-import 'package:fluvie/src/rendering/platform/process_ffmpeg_provider.dart';
+import 'package:fluvie/src/rendering/platform/process_ffmpeg_runner.dart';
 
 const _width = 160;
 const _height = 120;
@@ -99,7 +99,7 @@ void main() {
               ))
             .build();
 
-    await ProcessFfmpegProvider().encode(args: args, sandbox: sandbox);
+    await ProcessFfmpegRunner().encode(args: args, sandbox: sandbox);
 
     final probe = await _ffprobe(sandbox);
     final streams = (probe['streams']! as List<Object?>).cast<Map<String, Object?>>();
@@ -130,7 +130,7 @@ void main() {
               ))
             .build();
 
-    await ProcessFfmpegProvider().encode(args: args, sandbox: sandbox);
+    await ProcessFfmpegRunner().encode(args: args, sandbox: sandbox);
 
     final probe = await _ffprobe(sandbox);
     final streams = (probe['streams']! as List<Object?>).cast<Map<String, Object?>>();
@@ -162,7 +162,7 @@ void main() {
               ))
             .build();
 
-    await ProcessFfmpegProvider().encode(args: args, sandbox: sandbox);
+    await ProcessFfmpegRunner().encode(args: args, sandbox: sandbox);
 
     final probe = await _ffprobe(sandbox);
     final streams = (probe['streams']! as List<Object?>).cast<Map<String, Object?>>();

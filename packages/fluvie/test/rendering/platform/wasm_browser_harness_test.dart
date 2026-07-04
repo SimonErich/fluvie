@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/core/quality.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_args.dart';
-import 'package:fluvie/src/rendering/platform/wasm_ffmpeg_provider.dart';
+import 'package:fluvie/src/rendering/platform/wasm_ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/platform/wasm_runtime_bindings.dart';
 
 /// Manual browser harness (D13): real ffmpeg.wasm, real chrome, no network.
@@ -59,7 +59,7 @@ void main() {
               ..setH264Output(name: 'out.mp4', quality: Quality.low, fps: 30))
             .build();
     Uint8List? output;
-    final provider = WasmFfmpegProvider(
+    final provider = WasmFfmpegRunner(
       runtime: createWasmRuntime(),
       readInput: (name) async => _syntheticFrames(),
       writeOutput: (name, bytes) => output = bytes,

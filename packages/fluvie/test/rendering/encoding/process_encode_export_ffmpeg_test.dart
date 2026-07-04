@@ -14,7 +14,7 @@ import 'package:fluvie/src/core/errors/fluvie_encode_exception.dart';
 import 'package:fluvie/src/core/export.dart';
 import 'package:fluvie/src/rendering/encoding/video_encoder_io.dart';
 import 'package:fluvie/src/rendering/encoding/video_encoder_service.dart';
-import 'package:fluvie/src/rendering/platform/process_ffmpeg_provider.dart';
+import 'package:fluvie/src/rendering/platform/process_ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
 
 const _width = 320;
@@ -71,7 +71,7 @@ void main() {
   setUpAll(() async {
     const hint = 'The ffmpeg-tagged suite needs ffmpeg >= 6.0 AND ffprobe on PATH.';
     try {
-      final version = await ProcessFfmpegProvider().probeVersion();
+      final version = await ProcessFfmpegRunner().probeVersion();
       expect(version!.meetsFloor, isTrue, reason: 'found ffmpeg $version. $hint');
     } on FluvieEncodeException catch (error) {
       fail('$error\n$hint');
@@ -85,7 +85,7 @@ void main() {
     await service.encode(
       config: _config(),
       sandbox: sandbox,
-      provider: ProcessFfmpegProvider(),
+      runner: ProcessFfmpegRunner(),
       export: const Export.gif(),
     );
     final output = File('${sandbox.path}/out.gif');
@@ -101,7 +101,7 @@ void main() {
     await service.encode(
       config: _config(),
       sandbox: sandbox,
-      provider: ProcessFfmpegProvider(),
+      runner: ProcessFfmpegRunner(),
       export: const Export.transparent(),
     );
     final output = File('${sandbox.path}/out.webm');
@@ -123,7 +123,7 @@ void main() {
     await service.encode(
       config: _config(),
       sandbox: sandbox,
-      provider: ProcessFfmpegProvider(),
+      runner: ProcessFfmpegRunner(),
       export: const Export.imageSequence(),
     );
     final pngs = sandbox.listSync().whereType<File>().where((f) => f.path.endsWith('.png'));
@@ -132,7 +132,7 @@ void main() {
 
   test('the poster invocation extracts a single PNG that exists', () async {
     final sandbox = await _sandboxWithFrames();
-    await ProcessFfmpegProvider().encode(
+    await ProcessFfmpegRunner().encode(
       args: service.planPosterArgs(_config(), posterFrame: 10),
       sandbox: sandbox,
     );

@@ -6,7 +6,7 @@ import 'package:fluvie/src/audio/encoding/audio_track_node.dart';
 import 'package:fluvie/src/core/errors/fluvie_encode_exception.dart';
 import 'package:fluvie/src/core/export.dart';
 import 'package:fluvie/src/core/quality.dart';
-import 'package:fluvie/src/rendering/encoding/ffmpeg_provider.dart';
+import 'package:fluvie/src/rendering/encoding/ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/encoding/video_encoder_io.dart';
 import 'package:fluvie/src/rendering/encoding/video_encoder_service.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
@@ -14,7 +14,7 @@ import 'package:mocktail/mocktail.dart';
 
 import '../fakes/silent_track_node.dart';
 
-class _MockFfmpegProvider extends Mock implements FfmpegProvider {}
+class _MockFfmpegRunner extends Mock implements FfmpegRunner {}
 
 void main() {
   const service = VideoEncoderService();
@@ -166,7 +166,7 @@ void main() {
 
   group('VideoEncoderService.encode', () {
     test('forwards the exact plan and sandbox to the provider', () async {
-      final provider = _MockFfmpegProvider();
+      final provider = _MockFfmpegRunner();
       final sandbox = Directory('/tmp/fluvie_encoder_sandbox');
       when(
         () => provider.encode(
@@ -175,7 +175,7 @@ void main() {
         ),
       ).thenAnswer((_) async {});
 
-      await service.encode(config: demo(), sandbox: sandbox, provider: provider);
+      await service.encode(config: demo(), sandbox: sandbox, runner: provider);
 
       verify(
         () => provider.encode(args: service.planEncodeArgs(demo()), sandbox: sandbox),
@@ -183,7 +183,7 @@ void main() {
     });
 
     test('forwards an amix plan so a real audio track encodes', () async {
-      final provider = _MockFfmpegProvider();
+      final provider = _MockFfmpegRunner();
       final sandbox = Directory('/tmp/fluvie_encoder_sandbox');
       when(
         () => provider.encode(
@@ -196,7 +196,7 @@ void main() {
       await service.encode(
         config: demo(),
         sandbox: sandbox,
-        provider: provider,
+        runner: provider,
         audio: plan.tracks,
         amix: plan.amix,
       );
@@ -215,7 +215,7 @@ void main() {
     });
 
     test('a provider failure propagates typed', () async {
-      final provider = _MockFfmpegProvider();
+      final provider = _MockFfmpegRunner();
       when(
         () => provider.encode(
           args: any(named: 'args'),
@@ -227,7 +227,7 @@ void main() {
         () => service.encode(
           config: demo(),
           sandbox: Directory('/tmp/fluvie_encoder_sandbox'),
-          provider: provider,
+          runner: provider,
         ),
         throwsA(isA<FluvieEncodeException>()),
       );
