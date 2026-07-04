@@ -135,4 +135,38 @@ dev_dependencies:
       expect(minimal.readAsStringSync(), contains('fluvie: ^0.1.0'));
     });
   });
+
+  group('ensureCustomLintPlugin', () {
+    late Directory dir;
+    late File options;
+
+    setUp(() {
+      dir = Directory.systemTemp.createTempSync('fluvie_lints_wire_');
+      options = File('${dir.path}/analysis_options.yaml');
+    });
+
+    tearDown(() => dir.deleteSync(recursive: true));
+
+    test('creates analysis_options.yaml with the plugin when absent', () {
+      expect(ensureCustomLintPlugin(options), isTrue);
+      final content = options.readAsStringSync();
+      expect(content, contains('include: package:flutter_lints/flutter.yaml'));
+      expect(content, contains('custom_lint'));
+    });
+
+    test('adds the plugin to an existing options file, preserving it', () {
+      options.writeAsStringSync('include: package:flutter_lints/flutter.yaml\n');
+      expect(ensureCustomLintPlugin(options), isTrue);
+      final content = options.readAsStringSync();
+      expect(content, contains('include: package:flutter_lints/flutter.yaml'));
+      expect(content, contains('custom_lint'));
+    });
+
+    test('is a no-op when the plugin is already wired', () {
+      options.writeAsStringSync(
+        'analyzer:\n  plugins:\n    - custom_lint\n',
+      );
+      expect(ensureCustomLintPlugin(options), isFalse);
+    });
+  });
 }

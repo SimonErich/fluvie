@@ -12,6 +12,15 @@ const String fluvieDependencyVersion = '^0.1.0';
 /// real bundled fonts so captured text is not Ahem boxes).
 const String alchemistDependencyVersion = '^0.14.0';
 
+/// The pinned `fluvie_lints` dev dependency `fluvie init` wires up: the rules
+/// that catch timing mistakes (dangling anchors, cyclic triggers, animations
+/// past their window) as you type.
+const String fluvieLintsDependencyVersion = '^0.1.0';
+
+/// The pinned `custom_lint` dev dependency that hosts the fluvie_lints rules
+/// in the analyzer.
+const String customLintDependencyVersion = '^0.8.0';
+
 /// The names `fluvie init` derives from a composition name: the render `key`,
 /// the Dart builder `functionName`, and the `fileName` under `lib/`.
 typedef ScaffoldNames = ({String key, String functionName, String fileName});
@@ -112,5 +121,64 @@ List<String> writeRenderScaffold({
     name: 'alchemist',
     version: alchemistDependencyVersion,
   );
+  // Fluvie's own lints ride the same scaffold: the rules that catch timing
+  // mistakes (dangling anchors, cyclic triggers) light up in the IDE without
+  // any manual wiring.
+  ensureDependency(
+    File('${projectDir.path}/pubspec.yaml'),
+    section: 'dev_dependencies',
+    name: 'custom_lint',
+    version: customLintDependencyVersion,
+  );
+  ensureDependency(
+    File('${projectDir.path}/pubspec.yaml'),
+    section: 'dev_dependencies',
+    name: 'fluvie_lints',
+    version: fluvieLintsDependencyVersion,
+  );
+  final lintsWired = ensureCustomLintPlugin(File('${projectDir.path}/analysis_options.yaml'));
+  if (lintsWired) written.add('analysis_options.yaml');
   return written;
+}
+
+/// Wires the `custom_lint` analyzer plugin into [analysisOptions] so the
+/// fluvie_lints rules run in the IDE and via `dart run custom_lint`.
+///
+/// Creates the file (on the `flutter_lints` base `flutter create` would write)
+/// when absent; otherwise appends the `analyzer: plugins:` block, preserving
+/// the existing content. Idempotent: returns `false` when the plugin is
+/// already wired.
+bool ensureCustomLintPlugin(File analysisOptions) {
+  if (!analysisOptions.existsSync()) {
+    analysisOptions
+      ..createSync(recursive: true)
+      ..writeAsStringSync(
+        'include: package:flutter_lints/flutter.yaml\n'
+        '\n'
+        'analyzer:\n'
+        '  plugins:\n'
+        '    - custom_lint\n',
+      );
+    return true;
+  }
+  final content = analysisOptions.readAsStringSync();
+  final doc = loadYaml(content);
+  final analyzer = doc is YamlMap ? doc['analyzer'] : null;
+  final plugins = analyzer is YamlMap ? analyzer['plugins'] : null;
+  if (plugins is YamlList && plugins.contains('custom_lint')) return false;
+  final editor = YamlEditor(content);
+  if (analyzer is! YamlMap) {
+    editor.update(
+      ['analyzer'],
+      {
+        'plugins': ['custom_lint'],
+      },
+    );
+  } else if (plugins is! YamlList) {
+    editor.update(['analyzer', 'plugins'], ['custom_lint']);
+  } else {
+    editor.appendToList(['analyzer', 'plugins'], 'custom_lint');
+  }
+  analysisOptions.writeAsStringSync(editor.toString());
+  return true;
 }
