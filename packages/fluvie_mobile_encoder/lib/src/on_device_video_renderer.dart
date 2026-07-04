@@ -15,6 +15,8 @@ import 'package:fluvie_mobile_encoder/src/native_video_probe_service.dart';
 import 'package:fluvie_mobile_encoder/src/offscreen_capture_host.dart';
 import 'package:riverpod/riverpod.dart';
 
+part 'on_device_video_renderer_capture.dart';
+
 /// Builds the off-screen [CaptureHost] for a render at [size] logical pixels.
 typedef CaptureHostFactory = CaptureHost Function(Size size);
 
@@ -153,12 +155,13 @@ final class OnDeviceVideoRenderer {
         ),
       );
       final manifest = captured.manifest;
-      final mix = await _audioFor(
+      final mix = await _resolveAudioTracks(
         composition,
         encode: audio,
         warn: warnOnDroppedAudio,
         fps: fps,
         frameCount: frameCount,
+        materializer: _audioMaterializer,
       );
       final outputPath = outputFile?.path ?? '${sandbox.path}/${manifest.outputFileName}';
       onProgress?.call(RenderProgress(RenderPhase.encoding, compositionKey: compositionKey));
@@ -196,83 +199,9 @@ final class OnDeviceVideoRenderer {
     }
   }
 
-  /// Resolves [composition]'s audio into materialized [MobileAudioTrack]s.
-  ///
-  /// A non-`Video` or audio-less composition yields no tracks. With audio present
-  /// but [encode] `false`, it warns once (when [warn]) and yields no tracks;
-  /// otherwise it materializes every track's source through the renderer's
-  /// materializer.
-  Future<({List<MobileAudioTrack> tracks, double masterVolume})> _audioFor(
-    Widget composition, {
-    required bool encode,
-    required bool warn,
-    required int fps,
-    required int frameCount,
-  }) async {
-    if (composition is! Video) return (tracks: const <MobileAudioTrack>[], masterVolume: 1.0);
-    final mix = resolveAudioMix(video: composition, fps: fps, totalFrames: frameCount);
-    if (mix.isEmpty) return (tracks: const <MobileAudioTrack>[], masterVolume: 1.0);
-    if (!encode) {
-      if (warn) {
-        onWarning(
-          'This Video declares ${mix.tracks.length} audio track(s), but on-device '
-          'audio is off, so the MP4 will be silent. Pass audio: true to encode it, '
-          'or warnOnDroppedAudio: false to silence this warning.',
-        );
-      }
-      return (tracks: const <MobileAudioTrack>[], masterVolume: 1.0);
-    }
-    return (
-      tracks: [
-        for (final track in mix.tracks)
-          MobileAudioTrack.fromResolved(
-            track,
-            path: await _audioMaterializer.materialize(track.source),
-          ),
-      ],
-      masterVolume: mix.masterVolume,
-    );
-  }
-
   // coverage:ignore-line: constructs the engine-backed host, exercised only on a device.
   static CaptureHost _defaultHostFactory(Size size) => OffscreenCaptureHost(size);
 
   static Future<Directory> _defaultSandboxFactory() =>
       Directory.systemTemp.createTemp('fluvie_mobile_render_');
 }
-
-/// Fluvie's capture entry, wrapped at library scope so
-/// [OnDeviceVideoRenderer.render] can call it without the method name shadowing
-/// the free function. Capture stages a silent FFmpeg lane; the renderer mixes
-/// and muxes audio natively after capture (see [OnDeviceVideoRenderer._audioFor]).
-Future<RenderAspectResult> _captureToSandbox({
-  required Widget composition,
-  required Aspect aspect,
-  required int frameCount,
-  required Directory outDir,
-  required RenderService service,
-  required ShellMount pumpWidget,
-  required ShellFramePump pumpFrame,
-  required int longEdge,
-  required int fps,
-  required String compositionKey,
-  required MediaResolver resolver,
-}) => render(
-  composition: composition,
-  aspect: aspect,
-  frameCount: frameCount,
-  outDir: outDir,
-  service: service,
-  pumpWidget: pumpWidget,
-  pumpFrame: pumpFrame,
-  longEdge: longEdge,
-  fps: fps,
-  compositionKey: compositionKey,
-  stageAudio: _silentAudio,
-  resolver: resolver,
-);
-
-Future<AudioMixLanes> _silentAudio({
-  required MediaResolver resolver,
-  required Directory sandbox,
-}) async => (nodes: const <Never>[], amix: null);
