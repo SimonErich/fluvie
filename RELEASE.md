@@ -36,8 +36,8 @@ MCP, and demo services run as Dokploy containers.
 
 All packages share one version and publish from one umbrella tag, but pub.dev
 must trust this repo first. For every package (`fluvie`, `fluvie_cli`,
-`fluvie_lints`, `fluvie_ai`, `fluvie_server`, `fluvie_mobile_encoder`,
-`fluvie_web_encoder`):
+`fluvie_lints`, `ai_abstracted`, `fluvie_ai`, `fluvie_server`,
+`fluvie_validate`, `fluvie_mobile_encoder`, `fluvie_web_encoder`):
 
 1. Reserve the name with a first manual publish from the package directory:
    ```sh
@@ -50,9 +50,13 @@ must trust this repo first. For every package (`fluvie`, `fluvie_cli`,
    pattern **`v{{version}}`** (the umbrella tag — the same for every package, so
    one `v0.1.2` release publishes them all).
 
-`fluvie_server` is new as of 0.1.4, so it has no Admin page yet: do its first
-manual publish (`cd packages/fluvie_server && dart pub publish`) before the
-tagged release, then set its tag pattern to `v{{version}}`. The retired
+A package that has never been published has no Admin page yet: do its first
+manual publish (`cd packages/<name> && dart pub publish`) before the tagged
+release, then set its tag pattern to `v{{version}}`. As of 0.1.10 that applies
+to `ai_abstracted` (publish it before `fluvie_ai`, which depends on it). Also
+verify `fluvie_server` has **Admin → Automated publishing** enabled — its 0.1.10
+publish job failed because the setting was never turned on after the 0.1.4
+manual publish. The retired
 `fluvie_api` and `fluvie_mcp` packages are no longer in the workspace, so the
 tagged release will not republish them; their existing pub.dev versions stay up
 (pub.dev packages cannot be deleted). Optionally mark them **discontinued** on
@@ -179,8 +183,9 @@ Notes:
   package's publish job (the others still succeed).
 - Do this from a real account, not an Action: GitHub does not fire `publish.yml` /
   `images.yml` for a tag pushed by the built-in `GITHUB_TOKEN`.
-- Inter-package constraints are intentionally loose (`^0.1.x`) so the publish jobs
-  can run in parallel. If you tighten them, add `needs:` ordering in `publish.yml`.
+- Inter-package constraints track the release version: `tool/set_version.sh`
+  rewrites them on every bump, and `publish.yml` orders the jobs with `needs:`
+  so each package publishes after its in-repo dependencies are on pub.dev.
 
 ## 8. Optional polish
 

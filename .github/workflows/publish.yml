@@ -11,9 +11,10 @@ name: publish
 # published manually (`dart pub publish` once); the tag automates every release
 # after that.
 #
-# Jobs run in parallel; that is safe because the inter-package constraints are
-# loose (`^0.1.x`), so a dependency only needs SOME already-published version, not
-# this release's. If you tighten those constraints, add `needs:` to order them.
+# The inter-package constraints track the release version (`tool/set_version.sh`
+# rewrites them on every bump), so each dependent's constraint names the version
+# being published in this same run. The `needs:` chains below order the jobs so
+# a package only publishes after its in-repo dependencies are on pub.dev.
 
 on:
   push:
@@ -41,21 +42,23 @@ jobs:
     with:
       working-directory: packages/fluvie_lints
 
+  ai_abstracted:
+    permissions:
+      id-token: write
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      working-directory: packages/ai_abstracted
+
   fluvie_ai:
+    needs: [fluvie, ai_abstracted]
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
     with:
       working-directory: packages/fluvie_ai
 
-  fluvie_server:
-    permissions:
-      id-token: write
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
-    with:
-      working-directory: packages/fluvie_server
-
   fluvie_mobile_encoder:
+    needs: [fluvie]
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
@@ -63,6 +66,7 @@ jobs:
       working-directory: packages/fluvie_mobile_encoder
 
   fluvie_web_encoder:
+    needs: [fluvie]
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
@@ -70,8 +74,17 @@ jobs:
       working-directory: packages/fluvie_web_encoder
 
   fluvie_validate:
+    needs: [fluvie, fluvie_lints]
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
     with:
       working-directory: packages/fluvie_validate
+
+  fluvie_server:
+    needs: [fluvie_cli, fluvie_validate]
+    permissions:
+      id-token: write
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      working-directory: packages/fluvie_server
