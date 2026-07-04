@@ -1,4 +1,5 @@
 import 'package:fluvie_server/src/api/config/server_config.dart';
+import 'package:fluvie_server/src/config/env_trim.dart';
 import 'package:fluvie_server/src/config/mcp_mode.dart';
 import 'package:meta/meta.dart';
 
@@ -54,11 +55,11 @@ final class FluvieServerConfig {
       mcpMode: mcpMode,
       host: api?.host ?? env['HOST'] ?? '0.0.0.0',
       port: api?.port ?? _port(env),
-      docsDir: _trimToNull(env['FLUVIE_DOCS_DIR']) ?? defaultDocsDir,
+      docsDir: trimToNull(env['FLUVIE_DOCS_DIR']) ?? defaultDocsDir,
       api: api,
-      mcpToken: _trimToNull(env['FLUVIE_MCP_TOKEN']),
+      mcpToken: trimToNull(env['FLUVIE_MCP_TOKEN']),
       remoteApiUrl: remoteApiUrl,
-      remoteApiToken: _trimToNull(env['FLUVIE_API_TOKEN']),
+      remoteApiToken: trimToNull(env['FLUVIE_API_TOKEN']),
     );
   }
 
@@ -96,7 +97,7 @@ final class FluvieServerConfig {
   final String? remoteApiToken;
 
   static McpMode _mode(Map<String, String> env, {required bool hasRenderBackend}) {
-    final raw = _trimToNull(env['FLUVIE_MCP_MODE']);
+    final raw = trimToNull(env['FLUVIE_MCP_MODE']);
     final mode = raw == null
         ? (hasRenderBackend ? McpMode.build : McpMode.docs)
         : _enum(raw, McpMode.values, 'FLUVIE_MCP_MODE');
@@ -109,12 +110,12 @@ final class FluvieServerConfig {
   }
 
   static Uri? _uri(Map<String, String> env, String key) {
-    final raw = _trimToNull(env[key]);
+    final raw = trimToNull(env[key]);
     return raw == null ? null : Uri.parse(raw);
   }
 
   static int _port(Map<String, String> env) {
-    final raw = _trimToNull(env['PORT']);
+    final raw = trimToNull(env['PORT']);
     if (raw == null) return 8080;
     final value = int.tryParse(raw);
     if (value == null || value < 0) {
@@ -124,7 +125,7 @@ final class FluvieServerConfig {
   }
 
   static bool _bool(Map<String, String> env, String key, {required bool fallback}) {
-    final raw = _trimToNull(env[key])?.toLowerCase();
+    final raw = trimToNull(env[key])?.toLowerCase();
     if (raw == null) return fallback;
     if (raw == 'true') return true;
     if (raw == 'false') return false;
@@ -136,10 +137,5 @@ final class FluvieServerConfig {
       if (value.name == raw) return value;
     }
     throw ServerConfigException('$key must be one of ${values.map((v) => v.name).join(', ')}');
-  }
-
-  static String? _trimToNull(String? value) {
-    final trimmed = value?.trim();
-    return trimmed == null || trimmed.isEmpty ? null : trimmed;
   }
 }

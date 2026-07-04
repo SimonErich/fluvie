@@ -12,5 +12,5 @@ export 'jsonrpc.dart';
 export 'mcp_server.dart';
 export 'mcp_tool.dart';
 export 'render_gateway.dart';
-export 'server_config.dart';
+export 'mcp_server_config.dart';
 export 'stdio_transport.dart';

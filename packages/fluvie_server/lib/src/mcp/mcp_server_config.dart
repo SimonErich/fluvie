@@ -1,3 +1,4 @@
+import 'package:fluvie_server/src/config/env_trim.dart';
 import 'package:fluvie_server/src/mcp/api_render_gateway.dart';
 import 'package:fluvie_server/src/mcp/render_gateway.dart';
 import 'package:meta/meta.dart';
@@ -25,9 +26,9 @@ final class McpServerConfig {
     final url = env['FLUVIE_API_URL'];
     return McpServerConfig(
       apiBaseUrl: Uri.parse(url == null || url.isEmpty ? 'http://localhost:8080' : url),
-      apiToken: _trimmed(env['FLUVIE_API_TOKEN']),
-      mcpToken: _trimmed(env['FLUVIE_MCP_TOKEN']),
-      host: _trimmed(env['HOST']) ?? '0.0.0.0',
+      apiToken: trimToNull(env['FLUVIE_API_TOKEN']),
+      mcpToken: trimToNull(env['FLUVIE_MCP_TOKEN']),
+      host: trimToNull(env['HOST']) ?? '0.0.0.0',
       port: int.tryParse(env['PORT'] ?? '') ?? 8080,
     );
   }
@@ -49,10 +50,4 @@ final class McpServerConfig {
 
   /// Builds the render gateway this configuration points at.
   RenderGateway buildGateway() => ApiRenderGateway(baseUrl: apiBaseUrl, apiToken: apiToken);
-
-  static String? _trimmed(String? value) {
-    if (value == null) return null;
-    final trimmed = value.trim();
-    return trimmed.isEmpty ? null : trimmed;
-  }
 }

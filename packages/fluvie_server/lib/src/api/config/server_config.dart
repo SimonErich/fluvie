@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:fluvie_server/src/api/config/duration_parsing.dart';
 import 'package:fluvie_server/src/api/config/s3_config.dart';
+import 'package:fluvie_server/src/config/env_trim.dart';
 import 'package:fluvie_server/src/api/ratelimit/rate_limit_config.dart';
 import 'package:meta/meta.dart';
 
@@ -130,7 +131,7 @@ ServerConfig serverConfigFromEnvironment(Map<String, String> env) {
   final port = _int(env, 'PORT', 8080);
   final apiToken = _required(env, 'API_TOKEN');
   final backend = _enum(env, 'STORAGE_BACKEND', StorageBackend.values, StorageBackend.local);
-  final signingKey = _trimToNull(env['DOWNLOAD_SIGNING_KEY']);
+  final signingKey = trimToNull(env['DOWNLOAD_SIGNING_KEY']);
   return ServerConfig(
     host: env['HOST'] ?? '0.0.0.0',
     port: port,
@@ -148,8 +149,8 @@ ServerConfig serverConfigFromEnvironment(Map<String, String> env) {
     downloadUrlTtl: _duration(env, 'DOWNLOAD_URL_TTL', const Duration(minutes: 15)),
     cleanupInterval: _duration(env, 'CLEANUP_INTERVAL', const Duration(hours: 1)),
     renderConcurrency: _int(env, 'RENDER_CONCURRENCY', 1),
-    renderProject: _trimToNull(env['RENDER_PROJECT']),
-    ffmpegPath: _trimToNull(env['FFMPEG_PATH']),
+    renderProject: trimToNull(env['RENDER_PROJECT']),
+    ffmpegPath: trimToNull(env['FFMPEG_PATH']),
     corsAllowOrigins: (env['CORS_ALLOW_ORIGINS'] ?? '')
         .split(',')
         .map((s) => s.trim())
@@ -157,7 +158,7 @@ ServerConfig serverConfigFromEnvironment(Map<String, String> env) {
         .toList(),
     aiEnv: {
       for (final key in _aiEnvKeys)
-        if (_trimToNull(env[key]) != null) key: env[key]!,
+        if (trimToNull(env[key]) != null) key: env[key]!,
     },
     aiRateLimit: RateLimitConfig(
       limit: _int(env, 'FLUVIE_AI_RATE_LIMIT', RateLimitConfig.defaults.limit),
@@ -175,24 +176,19 @@ S3Config _s3(Map<String, String> env) => S3Config(
   secretKey: _required(env, 'S3_SECRET_KEY'),
   useSsl: _bool(env, 'S3_USE_SSL', fallback: true),
   pathStyle: _bool(env, 'S3_PATH_STYLE', fallback: false),
-  publicBaseUrl: _trimToNull(env['S3_PUBLIC_BASE']) == null
+  publicBaseUrl: trimToNull(env['S3_PUBLIC_BASE']) == null
       ? null
       : Uri.parse(env['S3_PUBLIC_BASE']!),
 );
 
 String _required(Map<String, String> env, String key) {
-  final value = _trimToNull(env[key]);
+  final value = trimToNull(env[key]);
   if (value == null) throw ServerConfigException('$key is required');
   return value;
 }
 
-String? _trimToNull(String? value) {
-  final trimmed = value?.trim();
-  return trimmed == null || trimmed.isEmpty ? null : trimmed;
-}
-
 int _int(Map<String, String> env, String key, int fallback) {
-  final raw = _trimToNull(env[key]);
+  final raw = trimToNull(env[key]);
   if (raw == null) return fallback;
   final value = int.tryParse(raw);
   if (value == null || value < 0) throw ServerConfigException('$key must be a non-negative int');
@@ -200,7 +196,7 @@ int _int(Map<String, String> env, String key, int fallback) {
 }
 
 bool _bool(Map<String, String> env, String key, {required bool fallback}) {
-  final raw = _trimToNull(env[key])?.toLowerCase();
+  final raw = trimToNull(env[key])?.toLowerCase();
   if (raw == null) return fallback;
   if (raw == 'true') return true;
   if (raw == 'false') return false;
@@ -208,7 +204,7 @@ bool _bool(Map<String, String> env, String key, {required bool fallback}) {
 }
 
 Duration _duration(Map<String, String> env, String key, Duration fallback) {
-  final raw = _trimToNull(env[key]);
+  final raw = trimToNull(env[key]);
   if (raw == null) return fallback;
   try {
     return parseHumanDuration(raw, label: key);
@@ -218,7 +214,7 @@ Duration _duration(Map<String, String> env, String key, Duration fallback) {
 }
 
 T _enum<T extends Enum>(Map<String, String> env, String key, List<T> values, T fallback) {
-  final raw = _trimToNull(env[key]);
+  final raw = trimToNull(env[key]);
   if (raw == null) return fallback;
   for (final value in values) {
     if (value.name == raw) return value;
