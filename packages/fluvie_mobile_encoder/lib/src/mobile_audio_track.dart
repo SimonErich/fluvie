@@ -1,4 +1,4 @@
-import 'package:fluvie/fluvie.dart' show ResolvedAudioTrack;
+import 'package:fluvie/rendering.dart';
 import 'package:meta/meta.dart';
 
 /// One audio track ready for the native mixer: a materialized local [path] plus

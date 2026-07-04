@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_example/render/composition_entry.dart';
 import 'package:fluvie_example/starter/starter_video.dart';
 

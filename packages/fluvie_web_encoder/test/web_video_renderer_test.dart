@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart' hide Animation, Image;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
 import 'package:fluvie_web_encoder/src/png_frame_encoder.dart' show encodeFramePng;
 

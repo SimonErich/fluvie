@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 // MotionTarget is internal; the registry test reaches into the tree to confirm
 // lesson 06 binds the pixel-fx overlay the doc demonstrates.
 import 'package:fluvie/src/animation/motion_target.dart';

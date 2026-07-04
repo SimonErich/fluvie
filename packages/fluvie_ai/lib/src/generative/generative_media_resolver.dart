@@ -1,5 +1,6 @@
 import 'package:ai_abstracted/ai_abstracted.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_ai/src/generative/generative_cache.dart';
 import 'package:fluvie_ai/src/generative/generative_config.dart';
 import 'package:fluvie_ai/src/generative/generative_providers.dart';

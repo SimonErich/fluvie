@@ -21,6 +21,7 @@ dependencies:
   fluvie_server: ^0.1.0
   fluvie_web_encoder: ^0.1.0
   highlight: ^0.7.0
+  intl: ^0.20.0
   web: ^1.1.0
 
 dev_dependencies:

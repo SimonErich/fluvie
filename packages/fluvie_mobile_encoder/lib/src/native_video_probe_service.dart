@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
-import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_mobile_encoder/src/fluvie_mobile_encoder_exception.dart';
 
 /// A [VideoProbeService] backed by the platform: reads a clip's dimensions,

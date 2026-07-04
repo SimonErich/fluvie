@@ -32,6 +32,7 @@ import 'package:alchemist/alchemist.dart' show loadFonts;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie/src/rendering/capture/capture_shell.dart';
 import 'package:fluvie_cli/fluvie_cli.dart' show printVideoSpecJson;
 import 'package:fluvie_example/render/spec_composition.dart';

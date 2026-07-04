@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show AssetBundle, rootBundle;
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:http/http.dart' as http;
 
 /// Loads a Fluvie audio `source` string into bytes for the in-browser encoder.

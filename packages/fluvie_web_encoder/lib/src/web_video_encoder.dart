@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 
 /// Encodes the frames a render captured into a [RenderSandbox] to MP4 bytes,
 /// using ffmpeg.wasm through Fluvie's [WasmRuntime].

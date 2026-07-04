@@ -48,10 +48,6 @@ void main() {
       expect(('reveal'.label - const Time.frames(6)).offset, const Time.frames(-6));
     });
 
-    test('NumberFormat is re-exported so authors can format a Counter', () {
-      expect(NumberFormat.compact(), isA<NumberFormat>());
-    });
-
     test('Particles and NoiseSource are exported for the effect surface', () {
       // The Phase 9 public values: the particle spec authors pass to
       // Animation.particles, and the seeded-randomness contract §22 promises.
@@ -111,22 +107,20 @@ void main() {
         ),
         isA<DeviceFrame>(),
       );
-      // The SnapshotService contract and the typed missing-capability error are
-      // public so an author can inject a fake or catch the install hint. The
-      // SnapshotService type is named here; its request/raster value types stay
-      // internal, so a barrel-only author treats it as an opaque seam.
-      const SnapshotService? service = null;
-      expect(service, isNull);
+      // The typed missing-capability error stays public so an author can catch
+      // the install hint; the SnapshotService contract itself lives on the
+      // rendering barrel (see rendering_barrel_test.dart).
       expect(FluvieSnapshotUnavailableError('no chrome'), isA<Exception>());
     });
 
     test('the Phase 13 captions / reactive / annotation surface is reachable (WI-23)', () {
       // The annotations (Shape / Arrow / Connector / Spotlight / Callout /
       // LowerThird / TitleCard), the reactive Bars visualizer, the caption value
-      // types (CaptionStyle / CaptionPosition / CaptionCue), CaptionTheme (via
-      // FluvieTokens.captions), and the BeatDetectionService / FrequencyAnalyzer
-      // contracts are public; the AudioSource / CaptionSource / BandTable / DSP /
-      // ReactiveScope / parsers / annotation painters stay internal.
+      // types (CaptionStyle / CaptionPosition / CaptionCue), and CaptionTheme
+      // (via FluvieTokens.captions) are public; the AudioSource / CaptionSource /
+      // BandTable / DSP / ReactiveScope / parsers / annotation painters stay
+      // internal, and the BeatDetectionService / FrequencyAnalyzer contracts
+      // live on the rendering barrel.
       expect(
         const Shape.line(from: flutter.Offset.zero, to: flutter.Offset(10, 10)),
         isA<Shape>(),
@@ -164,10 +158,6 @@ void main() {
         isA<CaptionCue>(),
       );
       expect(const FluvieTokens.fallback().captions, isA<CaptionTheme>());
-      const BeatDetectionService? beats = null;
-      const FrequencyAnalyzer? bands = null;
-      expect(beats, isNull);
-      expect(bands, isNull);
     });
 
     test('the Phase 14 theme / aspect / template / FrameBuilder surface is '
@@ -225,9 +215,8 @@ void main() {
         isA<FrameBuilder>(),
       );
 
-      // The render / renderTemplate free functions are tear-off-reachable.
-      expect(render, isNotNull);
-      expect(renderTemplate, isNotNull);
+      // The render / renderTemplate free functions live on the rendering
+      // barrel (see rendering_barrel_test.dart), not here.
 
       // The Export modes ride core/export.dart, reachable from the barrel.
       expect(const Export.gif().mode, ExportMode.gif);

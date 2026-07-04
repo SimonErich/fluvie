@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 // The reactive pre-pass is render infrastructure under `src/`: the audio
 // collectors, the WAV reader, and the PcmDecoder seam are off the authoring
 // surface a lesson imports, exactly like the snapshot and caption harness wiring.

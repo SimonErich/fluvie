@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_mobile_encoder/src/capture_host.dart';
 import 'package:fluvie_mobile_encoder/src/method_channel_mobile_video_encoder.dart';
 import 'package:fluvie_mobile_encoder/src/mobile_audio_materializer.dart';

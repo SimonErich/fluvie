@@ -4,7 +4,7 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
-import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 
 /// Web factory: binds [WebClipDecoder] to the page-global `FluvieClipDecoder`
 /// object (a WebCodecs `VideoDecoder` + demuxer wrapper exposing

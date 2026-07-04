@@ -13,6 +13,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart' hide Animation, Image;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie/src/composition/runtime/reactive_collector.dart';
 import 'package:fluvie/src/core/audio/band_table.dart';
 import 'package:fluvie/src/core/captions/caption_source.dart';

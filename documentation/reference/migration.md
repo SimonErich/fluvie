@@ -5,6 +5,21 @@ surface consolidates them. There is now one motion type (`Animation`), one
 attachment (`.animate([...])`), and plain Flutter layout. This page maps each
 old name to its replacement.
 
+## 0.1.x to 0.2.0
+
+Version 0.2.0 renames hard: the old names are gone, not deprecated. Every
+change below is mechanical.
+
+| 0.1.x | 0.2.0 |
+| --- | --- |
+| Pipeline exports on `package:fluvie/fluvie.dart` (`RenderService`, `RenderConfig`, `render`, `renderToSandbox`, `renderTemplate`, sandboxes, capture services, resolver contracts, `resolveAudioMix`, collectors, `FadeBox`, the wasm runtime) | Import `package:fluvie/rendering.dart` — see [the rendering surface](rendering-surface.md) |
+| `NumberFormat` re-exported from the barrel | Import `package:intl/intl.dart` yourself |
+| `FfmpegProvider`, `ProcessFfmpegProvider`, `WasmFfmpegProvider`, `ffmpegProviderProvider` | `FfmpegRunner`, `ProcessFfmpegRunner`, `WasmFfmpegRunner`, `ffmpegRunnerProvider` (on the rendering barrel) |
+| `RenderService.render(provider:)` | `RenderService.render(runner:)` |
+
+The authoring surface (`Video`, `Scene`, elements, `Animation`, `Trigger`,
+themes, specs, the preview runtime) stays on `package:fluvie/fluvie.dart`.
+
 Most renames are mechanical. Here is the most common one, an animated text line,
 before and after:
 

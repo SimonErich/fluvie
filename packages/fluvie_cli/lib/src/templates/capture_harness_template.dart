@@ -1,8 +1,9 @@
 /// The capture harness `fluvie init` writes to `test/render/`.
 ///
-/// It is self-contained and uses only the public `package:fluvie/fluvie.dart`
-/// surface, so `fluvie render <key>` works in any project that has this file —
-/// no dependency on the Fluvie example app. It covers media-less compositions
+/// It is self-contained and uses only the public barrels — the authoring
+/// surface plus `package:fluvie/rendering.dart` for the capture pipeline — so
+/// `fluvie render <key>` works in any project that has this file, with no
+/// dependency on the Fluvie example app. It covers media-less compositions
 /// (text, shapes, charts, gradients); add an `ImageResolverScope` for `Image`
 /// or `Clip` media.
 library;
@@ -37,6 +38,7 @@ import 'package:alchemist/alchemist.dart' show loadFonts;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 
 {{IMPORTS}}
 

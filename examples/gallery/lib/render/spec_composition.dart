@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart' show Directionality, TextDirection;
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_example/render/composition_entry.dart';
 
 /// Reads a [VideoSpec] from a JSON file at [path].

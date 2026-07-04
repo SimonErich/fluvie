@@ -17,6 +17,7 @@ import 'package:flutter/widgets.dart' hide Animation, Image;
 import 'package:flutter/widgets.dart' as flutter;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie/src/elements/snapshot/runtime/snapshot_capture.dart';
 import 'package:fluvie/src/elements/snapshot/runtime/snapshot_capture_scope.dart';
 import 'package:fluvie/src/media/media_bytes_loader.dart';

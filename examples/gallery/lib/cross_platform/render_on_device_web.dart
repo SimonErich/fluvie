@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
 
 /// Renders [video] to MP4 bytes with ffmpeg.wasm, in the browser.

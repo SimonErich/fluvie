@@ -1,16 +1,15 @@
 /// Write a video like a Flutter screen: widgets in, a real video file out.
 ///
-/// Import this single barrel and nothing else:
+/// This is the authoring surface, everything you type inside a `Video`:
 ///
 /// ```dart
 /// import 'package:fluvie/fluvie.dart';
 /// ```
 ///
-/// The public surface grows phase by phase and is always re-exported from
-/// here; `src/` stays private.
+/// The pipeline surface (capture, sandboxes, encoders) lives behind
+/// `package:fluvie/rendering.dart`; the two barrels are disjoint. `src/`
+/// stays private.
 library;
-
-export 'package:intl/intl.dart' show NumberFormat;
 
 export 'src/animation/animate_extension.dart';
 export 'src/animation/animation.dart';
@@ -19,7 +18,6 @@ export 'src/animation/effect_kind.dart';
 export 'src/animation/frame_builder.dart' show FrameBuilder;
 export 'src/animation/runtime/frame_context.dart' show FrameContext;
 export 'src/audio/audio.dart';
-export 'src/audio/encoding/resolved_audio_track.dart' show ResolvedAudioMix, ResolvedAudioTrack;
 export 'src/audio/generative_audio.dart';
 export 'src/captions/caption_position.dart' show CaptionPosition;
 export 'src/captions/caption_style.dart' show CaptionStyle;
@@ -30,8 +28,6 @@ export 'src/composition/box.dart';
 export 'src/composition/camera/camera.dart';
 export 'src/composition/frame.dart';
 export 'src/composition/runtime/aspect_scope.dart' show AspectScope;
-export 'src/composition/runtime/media_collector.dart'
-    show collectMediaSources, collectSnapshotSources, collectSnapshots;
 export 'src/composition/runtime/timeline_probe.dart';
 export 'src/composition/scene.dart';
 export 'src/composition/timeline.dart';
@@ -47,12 +43,6 @@ export 'src/core/audio/audio_source.dart' show AudioSource;
 export 'src/core/audio_band.dart';
 export 'src/core/captions/caption_cue.dart' show CaptionCue, CaptionCueWord;
 export 'src/core/captions/caption_word.dart';
-export 'src/core/contracts/beat_detection_service.dart' show BeatDetectionService;
-export 'src/core/contracts/disposable_resolver.dart' show DisposableResolver;
-export 'src/core/contracts/frequency_analyzer.dart' show FrequencyAnalyzer;
-export 'src/core/contracts/generative_resolver.dart';
-export 'src/core/contracts/media_resolver.dart';
-export 'src/core/contracts/snapshot_service.dart' show SnapshotService;
 export 'src/core/defaults.dart';
 export 'src/core/ease.dart';
 export 'src/core/edge.dart';
@@ -71,7 +61,6 @@ export 'src/core/media/media_source.dart';
 export 'src/core/noise/noise_source.dart';
 export 'src/core/particles/particles.dart';
 export 'src/core/quality.dart';
-export 'src/core/render_phase.dart';
 export 'src/core/repeat.dart';
 export 'src/core/snapshot/snapshot_viewport.dart' show SnapshotViewport;
 export 'src/core/stagger.dart';
@@ -117,41 +106,6 @@ export 'src/elements/terminal/terminal_line.dart' show TerminalLine;
 export 'src/elements/typewriter.dart';
 export 'src/elements/webview/html.dart' show Html;
 export 'src/elements/webview/webview.dart' show WebView;
-export 'src/media/net/network_allowlist.dart' show NetworkAllowlist;
-export 'src/media/render_resolver_scope.dart' show ResolverScope, resolverScope;
-export 'src/media/web_clip_decoder.dart' show WebClipDecoder;
-export 'src/rendering/audio_mix_resolution.dart' show resolveAudioMix;
-export 'src/rendering/audio_sandbox_staging.dart' show AudioByteLoader, stageResolvedAudioToSandbox;
-export 'src/rendering/capture/frame_capture_service.dart';
-export 'src/rendering/capture/raw_frame.dart';
-export 'src/rendering/capture/render_manifest.dart';
-export 'src/rendering/capture/repaint_boundary_capture_service.dart';
-export 'src/rendering/encoding/ffmpeg_frame_extraction_service.dart'
-    show frameExtractionServiceProvider;
-export 'src/rendering/encoding/frame_cache.dart';
-export 'src/rendering/encoding/frame_extraction_service.dart' show FrameExtractionService;
-export 'src/rendering/encoding/video_probe_service.dart'
-    show VideoProbeResult, VideoProbeService, videoProbeServiceProvider;
-export 'src/rendering/generative_resolver_provider.dart';
-export 'src/rendering/io/file_render_sandbox.dart' show FileRenderSandbox;
-export 'src/rendering/io/memory_render_sandbox.dart' show MemoryRenderSandbox;
-export 'src/rendering/io/render_sandbox.dart';
-export 'src/rendering/no_generative_resolver.dart';
-export 'src/rendering/no_media_resolver.dart';
-export 'src/rendering/platform/wasm_runtime.dart' show WasmRuntime;
-export 'src/rendering/platform/wasm_runtime_bindings.dart' show createWasmRuntime;
-export 'src/rendering/primitives/fade_box.dart';
-export 'src/rendering/render_aspect.dart'
-    show RenderAspectResult, ShellFramePump, ShellMount, render;
-export 'src/rendering/render_cleanup.dart' show runGuarded;
-export 'src/rendering/render_config.dart';
-export 'src/rendering/render_duration.dart' show frameCountFor;
-export 'src/rendering/render_progress.dart' show RenderProgress, RenderProgressCallback;
-export 'src/rendering/render_service.dart';
-export 'src/rendering/render_stage.dart' show runStage;
-export 'src/rendering/render_template.dart' show renderTemplate;
-export 'src/rendering/render_to_sandbox.dart'
-    show FrameEncoder, SandboxFramePump, SandboxMount, renderToSandbox;
 export 'src/rendering/runtime/frame_provider.dart';
 export 'src/rendering/runtime/render_controller.dart';
 export 'src/rendering/runtime/render_controller_scope.dart';

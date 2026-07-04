@@ -14,6 +14,7 @@ import 'package:cli_quickstart/render/whisker_composition.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 
 /// Every composition this project can render, keyed for `fluvie render <key>`.
 final Map<String, Video Function()> compositions = <String, Video Function()>{

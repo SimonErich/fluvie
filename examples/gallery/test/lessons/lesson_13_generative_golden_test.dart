@@ -10,6 +10,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie/src/composition/runtime/generative_collector.dart';
 import 'package:fluvie/src/media/runtime/generative_resolver_scope.dart';
 import 'package:fluvie/src/media/runtime/image_resolver_scope.dart';

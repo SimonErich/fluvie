@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 
 /// The fallback when neither a mobile nor a web build is selected.
 ///

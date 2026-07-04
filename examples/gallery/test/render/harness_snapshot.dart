@@ -6,6 +6,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 // The snapshot media wiring lives under `src/`: pre-resolution is render
 // infrastructure, not part of the authoring surface a lesson imports. The
 // `SnapshotService` contract itself is public via the barrel.

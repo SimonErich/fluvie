@@ -10,6 +10,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart' hide Animation, Image;
 import 'package:fluvie/fluvie.dart';
+import 'package:intl/intl.dart' show NumberFormat;
 
 /// A title that fades and slides in — plain Flutter `Text` plus `.animate()`,
 /// the whole of Fluvie's text story.

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_mobile_encoder/src/mobile_audio_materializer.dart';
 import 'package:http/http.dart' as http;
 

@@ -22,6 +22,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 // The resolver scope, the reactive scope builder, the collect passes, and the
 // real MediaRepository are render infrastructure, off the authoring barrel; the
 // golden reaches into src/ like the render harness.

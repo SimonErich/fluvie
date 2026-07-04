@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/fluvie.dart' show FluvieRenderException;
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
 
 class _FakeBundle extends CachingAssetBundle {

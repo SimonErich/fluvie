@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluvie/fluvie.dart' show ResolvedAudioTrack;
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_mobile_encoder/fluvie_mobile_encoder.dart';
 
 void main() {

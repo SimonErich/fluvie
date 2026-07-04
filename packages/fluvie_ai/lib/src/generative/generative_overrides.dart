@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fluvie/fluvie.dart' show GenerativeResolver;
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_ai/src/generative/generative_config.dart';
 import 'package:fluvie_ai/src/generative/generative_media_resolver.dart';
 

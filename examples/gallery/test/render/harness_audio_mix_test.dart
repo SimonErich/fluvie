@@ -11,6 +11,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart' hide Animation, Image;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie/src/composition/runtime/audio_collector.dart';
 import 'package:fluvie/src/composition/runtime/reactive_collector.dart';
 import 'package:fluvie_example/render/composition_entry.dart';

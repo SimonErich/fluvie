@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie/src/core/audio/band_table.dart';
 import 'package:fluvie/src/core/captions/caption_source.dart';
 import 'package:fluvie/src/core/contracts/beat_grid.dart';

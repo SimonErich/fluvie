@@ -13,6 +13,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart' hide Animation, Image;
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 
 /// The four export modes, each pure config data carried on `Video.export`.
 /// The render pipeline dispatches on the mode you pick.

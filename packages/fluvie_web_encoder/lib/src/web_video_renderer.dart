@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_web_encoder/src/clip_decoder.dart';
 import 'package:fluvie_web_encoder/src/fluvie_web_stage.dart';
 import 'package:fluvie_web_encoder/src/png_frame_encoder.dart';

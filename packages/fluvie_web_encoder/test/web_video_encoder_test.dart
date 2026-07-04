@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
 import 'package:fluvie_web_encoder/src/web_video_encoder.dart'
     show expandImagePattern, fileInputNames;

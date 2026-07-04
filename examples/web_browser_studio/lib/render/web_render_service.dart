@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 
 import 'package:web_browser_studio/render/web_render_service_stub.dart'
     if (dart.library.js_interop) 'package:web_browser_studio/render/web_render_service_web.dart';

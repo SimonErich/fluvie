@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 
 /// The non-browser fallback: a [WebClipDecoder] that fails on use, so the symbol
 /// is importable on the VM (tests, analysis) while real decoding stays

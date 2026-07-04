@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 
 /// An in-memory [WasmRuntime] for tests: records every write, returns a fake
 /// MP4 (an `ftyp` header) from [exec], and serves files back from memory.
