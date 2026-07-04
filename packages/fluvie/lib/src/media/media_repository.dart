@@ -1,3 +1,4 @@
+// fluvie:large-file-ok: the MediaResolver facade; the logic lives in its five sibling parts
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
