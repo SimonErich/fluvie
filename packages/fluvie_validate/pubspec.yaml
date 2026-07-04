@@ -4,6 +4,9 @@ version: 0.1.10
 repository: https://github.com/SimonErich/fluvie/tree/main/packages/fluvie_validate
 homepage: https://github.com/SimonErich/fluvie
 issue_tracker: https://github.com/SimonErich/fluvie/issues
+documentation: https://docs.fluvie.dev
+funding:
+  - https://github.com/sponsors/SimonErich
 topics:
   - video
   - analysis
