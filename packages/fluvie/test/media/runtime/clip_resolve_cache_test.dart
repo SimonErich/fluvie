@@ -239,5 +239,38 @@ void main() {
       );
       expect(cache.decodedClipFrameLookup(_clip, 2).width, 2);
     });
+
+    test('the window floor rises to the registered clip count', () async {
+      // Two clips, capacity one: every composition frame warms one frame per
+      // clip, so the window must hold both at once or the first clip's
+      // just-warmed frame would be evicted before paint reads it.
+      const clipB = MediaSource.asset('b.mp4');
+      final store = _MemoryClipFrameStore();
+      final cache = _FakeClipCache(_meta, store: store, windowCapacity: 1)
+        ..markResolved()
+        ..registerClipPlan(
+          source: _clip,
+          windowStart: 0,
+          windowLength: 30,
+          compFps: 30,
+          trimStartFrames: 0,
+          trimEndFrames: 30,
+        )
+        ..registerClipPlan(
+          source: clipB,
+          windowStart: 0,
+          windowLength: 30,
+          compFps: 30,
+          trimStartFrames: 0,
+          trimEndFrames: 30,
+        );
+      await cache.resolveClipFrames(_clip, [0]);
+      await cache.resolveClipFrames(clipB, [0]);
+
+      await cache.prepareClipFramesForComposition(0);
+
+      expect(cache.decodedClipFrameLookup(_clip, 0).width, 2);
+      expect(cache.decodedClipFrameLookup(clipB, 0).width, 2);
+    });
   });
 }

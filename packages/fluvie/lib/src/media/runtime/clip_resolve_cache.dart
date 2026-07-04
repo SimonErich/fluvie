@@ -7,36 +7,13 @@ import 'dart:ui' as ui;
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
+import 'package:fluvie/src/media/runtime/clip_frame_store.dart';
 import 'package:fluvie/src/media/runtime/image_resolve_cache.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
 
-/// Backing store for a clip's extracted source frames (raw RGBA), kept off the
-/// Dart heap so the decoded window can stay small.
-///
-/// The `dart:io` `MediaRepository` backs this with files in a temp directory;
-/// a resolver with no store decodes every frame up front instead (the browser
-/// path). Frames are addressed by an opaque per-clip [String] key plus the
-/// source-frame index, and [dispose] releases the whole store.
-abstract interface class ClipFrameStore {
-  /// Writes the RGBA bytes of [frame] for the clip keyed by [clipKey].
-  Future<void> put(String clipKey, int frame, Uint8List rgba);
+export 'package:fluvie/src/media/runtime/clip_frame_store.dart' show ClipFrameStore;
 
-  /// Reads the RGBA bytes of [frame] for [clipKey], or null when absent.
-  Future<Uint8List?> get(String clipKey, int frame);
-
-  /// Releases every stored frame.
-  Future<void> dispose();
-}
-
-/// How a clip maps composition frames to its source frames — the data
-/// [ClipResolveCache.prepareClipFramesForComposition] resamples against.
-typedef _ClipPlan = ({
-  int windowStart,
-  int windowLength,
-  int compFps,
-  int trimStartFrames,
-  int trimEndFrames,
-});
+part 'clip_resolve_cache_window.dart';
 
 /// The shared clip cache behind every [MediaResolver] that decodes video clips:
 /// probe a source once for its [ClipMetadata], extract the source frames a
@@ -65,12 +42,7 @@ mixin ClipResolveCache on ImageResolveCache {
   /// Decode-all mode only: every decoded frame, keyed by source-frame index.
   final Map<MediaSource, Map<int, ui.Image>> clipFrames = {};
 
-  // Streaming-mode state.
-  final Map<MediaSource, _ClipPlan> _clipPlans = {};
-  final Map<MediaSource, String> _clipKeys = {};
-  final Map<MediaSource, Set<int>> _storedFrames = {};
-  final LinkedHashMap<String, ui.Image> _window = LinkedHashMap<String, ui.Image>();
-  int _clipKeyCounter = 0;
+  final _ClipStreamer _streamer = _ClipStreamer();
 
   /// The store extracted frames stream through, or null to decode every frame
   /// up front into [clipFrames]. Defaults to null (decode-all); the on-device
@@ -127,20 +99,14 @@ mixin ClipResolveCache on ImageResolveCache {
       }
       return;
     }
-    final stored = _storedFrames.putIfAbsent(source, () => <int>{});
-    final key = _keyFor(source);
-    final missing = [
-      for (final i in sourceFrames)
-        if (!stored.contains(i)) i,
-    ]..sort();
-    for (var i = 0; i < missing.length; i += _extractChunk) {
-      final chunk = missing.sublist(i, math.min(i + _extractChunk, missing.length));
-      final extracted = await extractClipFrames(source, chunk, meta);
-      for (final entry in extracted.entries) {
-        await store.put(key, entry.key, entry.value.rgba);
-        stored.add(entry.key);
-      }
-    }
+    await _streamer.extractMissing(
+      source: source,
+      sourceFrames: sourceFrames,
+      meta: meta,
+      store: store,
+      extract: extractClipFrames,
+      chunkSize: _extractChunk,
+    );
   }
 
   /// Records [source]'s composition→source frame mapping for the streaming
@@ -154,13 +120,13 @@ mixin ClipResolveCache on ImageResolveCache {
     required int trimStartFrames,
     required int trimEndFrames,
   }) {
-    _clipPlans[source] = (
+    _streamer.registerPlan(source, (
       windowStart: windowStart,
       windowLength: windowLength,
       compFps: compFps,
       trimStartFrames: trimStartFrames,
       trimEndFrames: trimEndFrames,
-    );
+    ));
   }
 
   /// Streaming decode-ahead: decodes (into the bounded window) the frame every
@@ -176,12 +142,14 @@ mixin ClipResolveCache on ImageResolveCache {
   /// streaming window a hit for every paint, matching the decode-all path.
   Future<void> prepareClipFramesForComposition(int compFrame) async {
     final store = clipFrameStore;
-    if (store == null || _clipPlans.isEmpty) return;
-    for (final entry in _clipPlans.entries) {
-      final meta = clipMeta[entry.key];
-      if (meta == null) continue;
-      await _ensureDecoded(entry.key, _resample(compFrame, entry.value, meta.fps), store);
-    }
+    if (store == null || !_streamer.hasPlans) return;
+    await _streamer.prepareForComposition(
+      compFrame: compFrame,
+      meta: clipMeta,
+      store: store,
+      windowCapacity: clipWindowCapacity,
+      debugOwner: '$runtimeType',
+    );
   }
 
   /// The synchronous metadata lookup: asserts the pre-pass ran, then returns the
@@ -213,7 +181,7 @@ mixin ClipResolveCache on ImageResolveCache {
       }
       return image;
     }
-    final image = _window['${_keyFor(source)}#$sourceFrame'];
+    final image = _streamer.lookupDecoded(source, sourceFrame);
     if (image == null) {
       throw FluvieRenderException(
         '$runtimeType has no clip frame $sourceFrame for "$source" in the decode '
@@ -234,77 +202,6 @@ mixin ClipResolveCache on ImageResolveCache {
       }
     }
     clipFrames.clear();
-    for (final image in _window.values) {
-      image.dispose();
-    }
-    _window.clear();
-    _clipPlans.clear();
-    _clipKeys.clear();
-    _storedFrames.clear();
-  }
-
-  /// Ensures [sourceFrame] of [source] is decoded in the window, loading it from
-  /// [store] and decoding on a miss, then evicting the LRU beyond capacity.
-  Future<void> _ensureDecoded(
-    MediaSource source,
-    int sourceFrame,
-    ClipFrameStore store,
-  ) async {
-    final lruKey = '${_keyFor(source)}#$sourceFrame';
-    final present = _window.remove(lruKey);
-    if (present != null) {
-      _window[lruKey] = present; // touch: move to most-recently-used.
-      return;
-    }
-    final rgba = await store.get(_keyFor(source), sourceFrame);
-    if (rgba == null) {
-      throw FluvieRenderException(
-        '$runtimeType has no stored clip frame $sourceFrame for "$source". '
-        'Was it included in the frames pre-resolved with preResolveClip?',
-      );
-    }
-    final meta = clipMeta[source]!;
-    _window[lruKey] = await _decodeRgba(source, rgba, meta.width, meta.height);
-    // Every registered clip warms one frame per composition frame, so the window
-    // must hold at least that many at once or a clip's just-warmed frame would be
-    // evicted before paint reads it.
-    final capacity = math.max(clipWindowCapacity, _clipPlans.length);
-    while (_window.length > capacity) {
-      _window.remove(_window.keys.first)!.dispose();
-    }
-  }
-
-  int _resample(int compFrame, _ClipPlan plan, double srcFps) {
-    final advanced = ((compFrame - plan.windowStart) / plan.compFps * srcFps).floor();
-    final raw = advanced + plan.trimStartFrames;
-    return math.max(plan.trimStartFrames, math.min(raw, plan.trimEndFrames - 1));
-  }
-
-  String _keyFor(MediaSource source) =>
-      _clipKeys.putIfAbsent(source, () => 'clip${_clipKeyCounter++}');
-
-  Future<ui.Image> _decodeRawFrame(MediaSource source, RawFrame raw) =>
-      _decodeRgba(source, raw.rgba, raw.width, raw.height);
-
-  Future<ui.Image> _decodeRgba(
-    MediaSource source,
-    Uint8List rgba,
-    int width,
-    int height,
-  ) async {
-    try {
-      final completer = Completer<ui.Image>();
-      ui.decodeImageFromPixels(
-        rgba,
-        width,
-        height,
-        ui.PixelFormat.rgba8888,
-        completer.complete,
-      );
-      return await completer.future;
-    } on Object catch (error) {
-      // coverage:ignore-line: defensive decode-failure wrap; valid clip frames decode cleanly
-      throw FluvieRenderException('Failed to decode clip frame of "$source": $error.');
-    }
+    _streamer.dispose();
   }
 }
