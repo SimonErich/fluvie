@@ -1,8 +1,10 @@
 # Fluvie examples
 
-The full, runnable examples live in the workspace `example/` app: twelve lessons
-(`example/lib/lessons/01_hello_video.dart` through `12_the_kitchen_sink.dart`)
-plus a scrubbable inspector. Each lesson is one complete, readable `Video`.
+The full, runnable examples live in the repository's
+[gallery app](https://github.com/SimonErich/fluvie/tree/main/examples/gallery):
+twelve lessons (`examples/gallery/lib/lessons/01_hello_video.dart` through
+`12_the_kitchen_sink.dart`) plus a scrubbable inspector. Each lesson is one
+complete, readable `Video`.
 
 The smallest one, lesson 01:
 
