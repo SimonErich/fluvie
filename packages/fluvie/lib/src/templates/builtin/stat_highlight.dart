@@ -27,7 +27,7 @@ import 'package:meta/meta.dart' show immutable;
 final class StatHighlightProps {
   /// Creates the props from a required [value] and [label] and optional [accent]
   /// (the headline color) and [background] (the scene backdrop).
-  // coverage:ignore-line: const-ctor artifact, props pinned by template tests
+  // coverage:ignore-line const ctor artifact props pinned by template tests
   const StatHighlightProps({
     required this.value,
     required this.label,
@@ -79,7 +79,7 @@ final class StatHighlightProps {
 /// ```
 final class StatHighlight extends VideoTemplate<StatHighlightProps> {
   /// Creates the built-in; all variation flows through [build]'s props.
-  // coverage:ignore-line: const-ctor artifact, build behavior pinned by template tests
+  // coverage:ignore-line const ctor artifact build behavior pinned by template tests
   const StatHighlight();
 
   /// The card lasts 3 seconds; the count runs over the first 2.

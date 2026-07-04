@@ -33,7 +33,7 @@ import 'package:fluvie/src/timing/time_scope_provider.dart';
 final class Typewriter extends StatelessWidget {
   /// Types out [text] at [speed] frames per glyph, optionally trailing a
   /// blinking [caret], in [style].
-  // coverage:ignore-line: const-ctor artifact, behavior pinned by typewriter tests
+  // coverage:ignore-line const ctor artifact behavior pinned by typewriter tests
   const Typewriter(
     this.text, {
     this.speed = const Time.frames(2),

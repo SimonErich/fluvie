@@ -37,7 +37,7 @@ import 'package:fluvie/src/composition/video.dart';
 abstract class VideoTemplate<P> {
   /// Const so a template carries no state of its own — every choice flows
   /// through [build]'s [P], keeping the definition a pure function of its props.
-  // coverage:ignore-line: const super-ctor artifact for the abstract template base
+  // coverage:ignore-line const super ctor artifact for the abstract template base
   const VideoTemplate();
 
   /// Builds the [Video] for [props].

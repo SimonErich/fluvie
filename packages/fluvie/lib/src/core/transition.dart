@@ -43,7 +43,7 @@ enum TransitionKind {
 @immutable
 final class Transition {
   /// A hard cut: zero [duration], no [overlap], no blend window at all.
-  // coverage:ignore-line: const-ctor artifact, behavior pinned by transition_test
+  // coverage:ignore-line const ctor artifact behavior pinned by transition_test
   const Transition.cut()
     : kind = TransitionKind.cut,
       duration = Time.zero,

@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 @immutable
 final class CaptionTheme {
   /// Creates a theme from an explicit [defaultStyle].
-  // coverage:ignore-line: const-ctor artifact, behavior pinned by caption theme tests
+  // coverage:ignore-line const ctor artifact behavior pinned by caption theme tests
   const CaptionTheme({required this.defaultStyle});
 
   /// The standard caption theme: a plain lower-third [CaptionStyle.subtitle].

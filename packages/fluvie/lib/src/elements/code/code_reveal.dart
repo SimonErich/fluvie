@@ -43,7 +43,7 @@ final class InstantReveal extends CodeReveal {
 /// The [CodeReveal.typing] variant: glyph-by-glyph at [speed] frames per glyph.
 final class TypingReveal extends CodeReveal {
   /// Creates a typed reveal at [speed] frames per glyph.
-  // coverage:ignore-line: const-ctor artifact, equality/toString pinned by code_reveal_test
+  // coverage:ignore-line const ctor artifact equality toString pinned by code_reveal_test
   const TypingReveal(this.speed);
 
   /// How long each glyph takes to appear; resolved against the element window.
@@ -62,7 +62,7 @@ final class TypingReveal extends CodeReveal {
 /// The [CodeReveal.lineByLine] variant: whole lines at [perLine] frames each.
 final class LineByLineReveal extends CodeReveal {
   /// Creates a line-by-line reveal at [perLine] frames per line.
-  // coverage:ignore-line: const-ctor artifact, equality/toString pinned by code_reveal_test
+  // coverage:ignore-line const ctor artifact equality toString pinned by code_reveal_test
   const LineByLineReveal(this.perLine);
 
   /// How long each line waits before appearing; resolved against the window.

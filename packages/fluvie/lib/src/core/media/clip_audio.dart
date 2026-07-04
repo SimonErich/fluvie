@@ -28,7 +28,7 @@ final class ClipAudio {
 
   /// Drops the clip's audio entirely: [muted] is `true`, [volume] is `0`, and
   /// there is no [fadeIn].
-  // coverage:ignore-line: const-ctor artifact, behavior pinned by clip_audio tests
+  // coverage:ignore-line const ctor artifact behavior pinned by clip_audio tests
   const ClipAudio.muted() : muted = true, volume = 0.0, fadeIn = Time.zero;
 
   /// Whether the clip's audio is dropped (`true` for [ClipAudio.muted]).

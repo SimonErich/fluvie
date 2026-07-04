@@ -1,4 +1,4 @@
-// coverage:ignore-file: thin minio network adapter; exercised by the @Tags(['s3'])
+// coverage:ignore-file thin minio network adapter exercised by the Tags s3
 // integration suite against a live bucket, not unit-testable. The mapping logic
 // it feeds (S3FileStore) is fully unit-tested through the S3ObjectStorage fake.
 import 'dart:typed_data';

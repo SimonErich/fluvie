@@ -1,4 +1,4 @@
-// coverage:ignore-file — thin JS bridge, exercised only by the manual
+// coverage:ignore-file thin JS bridge exercised only by the manual
 // clip-tagged browser harness; CI covers the web resolver against a fake.
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';

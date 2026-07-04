@@ -15,7 +15,7 @@ final class InitPrompt {
   /// [readLine] (default: `stdin.readLineSync`).
   InitPrompt({required this.out, LineReader? readLine}) : _readLine = readLine ?? _stdinReadLine;
 
-  // coverage:ignore-start: real stdin; the seam is exercised via an injected reader.
+  // coverage:ignore-start real stdin the seam is exercised via an injected reader
   static String? _stdinReadLine() => stdin.readLineSync();
   // coverage:ignore-end
 

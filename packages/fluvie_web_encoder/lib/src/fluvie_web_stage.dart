@@ -1,4 +1,4 @@
-// coverage:ignore-file: drives the live engine pipeline (post-frame callbacks,
+// coverage:ignore-file drives the live engine pipeline post frame callbacks
 // scheduleFrame, off-screen paint) so a real RepaintBoundary mounts and reads
 // back; this only runs in a browser, not the unit-test binding. The renderer
 // orchestration is covered with a tester-backed host, and the full chain is

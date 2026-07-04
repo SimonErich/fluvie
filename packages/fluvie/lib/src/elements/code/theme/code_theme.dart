@@ -21,7 +21,7 @@ import 'package:meta/meta.dart' show immutable;
 @immutable
 final class CodeTheme {
   /// Creates a theme from explicit per-token colors and editor chrome colors.
-  // coverage:ignore-line: const-ctor artifact, palette pinned by code_theme_test
+  // coverage:ignore-line const ctor artifact palette pinned by code_theme_test
   const CodeTheme({
     required this.keyword,
     required this.string,
@@ -61,7 +61,7 @@ final class CodeTheme {
       removedGutter = const Color(0xFF8A1F11);
 
   /// A neutral light theme: dark text on a near-white editor background.
-  // coverage:ignore-line: const-ctor artifact, palette pinned by code_theme_test
+  // coverage:ignore-line const ctor artifact palette pinned by code_theme_test
   const CodeTheme.light()
     : keyword = const Color(0xFFAF00DB),
       string = const Color(0xFFA31515),

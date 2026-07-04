@@ -67,6 +67,6 @@ final class BundleWebAudioMaterializer implements WebAudioMaterializer {
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   }
 
-  // coverage:ignore-line: real browser HTTP GET, exercised only in a browser; tests inject fetch.
+  // coverage:ignore-line real browser HTTP GET exercised only in a browser tests inject fetch
   static Future<Uint8List> _httpGet(Uri url) => http.readBytes(url);
 }

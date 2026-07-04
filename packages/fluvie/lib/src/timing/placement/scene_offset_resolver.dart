@@ -52,7 +52,7 @@ SceneOffsets resolveSceneOffsets({
   final ids = sceneIds ?? [for (var s = 0; s < durations.length; s++) 'scenes[$s]'];
   assert(
     ids.length == durations.length,
-    // coverage:ignore-line: defensive assert message; sceneIds always matches the scene count
+    // coverage:ignore-line defensive assert message sceneIds always matches the scene count
     'sceneIds must label every scene: got ${ids.length} ids for ${durations.length} scenes.',
   );
   final boundaries = math.max(0, durations.length - 1);

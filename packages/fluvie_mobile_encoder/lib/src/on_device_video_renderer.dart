@@ -60,7 +60,7 @@ final class OnDeviceVideoRenderer {
   /// test captures them here).
   static void Function(String message) onWarning = _defaultWarn;
 
-  // coverage:ignore-line: the default sink runs only when onWarning is not overridden, which tests always do.
+  // coverage:ignore-line the default sink runs only when onWarning is not overridden which tests always do
   static void _defaultWarn(String message) => debugPrint('fluvie_mobile_encoder: $message');
 
   final MobileVideoEncoder _encoder;
@@ -199,7 +199,7 @@ final class OnDeviceVideoRenderer {
     }
   }
 
-  // coverage:ignore-line: constructs the engine-backed host, exercised only on a device.
+  // coverage:ignore-line constructs the engine backed host exercised only on a device
   static CaptureHost _defaultHostFactory(Size size) => OffscreenCaptureHost(size);
 
   static Future<Directory> _defaultSandboxFactory() =>

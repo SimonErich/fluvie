@@ -171,7 +171,7 @@ final class RenderQueue {
   static int _idCounter = 0;
   static String _defaultId() => 'rnd_${_defaultNow().microsecondsSinceEpoch}_${_idCounter++}';
 
-  // coverage:ignore-start: real temp dir; unit tests inject their own work dir
+  // coverage:ignore-start real temp dir unit tests inject their own work dir
   static Future<Directory> _defaultWorkDir(String jobId) =>
       Directory.systemTemp.createTemp('fluvie_server_job_${jobId}_');
   // coverage:ignore-end

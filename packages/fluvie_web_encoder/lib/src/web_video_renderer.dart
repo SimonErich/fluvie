@@ -38,9 +38,9 @@ final class WebVideoRenderer {
     this.mediaResolver,
     this.networkAllowlist,
   }) : _hostFactory = hostFactory ?? _defaultHostFactory,
-       // coverage:ignore-line: the `?? _defaultEncoder()` default only runs in a browser.
+       // coverage:ignore-line the _defaultEncoder default only runs in a browser
        _encoder = encoder ?? _defaultEncoder(),
-       // coverage:ignore-line: the default materializer reads rootBundle, only in a browser.
+       // coverage:ignore-line the default materializer reads rootBundle only in a browser
        _audioMaterializer = audioMaterializer ?? BundleWebAudioMaterializer(),
        _clipDecoder = clipDecoder ?? createWebClipDecoder(),
        _frameEncoder = frameEncoder ?? encodeFramePng;
@@ -61,7 +61,7 @@ final class WebVideoRenderer {
   /// warnings (a test captures them here).
   static void Function(String message) onWarning = _defaultWarn;
 
-  // coverage:ignore-line: the default sink runs only when onWarning is not overridden, which tests always do.
+  // coverage:ignore-line the default sink runs only when onWarning is not overridden which tests always do
   static void _defaultWarn(String message) => debugPrint('fluvie_web_encoder: $message');
 
   final WebVideoEncoder _encoder;
@@ -212,9 +212,9 @@ final class WebVideoRenderer {
     return (tracks: mix.tracks, masterVolume: mix.masterVolume);
   }
 
-  // coverage:ignore-line: binds to the live FluvieWebStage, exercised only in a browser.
+  // coverage:ignore-line binds to the live FluvieWebStage exercised only in a browser
   static WebCaptureHost _defaultHostFactory(Size size) => FluvieWebStage.hostFor(size);
 
-  // coverage:ignore-line: constructs the default ffmpeg.wasm encoder, only valid in a browser.
+  // coverage:ignore-line constructs the default ffmpeg wasm encoder only valid in a browser
   static WebVideoEncoder _defaultEncoder() => WebVideoEncoder();
 }

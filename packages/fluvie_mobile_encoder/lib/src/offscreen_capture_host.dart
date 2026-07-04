@@ -1,4 +1,4 @@
-// coverage:ignore-file: drives the real Flutter engine (a live RenderView, manual
+// coverage:ignore-file drives the real Flutter engine a live RenderView manual
 // pipeline flushes, and toImage read-back) which runs only in a hosted app or an
 // on-device integration test, never under the unit-test binding; the orchestrator
 // logic is covered with a tester-backed CaptureHost instead.

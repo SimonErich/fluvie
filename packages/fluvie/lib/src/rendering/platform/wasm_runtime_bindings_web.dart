@@ -1,4 +1,4 @@
-// coverage:ignore-file — thin JS bridge, exercised only by the manual
+// coverage:ignore-file thin JS bridge exercised only by the manual
 // wasm-tagged browser harness; CI covers the provider against a mock.
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';

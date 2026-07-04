@@ -12,7 +12,7 @@ import 'package:riverpod/riverpod.dart';
 /// Chooses the [FfmpegProvider] for a platform: the native process provider
 /// everywhere except the web, where ffmpeg.wasm takes over.
 final class FfmpegProviderRegistry {
-  // coverage:ignore-line: const private ctor for the static-facade registry
+  // coverage:ignore-line const private ctor for the static facade registry
   const FfmpegProviderRegistry._();
 
   /// Builds the provider for [isWeb], with every dependency injectable.
@@ -39,8 +39,7 @@ final class FfmpegProviderRegistry {
     );
   }
 
-  // coverage:ignore-start: web-only fail-loud defaults; the VM render path never takes the
-  // isWeb branch, so these unwired guards cannot run in a unit test.
+  // coverage:ignore-start web only fail loud defaults the VM render path never takes the isWeb branch so these unwired guards cannot run in a unit test
   static Future<Uint8List> _unwiredReadInput(String name) => throw UnsupportedError(
     'WasmFfmpegProvider has no readInput wired: the web render path must '
     'provide one to FfmpegProviderRegistry.select before encoding "$name".',

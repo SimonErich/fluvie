@@ -58,6 +58,6 @@ final class NetworkAudioMaterializer implements MobileAudioMaterializer {
 
   static String _safeName(String source) => source.replaceAll(RegExp('[^A-Za-z0-9._-]'), '_');
 
-  // coverage:ignore-line: real network GET, exercised on-device only; tests inject fetch.
+  // coverage:ignore-line real network GET exercised on device only tests inject fetch
   static Future<Uint8List> _httpGet(Uri url) => http.readBytes(url);
 }

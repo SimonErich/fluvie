@@ -64,5 +64,5 @@ final class ServerDependencies {
 }
 
 // The system wall clock in UTC, the production default for ServerDependencies.now.
-// coverage:ignore-line: real wall clock; tests inject a fixed clock by contract.
+// coverage:ignore-line real wall clock tests inject a fixed clock by contract
 DateTime _systemUtcNow() => DateTime.now().toUtc();

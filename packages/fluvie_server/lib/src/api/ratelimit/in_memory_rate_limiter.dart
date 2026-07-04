@@ -96,7 +96,7 @@ final class InMemoryRateLimiter implements RateLimiter {
   static Duration _atLeastOneSecond(Duration wait) =>
       wait < const Duration(seconds: 1) ? const Duration(seconds: 1) : wait;
 
-  // coverage:ignore-line: real wall clock; tests inject a fixed clock by contract.
+  // coverage:ignore-line real wall clock tests inject a fixed clock by contract
   static DateTime _systemUtcNow() => DateTime.now().toUtc();
 }
 

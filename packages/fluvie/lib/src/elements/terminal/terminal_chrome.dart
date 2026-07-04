@@ -27,7 +27,7 @@ final class TerminalChrome {
 
   /// macOS-style chrome: a title bar carrying [title] and the three traffic-light
   /// dots.
-  // coverage:ignore-line: const-ctor artifact, behavior pinned by terminal tests
+  // coverage:ignore-line const ctor artifact behavior pinned by terminal tests
   const TerminalChrome.macos({this.title}) : showDots = true;
 
   /// An explicit no-chrome value: no title bar, no dots. Equivalent to passing

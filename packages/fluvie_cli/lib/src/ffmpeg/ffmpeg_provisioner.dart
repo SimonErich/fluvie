@@ -76,7 +76,7 @@ final class FfmpegProvisioner implements FfmpegInstaller {
     }
     if (!force && File(binaryPath).existsSync()) return binaryPath;
 
-    // coverage:ignore-line: the host-asset default is exercised by the download-tagged provision test.
+    // coverage:ignore-line the host asset default is exercised by the download tagged provision test
     final resolved = asset ?? ffmpegAssetFor();
     log('Downloading $pinnedFfmpegBuildLabel ...');
     final bytes = await _downloader.download(resolved.url);

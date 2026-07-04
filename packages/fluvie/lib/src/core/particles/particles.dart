@@ -38,8 +38,7 @@ enum ParticleKind {
 /// ```
 @immutable
 final class Particles {
-  // coverage:ignore-start: const-ctor artifacts; particles_test pins the fields, equality,
-  // and toString. The VM does not instrument the const literals themselves.
+  // coverage:ignore-start const ctor artifacts particles_test pins the fields equality and toString The VM does not instrument the const literals themselves
   /// The shared const constructor; the named factories pin each kind's
   /// defaults rather than exposing this directly.
   const Particles._({

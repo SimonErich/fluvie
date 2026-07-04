@@ -168,7 +168,7 @@ final class PipelineRenderRunner implements RenderRunner {
 
   Map<String, String> _defines(RenderRequest request, Directory workDir, String specOut) =>
       switch (request) {
-        // coverage:ignore-line: unreachable; code renders take the staged path
+        // coverage:ignore-line unreachable code renders take the staged path
         CodeRenderRequest() => const {},
         KeyRenderRequest() => const {},
         SpecRenderRequest(:final spec) => specDefines(
@@ -203,14 +203,14 @@ final class PipelineRenderRunner implements RenderRunner {
     null || 'mp4' => ('mp4', 'video/mp4'),
     'gif' => ('gif', 'image/gif'),
     'transparent' => ('webm', 'video/webm'),
-    // coverage:ignore-line: unreachable; formats are validated at request parse
+    // coverage:ignore-line unreachable formats are validated at request parse
     _ => throw RenderFailure('Unsupported format: $format'),
   };
 
   static String _posterPath(String outPath) =>
       outPath.replaceFirst(RegExp(r'\.[^.]+$'), '.poster.png');
 
-  // coverage:ignore-start: makes a real temp dir; the unit tests inject their own
+  // coverage:ignore-start makes a real temp dir the unit tests inject their own
   static Future<Directory> _defaultSandbox() =>
       Directory.systemTemp.createTemp('fluvie_server_cap_');
   // coverage:ignore-end

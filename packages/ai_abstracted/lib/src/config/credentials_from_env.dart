@@ -52,8 +52,7 @@ String _envKey(ProviderId provider) {
       return 'ANTHROPIC_API_KEY';
     case ProviderId.mistral:
       return 'MISTRAL_API_KEY';
-    // coverage:ignore-start: unreachable; keyless ollama short-circuits before _envKey is
-    // ever consulted. The case exists only to keep the switch exhaustive.
+    // coverage:ignore-start unreachable keyless ollama short circuits before _envKey is ever consulted The case exists only to keep the switch exhaustive
     case ProviderId.ollama:
       return '';
     // coverage:ignore-end

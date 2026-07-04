@@ -28,8 +28,7 @@ final class FfmpegAudioDecoder {
   /// are reproducible per machine; the bytes themselves are the documented
   /// per-machine exception (ffmpeg builds differ), but the analysis derived
   /// from them is stable.
-  // coverage:ignore-start: process glue; it spawns the real ffmpeg binary, so it runs only
-  // under the ffmpeg-tagged integration suite, never the unit gate.
+  // coverage:ignore-start process glue it spawns the real ffmpeg binary so it runs only under the ffmpeg tagged integration suite never the unit gate
   Future<Float32List> decode(String name, {required String workingDirectory}) async {
     final args = audioDecodeArgs(name);
     final process = await Process.start(binaryPath, args, workingDirectory: workingDirectory);

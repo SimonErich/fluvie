@@ -25,7 +25,7 @@ import 'package:meta/meta.dart' show immutable;
 /// the repaint cache stays frame-stable.
 @immutable
 sealed class TerminalLine {
-  // coverage:ignore-line: const-ctor artifact, behavior pinned by terminal tests
+  // coverage:ignore-line const ctor artifact behavior pinned by terminal tests
   const TerminalLine(this.text);
 
   /// A typed command line: it types out glyph by glyph after a prompt with a
@@ -46,7 +46,7 @@ sealed class TerminalLine {
 final class TerminalCmd extends TerminalLine {
   /// Creates a typed command over [text], optionally overriding the terminal's
   /// prompt with [prompt].
-  // coverage:ignore-line: const-ctor artifact, behavior pinned by terminal tests
+  // coverage:ignore-line const ctor artifact behavior pinned by terminal tests
   const TerminalCmd(super.text, {this.prompt});
 
   /// The prompt printed before this command, or `null` to use the terminal's
@@ -67,7 +67,7 @@ final class TerminalCmd extends TerminalLine {
 /// The [TerminalLine.out] variant: a streamed block of output text.
 final class TerminalOut extends TerminalLine {
   /// Creates an output line over [text].
-  // coverage:ignore-line: const-ctor artifact, behavior pinned by terminal tests
+  // coverage:ignore-line const ctor artifact behavior pinned by terminal tests
   const TerminalOut(super.text);
 
   @override

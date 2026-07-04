@@ -10,7 +10,7 @@ import 'package:fluvie_cli/src/render_pipeline.dart';
 
 /// Creates the per-render temp sandbox; deleted after the render unless
 /// `--keep-temp` is passed.
-// coverage:ignore-line: filesystem glue; makes a real temp dir, banned in unit tests
+// coverage:ignore-line filesystem glue makes a real temp dir banned in unit tests
 Future<Directory> createRenderSandbox() => Directory.systemTemp.createTemp('fluvie_render_');
 
 /// `fluvie render <key> --out <file>` (or `--spec <file.fluvie.json>`): capture

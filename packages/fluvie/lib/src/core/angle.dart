@@ -16,8 +16,7 @@ import 'package:meta/meta.dart';
 /// equal whichever constructor produced it.
 @immutable
 final class Angle {
-  // coverage:ignore-start: const-ctor artifacts; angle_test pins the canonical turns each
-  // ctor stores plus equality and toString.
+  // coverage:ignore-start const ctor artifacts angle_test pins the canonical turns each ctor stores plus equality and toString
   /// An angle of [degrees] degrees (`360` = one full turn).
   const Angle.deg(double degrees) : turns = degrees / 360;
 

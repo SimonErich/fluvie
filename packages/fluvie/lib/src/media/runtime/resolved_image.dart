@@ -49,8 +49,7 @@ final class ResolvedImage extends StatelessWidget {
   Widget _previewFallback() => switch (source) {
     AssetSource(:final name) => flutter.Image.asset(name, fit: fit),
     NetworkSource(:final url) => flutter.Image.network(url.toString(), fit: fit),
-    // coverage:ignore-start: live-preview-only file and memory arms; they read the real
-    // filesystem or decode bytes, which the capture path never touches.
+    // coverage:ignore-start live preview only file and memory arms they read the real filesystem or decode bytes which the capture path never touches
     FileSource(:final path) => fileImagePreview(path, fit),
     MemorySource(:final bytes) => flutter.Image.memory(bytes, fit: fit),
     // coverage:ignore-end

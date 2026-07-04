@@ -28,7 +28,7 @@ import 'package:meta/meta.dart' show immutable;
 final class TitleIntroProps {
   /// Creates the props from a required [title] and optional [subtitle], [accent]
   /// (the title color), and [background] (the scene backdrop).
-  // coverage:ignore-line: const-ctor artifact, props pinned by template tests
+  // coverage:ignore-line const ctor artifact props pinned by template tests
   const TitleIntroProps({
     required this.title,
     this.subtitle,
@@ -81,7 +81,7 @@ final class TitleIntroProps {
 /// ```
 final class TitleIntro extends VideoTemplate<TitleIntroProps> {
   /// Creates the built-in; all variation flows through [build]'s props.
-  // coverage:ignore-line: const-ctor artifact, build behavior pinned by template tests
+  // coverage:ignore-line const ctor artifact build behavior pinned by template tests
   const TitleIntro();
 
   /// The intro lasts 3 seconds on the canonical vertical canvas.

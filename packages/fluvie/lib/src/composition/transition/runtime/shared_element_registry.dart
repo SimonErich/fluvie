@@ -126,7 +126,7 @@ final class SharedElementRegistry {
     final where = scenes.map((s) => "'scenes[$s]'").join(', ');
     assert(
       scenes.every((s) => s >= 0 && s < sceneCount),
-      // coverage:ignore-line: defensive assert message; slots always register a valid scene index
+      // coverage:ignore-line defensive assert message slots always register a valid scene index
       'a shared slot named a scene index outside [0, $sceneCount)',
     );
     if (scenes.length == 1) {

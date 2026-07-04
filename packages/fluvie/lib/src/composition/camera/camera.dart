@@ -56,7 +56,7 @@ final class Camera {
        );
 
   /// A camera that does not move: the scene paints unscaled, centred.
-  // coverage:ignore-line: const-ctor artifact, still-pose behavior pinned by camera_test
+  // coverage:ignore-line const ctor artifact still pose behavior pinned by camera_test
   const Camera.still()
     : this._(
         over: const Time.relative(1),

@@ -122,7 +122,7 @@ final class AstRenderer {
   Widget _fencedCode(md.Element node) {
     final code = (node.children ?? const <md.Node>[]).whereType<md.Element>().firstWhere(
       (e) => e.tag == 'code',
-      // coverage:ignore-line — the parser always nests `pre`>`code`; defensive.
+      // coverage:ignore-line the parser always nests pre code defensive
       orElse: () => md.Element.text('code', node.textContent),
     );
     final language = _languageOf(code.attributes['class']);
@@ -156,7 +156,7 @@ final class AstRenderer {
         _ => TextSpan(children: _inline(node.children, base)),
       };
     }
-    // coverage:ignore-line — inline nodes are always Text or Element post-parse.
+    // coverage:ignore-line inline nodes are always Text or Element post parse
     return TextSpan(text: node.textContent, style: base);
   }
 

@@ -140,7 +140,7 @@ Future<ui.Image> _decodeRgba(MediaSource source, Uint8List rgba, int width, int 
     ui.decodeImageFromPixels(rgba, width, height, ui.PixelFormat.rgba8888, completer.complete);
     return await completer.future;
   } on Object catch (error) {
-    // coverage:ignore-line: defensive decode-failure wrap; valid clip frames decode cleanly
+    // coverage:ignore-line defensive decode failure wrap valid clip frames decode cleanly
     throw FluvieRenderException('Failed to decode clip frame of "$source": $error.');
   }
 }

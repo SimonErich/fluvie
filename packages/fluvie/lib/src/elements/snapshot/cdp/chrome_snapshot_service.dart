@@ -44,10 +44,7 @@ class ChromeSnapshotService implements SnapshotService {
     return _capture(binary, request);
   }
 
-  // coverage:ignore-start: live CDP glue (spawn, websocket, navigate, screenshot); needs a
-  // real browser, so it is exercised only by the @Tags(['snapshot']) integration test that
-  // self-skips when no Chrome is present. All decision logic it relies on (binary probe,
-  // arg arrays, error mapping) is pure and fully covered elsewhere.
+  // coverage:ignore-start live CDP glue spawn websocket navigate screenshot needs a real browser so it is exercised only by the Tags snapshot integration test that self skips when no Chrome is present All decision logic it relies on binary probe arg arrays error mapping is pure and fully covered elsewhere
   Future<SnapshotRaster> _capture(String binary, SnapshotRequest request) async {
     throw FluvieRenderException(
       'ChromeSnapshotService live capture is not wired in this build (binary: '

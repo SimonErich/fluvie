@@ -14,7 +14,7 @@ import 'package:meta/meta.dart';
 final class CaptionStyle {
   /// Creates a style from an explicit [textStyle], [background], [highlight],
   /// and the [wordPop] / [karaoke] flags.
-  // coverage:ignore-line: const-ctor artifact, pinned by caption_values_coverage_test
+  // coverage:ignore-line const ctor artifact pinned by caption_values_coverage_test
   const CaptionStyle({
     required this.textStyle,
     required this.background,
@@ -25,7 +25,7 @@ final class CaptionStyle {
 
   /// Bold white words on a translucent dark pill that pop in one by one — the
   /// social-clip caption look.
-  // coverage:ignore-line: const-ctor artifact, pinned by caption_values_coverage_test
+  // coverage:ignore-line const ctor artifact pinned by caption_values_coverage_test
   const CaptionStyle.tikTok()
     : textStyle = const TextStyle(
         color: Color(0xFFFFFFFF),
@@ -52,7 +52,7 @@ final class CaptionStyle {
 
   /// A karaoke caption: the whole line shows dimmed and the active word lights
   /// up in the [highlight] color as it is sung.
-  // coverage:ignore-line: const-ctor artifact, pinned by caption_values_coverage_test
+  // coverage:ignore-line const ctor artifact pinned by caption_values_coverage_test
   const CaptionStyle.karaoke()
     : textStyle = const TextStyle(
         color: Color(0x80FFFFFF),

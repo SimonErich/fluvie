@@ -16,8 +16,7 @@ enum ImageFormat {
 /// value-equal within a variant, so configs can be compared and cached.
 @immutable
 final class Export {
-  // coverage:ignore-start: const-ctor artifacts; export_test pins each variant mode,
-  // equality, and toString. The VM does not instrument the const literals.
+  // coverage:ignore-start const ctor artifacts export_test pins each variant mode equality and toString The VM does not instrument the const literals
   const Export._(this.mode, {this.quality, this.gifFps, this.imageFormat});
 
   /// An H.264 MP4 at [quality] — the default share-anywhere container.

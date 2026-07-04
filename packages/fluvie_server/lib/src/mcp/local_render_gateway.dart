@@ -106,7 +106,7 @@ final class LocalRenderGateway implements RenderGateway {
     }
   }
 
-  // coverage:ignore-start: real delay; tests inject an instant wait.
+  // coverage:ignore-start real delay tests inject an instant wait
   static Future<void> _realWait(Duration duration) => Future<void>.delayed(duration);
   // coverage:ignore-end
 }

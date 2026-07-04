@@ -22,18 +22,24 @@ write a test that asserts the work. An ignore is a last resort.
 
 Every ignore carries a reason on the same line. The gate honors three markers.
 
+Write the reason in letters, digits, and spaces only. No colon after the
+marker, no punctuation in the reason. `package:coverage` (the collector inside
+`flutter test --coverage`) drops a marker on any other character, and an
+unbalanced start and end pair crashes the whole test run. The tool test
+`tool/test/coverage_ignore_syntax_test.dart` pins every marker to this charset.
+
 Use an inline marker for one line:
 
 <!-- code-excerpt-ignore: illustrates the coverage:ignore marker syntax, not runnable Fluvie API -->
 ```dart
-final x = legacy(); // coverage:ignore-line: reason here
+final x = legacy(); // coverage:ignore-line reason here
 ```
 
 Use a block marker for a run of lines:
 
 <!-- code-excerpt-ignore: illustrates the coverage:ignore marker syntax, not runnable Fluvie API -->
 ```dart
-// coverage:ignore-start: reason here
+// coverage:ignore-start reason here
 ... block ...
 // coverage:ignore-end
 ```
@@ -42,7 +48,7 @@ Use a file marker for a whole file:
 
 <!-- code-excerpt-ignore: illustrates the coverage:ignore marker syntax, not runnable Fluvie API -->
 ```dart
-// coverage:ignore-file: reason here
+// coverage:ignore-file reason here
 ```
 
 The gate reads the source and drops the marked lines from the total. Then it

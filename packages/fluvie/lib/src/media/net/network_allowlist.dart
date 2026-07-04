@@ -14,7 +14,7 @@ final class NetworkAllowlist {
   /// Creates an allowlist permitting exactly [hosts] over [schemes].
   ///
   /// [schemes] defaults to `{'https'}` — `http` must be opted in explicitly.
-  // coverage:ignore-line: const-ctor artifact, allow/deny behavior pinned by allowlist tests
+  // coverage:ignore-line const ctor artifact allow deny behavior pinned by allowlist tests
   const NetworkAllowlist({required this.hosts, this.schemes = const {'https'}})
     : _allowAnyHost = false;
 
