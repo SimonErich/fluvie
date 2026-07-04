@@ -16,10 +16,11 @@ environment:
 resolution: workspace
 dependencies:
   analyzer: ">=8.0.0 <9.0.0"
-  # Pinned exactly: the engine calls DartLintRule.testRun, which is
-  # @visibleForTesting, so a minor bump could change it without a major. The
-  # rule-fires test guards against silent drift.
-  custom_lint_builder: 0.8.1
+  # Caret range, not an exact pin: an exact pin fails pub.dev's publish
+  # dry-run (the v0.1.10 publish exited 65 on it). The engine calls
+  # DartLintRule.testRun, which is @visibleForTesting, so a patch bump could
+  # still move it — the rule-fires test guards against silent drift.
+  custom_lint_builder: ^0.8.1
   fluvie: ^0.1.0
   fluvie_lints: ^0.1.0
 dev_dependencies:
