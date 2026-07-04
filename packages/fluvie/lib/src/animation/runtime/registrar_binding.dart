@@ -4,6 +4,7 @@ library;
 import 'package:flutter/widgets.dart' show BuildContext;
 import 'package:fluvie/src/animation/animation.dart';
 import 'package:fluvie/src/animation/runtime/animation_plan_adapter.dart';
+import 'package:fluvie/src/animation/runtime/schedule_lookup.dart';
 import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/defaults.dart';
 import 'package:fluvie/src/core/errors/fluvie_timing_error.dart';
@@ -11,9 +12,11 @@ import 'package:fluvie/src/core/time_range.dart';
 import 'package:fluvie/src/timing/schedule/composition_registrar.dart';
 import 'package:fluvie/src/timing/schedule/composition_registrar_scope.dart';
 import 'package:fluvie/src/timing/schedule/element_registration.dart';
-import 'package:fluvie/src/timing/schedule/element_schedule.dart';
 import 'package:fluvie/src/timing/schedule/resolved_schedule_scope.dart';
 import 'package:fluvie/src/timing/window_scope.dart';
+
+export 'package:fluvie/src/animation/runtime/schedule_lookup.dart'
+    show CollectPending, ScheduleLookup, ScheduleReady, Standalone;
 
 /// One element's registrar-side state, owned by its [MotionTarget] State for
 /// the State's lifetime: the registration token, the registrar it registered
@@ -107,34 +110,4 @@ final class RegistrarBinding {
     _token = null;
     _registrar = null;
   }
-}
-
-/// The outcome of one [RegistrarBinding.lookup] — which arm of the
-/// consult order applies this build.
-sealed class ScheduleLookup {
-  const ScheduleLookup();
-}
-
-/// A schedule is available: an explicit [ResolvedScheduleScope] or a resolved
-/// registrar answered — render the full animated frame with it.
-final class ScheduleReady extends ScheduleLookup {
-  /// Wraps the [schedule] to render with.
-  const ScheduleReady(this.schedule);
-
-  /// The element's resolved schedule.
-  final ElementSchedule schedule;
-}
-
-/// A registrar is still collecting (pass 1): render the hidden
-/// placeholder — no animation math, layout slot held.
-final class CollectPending extends ScheduleLookup {
-  /// Const marker.
-  const CollectPending();
-}
-
-/// No explicit scope and no registrar: standalone mode — the caller resolves
-/// a local schedule (the documented fallback).
-final class Standalone extends ScheduleLookup {
-  /// Const marker.
-  const Standalone();
 }
