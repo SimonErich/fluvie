@@ -5,9 +5,7 @@
       "command": "codegraph",
       "args": [
         "serve",
-        "--mcp",
-        "--path",
-        "/home/simonerich/Flutters/fluvie2"
+        "--mcp"
       ]
     }
   }

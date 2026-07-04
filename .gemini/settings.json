@@ -1,4 +1,5 @@
 {
+  "contextFileName": "AGENTS.md",
   "mcpServers": {
     "codegraph": {
       "type": "stdio",
