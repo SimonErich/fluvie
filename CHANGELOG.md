@@ -49,7 +49,8 @@ Per-package changelogs live next to each package.
   variable (`FLUVIE_ENABLE_API` / `_MCP` / `_DOCS`). The `/v1` routes, the `/mcp`
   contract, and every env var name are unchanged, so existing clients keep
   working; the web-safe client moved to `package:fluvie_server/client.dart`.
-  Migrating an existing deployment? See [RELEASE_MIGRATION.md](RELEASE_MIGRATION.md).
+  Migrating an existing deployment? See
+  [RELEASE_MIGRATION.md at v0.1.9](https://github.com/SimonErich/fluvie/blob/v0.1.9/RELEASE_MIGRATION.md).
 
 ### Added
 
