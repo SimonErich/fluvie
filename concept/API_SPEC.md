@@ -420,11 +420,14 @@ Set once, inherited everywhere, overridable locally. **Precedence: animation-loc
 
 ```dart
 class Defaults {
-  final Time duration;     // package default: Time.relative(0.2, max: Time.seconds(0.8))
-  final Curve ease;        // package default: Ease.smooth
-  final Stagger? stagger;
+  final Time? duration;    // null = inherit; package default: Time.relative(0.2, max: Time.seconds(0.8))
+  final Curve? ease;       // null = inherit; package default: Ease.smooth
+  final Stagger? stagger;  // null = no stagger (always opt-in)
 }
 ```
+
+Every field is nullable — `null` means "unset, inherit from the level below" — and the resolved
+cascade always bottoms out in the non-null `Defaults.package` values.
 
 The default duration is **20% of the window, capped at 0.8s** — so animations scale with short scenes but
 never crawl on long ones.
@@ -474,7 +477,7 @@ Scene({
 });
 
 Scene.sequence({                   // length DERIVED from its timeline / sequenced contents
-  required Timeline timeline,
+  required TimelineSchedule timeline,   // the contract; Timeline is the real implementation
   Background? background,
   List<Widget> children = const [],
   …
