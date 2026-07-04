@@ -107,7 +107,7 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 | `Background.color / gradient / radial / noise / vhs` | painted fills |
 | `Background.image / video` | pre-resolved like `Image`/`Clip` |
 | `Box(color:, size:)` | fractional-size rectangle; null size fills |
-| `Frame.none / rounded / card / polaroid` | styled wrappers |
+| `PhotoFrame.none / rounded / card / polaroid` | styled wrappers |
 | `FadeBox(opacity:, child:)` | render-safe opacity primitive |
 
 ## Audio and captions

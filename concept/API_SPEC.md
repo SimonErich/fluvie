@@ -575,17 +575,17 @@ when it loads"). Fluvie pre-fetches/decodes and caches by content hash.
 
 ```dart
 Image.network('https://…/photo.jpg', fit: BoxFit.cover)
-Image.asset('me.png', frame: Frame.polaroid(caption: 'Summer'))
+Image.asset('me.png', frame: PhotoFrame.polaroid(caption: 'Summer'))
 Image.file(file)   Image.memory(bytes)
 
 Image.network('…').animate([Animation.slideFadeIn(from: Edge.left), Animation.kenBurns(zoom: 1.2)]);
 ```
 
-`Frame` is an optional decorative wrapper (replaces `PhotoCard`/`PolaroidFrame`):
+`PhotoFrame` is an optional decorative wrapper (replaces `PhotoCard`/`PolaroidFrame`):
 
 ```dart
-Frame.none()   Frame.card({double radius = 16, double elevation = 8})
-Frame.polaroid({String? caption})   Frame.rounded(24)
+PhotoFrame.none()   PhotoFrame.card({double radius = 16, double elevation = 8})
+PhotoFrame.polaroid({String? caption})   PhotoFrame.rounded(24)
 ```
 
 ### `Clip` — embedded video
@@ -1868,7 +1868,7 @@ Scene(
     Padding(
       padding: EdgeInsets.all(48),
       child: Wrap(spacing: 12, runSpacing: 12, children: [
-        for (final p in photos) Image.network(p, frame: Frame.card()),
+        for (final p in photos) Image.network(p, frame: PhotoFrame.card()),
       ]).animate([Animation.slideFadeIn(from: Edge.bottom, stagger: Stagger.each(0.06.seconds))]),
     ),
   ],
@@ -2221,7 +2221,7 @@ All rendering packages are optional; the core `package:fluvie` never pulls in FF
 | `VStack` `VColumn` `VRow` `VCenter` `VPadding` `VPositioned` `VSizedBox` | `Stack` `Column` `Row` `Center` `Padding` `Positioned` `SizedBox` |
 | `LayerStack`/`Layer`, `VideoTimingMixin`                              | internal `TimeScope`                               |
 | `EmbeddedVideo`/`VideoSequence`                                       | `Clip`                                             |
-| raw image use, `KenBurnsImage`, `PhotoCard`, `PolaroidFrame`          | `Image` (+ `Animation.kenBurns`, `Frame.*`)        |
+| raw image use, `KenBurnsImage`, `PhotoCard`, `PolaroidFrame`          | `Image` (+ `Animation.kenBurns`, `PhotoFrame.*`)        |
 | `AnimatedText`, `FadeText`/`Fade`/`FadeContainer`                     | `Text` + `.animate()` (render-safe internals)      |
 | `FloatingElement`                                                     | `Animation.float`                                  |
 | `TypewriterText`                                                      | `Typewriter`                                       |

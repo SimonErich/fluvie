@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart' show BoxFit, BuildContext, StatelessWidget, Widget;
-import 'package:fluvie/src/composition/frame.dart';
+import 'package:fluvie/src/composition/photo_frame.dart';
 import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/media/media_carrier.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
@@ -22,13 +22,13 @@ import 'package:fluvie/src/media/runtime/resolved_image.dart';
 ///
 /// ```dart
 /// Image.network('https://…/photo.jpg', fit: BoxFit.cover)
-/// Image.asset('me.png', frame: Frame.polaroid(caption: 'Summer'))
+/// Image.asset('me.png', frame: PhotoFrame.polaroid(caption: 'Summer'))
 /// Image.network('…').animate([Animation.slideFadeIn(), Animation.kenBurns(zoom: 1.2)]);
 /// ```
 ///
 /// [source] exposes the declared [MediaSource] for the collect pass
 /// (`collectMediaSources`). An optional [frame] wraps the image in a decorative
-/// `Frame`; an optional [shared] anchor wraps the result in a `SharedElement`
+/// `PhotoFrame`; an optional [shared] anchor wraps the result in a `SharedElement`
 /// for a hero morph across a scene boundary. Transforms and effects come
 /// through `.animate()` only, like every element.
 final class Image extends StatelessWidget implements MediaCarrier {
@@ -67,9 +67,9 @@ final class Image extends StatelessWidget implements MediaCarrier {
   /// How the image scales into its box, or `null` for Flutter's default.
   final BoxFit? fit;
 
-  /// An optional decorative wrapper (`Frame.card`, `Frame.polaroid`, …), or
+  /// An optional decorative wrapper (`PhotoFrame.card`, `PhotoFrame.polaroid`, …), or
   /// `null` for a bare image.
-  final Frame? frame;
+  final PhotoFrame? frame;
 
   /// An optional hero anchor: when non-null the image morphs across the
   /// boundary it shares with the same anchor in the adjacent scene. `null`
@@ -83,8 +83,8 @@ final class Image extends StatelessWidget implements MediaCarrier {
     return wrapShared(shared, framed);
   }
 
-  /// Rebuilds [frame] around [child]: a `Frame` declares its style at
+  /// Rebuilds [frame] around [child]: a `PhotoFrame` declares its style at
   /// construction and carries its own child, so wrapping the image means
   /// re-issuing the same style with [child].
-  static Frame _reframe(Frame frame, Widget child) => frame.withChild(child);
+  static PhotoFrame _reframe(PhotoFrame frame, Widget child) => frame.withChild(child);
 }

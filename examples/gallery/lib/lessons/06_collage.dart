@@ -60,7 +60,11 @@ Video lesson06Video() {
                       SizedBox(
                         width: 280,
                         height: 280,
-                        child: Image.asset(photo, fit: BoxFit.cover, frame: const Frame.card()),
+                        child: Image.asset(
+                          photo,
+                          fit: BoxFit.cover,
+                          frame: const PhotoFrame.card(),
+                        ),
                       ),
                   ],
                 ).animate([

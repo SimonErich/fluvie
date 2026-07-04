@@ -26,7 +26,7 @@ export 'src/composition/adaptive.dart' show Adaptive;
 export 'src/composition/background/background.dart';
 export 'src/composition/box.dart';
 export 'src/composition/camera/camera.dart';
-export 'src/composition/frame.dart';
+export 'src/composition/photo_frame.dart';
 export 'src/composition/runtime/aspect_scope.dart' show AspectScope;
 export 'src/composition/runtime/timeline_probe.dart';
 export 'src/composition/scene.dart';

@@ -26,7 +26,7 @@ const lesson05ImagesAndClips = Lesson(
 /// Builds the lesson 05 composition: a 3 second square scene at 30 fps with a
 /// framed, zooming photo and a trimmed clip.
 ///
-/// The photo is a bundled asset wrapped in a polaroid `Frame`; `kenBurns` gives
+/// The photo is a bundled asset wrapped in a polaroid `PhotoFrame`; `kenBurns` gives
 /// it a slow zoom. The clip plays the middle of `clip_1s.mp4` via `trim`. Both
 /// sources are pre-resolved by the render harness, so the poster frame already
 /// shows them with no async pop-in.
@@ -49,7 +49,7 @@ Video lesson05Video() {
             child: Image.asset(
               'assets/fixtures/swatch.png',
               fit: BoxFit.cover,
-              frame: const Frame.polaroid(caption: 'Summer'),
+              frame: const PhotoFrame.polaroid(caption: 'Summer'),
             ).animate([Animation.kenBurns(zoom: 1.2)]),
           ),
           // #enddocregion image-asset

@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animate_extension.dart';
 import 'package:fluvie/src/composition/background/background.dart';
 import 'package:fluvie/src/composition/box.dart';
-import 'package:fluvie/src/composition/frame.dart';
+import 'package:fluvie/src/composition/photo_frame.dart';
 import 'package:fluvie/src/composition/runtime/media_collector.dart';
 import 'package:fluvie/src/composition/scene.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
@@ -159,9 +159,9 @@ void main() {
       expect(collectMediaSources(scenes), {_logo});
     });
 
-    test('descends into a Frame wrapping widget to collect a nested Image', () {
+    test('descends into a PhotoFrame wrapping widget to collect a nested Image', () {
       final scenes = [
-        _scene(children: [Frame.card(child: Image.asset('fixtures/swatch.png'))]),
+        _scene(children: [PhotoFrame.card(child: Image.asset('fixtures/swatch.png'))]),
       ];
       expect(collectMediaSources(scenes), {_logo});
     });

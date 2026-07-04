@@ -11,7 +11,7 @@ Align(
   child: Image.asset(
     'assets/fixtures/swatch.png',
     fit: BoxFit.cover,
-    frame: const Frame.polaroid(caption: 'Summer'),
+    frame: const PhotoFrame.polaroid(caption: 'Summer'),
   ).animate([Animation.kenBurns(zoom: 1.2)]),
 ),
 ```
@@ -63,8 +63,8 @@ host raises a typed error that names it.
 
 ## Frames
 
-A `Frame` is a decorative wrapper you pass to an element. The four styles are
-`Frame.none`, `Frame.rounded`, `Frame.card`, and `Frame.polaroid`. The card and
+A `PhotoFrame` is a decorative wrapper you pass to an element. The four styles are
+`PhotoFrame.none`, `PhotoFrame.rounded`, `PhotoFrame.card`, and `PhotoFrame.polaroid`. The card and
 polaroid styles carry one deterministic drop shadow; the polaroid takes an
 optional caption under the image. The element rewraps the frame around itself,
 so you write the style once on the `frame:` parameter.

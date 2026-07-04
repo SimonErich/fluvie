@@ -25,6 +25,7 @@ change below is mechanical.
 | `Animation.spin(per:)` (and the spec arg `"per"`) | `Animation.spin(period:)` / `"period"` |
 | `Animation.float(frequency: 0.4)` (cycles per second) | `Animation.float(period: 2.5.seconds)` (one bob per period) |
 | `Timeline(fps: 30)` | `Timeline()` — the timeline resolves at the enclosing `Video`'s fps, so a 60 fps video can no longer silently mistime a schedule; `timeline.placements` becomes `placementsAt(fps)` |
+| `Frame.polaroid/card/rounded/none` (the decorative photo mat) | `PhotoFrame.*` — "Frame" now always means the render clock (`FrameBuilder`, `n.frames`, `RawFrame`) |
 
 New preset mirrors in 0.2.0: `scaleOut`, `glitchOut`, `slideFadeOut`, and
 `maskWipeOut` complete every directional pair, so guessing the `*Out` twin of
@@ -147,7 +148,7 @@ job is now the internal `TimeScope`. See [Layouts](../guides/layouts.md).
 ## Images, clips, and frames
 
 Raw image use, `KenBurnsImage`, `PhotoCard`, and `PolaroidFrame` collapse into
-one `Image` plus `Animation.kenBurns` and the `Frame.*` styles:
+one `Image` plus `Animation.kenBurns` and the `PhotoFrame.*` styles:
 
 <!-- code-excerpt-ignore: the old KenBurnsImage/PolaroidFrame APIs predate v1 and no longer compile -->
 ```dart
@@ -157,7 +158,7 @@ PolaroidFrame(child: KenBurnsImage.network(url));
 
 <!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-image)" -->
 ```dart
-Frame.polaroid(
+PhotoFrame.polaroid(
   child: Image.network(url, fit: BoxFit.cover).animate([Animation.kenBurns()]),
 );
 ```

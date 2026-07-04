@@ -32,7 +32,7 @@ Video birthdayCard({
       Image.asset(
         KittenAssets.photo,
         fit: BoxFit.cover,
-        frame: const Frame.polaroid(caption: 'Birthday cat'),
+        frame: const PhotoFrame.polaroid(caption: 'Birthday cat'),
       );
   return Video(
     size: VideoSize.square,

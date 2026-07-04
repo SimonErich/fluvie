@@ -1,5 +1,5 @@
 // Epic 6.4 layout goldens (WI-30): the §14 Box grow-in rule at three frames,
-// the four D15 Frame styles side by side, and a registrar-resolved stagger
+// the four D15 PhotoFrame styles side by side, and a registrar-resolved stagger
 // across a Stack inside a real Video (the D1 pipeline end to end). All
 // subjects are font-free, so the pixels carry zero variance.
 @Tags(['golden'])
@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animate_extension.dart';
 import 'package:fluvie/src/animation/animation.dart';
 import 'package:fluvie/src/composition/box.dart';
-import 'package:fluvie/src/composition/frame.dart';
+import 'package:fluvie/src/composition/photo_frame.dart';
 import 'package:fluvie/src/composition/scene.dart';
 import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/ease.dart';
@@ -79,17 +79,17 @@ Future<void> main() async {
   );
 
   await goldenTest(
-    'Frame: the four D15 styles around the same content',
+    'PhotoFrame: the four D15 styles around the same content',
     fileName: 'composition_frames',
     builder: () => motionVariantsGroup(
       frame: 0,
       size: const Size(120, 130),
       variants: [
         for (final (name, frame) in <(String, Widget Function(Widget))>[
-          ('none', (child) => Frame.none(child: child)),
-          ('rounded', (child) => Frame.rounded(child: child)),
-          ('card', (child) => Frame.card(child: child)),
-          ('polaroid', (child) => Frame.polaroid(child: child)),
+          ('none', (child) => PhotoFrame.none(child: child)),
+          ('rounded', (child) => PhotoFrame.rounded(child: child)),
+          ('card', (child) => PhotoFrame.card(child: child)),
+          ('polaroid', (child) => PhotoFrame.polaroid(child: child)),
         ])
           (
             name,

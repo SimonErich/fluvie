@@ -33,7 +33,7 @@ const Map<String, _Replacement> _consolidation = {
   'AnimatedChart': (to: 'Chart', note: null),
   // Image shims fold into `Image` plus a preset.
   'KenBurnsImage': (to: 'Image', note: 'add Animation.kenBurns() via .animate.'),
-  'PhotoCard': (to: 'Image', note: 'wrap it in a Frame.* recipe.'),
+  'PhotoCard': (to: 'Image', note: 'wrap it in a PhotoFrame.* recipe.'),
   // Encoding config renames to the `Export.*` factories.
   'EncodingConfig': (to: 'Export', note: 'use the Export.* factories.'),
 };

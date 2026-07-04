@@ -13,7 +13,7 @@ import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animate_extension.dart';
 import 'package:fluvie/src/animation/animation.dart';
-import 'package:fluvie/src/composition/frame.dart';
+import 'package:fluvie/src/composition/photo_frame.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/elements/image.dart';
 import 'package:fluvie/src/media/runtime/image_resolver_scope.dart';
@@ -66,7 +66,7 @@ Future<void> main() async {
             child: Image.asset(
               'fixtures/swatch.png',
               fit: BoxFit.cover,
-              frame: const Frame.polaroid(caption: 'Summer'),
+              frame: const PhotoFrame.polaroid(caption: 'Summer'),
             ),
           ),
         ),

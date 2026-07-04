@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animate_extension.dart';
 import 'package:fluvie/src/animation/animation.dart';
 import 'package:fluvie/src/animation/motion_target.dart';
-import 'package:fluvie/src/composition/frame.dart';
+import 'package:fluvie/src/composition/photo_frame.dart';
 import 'package:fluvie/src/composition/transition/shared_element.dart';
 import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
@@ -155,7 +155,7 @@ void main() {
   });
 
   group('frame: wrapping', () {
-    testWidgets('wraps the built image in the given Frame', (tester) async {
+    testWidgets('wraps the built image in the given PhotoFrame', (tester) async {
       final decoded = await _solidImage();
       addTearDown(decoded.dispose);
       final resolver = _resolverFor(_asset, decoded);
@@ -166,14 +166,14 @@ void main() {
           resolver: resolver,
           child: RenderModeContext(
             mode: RenderMode.capture,
-            child: Image.asset('fixtures/swatch.png', frame: const Frame.card()),
+            child: Image.asset('fixtures/swatch.png', frame: const PhotoFrame.card()),
           ),
         ),
       );
 
-      expect(find.byType(Frame), findsOneWidget);
+      expect(find.byType(PhotoFrame), findsOneWidget);
       expect(
-        find.descendant(of: find.byType(Frame), matching: find.byType(flutter.RawImage)),
+        find.descendant(of: find.byType(PhotoFrame), matching: find.byType(flutter.RawImage)),
         findsOneWidget,
       );
     });

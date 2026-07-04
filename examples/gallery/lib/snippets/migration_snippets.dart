@@ -44,11 +44,11 @@ Widget migrateEffects() =>
     ]);
 // #enddocregion migrate-effects
 
-/// The new image form: one `Image` plus `Animation.kenBurns` and `Frame.*`,
+/// The new image form: one `Image` plus `Animation.kenBurns` and `PhotoFrame.*`,
 /// replacing `KenBurnsImage` / `PhotoCard` / `PolaroidFrame`.
 Widget migrateImage(String url) =>
     // #docregion migrate-image
-    Frame.polaroid(
+    PhotoFrame.polaroid(
       child: Image.network(url, fit: BoxFit.cover).animate([Animation.kenBurns()]),
     );
 // #enddocregion migrate-image

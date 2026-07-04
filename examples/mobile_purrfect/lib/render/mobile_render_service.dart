@@ -37,7 +37,7 @@ class OnDeviceMobileRenderService implements MobileRenderService {
         ? null
         : Image.memory(
             photoBytes,
-            frame: const Frame.polaroid(caption: 'My cat'),
+            frame: const PhotoFrame.polaroid(caption: 'My cat'),
           );
     return OnDeviceVideoRenderer().render(
       composition: birthdayCard(catName: catName, photo: photo, song: song),

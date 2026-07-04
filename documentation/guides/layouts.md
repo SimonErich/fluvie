@@ -53,16 +53,16 @@ same thing.
 one percent of its height. Leave `size` null to fill the parent. For
 absolute pixels, use `SizedBox`; Fluvie adds no second sizing system.
 
-## Frame
+## PhotoFrame
 
-`Frame` wraps a child in a small styled shell:
+`PhotoFrame` wraps a child in a small styled shell:
 
 | Constructor | What you get |
 | --- | --- |
-| `Frame.none` | passthrough, no decoration |
-| `Frame.rounded(radius: 24)` | rounded corner clip |
-| `Frame.card` | rounded white surface, padding, one soft shadow |
-| `Frame.polaroid` | white border, wide at the bottom, one shadow |
+| `PhotoFrame.none` | passthrough, no decoration |
+| `PhotoFrame.rounded(radius: 24)` | rounded corner clip |
+| `PhotoFrame.card` | rounded white surface, padding, one soft shadow |
+| `PhotoFrame.polaroid` | white border, wide at the bottom, one shadow |
 
 ## Where to next
 

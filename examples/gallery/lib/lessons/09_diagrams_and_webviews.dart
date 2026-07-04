@@ -14,7 +14,7 @@ const _flow =
     'graph LR;\n'
     '  Source[Mermaid source] --> Layout[Chromium layout];\n'
     '  Layout --> Raster[in-process raster];\n'
-    '  Raster --> Frame[every frame];';
+    '  Raster --> PhotoFrame[every frame];';
 
 /// The Markdown the doc scene renders, reusing the `Markdown` element.
 const _notes =
