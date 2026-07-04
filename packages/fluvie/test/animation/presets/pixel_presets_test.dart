@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animation.dart';
 import 'package:fluvie/src/animation/effect_kind.dart';
+import 'package:fluvie/src/core/animation_phase.dart';
 import 'package:fluvie/src/animation/effects/bloom_effect.dart';
 import 'package:fluvie/src/animation/effects/chromatic_effect.dart';
 import 'package:fluvie/src/animation/effects/glitch_effect.dart';
@@ -59,6 +60,14 @@ void main() {
       expect(a.effect, isA<GlitchEffect>());
       expect((a.effect as GlitchEffect).from, Edge.right);
       expect(effectKindOf(a.effect), EffectKind.pixel);
+    });
+
+    test('glitchOut is the reversed tear biased toward Edge.right — an exit', () {
+      final out = Animation.glitchOut();
+      final effect = out.effect as GlitchEffect;
+      expect(effect.from, Edge.right);
+      expect(effect.reverse, isTrue);
+      expect(out.phase, AnimationPhase.exit);
     });
 
     test('glitchIn defaults the slice direction to Edge.left', () {

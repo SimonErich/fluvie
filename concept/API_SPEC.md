@@ -108,11 +108,11 @@ final video = Video(
 
         // Slides + fades in, but only once the gradient shift finishes.
         Text('Hello, Fluvie')
-            .animate([Animation.slideFade(from: Edge.bottom, at: Trigger.whenEnds(bg))]),
+            .animate([Animation.slideFadeIn(from: Edge.bottom, at: Trigger.whenEnds(bg))]),
 
         // Slides in from the left over 4 seconds, then a slow Ken Burns push.
         Image.network('https://example.com/photo.jpg').animate([
-          Animation.slideFade(from: Edge.left, duration: 4.seconds),
+          Animation.slideFadeIn(from: Edge.left, duration: 4.seconds),
           Animation.kenBurns(zoom: 1.2),
         ]),
       ],
@@ -211,14 +211,14 @@ Friendly, guessable names that expand to the above. Examples:
 ```dart
 Animation.fadeIn()                 => Animation.from(const Keyframe(opacity: 0));
 Animation.fadeOut()                => Animation.to(const Keyframe(opacity: 0));
-Animation.slideFade({Edge from = Edge.bottom})
+Animation.slideFadeIn({Edge from = Edge.bottom})
     => Animation.from(Keyframe(opacity: 0, x: from.dx, y: from.dy));   // one element-size away
 Animation.slideIn({Edge from = Edge.bottom})  Animation.slideOut({Edge to = Edge.top})
 Animation.pop({double overshoot = 1.1})
     => Animation.from(const Keyframe(scale: 0), spring: Spring.bouncy); // spring by default
 Animation.scaleIn({double from = 0.85})    // spring by default
 Animation.blurIn({double sigma = 12})      Animation.blurOut()
-Animation.maskWipe({WipeShape shape = WipeShape.circle, Alignment origin = Alignment.center})
+Animation.maskWipeIn({WipeShape shape = WipeShape.circle, Alignment origin = Alignment.center})
 Animation.glitchIn({Edge from = Edge.left})
 ```
 
@@ -357,7 +357,7 @@ A property of an animation, applied when its target has multiple children:
 
 ```dart
 Column(children: [Text('A'), Text('B'), Text('C')])
-    .animate([Animation.slideFade(from: Edge.bottom, stagger: Stagger.each(0.08.seconds))]);
+    .animate([Animation.slideFadeIn(from: Edge.bottom, stagger: Stagger.each(0.08.seconds))]);
 
 Stagger.each(0.08.seconds)
 Stagger.evenly(over: 0.5.relative)
@@ -540,7 +540,7 @@ Center(
   child: Column(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Text('Title').animate([Animation.slideFade(from: Edge.bottom)]),
+      Text('Title').animate([Animation.slideFadeIn(from: Edge.bottom)]),
       SizedBox(height: 16),
       Text('Subtitle').animate([Animation.fadeIn(delay: 0.2.seconds)]),
     ],
@@ -575,7 +575,7 @@ Image.network('https://…/photo.jpg', fit: BoxFit.cover)
 Image.asset('me.png', frame: Frame.polaroid(caption: 'Summer'))
 Image.file(file)   Image.memory(bytes)
 
-Image.network('…').animate([Animation.slideFade(from: Edge.left), Animation.kenBurns(zoom: 1.2)]);
+Image.network('…').animate([Animation.slideFadeIn(from: Edge.left), Animation.kenBurns(zoom: 1.2)]);
 ```
 
 `Frame` is an optional decorative wrapper (replaces `PhotoCard`/`PolaroidFrame`):
@@ -601,7 +601,7 @@ Plain Flutter `Text` + `.animate()`. Fluvie swaps in render-safe opacity/transfo
 
 ```dart
 Text('Animated', style: TextStyle(fontSize: 64, color: Colors.white))
-    .animate([Animation.slideFade(from: Edge.bottom)]);
+    .animate([Animation.slideFadeIn(from: Edge.bottom)]);
 ```
 
 ### `Typewriter` (intrinsic)
@@ -1830,7 +1830,7 @@ Video(
         Text('2025', style: TextStyle(fontSize: 120, color: Colors.white))
             .animate([Animation.pop()]),                       // spring by default
         Text('Year in review', style: TextStyle(fontSize: 36, color: Colors.white70))
-            .animate([Animation.slideFade(from: Edge.bottom, at: Trigger.previous, delay: 0.1.seconds)]),
+            .animate([Animation.slideFadeIn(from: Edge.bottom, at: Trigger.previous, delay: 0.1.seconds)]),
       ]),
     ),
 
@@ -1866,7 +1866,7 @@ Scene(
       padding: EdgeInsets.all(48),
       child: Wrap(spacing: 12, runSpacing: 12, children: [
         for (final p in photos) Image.network(p, frame: Frame.card()),
-      ]).animate([Animation.slideFade(from: Edge.bottom, stagger: Stagger.each(0.06.seconds))]),
+      ]).animate([Animation.slideFadeIn(from: Edge.bottom, stagger: Stagger.each(0.06.seconds))]),
     ),
   ],
 );
@@ -1935,7 +1935,7 @@ All of this runs **inside** Fluvie. The call site only wrote `anchor: bg` and `T
 
 Because transforms and pixel effects share one list, Fluvie classifies each `Animation` and builds the
 pipeline deterministically: **transforms wrap the widget first; pixel effects are applied as a post-process
-layer afterward, in list order among themselves.** So `[slideFade, grain]` slides the widget, then lays
+layer afterward, in list order among themselves.** So `[slideFadeIn, grain]` slides the widget, then lays
 grain over the result — regardless of list order between the two classes.
 
 ### 27.7 Capture isolation
@@ -2112,7 +2112,7 @@ A `VideoSpec` is a JSON-serializable mirror of a `Video`. Author a spec from a p
 
 ### The spec types
 
-`VideoSpec` is the root—it holds `scenes`, `size`, `fps`, and optional `poster`/`export`/`motionDefaults`/`transition`. Each `SceneSpec` holds `duration`, an optional `BackgroundSpec` (`background`)/`enter`/`exit`, and a list of `ElementSpec` children. Each `ElementSpec` names a `type` (from `knownElementTypes`), carries its content `props` verbatim, optionally declares an `anchor` id, and holds an `animate` list of `AnimationSpec` objects. Each `AnimationSpec` is either a named preset (like `fadeIn`) or a raw `from`/`to`/`fromTo` keyframe, plus the common timing tail (`duration`, `ease`, `delay`, `at`, `stagger`, `repeat`, `label`). Background types come from `knownBackgroundKinds` (`color`, `gradient`, `image`, `video`, `noise`, `vhs`, etc.); animation presets from `knownAnimationPresets` (`fadeIn`, `pop`, `kenBurns`, `slideIn`, `slideFade`, …).
+`VideoSpec` is the root—it holds `scenes`, `size`, `fps`, and optional `poster`/`export`/`motionDefaults`/`transition`. Each `SceneSpec` holds `duration`, an optional `BackgroundSpec` (`background`)/`enter`/`exit`, and a list of `ElementSpec` children. Each `ElementSpec` names a `type` (from `knownElementTypes`), carries its content `props` verbatim, optionally declares an `anchor` id, and holds an `animate` list of `AnimationSpec` objects. Each `AnimationSpec` is either a named preset (like `fadeIn`) or a raw `from`/`to`/`fromTo` keyframe, plus the common timing tail (`duration`, `ease`, `delay`, `at`, `stagger`, `repeat`, `label`). Background types come from `knownBackgroundKinds` (`color`, `gradient`, `image`, `video`, `noise`, `vhs`, etc.); animation presets from `knownAnimationPresets` (`fadeIn`, `pop`, `kenBurns`, `slideIn`, `slideFadeIn`, …).
 
 ### Time as a string
 
@@ -2214,7 +2214,7 @@ All rendering packages are optional; the core `package:fluvie` never pulls in FF
 | `PropAnimation`, `EntryAnimation`, `AmbientAnimation`/`FloatingVibe`, `SlideIn`, `SceneTransition`-as-animation | `Animation.*` presets / `Animation.from`/`to`/`keyframes` / `AnimationEffect` |
 | `AnimatedProp`                                                        | `.animate([...])`                                  |
 | `Stagger` widget + `StaggerConfig`                                    | `stagger:` on an `Animation`                       |
-| `EffectOverlay`, `ParticleEffect`, `MaskedClip`, `ParallaxLayer`      | `Animation.grain/vignette/particles/shader/maskWipe` (same `.animate()` list) |
+| `EffectOverlay`, `ParticleEffect`, `MaskedClip`, `ParallaxLayer`      | `Animation.grain/vignette/particles/shader/maskWipeIn` (same `.animate()` list) |
 | `VStack` `VColumn` `VRow` `VCenter` `VPadding` `VPositioned` `VSizedBox` | `Stack` `Column` `Row` `Center` `Padding` `Positioned` `SizedBox` |
 | `LayerStack`/`Layer`, `VideoTimingMixin`                              | internal `TimeScope`                               |
 | `EmbeddedVideo`/`VideoSequence`                                       | `Clip`                                             |

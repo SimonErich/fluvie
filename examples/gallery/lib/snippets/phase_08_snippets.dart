@@ -18,7 +18,7 @@ import 'package:intl/intl.dart' show NumberFormat;
 Widget animatedTitle() => const Text(
   'Made with Fluvie',
   style: TextStyle(fontSize: 64, fontWeight: FontWeight.bold),
-).animate([Animation.slideFade(), Animation.fadeIn()]);
+).animate([Animation.slideFadeIn(), Animation.fadeIn()]);
 // #enddocregion text-animate
 
 /// A frame-driven typewriter with a blinking caret.
@@ -47,10 +47,10 @@ Widget shareOfVoice() => Counter.percent(to: 0.87); // "87%"
 // #docregion timeline
 Timeline introTimeline(Anchor title, Anchor subtitle, List<Anchor> bullets, Anchor cta) =>
     Timeline(defaults: const Defaults(duration: Time.seconds(0.5)))
-      ..play(title, Animation.slideFade())
+      ..play(title, Animation.slideFadeIn())
       ..play(subtitle, Animation.fadeIn(), at: Trigger.whenEnds(title))
       ..wait(0.3.seconds)
-      ..playAll(bullets, Animation.slideFade(), stagger: 0.08.seconds)
+      ..playAll(bullets, Animation.slideFadeIn(), stagger: 0.08.seconds)
       ..label('reveal')
       ..play(cta, Animation.pop(), at: 'reveal'.label - 0.2.seconds);
 // #enddocregion timeline

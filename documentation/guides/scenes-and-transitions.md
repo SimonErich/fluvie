@@ -104,7 +104,7 @@ Scene(
       child: const Box(color: _brand, size: Size(0.4, 0.4)),
     ),
     const Text('Year in review', style: _title).animate([
-      Animation.slideFade(at: Trigger.sceneEnd),
+      Animation.slideFadeIn(at: Trigger.sceneEnd),
     ]),
   ],
 ),

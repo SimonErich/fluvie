@@ -31,7 +31,7 @@ const lesson06Collage = Lesson(
 
 /// Builds the lesson 06 composition: a 4 second square gallery at 30 fps.
 ///
-/// The `Wrap` lays the photo tiles out left to right; one `slideFade` with a
+/// The `Wrap` lays the photo tiles out left to right; one `slideFadeIn` with a
 /// per-child `Stagger` brings them in two frames apart. The same
 /// list adds `grain` and `vignette`: pixel post-effects post-process the
 /// already-laid-out wall, so list order between transforms and
@@ -66,7 +66,7 @@ Video lesson06Video() {
                 ).animate([
                   // Transforms wrap the wall; the two pixel effects post-process
                   // the result, regardless of list order.
-                  Animation.slideFade(stagger: const Stagger.each(Time.frames(2))),
+                  Animation.slideFadeIn(stagger: const Stagger.each(Time.frames(2))),
                   Animation.grain(0.18),
                   Animation.vignette(0.4),
                 ]),

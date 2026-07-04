@@ -82,7 +82,7 @@ Scene _headlineScene() => Scene(
             to: 267000,
             reveal: 1500.ms,
             style: _metric,
-          ).animate([Animation.slideFade()]),
+          ).animate([Animation.slideFadeIn()]),
           const Text('up 38% over last year', style: _caption),
         ],
       ),
@@ -104,7 +104,7 @@ Scene _barScene() => Scene(
           data: _revenue,
           reveal: 1.seconds,
           stagger: const Stagger.each(Time.frames(6)),
-        ).animate([Animation.slideFade()]),
+        ).animate([Animation.slideFadeIn()]),
         // #enddocregion bar
       ),
     ),
@@ -175,7 +175,7 @@ Scene _donutScene() => Scene(
             data: _channels,
             reveal: 1.seconds,
             innerRadius: 0.62,
-          ).animate([Animation.slideFade()]),
+          ).animate([Animation.slideFadeIn()]),
           // #enddocregion donut
         ),
       ),

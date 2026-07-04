@@ -42,7 +42,7 @@ Video lesson03Video() {
           // #enddocregion gradient-anchor
           // #docregion after-trigger
           const Text('Hello, Fluvie', style: _title).animate([
-            Animation.slideFade(at: Trigger.whenEnds(bg)),
+            Animation.slideFadeIn(at: Trigger.whenEnds(bg)),
           ]),
           // #enddocregion after-trigger
           // #docregion show-window

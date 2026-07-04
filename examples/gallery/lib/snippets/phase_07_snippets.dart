@@ -33,7 +33,7 @@ Chart staggeredBars() =>
 /// the chart's own reveal.
 Widget movedBars() =>
     // #docregion chart-animate
-    Chart.bar(data: _revenue).animate([Animation.slideFade()]);
+    Chart.bar(data: _revenue).animate([Animation.slideFadeIn()]);
 // #enddocregion chart-animate
 
 /// Theming a chart by wrapping it in a `FluvieTokensScope`: the chart reads the

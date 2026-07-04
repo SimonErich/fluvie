@@ -34,7 +34,7 @@ void main() {
         _harness(
           frame: frame,
           sceneFrames: 240,
-          child: _square.animate([Animation.spin(per: const Time.frames(120))]),
+          child: _square.animate([Animation.spin(period: const Time.frames(120))]),
         ),
       );
       final finder = find.byType(Transform);

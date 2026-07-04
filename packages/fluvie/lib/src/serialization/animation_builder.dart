@@ -64,9 +64,21 @@ Animation buildAnimation(AnimationSpec spec) {
         repeat: spec.repeat,
         label: spec.label,
       );
-    case 'slideFade':
-      return Animation.slideFade(
+    case 'slideFadeIn':
+      return Animation.slideFadeIn(
         from: _edge(args['from']) ?? Edge.bottom,
+        duration: spec.duration,
+        ease: spec.ease,
+        spring: spec.spring,
+        delay: delay,
+        at: at,
+        stagger: spec.stagger,
+        repeat: spec.repeat,
+        label: spec.label,
+      );
+    case 'slideFadeOut':
+      return Animation.slideFadeOut(
+        to: _edge(args['to']) ?? Edge.top,
         duration: spec.duration,
         ease: spec.ease,
         spring: spec.spring,
@@ -79,6 +91,18 @@ Animation buildAnimation(AnimationSpec spec) {
     case 'pop':
       return Animation.pop(
         overshoot: _double(args['overshoot']) ?? 1.1,
+        spring: spec.spring,
+        duration: spec.duration,
+        ease: spec.ease,
+        delay: delay,
+        at: at,
+        stagger: spec.stagger,
+        repeat: spec.repeat,
+        label: spec.label,
+      );
+    case 'scaleOut':
+      return Animation.scaleOut(
+        to: _double(args['to']) ?? 0.85,
         spring: spec.spring,
         duration: spec.duration,
         ease: spec.ease,
@@ -150,7 +174,7 @@ Animation buildAnimation(AnimationSpec spec) {
       );
     case 'spin':
       return Animation.spin(
-        per: _timeOr(args['per'], const Time.seconds(4)),
+        period: _timeOr(args['period'], const Time.seconds(4)),
         delay: delay,
         at: at,
         stagger: spec.stagger,

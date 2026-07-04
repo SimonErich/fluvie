@@ -73,7 +73,7 @@ final Map<String, Object?> printerOracleSpec = {
           'size': {'width': 200, 'height': 120},
           'animate': [
             {
-              'preset': 'slideFade',
+              'preset': 'slideFadeIn',
               'from': 'left',
               'at': {'kind': 'whenEnds', 'anchor': 'title'},
             },

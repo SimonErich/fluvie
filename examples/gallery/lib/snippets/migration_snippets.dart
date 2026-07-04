@@ -12,7 +12,7 @@ const _line = TextStyle(color: Color(0xFFE6EDF3), fontSize: 40);
 /// `AnimatedProp` / `PropAnimation` / `EntryAnimation` widgets.
 Widget migrateAnimate() =>
     // #docregion migrate-animate
-    const Text('Hello', style: _line).animate([Animation.slideFade()]);
+    const Text('Hello', style: _line).animate([Animation.slideFadeIn()]);
 // #enddocregion migrate-animate
 
 /// The new stagger form: a `stagger:` on the animation, not a `Stagger` widget.

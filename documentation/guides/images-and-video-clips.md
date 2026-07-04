@@ -55,7 +55,7 @@ and caches it in the pre-resolve pass, then paints it synchronously:
 Widget remotePhoto() => Image.network(
   'https://picsum.photos/seed/fluvie/800/800',
   fit: BoxFit.cover,
-).animate([Animation.slideFade(), Animation.kenBurns(zoom: 1.2)]);
+).animate([Animation.slideFadeIn(), Animation.kenBurns(zoom: 1.2)]);
 ```
 
 Only allowlisted hosts and schemes are fetched during a render. A disallowed

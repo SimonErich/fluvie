@@ -30,9 +30,9 @@ void main() {
       expect(effect.at, isNull, reason: 'stops are evenly spaced');
     });
 
-    test('cycle duration is 1/frequency seconds on a linear global clock', () {
-      expect(Animation.float().duration, const Time.seconds(1 / 0.4));
-      expect(Animation.float(frequency: 0.5).duration, const Time.seconds(2));
+    test('one period per cycle on a linear global clock', () {
+      expect(Animation.float().duration, const Time.seconds(2.5));
+      expect(Animation.float(period: const Time.seconds(2)).duration, const Time.seconds(2));
       expect(Animation.float().ease, Ease.linear);
       expect(Animation.float().repeat, const Repeat.forever());
     });
@@ -49,7 +49,7 @@ void main() {
         isA<
           Animation Function({
             double amplitude,
-            double frequency,
+            Time period,
             String? seed,
             Time delay,
             Trigger at,
@@ -129,9 +129,9 @@ void main() {
       expect(spin.repeat, const Repeat.forever());
     });
 
-    test('per sets the cycle length and an explicit repeat wins', () {
+    test('period sets the cycle length and an explicit repeat wins', () {
       final spin = Animation.spin(
-        per: const Time.frames(240),
+        period: const Time.frames(240),
         repeat: const Repeat.times(2, gap: Time.frames(6)),
       );
       expect(spin.duration, const Time.frames(240));

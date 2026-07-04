@@ -2,7 +2,7 @@
 /// motion comes from or goes to.
 ///
 /// ```dart
-/// Animation.slideFade(from: Edge.bottom)   // rises into place
+/// Animation.slideFadeIn(from: Edge.bottom)   // rises into place
 /// Animation.drift(to: Edge.right)          // drifts off to the right
 /// ```
 enum Edge {

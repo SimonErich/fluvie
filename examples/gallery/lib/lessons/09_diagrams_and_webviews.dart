@@ -86,7 +86,7 @@ Scene _diagramScene() => Scene(
           _flow,
           theme: MermaidTheme.dark(),
           reveal: MermaidReveal.drawEdges(Time.seconds(1)),
-        ).animate([Animation.slideFade()]),
+        ).animate([Animation.slideFadeIn()]),
         // #enddocregion mermaid
       ),
     ),
@@ -126,7 +126,7 @@ Scene _browserScene() => Scene(
         child: const DeviceFrame.browser(
           url: 'https://fluvie.dev',
           child: SizedBox.expand(child: Html(_page, viewport: _viewport)),
-        ).animate([Animation.slideFade()]),
+        ).animate([Animation.slideFadeIn()]),
         // #enddocregion browser
       ),
     ),

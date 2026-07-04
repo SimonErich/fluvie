@@ -45,7 +45,7 @@ Video lesson02Video() {
               Text('Timing happens for you', style: _line),
             ],
           ).animate([
-            Animation.slideFade(stagger: const Stagger.each(Time.frames(8))),
+            Animation.slideFadeIn(stagger: const Stagger.each(Time.frames(8))),
           ]),
           // #enddocregion column-stagger
           // #docregion previous-chain

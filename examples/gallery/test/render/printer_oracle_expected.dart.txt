@@ -21,7 +21,7 @@ Video build() {
           Box(
             color: Color(0xFF00A0FF),
             size: Size(200, 120),
-          ).animate([Animation.slideFade(from: Edge.left, at: Trigger.whenEnds(title))]),
+          ).animate([Animation.slideFadeIn(from: Edge.left, at: Trigger.whenEnds(title))]),
         ],
       ),
       Scene(

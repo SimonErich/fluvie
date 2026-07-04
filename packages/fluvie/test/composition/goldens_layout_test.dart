@@ -129,7 +129,7 @@ Future<void> main() async {
                         ),
                     ],
                   ).animate([
-                    Animation.slideFade(
+                    Animation.slideFadeIn(
                       duration: const Time.frames(8),
                       ease: Ease.linear,
                       stagger: const Stagger.each(Time.frames(6)),

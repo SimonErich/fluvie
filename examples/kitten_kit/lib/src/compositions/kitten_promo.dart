@@ -86,7 +86,7 @@ Video kittenPromo({
                   crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: 10,
                   children: [for (final String f in _features) Text('•  $f', style: _feature)],
-                ).animate([Animation.slideFade(stagger: const Stagger.each(Time.frames(7)))]),
+                ).animate([Animation.slideFadeIn(stagger: const Stagger.each(Time.frames(7)))]),
               ],
             ),
           ),

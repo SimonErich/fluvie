@@ -15,9 +15,9 @@ import 'plan_builders.dart';
 /// Approximations (the plan model has no widgets):
 ///
 /// * Counters, captions, and pixel effects are plain ownerIds.
-/// * §26 writes `Trigger.previous` on the subtitle's slideFade, chaining off
+/// * §26 writes `Trigger.previous` on the subtitle's slideFadeIn, chaining off
 ///   the sibling title's pop; under D6 `previous` chains within one element,
-///   so pop and slideFade live on a single `title` element here.
+///   so pop and slideFadeIn live on a single `title` element here.
 /// * The hero-shared logo is an anchored, animation-less element (hero
 ///   morphing is Phase 7); the audio track and its beat grid play no part in
 ///   the resolved schedule.
@@ -28,7 +28,7 @@ import 'plan_builders.dart';
 /// | owner    | label     | phase  | span     |
 /// |----------|-----------|--------|----------|
 /// | title    | pop       | enter  | 0..36    |
-/// | title    | slideFade | enter  | 39..57   |
+/// | title    | slideFadeIn | enter  | 39..57   |
 /// | counter  | count     | enter  | 90..150  |
 /// | stats-fx | grain     | during | 90..210  |
 /// | stats-fx | vignette  | during | 90..210  |
@@ -50,7 +50,7 @@ CompositionPlan workedExample() {
             'title',
             animations: [
               anim(label: 'pop', timing: const Spring()),
-              anim(label: 'slideFade', at: Trigger.previous, delay: 0.1.seconds),
+              anim(label: 'slideFadeIn', at: Trigger.previous, delay: 0.1.seconds),
             ],
           ),
         ],

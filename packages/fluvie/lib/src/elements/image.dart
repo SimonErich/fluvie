@@ -23,7 +23,7 @@ import 'package:fluvie/src/media/runtime/resolved_image.dart';
 /// ```dart
 /// Image.network('https://…/photo.jpg', fit: BoxFit.cover)
 /// Image.asset('me.png', frame: Frame.polaroid(caption: 'Summer'))
-/// Image.network('…').animate([Animation.slideFade(), Animation.kenBurns(zoom: 1.2)]);
+/// Image.network('…').animate([Animation.slideFadeIn(), Animation.kenBurns(zoom: 1.2)]);
 /// ```
 ///
 /// [source] exposes the declared [MediaSource] for the collect pass

@@ -17,7 +17,7 @@ explanation, no markdown code fences.
 Rules:
 - Timing is declarative. Never compute frame numbers. Use unit-tagged durations:
   "2s" (seconds), "30f" (frames), "500ms", or "0.3r" (a fraction of the window).
-- Prefer animation presets (fadeIn, fadeOut, slideIn, slideOut, slideFade, pop,
+- Prefer animation presets (fadeIn, fadeOut, slideIn, slideOut, slideFadeIn, slideFadeOut, pop,
   scaleIn, blurIn, blurOut, grain, vignette, spin, drift, kenBurns) over raw
   keyframes.
 - Anchors are string ids. Give an element an "anchor", then reference it from a

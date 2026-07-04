@@ -4,6 +4,7 @@ import 'package:flutter/painting.dart' show Alignment;
 import 'package:fluvie/src/animation/animation.dart';
 import 'package:fluvie/src/animation/effects/mask_wipe_effect.dart';
 import 'package:fluvie/src/animation/presets/preset_tail.dart';
+import 'package:fluvie/src/core/animation_phase.dart';
 import 'package:fluvie/src/core/edge.dart';
 import 'package:fluvie/src/core/keyframe.dart';
 import 'package:fluvie/src/core/timing.dart';
@@ -24,10 +25,15 @@ Animation buildSlideIn(Edge from, PresetTail tail) =>
 /// edge, an exit.
 Animation buildSlideOut(Edge to, PresetTail tail) => _exit(Keyframe(x: to.dx, y: to.dy), tail);
 
-/// Builds `Animation.slideFade`: transparent and one element-size off
+/// Builds `Animation.slideFadeIn`: transparent and one element-size off
 /// the [from] edge → natural, an enter.
-Animation buildSlideFade(Edge from, PresetTail tail) =>
+Animation buildSlideFadeIn(Edge from, PresetTail tail) =>
     _enter(Keyframe(opacity: 0, x: from.dx, y: from.dy), tail);
+
+/// Builds `Animation.slideFadeOut`: natural → transparent and one
+/// element-size off the [to] edge, an exit.
+Animation buildSlideFadeOut(Edge to, PresetTail tail) =>
+    _exit(Keyframe(opacity: 0, x: to.dx, y: to.dy), tail);
 
 /// Builds `Animation.pop`: scale `0` → natural on the
 /// overshoot-derived spring; an explicit tail spring wins.
@@ -39,6 +45,11 @@ Animation buildPop(double overshoot, PresetTail tail) =>
 Animation buildScaleIn(double from, PresetTail tail) =>
     _enter(Keyframe(scale: from), _withSpring(tail, tail.spring ?? Spring.snappy));
 
+/// Builds `Animation.scaleOut`: natural → scale [to] on
+/// [Spring.snappy]; an explicit tail spring wins.
+Animation buildScaleOut(double to, PresetTail tail) =>
+    _exit(Keyframe(scale: to), _withSpring(tail, tail.spring ?? Spring.snappy));
+
 /// Builds `Animation.blurIn`: gaussian blur [sigma] → sharp,
 /// blur-only (compose with `fadeIn` for blur+fade), an enter.
 Animation buildBlurIn(double sigma, PresetTail tail) => _enter(Keyframe(blur: sigma), tail);
@@ -47,10 +58,25 @@ Animation buildBlurIn(double sigma, PresetTail tail) => _enter(Keyframe(blur: si
 /// blur-only, an exit.
 Animation buildBlurOut(double sigma, PresetTail tail) => _exit(Keyframe(blur: sigma), tail);
 
-/// Builds `Animation.maskWipe`: a [shape] mask growing from [origin]
+/// Builds `Animation.maskWipeIn`: a [shape] mask growing from [origin]
 /// reveals the element, an enter (the `custom` default phase).
-Animation buildMaskWipe(WipeShape shape, Alignment origin, PresetTail tail) => Animation.custom(
+Animation buildMaskWipeIn(WipeShape shape, Alignment origin, PresetTail tail) => Animation.custom(
   MaskWipeEffect(shape: shape, origin: origin),
+  duration: tail.duration,
+  ease: tail.ease,
+  spring: tail.spring,
+  delay: tail.delay,
+  at: tail.at,
+  stagger: tail.stagger,
+  repeat: tail.repeat,
+  label: tail.label,
+);
+
+/// Builds `Animation.maskWipeOut`: the [shape] mask shrinks toward
+/// [origin], hiding the element, an exit.
+Animation buildMaskWipeOut(WipeShape shape, Alignment origin, PresetTail tail) => Animation.custom(
+  MaskWipeEffect(shape: shape, origin: origin, reverse: true),
+  phase: AnimationPhase.exit,
   duration: tail.duration,
   ease: tail.ease,
   spring: tail.spring,

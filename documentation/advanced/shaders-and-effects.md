@@ -26,7 +26,7 @@ Padding(
       ).animate([
         // Transforms wrap the wall; the two pixel effects post-process
         // the result, regardless of list order.
-        Animation.slideFade(stagger: const Stagger.each(Time.frames(2))),
+        Animation.slideFadeIn(stagger: const Stagger.each(Time.frames(2))),
         Animation.grain(0.18),
         Animation.vignette(0.4),
       ]),
@@ -46,7 +46,7 @@ same way:
   scanlines, chromatic, bloom, glitch, particles, and shaders. They run last,
   in list order among themselves.
 
-So `[slideFade, grain]` and `[grain, slideFade]` produce the same frame: the
+So `[slideFadeIn, grain]` and `[grain, slideFadeIn]` produce the same frame: the
 wall slides into place, then grain lays over the result. You never order the two
 classes by hand. This is the unified pipeline.
 

@@ -30,14 +30,17 @@ String _preset(String preset, Map<String, Object?> animation, _Anchors anchors) 
     case 'fadeOut':
       return 'Animation.$preset(${_args(tail)})';
     case 'slideIn':
-    case 'slideFade':
+    case 'slideFadeIn':
       return 'Animation.$preset(${_args([_edgeArg('from', animation['from']), ...tail])})';
     case 'slideOut':
-      return 'Animation.slideOut(${_args([_edgeArg('to', animation['to']), ...tail])})';
+    case 'slideFadeOut':
+      return 'Animation.$preset(${_args([_edgeArg('to', animation['to']), ...tail])})';
     case 'pop':
       return 'Animation.pop(${_args([_numArg('overshoot', animation['overshoot']), ...tail])})';
     case 'scaleIn':
       return 'Animation.scaleIn(${_args([_numArg('from', animation['from']), ...tail])})';
+    case 'scaleOut':
+      return 'Animation.scaleOut(${_args([_numArg('to', animation['to']), ...tail])})';
     case 'blurIn':
     case 'blurOut':
       return 'Animation.$preset(${_args([_numArg('sigma', animation['sigma']), ...tail])})';
@@ -46,9 +49,9 @@ String _preset(String preset, Map<String, Object?> animation, _Anchors anchors) 
       final amount = animation['amount'] != null ? _num(animation['amount']) : '0';
       return 'Animation.$preset(${_args([amount, ...tail])})';
     case 'spin':
-      final per = animation['per'];
+      final period = animation['period'];
       return 'Animation.spin(${_args([
-        if (per != null) 'per: ${_time(per as String)}',
+        if (period != null) 'period: ${_time(period as String)}',
         ...ambientTail,
       ])})';
     case 'drift':

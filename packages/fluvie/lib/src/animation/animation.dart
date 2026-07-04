@@ -219,7 +219,7 @@ final class Animation {
   /// from.dy))`: one element-size of travel plus a fade in a single keyframe
   /// animation. [from] defaults to [Edge.bottom]; the common tail forwards
   /// verbatim.
-  static Animation slideFade({
+  static Animation slideFadeIn({
     Edge from = Edge.bottom,
     Time? duration,
     Curve? ease,
@@ -229,7 +229,24 @@ final class Animation {
     Stagger? stagger,
     Repeat? repeat,
     String? label,
-  }) => buildSlideFade(from, _tail(duration, ease, spring, delay, at, stagger, repeat, label));
+  }) => buildSlideFadeIn(from, _tail(duration, ease, spring, delay, at, stagger, repeat, label));
+
+  /// Slides out toward the [to] edge while fading out — an exit.
+  ///
+  /// Expands to `Animation.to(Keyframe(opacity: 0, x: to.dx, y: to.dy))`,
+  /// mirroring [slideFadeIn]. [to] defaults to [Edge.top]; the common tail
+  /// forwards verbatim.
+  static Animation slideFadeOut({
+    Edge to = Edge.top,
+    Time? duration,
+    Curve? ease,
+    Spring? spring,
+    Time delay = Time.zero,
+    Trigger at = Trigger.auto,
+    Stagger? stagger,
+    Repeat? repeat,
+    String? label,
+  }) => buildSlideFadeOut(to, _tail(duration, ease, spring, delay, at, stagger, repeat, label));
 
   /// Pops in from scale `0` on a spring — an enter, springy by default.
   ///
@@ -268,6 +285,24 @@ final class Animation {
     Repeat? repeat,
     String? label,
   }) => buildScaleIn(from, _tail(duration, ease, spring, delay, at, stagger, repeat, label));
+
+  /// Scales out toward [to] (a scale factor, `1` = natural size) — an exit
+  /// on [Spring.snappy] by default, mirroring [scaleIn].
+  ///
+  /// Expands to `Animation.to(Keyframe(scale: to), spring: Spring.snappy)`.
+  /// An explicit [spring] replaces the preset spring; the rest of the common
+  /// tail forwards verbatim.
+  static Animation scaleOut({
+    double to = 0.85,
+    Spring? spring,
+    Time? duration,
+    Curve? ease,
+    Time delay = Time.zero,
+    Trigger at = Trigger.auto,
+    Stagger? stagger,
+    Repeat? repeat,
+    String? label,
+  }) => buildScaleOut(to, _tail(duration, ease, spring, delay, at, stagger, repeat, label));
 
   /// Sharpens in from a gaussian blur of [sigma] logical pixels — an enter.
   ///
@@ -309,7 +344,7 @@ final class Animation {
   /// revealed (a circle's radius reaches the farthest corner exactly at the
   /// end). [origin] positions where the mask grows from and is ignored by
   /// [WipeShape.diagonal]. The common tail forwards verbatim.
-  static Animation maskWipe({
+  static Animation maskWipeIn({
     WipeShape shape = WipeShape.circle,
     Alignment origin = Alignment.center,
     Time? duration,
@@ -320,7 +355,31 @@ final class Animation {
     Stagger? stagger,
     Repeat? repeat,
     String? label,
-  }) => buildMaskWipe(
+  }) => buildMaskWipeIn(
+    shape,
+    origin,
+    _tail(duration, ease, spring, delay, at, stagger, repeat, label),
+  );
+
+  /// Hides the element through a shrinking [shape] mask — an exit,
+  /// mirroring [maskWipeIn].
+  ///
+  /// Expands to `Animation.custom(MaskWipeEffect(..., reverse: true))`: at
+  /// progress `0` the element is fully visible, at `1` fully hidden. [origin]
+  /// positions where the mask shrinks toward and is ignored by
+  /// [WipeShape.diagonal]. The common tail forwards verbatim.
+  static Animation maskWipeOut({
+    WipeShape shape = WipeShape.circle,
+    Alignment origin = Alignment.center,
+    Time? duration,
+    Curve? ease,
+    Spring? spring,
+    Time delay = Time.zero,
+    Trigger at = Trigger.auto,
+    Stagger? stagger,
+    Repeat? repeat,
+    String? label,
+  }) => buildMaskWipeOut(
     shape,
     origin,
     _tail(duration, ease, spring, delay, at, stagger, repeat, label),
@@ -479,6 +538,26 @@ final class Animation {
     String? label,
   }) => buildGlitchIn(from, _tail(duration, ease, spring, delay, at, stagger, repeat, label));
 
+  /// Glitches out: the digital tear grows until the element degrades — a
+  /// pixel post-effect, an exit mirroring [glitchIn].
+  ///
+  /// Expands to `Animation.custom(GlitchEffect(from: to, reverse: true))`:
+  /// the seeded slice jitter and chromatic split grow from zero as progress
+  /// runs to `1`. [to] biases the slice direction (defaults to [Edge.right]);
+  /// the same seed always tears the same way. The common tail forwards
+  /// verbatim.
+  static Animation glitchOut({
+    Edge to = Edge.right,
+    Time? duration,
+    Curve? ease,
+    Spring? spring,
+    Time delay = Time.zero,
+    Trigger at = Trigger.auto,
+    Stagger? stagger,
+    Repeat? repeat,
+    String? label,
+  }) => buildGlitchOut(to, _tail(duration, ease, spring, delay, at, stagger, repeat, label));
+
   /// Lays a deterministic field of particles over the element — a pixel
   /// post-effect.
   ///
@@ -557,8 +636,7 @@ final class Animation {
   /// Floats gently up and down forever — a continuous ambient motion.
   ///
   /// One cycle is a vertical sine of ± [amplitude] element-heights (fractions
-  /// of the element's own size) lasting `1/frequency` seconds ([frequency] is
-  /// in cycles per second; the default `0.4` is one bob every 2.5 s). Loops
+  /// of the element's own size), one bob per [period] (default 2.5 s). Loops
   /// forever unless [repeat] overrides.
   ///
   /// Pass a [seed] for organic variation: the pure sine then carries a
@@ -569,14 +647,14 @@ final class Animation {
   /// pure-sine keyframe float.
   static Animation float({
     double amplitude = 0.04,
-    double frequency = 0.4,
+    Time period = const Time.seconds(2.5),
     String? seed,
     Time delay = Time.zero,
     Trigger at = Trigger.auto,
     Stagger? stagger,
     Repeat? repeat,
     String? label,
-  }) => buildFloat(amplitude, frequency, _ambient(delay, at, stagger, repeat, label), seed: seed);
+  }) => buildFloat(amplitude, period, _ambient(delay, at, stagger, repeat, label), seed: seed);
 
   /// Breathes scale forever — a continuous ambient pulse, in two forms.
   ///
@@ -649,19 +727,19 @@ final class Animation {
     String? label,
   }) => buildDrift(to, distance, _ambient(delay, at, stagger, repeat, label));
 
-  /// Spins one full turn every [per] forever — a continuous rotation.
+  /// Spins one full turn every [period] forever — a continuous rotation.
   ///
-  /// Rotation runs linearly `0 → 1` turn (360°) per cycle of [per] (default
-  /// 4 s) and loops forever unless [repeat] overrides — e.g.
+  /// Rotation runs linearly `0 → 1` turn (360°) per cycle of [period]
+  /// (default 4 s) and loops forever unless [repeat] overrides — e.g.
   /// `Repeat.times(2)` stops after two turns.
   static Animation spin({
-    Time per = const Time.seconds(4),
+    Time period = const Time.seconds(4),
     Time delay = Time.zero,
     Trigger at = Trigger.auto,
     Stagger? stagger,
     Repeat? repeat,
     String? label,
-  }) => buildSpin(per, _ambient(delay, at, stagger, repeat, label));
+  }) => buildSpin(period, _ambient(delay, at, stagger, repeat, label));
 
   /// Slowly zooms to [zoom] while panning toward the [pan] edge — the
   /// classic Ken Burns documentary move, one pass across the window.

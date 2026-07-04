@@ -40,7 +40,7 @@ double _opacityOver(WidgetTester tester, String name) => tester
 
 void main() {
   group('stagger distribution (D13/D19) — staggered animations go per child', () {
-    testWidgets('a staggered slideFade cascades: child 0 leads, child 2 trails', (tester) async {
+    testWidgets('a staggered slideFadeIn cascades: child 0 leads, child 2 trails', (tester) async {
       await tester.pumpWidget(
         _harness(
           frame: 8,
@@ -48,7 +48,7 @@ void main() {
               Column(
                 children: [_square('a'), _square('b'), _square('c')],
               ).animate([
-                Animation.slideFade(
+                Animation.slideFadeIn(
                   stagger: const Stagger.each(Time.frames(4)),
                   duration: const Time.frames(20),
                   ease: Ease.linear,
@@ -93,7 +93,7 @@ void main() {
               Column(
                 children: [_square('a'), _square('b'), _square('c')],
               ).animate([
-                Animation.slideFade(
+                Animation.slideFadeIn(
                   stagger: const Stagger.each(Time.frames(4)),
                   duration: const Time.frames(20),
                   ease: Ease.linear,
@@ -107,7 +107,7 @@ void main() {
         find.ancestor(of: find.byType(Flex), matching: find.byType(Opacity)).first,
       );
       expect(containerOpacity.opacity, closeTo(0.5, 1e-9));
-      // …while the staggered slideFade still cascades per child inside.
+      // …while the staggered slideFadeIn still cascades per child inside.
       expect(_opacityOver(tester, 'a'), closeTo(0.5, 1e-9));
       expect(_opacityOver(tester, 'b'), closeTo(0.3, 1e-9));
       expect(_opacityOver(tester, 'c'), closeTo(0.1, 1e-9));

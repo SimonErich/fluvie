@@ -22,7 +22,7 @@ Reach for a preset first. Each is one entry in the list:
 <!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (preset-menu)" -->
 ```dart
 Animation.fadeIn(), // opacity 0 to natural
-Animation.slideFade(from: Edge.left), // rise in while fading
+Animation.slideFadeIn(from: Edge.left), // rise in while fading
 Animation.pop(overshoot: 1.2), // springy scale, peaks at 120%
 Animation.scaleIn(from: 0.7), // settle up from 70%
 Animation.blurIn(sigma: 16), // sharpen from a 16 px blur
@@ -31,8 +31,8 @@ Animation.float(amplitude: 0.05), // bob forever, ambient
 
 The presets fall into three groups:
 
-- **Enter** plays at the start of the window: `fadeIn`, `slideIn`, `slideFade`,
-  `pop`, `scaleIn`, `blurIn`, `maskWipe`.
+- **Enter** plays at the start of the window: `fadeIn`, `slideIn`, `slideFadeIn`,
+  `pop`, `scaleIn`, `blurIn`, `maskWipeIn`.
 - **Exit** plays at the end of the window: `fadeOut`, `slideOut`, `blurOut`,
   `color`.
 - **Ambient** plays the whole window, on a loop: `float`, `pulse`, `drift`,
@@ -49,7 +49,7 @@ you do not say when:
 <!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (compose-enter-exit)" -->
 ```dart
 const Text('In and out', style: _line).animate([
-  Animation.slideFade(),
+  Animation.slideFadeIn(),
   Animation.fadeOut(),
 ]);
 ```
@@ -97,7 +97,7 @@ By default an animation plays at its phase. A `Trigger` changes the start. Use
 <!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (trigger-after)" -->
 ```dart
 const Text('Then me', style: _line).animate([
-  Animation.slideFade(at: Trigger.whenEnds(intro)),
+  Animation.slideFadeIn(at: Trigger.whenEnds(intro)),
 ]);
 ```
 
@@ -121,7 +121,7 @@ const Column(
     Text('Three', style: _line),
   ],
 ).animate([
-  Animation.slideFade(stagger: const Stagger.each(Time.frames(8))),
+  Animation.slideFadeIn(stagger: const Stagger.each(Time.frames(8))),
 ]);
 ```
 

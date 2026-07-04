@@ -8,7 +8,7 @@ motion with `.animate()`. There is no special text widget to learn:
 Widget animatedTitle() => const Text(
   'Made with Fluvie',
   style: TextStyle(fontSize: 64, fontWeight: FontWeight.bold),
-).animate([Animation.slideFade(), Animation.fadeIn()]);
+).animate([Animation.slideFadeIn(), Animation.fadeIn()]);
 ```
 
 That title slides up and fades in together. Everything you know about Flutter

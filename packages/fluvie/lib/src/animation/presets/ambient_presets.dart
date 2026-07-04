@@ -9,14 +9,15 @@ import 'package:fluvie/src/core/repeat.dart';
 import 'package:fluvie/src/core/time.dart';
 
 /// Builds `Animation.float`: a vertical sine of ± [amplitude]
-/// element-heights, looping forever at `1/frequency` seconds per cycle.
+/// element-heights, looping forever at one [period] per cycle.
 ///
 /// With no [seed] this is the pure-sine keyframe preset: five evenly-spaced
 /// stops with gentle segment eases on a linear cycle (byte-identical to the
 /// shipped behaviour). A non-null [seed] swaps in a [FloatEffect] that reads
-/// the frame clock and adds a low-amplitude, reproducible noise wobble.
-Animation buildFloat(double amplitude, double frequency, AmbientTail tail, {String? seed}) {
-  if (seed != null) return _buildSeededFloat(amplitude, frequency, seed, tail);
+/// the frame clock and adds a low-amplitude, reproducible noise wobble; that
+/// branch needs an absolute [period] (seconds or milliseconds).
+Animation buildFloat(double amplitude, Time period, AmbientTail tail, {String? seed}) {
+  if (seed != null) return _buildSeededFloat(amplitude, _hzOf(period), seed, tail);
   return Animation.keyframes(
     [
       Keyframe.natural,
@@ -27,7 +28,7 @@ Animation buildFloat(double amplitude, double frequency, AmbientTail tail, {Stri
     ],
     easings: const [Ease.gentle, Ease.gentle, Ease.gentle, Ease.gentle],
     phase: AnimationPhase.during,
-    duration: Time.seconds(1 / frequency),
+    duration: period,
     ease: Ease.linear,
     delay: tail.delay,
     trigger: tail.at,
@@ -36,6 +37,17 @@ Animation buildFloat(double amplitude, double frequency, AmbientTail tail, {Stri
     label: tail.label,
   );
 }
+
+/// The cycle rate of an absolute [period], for the frame-clock [FloatEffect].
+double _hzOf(Time period) => switch (period) {
+  SecondTime(:final seconds) => 1 / seconds,
+  MsTime(:final milliseconds) => 1000 / milliseconds,
+  _ => throw ArgumentError.value(
+    period,
+    'period',
+    'a seeded float needs an absolute period (seconds or milliseconds)',
+  ),
+};
 
 /// The seeded `float` branch: a `during` [FloatEffect] looping forever, its
 /// noise wobble keyed by [seed]. Kept separate so `buildFloat` stays a
@@ -81,11 +93,11 @@ Animation buildDrift(Edge to, double distance, AmbientTail tail) => Animation.fr
 
 /// Builds `Animation.spin`: rotation `0 → 1` turn over [per], linear,
 /// looping forever.
-Animation buildSpin(Time per, AmbientTail tail) => Animation.fromTo(
+Animation buildSpin(Time period, AmbientTail tail) => Animation.fromTo(
   const Keyframe(rotation: 0),
   const Keyframe(rotation: 1),
   phase: AnimationPhase.during,
-  duration: per,
+  duration: period,
   ease: Ease.linear,
   delay: tail.delay,
   at: tail.at,

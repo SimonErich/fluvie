@@ -28,7 +28,7 @@ Another element waits for the anchored animation to finish:
 <!-- code-excerpt "examples/gallery/lib/lessons/03_timing_and_triggers.dart (after-trigger)" -->
 ```dart
 const Text('Hello, Fluvie', style: _title).animate([
-  Animation.slideFade(at: Trigger.whenEnds(bg)),
+  Animation.slideFadeIn(at: Trigger.whenEnds(bg)),
 ]),
 ```
 

@@ -41,18 +41,33 @@ void main() {
   });
 
   group('slide presets (§6, Edge.dx/dy)', () {
-    test('slideFade defaults to the bottom edge: opacity 0, one height down', () {
+    test('slideFadeIn defaults to the bottom edge: opacity 0, one height down', () {
       expectExpandsTo(
-        Animation.slideFade(),
+        Animation.slideFadeIn(),
         Animation.from(const Keyframe(opacity: 0, x: 0, y: 1)),
       );
     });
 
-    test('slideFade carries any edge through Edge.dx/dy', () {
+    test('slideFadeIn carries any edge through Edge.dx/dy', () {
       for (final edge in Edge.values) {
         expectExpandsTo(
-          Animation.slideFade(from: edge),
+          Animation.slideFadeIn(from: edge),
           Animation.from(Keyframe(opacity: 0, x: edge.dx, y: edge.dy)),
+        );
+      }
+    });
+
+    test('slideFadeOut defaults to the top edge: opacity 0, one height up — an exit', () {
+      final out = Animation.slideFadeOut();
+      expectExpandsTo(out, Animation.to(const Keyframe(opacity: 0, x: 0, y: -1)));
+      expect(out.phase, AnimationPhase.exit);
+    });
+
+    test('slideFadeOut carries any edge through Edge.dx/dy', () {
+      for (final edge in Edge.values) {
+        expectExpandsTo(
+          Animation.slideFadeOut(to: edge),
+          Animation.to(Keyframe(opacity: 0, x: edge.dx, y: edge.dy)),
         );
       }
     });
@@ -140,18 +155,39 @@ void main() {
     });
   });
 
-  group('maskWipe preset', () {
+  group('maskWipeIn preset', () {
     test('carries a MaskWipeEffect with the shape and origin — an enter', () {
-      final wipe = Animation.maskWipe();
+      final wipe = Animation.maskWipeIn();
       final effect = wipe.effect as MaskWipeEffect;
       expect(effect.shape, WipeShape.circle);
       expect(effect.origin, Alignment.center);
       expect(wipe.phase, AnimationPhase.enter);
 
-      final custom = Animation.maskWipe(shape: WipeShape.diagonal, origin: Alignment.topRight);
+      final custom = Animation.maskWipeIn(shape: WipeShape.diagonal, origin: Alignment.topRight);
       final customEffect = custom.effect as MaskWipeEffect;
       expect(customEffect.shape, WipeShape.diagonal);
       expect(customEffect.origin, Alignment.topRight);
+    });
+  });
+
+  group('maskWipeOut preset', () {
+    test('carries a reversed MaskWipeEffect — an exit', () {
+      final wipe = Animation.maskWipeOut();
+      final effect = wipe.effect as MaskWipeEffect;
+      expect(effect.shape, WipeShape.circle);
+      expect(effect.origin, Alignment.center);
+      expect(effect.reverse, isTrue);
+      expect(wipe.phase, AnimationPhase.exit);
+    });
+  });
+
+  group('scaleOut preset', () {
+    test('scales toward its target on a spring-by-default exit', () {
+      final out = Animation.scaleOut();
+      expectExpandsTo(out, Animation.to(const Keyframe(scale: 0.85)));
+      expect(out.phase, AnimationPhase.exit);
+      expect(out.spring, isNotNull);
+      expect(out.timing, isA<Spring>());
     });
   });
 
@@ -171,8 +207,13 @@ void main() {
           Animation.slideIn(delay: delay, at: at, stagger: stagger, repeat: repeat, label: label),
       'slideOut': () =>
           Animation.slideOut(delay: delay, at: at, stagger: stagger, repeat: repeat, label: label),
-      'slideFade': () =>
-          Animation.slideFade(delay: delay, at: at, stagger: stagger, repeat: repeat, label: label),
+      'slideFadeIn': () => Animation.slideFadeIn(
+        delay: delay,
+        at: at,
+        stagger: stagger,
+        repeat: repeat,
+        label: label,
+      ),
       'pop': () =>
           Animation.pop(delay: delay, at: at, stagger: stagger, repeat: repeat, label: label),
       'scaleIn': () =>
@@ -181,8 +222,13 @@ void main() {
           Animation.blurIn(delay: delay, at: at, stagger: stagger, repeat: repeat, label: label),
       'blurOut': () =>
           Animation.blurOut(delay: delay, at: at, stagger: stagger, repeat: repeat, label: label),
-      'maskWipe': () =>
-          Animation.maskWipe(delay: delay, at: at, stagger: stagger, repeat: repeat, label: label),
+      'maskWipeIn': () => Animation.maskWipeIn(
+        delay: delay,
+        at: at,
+        stagger: stagger,
+        repeat: repeat,
+        label: label,
+      ),
     };
 
     for (final entry in presets.entries) {
@@ -205,7 +251,7 @@ void main() {
       expect(fade.ease, Ease.snappy);
       expect(fade.timing, const Tween(Time.frames(20), ease: Ease.snappy));
 
-      final sprung = Animation.slideFade(spring: Spring.bouncy);
+      final sprung = Animation.slideFadeIn(spring: Spring.bouncy);
       expect(sprung.spring, Spring.bouncy);
       expect(sprung.timing, Spring.bouncy);
 

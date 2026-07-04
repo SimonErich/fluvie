@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 ///
 /// ```dart
 /// Column(children: [Text('A'), Text('B'), Text('C')])
-///     .animate([Animation.slideFade(stagger: Stagger.each(0.08.seconds))]);
+///     .animate([Animation.slideFadeIn(stagger: Stagger.each(0.08.seconds))]);
 /// ```
 ///
 /// A stagger is pure data; the distribution math (per-child offsets, origin

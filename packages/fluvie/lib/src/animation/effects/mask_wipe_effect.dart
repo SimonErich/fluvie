@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/animation/animation_effect.dart';
 import 'package:fluvie/src/core/wipe_shape.dart';
 
-/// The reveal effect behind `Animation.maskWipe`: a growing clip mask that
+/// The reveal effect behind `Animation.maskWipeIn`: a growing clip mask that
 /// uncovers its child as progress runs `0 → 1`.
 ///
 /// A transform-class effect — it wraps the child in a [ClipPath] (no
@@ -24,7 +24,11 @@ import 'package:fluvie/src/core/wipe_shape.dart';
 ///   corner to the bottom-right; [origin] is not used by this shape.
 final class MaskWipeEffect implements AnimationEffect {
   /// Creates a mask wipe revealing through [shape], growing from [origin].
-  const MaskWipeEffect({this.shape = WipeShape.circle, this.origin = Alignment.center});
+  const MaskWipeEffect({
+    this.shape = WipeShape.circle,
+    this.origin = Alignment.center,
+    this.reverse = false,
+  });
 
   /// The reveal geometry; defaults to [WipeShape.circle].
   final WipeShape shape;
@@ -33,10 +37,15 @@ final class MaskWipeEffect implements AnimationEffect {
   /// defaults to [Alignment.center]. Ignored by [WipeShape.diagonal].
   final Alignment origin;
 
+  /// Runs the wipe backwards: the mask shrinks, hiding the element as
+  /// progress runs `0 → 1` (the `maskWipeOut` exit).
+  final bool reverse;
+
   @override
   Widget build(Widget child, double progress) {
-    if (progress >= 1) return child;
-    final clamped = progress < 0 ? 0.0 : progress;
+    final reveal = reverse ? 1 - progress : progress;
+    if (reveal >= 1) return child;
+    final clamped = reveal < 0 ? 0.0 : reveal;
     return ClipPath(
       clipper: _WipeClipper(shape: shape, origin: origin, progress: clamped),
       child: child,
@@ -44,7 +53,8 @@ final class MaskWipeEffect implements AnimationEffect {
   }
 
   @override
-  String toString() => 'MaskWipeEffect(${shape.name}, origin: $origin)';
+  String toString() =>
+      'MaskWipeEffect(${shape.name}, origin: $origin${reverse ? ', reverse' : ''})';
 }
 
 /// Computes the wipe's clip path for one (shape, origin, progress) triple.

@@ -14,17 +14,17 @@ void main() {
 
       expect(
         table,
-        'owner    | label     | phase  | start | end | frames\n'
-        '---------+-----------+--------+-------+-----+-------\n'
-        'title    | pop       | enter  |     0 |  36 |     36\n'
-        'title    | slideFade | enter  |    39 |  57 |     18\n'
-        'counter  | count     | enter  |    90 | 150 |     60\n'
-        'stats-fx | grain     | during |    90 | 210 |    120\n'
-        'stats-fx | vignette  | during |    90 | 210 |    120\n'
-        'caption  | fadeIn    | enter  |   135 | 159 |     24\n'
-        'outro    | blurIn    | enter  |   210 | 228 |     18\n'
-        'outro    | float     | during |   210 | 300 |     90\n'
-        'outro    | fadeOut   | exit   |   282 | 300 |     18\n'
+        'owner    | label       | phase  | start | end | frames\n'
+        '---------+-------------+--------+-------+-----+-------\n'
+        'title    | pop         | enter  |     0 |  36 |     36\n'
+        'title    | slideFadeIn | enter  |    39 |  57 |     18\n'
+        'counter  | count       | enter  |    90 | 150 |     60\n'
+        'stats-fx | grain       | during |    90 | 210 |    120\n'
+        'stats-fx | vignette    | during |    90 | 210 |    120\n'
+        'caption  | fadeIn      | enter  |   135 | 159 |     24\n'
+        'outro    | blurIn      | enter  |   210 | 228 |     18\n'
+        'outro    | float       | during |   210 | 300 |     90\n'
+        'outro    | fadeOut     | exit   |   282 | 300 |     18\n'
         'total: 300 frames @ 30 fps\n',
       );
     });

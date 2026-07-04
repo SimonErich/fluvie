@@ -344,7 +344,7 @@ void main() {
         ),
         TimelineRow(
           ownerId: 'title',
-          label: 'slideFade',
+          label: 'slideFadeIn',
           phase: AnimationPhase.enter,
           startFrame: 39,
           endFrame: 57,

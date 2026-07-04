@@ -49,7 +49,7 @@ Video _quickstart(Anchor bg) => Video(
         // Slides + fades in, but only once the gradient shift finishes.
         const Text(
           'Hello, Fluvie',
-        ).animate([Animation.slideFade(from: Edge.bottom, at: Trigger.whenEnds(bg))]),
+        ).animate([Animation.slideFadeIn(from: Edge.bottom, at: Trigger.whenEnds(bg))]),
         // §3 mounts Image.network here — Phase 8 media; the stand-in keeps
         // the element's two animations verbatim.
         const SizedBox(
@@ -57,7 +57,7 @@ Video _quickstart(Anchor bg) => Video(
           height: 90,
           child: ColoredBox(color: Color(0xFF888888)),
         ).animate([
-          Animation.slideFade(from: Edge.left, duration: 4.seconds),
+          Animation.slideFadeIn(from: Edge.left, duration: 4.seconds),
           Animation.kenBurns(zoom: 1.2),
         ]),
       ],

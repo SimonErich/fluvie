@@ -20,6 +20,14 @@ change below is mechanical.
 | `Chart.bar(growIn:)`, `Chart.line/area(drawIn:)`, `Chart.pie/donut(sweepIn:)`, `Chart.scatter(popIn:)` | `reveal:` on every chart — one word for "how long the built-in reveal takes" |
 | `Counter(duration:)` (and the Counter spec prop `"duration"`) | `Counter(reveal:)` / `"reveal"` |
 | `Arrow(drawIn:)`, `Shape(drawIn:)`, `Connector(drawIn:)`, `LowerThird(slideIn:)` | `reveal:` — annotations share the same word |
+| `Animation.slideFade(...)` (and the spec preset `"slideFade"`) | `Animation.slideFadeIn(...)` / `"slideFadeIn"`; a new `slideFadeOut` mirrors it |
+| `Animation.maskWipe(...)` | `Animation.maskWipeIn(...)`; a new `maskWipeOut` mirrors it |
+| `Animation.spin(per:)` (and the spec arg `"per"`) | `Animation.spin(period:)` / `"period"` |
+| `Animation.float(frequency: 0.4)` (cycles per second) | `Animation.float(period: 2.5.seconds)` (one bob per period) |
+
+New preset mirrors in 0.2.0: `scaleOut`, `glitchOut`, `slideFadeOut`, and
+`maskWipeOut` complete every directional pair, so guessing the `*Out` twin of
+an `*In` preset now always works.
 
 The authoring surface (`Video`, `Scene`, elements, `Animation`, `Trigger`,
 themes, specs, the preview runtime) stays on `package:fluvie/fluvie.dart`.
@@ -41,7 +49,7 @@ AnimatedText('Hello', animation: EntryAnimation.slideFade());
 
 <!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-animate)" -->
 ```dart
-const Text('Hello', style: _line).animate([Animation.slideFade()]);
+const Text('Hello', style: _line).animate([Animation.slideFadeIn()]);
 ```
 
 The `deprecated_member` lint flags the old names in your code and offers a
@@ -65,7 +73,7 @@ AnimatedProp(animation: PropAnimation.fade(), child: Text('Hi'));
 
 <!-- code-excerpt "examples/gallery/lib/snippets/migration_snippets.dart (migrate-animate)" -->
 ```dart
-const Text('Hello', style: _line).animate([Animation.slideFade()]);
+const Text('Hello', style: _line).animate([Animation.slideFadeIn()]);
 ```
 
 See [Animating elements](../guides/animating-elements.md) for the full preset
@@ -92,7 +100,7 @@ const Column(children: [Text('A'), Text('B')]).animate([
 ## Effects join the animate list
 
 `EffectOverlay`, `ParticleEffect`, `MaskedClip`, and `ParallaxLayer` are gone.
-The pixel post-effects (`grain`, `vignette`, `particles`, `shader`, `maskWipe`,
+The pixel post-effects (`grain`, `vignette`, `particles`, `shader`, `maskWipeIn`,
 and the rest) sit in the same `.animate([...])` list as everything else:
 
 <!-- code-excerpt-ignore: the old EffectOverlay API predates v1 and no longer compiles -->

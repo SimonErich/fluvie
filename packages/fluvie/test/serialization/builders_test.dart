@@ -32,7 +32,7 @@ void main() {
         {'preset': 'fadeOut'},
         {'preset': 'slideIn', 'from': 'top'},
         {'preset': 'slideOut', 'to': 'bottom'},
-        {'preset': 'slideFade', 'from': 'left'},
+        {'preset': 'slideFadeIn', 'from': 'left'},
         {'preset': 'pop', 'overshoot': 1.2},
         {'preset': 'scaleIn', 'from': 0.8},
         {'preset': 'blurIn', 'sigma': 8},

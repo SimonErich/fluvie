@@ -69,9 +69,9 @@ void main() {
   testWidgets('§27.6: transform-then-pixel and pixel-then-transform paint identical pixels', (
     tester,
   ) async {
-    await tester.pumpWidget(_frameWith([Animation.slideFade(), _grainHold()]));
+    await tester.pumpWidget(_frameWith([Animation.slideFadeIn(), _grainHold()]));
     final forward = await _bytes(tester);
-    await tester.pumpWidget(_frameWith([_grainHold(), Animation.slideFade()]));
+    await tester.pumpWidget(_frameWith([_grainHold(), Animation.slideFadeIn()]));
     final reversed = await _bytes(tester);
     expect(
       forward.buffer.asUint8List(),

@@ -341,9 +341,9 @@ void main() {
 
     test('ambient spin emits no duration or ease', () {
       final code = codeFor([
-        {'preset': 'spin', 'per': '2.0s', 'duration': '5.0s', 'ease': 'smooth'},
+        {'preset': 'spin', 'period': '2.0s', 'duration': '5.0s', 'ease': 'smooth'},
       ]);
-      expect(code, contains('Animation.spin(per: 2.seconds)'));
+      expect(code, contains('Animation.spin(period: 2.seconds)'));
       expect(code, isNot(contains('Ease.smooth')));
     });
 

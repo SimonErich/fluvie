@@ -109,7 +109,7 @@ it:
 <!-- code-excerpt "examples/gallery/lib/snippets/phase_15_snippets.dart (trigger-after)" -->
 ```dart
 const Text('Then me', style: _line).animate([
-  Animation.slideFade(at: Trigger.whenEnds(intro)),
+  Animation.slideFadeIn(at: Trigger.whenEnds(intro)),
 ]);
 ```
 

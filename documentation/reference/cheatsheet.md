@@ -35,12 +35,12 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 | `widget.animate([...], anchor:, window:, defaults:)` | attach animations to any widget |
 | `widget.show(from:, to:)` | bound an element to a window |
 | `Animation.fadeIn / fadeOut` | opacity |
-| `Animation.slideIn / slideOut / slideFade` | offset, optionally with fade |
+| `Animation.slideIn / slideOut / slideFadeIn` | offset, optionally with fade |
 | `Animation.pop / scaleIn` | springy scale |
 | `Animation.blurIn / blurOut` | blur |
 | `Animation.color(to:)` | color lerp, consumed by color-capable elements |
 | `Animation.gradientShift(to:)` | pairwise gradient lerp |
-| `Animation.maskWipe(shape:)` | reveal wipe |
+| `Animation.maskWipeIn(shape:)` | reveal wipe |
 | `Animation.float / pulse / drift / spin / kenBurns` | ambient loops |
 | `Animation.from / to / fromTo / keyframes / along / custom` | build your own |
 | `Stagger.each(time) / evenly(over:) / from(origin)` | offset multi-child targets |

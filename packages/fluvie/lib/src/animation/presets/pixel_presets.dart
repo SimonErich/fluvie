@@ -10,6 +10,7 @@ import 'package:fluvie/src/animation/effects/scanlines_effect.dart';
 import 'package:fluvie/src/animation/effects/shader_effect.dart';
 import 'package:fluvie/src/animation/effects/vignette_effect.dart';
 import 'package:fluvie/src/animation/presets/preset_tail.dart';
+import 'package:fluvie/src/core/animation_phase.dart';
 import 'package:fluvie/src/core/edge.dart';
 import 'package:fluvie/src/core/particles/particles.dart';
 import 'package:meta/meta.dart';
@@ -38,6 +39,11 @@ Animation buildBloom(double amount, PresetTail tail) => _pixel(BloomEffect(amoun
 /// Builds `Animation.glitchIn`: a pixel-class [GlitchEffect] biased toward
 /// [from] that resolves to the natural frame at progress `1`.
 Animation buildGlitchIn(Edge from, PresetTail tail) => _pixel(GlitchEffect(from: from), tail);
+
+/// Builds `Animation.glitchOut`: the same seeded tear growing instead of
+/// resolving, biased toward [to] — an exit.
+Animation buildGlitchOut(Edge to, PresetTail tail) =>
+    _pixel(GlitchEffect(from: to, reverse: true), tail, phase: AnimationPhase.exit);
 
 /// Builds `Animation.particles`: a pixel-class [ParticlesEffect] laying the
 /// [spec]'s seeded field over the element — `progress` scrolls the field.
@@ -71,14 +77,16 @@ Animation buildParallax(double depth, PresetTail tail) => Animation.custom(
 
 /// Wraps a pixel effect as an `Animation.custom`, forwarding the common tail —
 /// the one-line delegation pattern shared by every pixel preset.
-Animation _pixel(PixelAnimationEffect effect, PresetTail tail) => Animation.custom(
-  effect,
-  duration: tail.duration,
-  ease: tail.ease,
-  spring: tail.spring,
-  delay: tail.delay,
-  at: tail.at,
-  stagger: tail.stagger,
-  repeat: tail.repeat,
-  label: tail.label,
-);
+Animation _pixel(PixelAnimationEffect effect, PresetTail tail, {AnimationPhase? phase}) =>
+    Animation.custom(
+      effect,
+      phase: phase,
+      duration: tail.duration,
+      ease: tail.ease,
+      spring: tail.spring,
+      delay: tail.delay,
+      at: tail.at,
+      stagger: tail.stagger,
+      repeat: tail.repeat,
+      label: tail.label,
+    );

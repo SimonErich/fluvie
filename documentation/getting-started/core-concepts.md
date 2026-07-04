@@ -49,7 +49,7 @@ renders are reproducible and cacheable.
 ## .animate
 
 `.animate([...])` works on any widget and takes a list of presets such as
-`Animation.fadeIn()`, `Animation.pop()`, `Animation.slideFade()`. Each preset
+`Animation.fadeIn()`, `Animation.pop()`, `Animation.slideFadeIn()`. Each preset
 accepts `duration`, `delay`, `ease` or `spring`, a `Trigger`, and a
 `Stagger` for multi-child targets. You declare the motion; placement happens
 during resolution.

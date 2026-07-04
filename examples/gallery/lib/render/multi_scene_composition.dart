@@ -58,7 +58,7 @@ Video multiSceneVideo() {
             'multi-scene',
             style: TextStyle(color: _white, fontSize: 24),
           ).animate([
-            Animation.slideFade(at: Trigger.whenEnds(bg), duration: const Time.frames(12)),
+            Animation.slideFadeIn(at: Trigger.whenEnds(bg), duration: const Time.frames(12)),
           ]),
         ],
       ),
@@ -76,7 +76,7 @@ Video multiSceneVideo() {
                 SizedBox(width: 48, height: 48, child: Box(color: color)),
             ],
           ).animate([
-            Animation.slideFade(
+            Animation.slideFadeIn(
               duration: const Time.frames(8),
               ease: Ease.linear,
               stagger: const Stagger.each(Time.frames(4)),

@@ -39,7 +39,7 @@ Future<void> main() async {
             spacing: 8,
             children: [_square(_purple), _square(_teal), _square(_orange)],
           ).animate([
-            Animation.slideFade(
+            Animation.slideFadeIn(
               stagger: const Stagger.each(Time.frames(6)),
               duration: const Time.frames(20),
               ease: Ease.linear,
@@ -68,7 +68,7 @@ Future<void> main() async {
                 _square(_blue, size: 18),
               ],
             ).animate([
-              Animation.slideFade(
+              Animation.slideFadeIn(
                 stagger: const Stagger.from(StaggerOrigin.center),
                 duration: const Time.frames(20),
                 ease: Ease.linear,

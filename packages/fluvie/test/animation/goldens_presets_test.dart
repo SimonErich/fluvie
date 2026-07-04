@@ -57,10 +57,17 @@ Future<void> main() async {
   );
 
   await goldenMotionFrames(
-    description: 'slideFade: rises from below while fading in',
+    description: 'slideFadeIn: rises from below while fading in',
     fileName: 'animation_slide_fade',
     frames: const [0, 10, 20],
-    subject: () => _animated(Animation.slideFade(duration: _tween, ease: Ease.linear)),
+    subject: () => _animated(Animation.slideFadeIn(duration: _tween, ease: Ease.linear)),
+  );
+
+  await goldenMotionFrames(
+    description: 'slideFadeOut: end-anchored — natural at 40, leaving upward and fading at 50/59',
+    fileName: 'animation_slide_fade_out',
+    frames: const [40, 50, 59],
+    subject: () => _animated(Animation.slideFadeOut(duration: _tween, ease: Ease.linear)),
   );
 
   await goldenMotionFrames(
@@ -78,14 +85,27 @@ Future<void> main() async {
   );
 
   await goldenMotionVariants(
-    description: 'maskWipe shapes, caught half-revealed (frame 10 of 20)',
+    description: 'maskWipeIn shapes, caught half-revealed (frame 10 of 20)',
     fileName: 'animation_mask_wipe',
     frame: 10,
     variants: [
       for (final shape in WipeShape.values)
         (
           shape.name,
-          () => _animated(Animation.maskWipe(shape: shape, duration: _tween, ease: Ease.linear)),
+          () => _animated(Animation.maskWipeIn(shape: shape, duration: _tween, ease: Ease.linear)),
+        ),
+    ],
+  );
+
+  await goldenMotionVariants(
+    description: 'maskWipeOut shapes, caught half-hidden (frame 50 of the exit window)',
+    fileName: 'animation_mask_wipe_out',
+    frame: 50,
+    variants: [
+      for (final shape in WipeShape.values)
+        (
+          shape.name,
+          () => _animated(Animation.maskWipeOut(shape: shape, duration: _tween, ease: Ease.linear)),
         ),
     ],
   );
@@ -107,5 +127,12 @@ Future<void> main() async {
     fileName: 'animation_scale_in',
     frames: [0, 8, 16, scaleInSettle],
     subject: () => _animated(Animation.scaleIn()),
+  );
+
+  await goldenMotionFrames(
+    description: 'scaleOut: end-anchored — natural at 40, shrinking toward 0.85 by 59',
+    fileName: 'animation_scale_out',
+    frames: const [40, 50, 59],
+    subject: () => _animated(Animation.scaleOut(duration: _tween, ease: Ease.linear)),
   );
 }

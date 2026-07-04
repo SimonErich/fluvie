@@ -93,12 +93,18 @@ Future<void> main() async {
   // identical frame whichever order they sit in the list (the pipeline always
   // applies transforms inner, pixels outer). The two panels must match.
   await goldenMotionVariants(
-    description: 'ordering: [slideFade, grain] and [grain, slideFade] are identical (§27.6)',
+    description: 'ordering: [slideFadeIn, grain] and [grain, slideFadeIn] are identical (§27.6)',
     fileName: 'effect_ordering_invariant',
     frame: 8,
     variants: [
-      ('transform then pixel', () => _withFx([Animation.slideFade(), _hold(Animation.grain(0.4))])),
-      ('pixel then transform', () => _withFx([_hold(Animation.grain(0.4)), Animation.slideFade()])),
+      (
+        'transform then pixel',
+        () => _withFx([Animation.slideFadeIn(), _hold(Animation.grain(0.4))]),
+      ),
+      (
+        'pixel then transform',
+        () => _withFx([_hold(Animation.grain(0.4)), Animation.slideFadeIn()]),
+      ),
     ],
   );
 }

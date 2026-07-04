@@ -1,5 +1,5 @@
 // Epic 10.4 WI-15 (10.4 ACCEPTANCE): a themed, animated chart end to end. A
-// `Chart.bar(...).animate([Animation.slideFade()])` inside a Scene with a
+// `Chart.bar(...).animate([Animation.slideFadeIn()])` inside a Scene with a
 // Background and a FluvieTokensScope, under the real Video/render scopes,
 // resolves to a warning-free timeline and renders deterministically at a mid
 // frame — the .animate() outer transform composes with the intrinsic reveal.
@@ -45,7 +45,7 @@ Video _themedChartVideo() => Video(
             child: Chart.bar(
               data: const {'A': 30, 'B': 80},
               reveal: const Time.frames(30),
-            ).animate([Animation.slideFade()]),
+            ).animate([Animation.slideFadeIn()]),
           ),
         ),
       ],

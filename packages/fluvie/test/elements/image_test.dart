@@ -197,7 +197,7 @@ void main() {
   });
 
   group('.animate() composes', () {
-    testWidgets('kenBurns + slideFade mount a MotionTarget over the Image', (tester) async {
+    testWidgets('kenBurns + slideFadeIn mount a MotionTarget over the Image', (tester) async {
       final decoded = await _solidImage();
       addTearDown(decoded.dispose);
       final resolver = _resolverFor(_asset, decoded);
@@ -218,7 +218,7 @@ void main() {
                   duration: const Time.frames(60),
                   child: Image.asset('fixtures/swatch.png').animate([
                     Animation.kenBurns(zoom: 1.2),
-                    Animation.slideFade(),
+                    Animation.slideFadeIn(),
                   ]),
                 ),
               ),

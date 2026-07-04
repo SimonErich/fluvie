@@ -68,7 +68,7 @@ final class TitleIntroProps {
 /// that pops in, with an optional subtitle that slides in after it.
 ///
 /// Built entirely on the public element API — [Video], [Scene], `Text`,
-/// [Background], [Animation.pop], [Animation.slideFade], and `.animate()` — so
+/// [Background], [Animation.pop], [Animation.slideFadeIn], and `.animate()` — so
 /// it doubles as a worked example of a [VideoTemplate]. Render it per data row
 /// with `renderTemplate(const TitleIntro(), props: ...)`.
 ///
@@ -111,7 +111,7 @@ final class TitleIntro extends VideoTemplate<TitleIntroProps> {
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 36, color: props.accent),
                 ).animate([
-                  Animation.slideFade(at: Trigger.whenEnds(intro), delay: 0.1.seconds),
+                  Animation.slideFadeIn(at: Trigger.whenEnds(intro), delay: 0.1.seconds),
                 ]),
               ],
             ],

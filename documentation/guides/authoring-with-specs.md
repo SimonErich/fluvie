@@ -103,7 +103,7 @@ final id = spec.digest();
 - **Elements**: `Text`, `Box`, `Image`, `Counter`.
 - **Backgrounds**: `color`, `gradient`, `radial`, `image`, `video`, `noise`,
   `vhs`.
-- **Animations**: the named presets (`fadeIn`, `slideFade`, `pop`, `kenBurns`,
+- **Animations**: the named presets (`fadeIn`, `slideFadeIn`, `pop`, `kenBurns`,
   and more) plus raw `from`/`to`/`fromTo` keyframes.
 - **Transitions**: `cut`, `crossFade`, `wipe`, `zoom`, `slide`.
 

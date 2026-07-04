@@ -63,7 +63,7 @@ void main() {
 
     test('seed == null is byte-identical to the existing buildFloat', () {
       final viaFacade = Animation.float();
-      final viaBuilder = buildFloat(0.04, 0.4, _tail);
+      final viaBuilder = buildFloat(0.04, const Time.seconds(2.5), _tail);
       // Same effect (the keyframe stops) and same loop/phase tail.
       expect(viaFacade.effect.toString(), viaBuilder.effect.toString());
       expect(viaFacade.phase, viaBuilder.phase);
@@ -282,7 +282,7 @@ void main() {
 
   group('KeyframeEffect sanity (the unseeded path is unaffected)', () {
     test('buildFloat still expands to keyframe stops, not a keyframe effect pair', () {
-      final unseeded = buildFloat(0.04, 0.4, _tail);
+      final unseeded = buildFloat(0.04, const Time.seconds(2.5), _tail);
       expect(unseeded.effect, isNot(isA<KeyframeEffect>()));
       expect(unseeded.effect, isA<MultiKeyframeEffect>());
     });

@@ -12,7 +12,7 @@ child: Code(
   reveal: CodeReveal.typing(1.frames),
   focusLines: const {5},
   highlightLines: const {5},
-).animate([Animation.slideFade()]),
+).animate([Animation.slideFadeIn()]),
 ```
 
 That highlights the snippet in Dart, types it out one glyph per frame, dims
@@ -123,7 +123,7 @@ child: const Terminal(
     TerminalLine.out('Rendering 270 frames...'),
     TerminalLine.out('Wrote hello.mp4 (9.0s, 1080x1080)'),
   ],
-).animate([Animation.slideFade()]),
+).animate([Animation.slideFadeIn()]),
 ```
 
 The prompt is `$ ` by default; pass `prompt:` to change it for the whole

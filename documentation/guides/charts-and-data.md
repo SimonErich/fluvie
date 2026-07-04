@@ -10,7 +10,7 @@ Chart.bar(
   data: _revenue,
   reveal: 1.seconds,
   stagger: const Stagger.each(Time.frames(6)),
-).animate([Animation.slideFade()]),
+).animate([Animation.slideFadeIn()]),
 ```
 
 That paints four bars from `{'Q1': 42, 'Q2': 58, 'Q3': 71, 'Q4': 96}`, grows
@@ -67,7 +67,7 @@ Chart.donut(
   data: _channels,
   reveal: 1.seconds,
   innerRadius: 0.62,
-).animate([Animation.slideFade()]),
+).animate([Animation.slideFadeIn()]),
 ```
 
 ## Stagger across segments
@@ -92,7 +92,7 @@ move composes with the grow or sweep:
 
 <!-- code-excerpt "examples/gallery/lib/snippets/phase_07_snippets.dart (chart-animate)" -->
 ```dart
-Chart.bar(data: _revenue).animate([Animation.slideFade()]);
+Chart.bar(data: _revenue).animate([Animation.slideFadeIn()]);
 ```
 
 Keep pixel data in the reveal and motion in the list. The two never fight: the
@@ -139,7 +139,7 @@ Center(
         to: 267000,
         reveal: 1500.ms,
         style: _metric,
-      ).animate([Animation.slideFade()]),
+      ).animate([Animation.slideFadeIn()]),
       const Text('up 38% over last year', style: _caption),
     ],
   ),

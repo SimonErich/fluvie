@@ -16,11 +16,11 @@ const Column(
     Text('Timing happens for you', style: _line),
   ],
 ).animate([
-  Animation.slideFade(stagger: const Stagger.each(Time.frames(8))),
+  Animation.slideFadeIn(stagger: const Stagger.each(Time.frames(8))),
 ]),
 ```
 
-One `slideFade` with `Stagger.each(Time.frames(8))` animates each child 8
+One `slideFadeIn` with `Stagger.each(Time.frames(8))` animates each child 8
 frames after the one before it. The layout knows nothing about the motion.
 
 ## Positioned works too

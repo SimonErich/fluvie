@@ -37,15 +37,15 @@ String _anim(Map<String, Object?> animation) => printVideoSpecJson(
 
 void main() {
   group('animation presets (remaining)', () {
-    test('fadeOut, slideOut, slideFade, scaleIn, blurIn, blurOut', () {
+    test('fadeOut, slideOut, slideFadeIn, scaleIn, blurIn, blurOut', () {
       expect(_anim({'preset': 'fadeOut'}), containsCode('Animation.fadeOut()'));
       expect(
         _anim({'preset': 'slideOut', 'to': 'top'}),
         containsCode('Animation.slideOut(to: Edge.top)'),
       );
       expect(
-        _anim({'preset': 'slideFade', 'from': 'right'}),
-        containsCode('Animation.slideFade(from: Edge.right)'),
+        _anim({'preset': 'slideFadeIn', 'from': 'right'}),
+        containsCode('Animation.slideFadeIn(from: Edge.right)'),
       );
       expect(
         _anim({'preset': 'scaleIn', 'from': 0.9}),

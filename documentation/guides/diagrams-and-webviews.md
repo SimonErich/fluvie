@@ -10,7 +10,7 @@ child: const Mermaid(
   _flow,
   theme: MermaidTheme.dark(),
   reveal: MermaidReveal.drawEdges(Time.seconds(1)),
-).animate([Animation.slideFade()]),
+).animate([Animation.slideFadeIn()]),
 ```
 
 That lays out the Mermaid source, rasterizes it to one image, and draws the
@@ -141,7 +141,7 @@ including a snapshot:
 child: const DeviceFrame.browser(
   url: 'https://fluvie.dev',
   child: SizedBox.expand(child: Html(_page, viewport: _viewport)),
-).animate([Animation.slideFade()]),
+).animate([Animation.slideFadeIn()]),
 ```
 
 That captures the inline HTML to a raster, paints it inside a browser window with

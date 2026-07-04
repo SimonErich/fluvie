@@ -8,10 +8,10 @@ opt-in, GSAP-style builder that records steps against a running playhead:
 ```dart
 Timeline introTimeline(Anchor title, Anchor subtitle, List<Anchor> bullets, Anchor cta) =>
     Timeline(defaults: const Defaults(duration: Time.seconds(0.5)))
-      ..play(title, Animation.slideFade())
+      ..play(title, Animation.slideFadeIn())
       ..play(subtitle, Animation.fadeIn(), at: Trigger.whenEnds(title))
       ..wait(0.3.seconds)
-      ..playAll(bullets, Animation.slideFade(), stagger: 0.08.seconds)
+      ..playAll(bullets, Animation.slideFadeIn(), stagger: 0.08.seconds)
       ..label('reveal')
       ..play(cta, Animation.pop(), at: 'reveal'.label - 0.2.seconds);
 ```

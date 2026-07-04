@@ -58,7 +58,7 @@ Video birthdayCard({
                   textAlign: TextAlign.center,
                   style: _title,
                 ).animate([
-                  Animation.slideFade(),
+                  Animation.slideFadeIn(),
                   Animation.float(at: Trigger.previous, amplitude: 0.05),
                 ]),
           ),

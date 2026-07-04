@@ -79,5 +79,5 @@ Video lesson05Video() {
 Widget remotePhoto() => Image.network(
   'https://picsum.photos/seed/fluvie/800/800',
   fit: BoxFit.cover,
-).animate([Animation.slideFade(), Animation.kenBurns(zoom: 1.2)]);
+).animate([Animation.slideFadeIn(), Animation.kenBurns(zoom: 1.2)]);
 // #enddocregion image-network

@@ -20,11 +20,18 @@ import 'package:fluvie/src/core/noise/value_noise.dart';
 final class GlitchEffect implements PixelAnimationEffect {
   /// Creates a glitch whose slices bias toward [from] (defaults to
   /// [Edge.left]), sampling jitter from [noise] (the const [ValueNoise] stub).
-  const GlitchEffect({this.from = Edge.left, NoiseSource noise = const ValueNoise()})
-    : _noise = noise; // ignore: prefer_initializing_formals — public arg `noise`, private field
+  const GlitchEffect({
+    this.from = Edge.left,
+    this.reverse = false,
+    NoiseSource noise = const ValueNoise(),
+  }) : _noise = noise; // ignore: prefer_initializing_formals — public arg `noise`, private field
 
   /// The edge the slice jitter biases toward; defaults to [Edge.left].
   final Edge from;
+
+  /// Runs the glitch backwards: the tear grows instead of resolving, so the
+  /// element degrades as progress runs `0 → 1` (the `glitchOut` exit).
+  final bool reverse;
 
   final NoiseSource _noise;
 
@@ -36,8 +43,9 @@ final class GlitchEffect implements PixelAnimationEffect {
 
   @override
   Widget build(Widget child, double progress) {
-    if (progress >= 1) return child;
-    final intensity = (1 - progress).clamp(0.0, 1.0);
+    final resolve = reverse ? 1 - progress : progress;
+    if (resolve >= 1) return child;
+    final intensity = (1 - resolve).clamp(0.0, 1.0);
     final bias = from == Edge.right ? 1.0 : -1.0;
     final split = intensity * 4;
     // A mounted NoiseScope wins; otherwise the effect's own source (the const

@@ -161,7 +161,7 @@ final Map<String, Object?> _anchoredTriggers = {
           'text': 'Subtitle',
           'animate': [
             {
-              'preset': 'slideFade',
+              'preset': 'slideFadeIn',
               'from': 'left',
               'at': {'kind': 'whenEnds', 'anchor': 'title'},
             },

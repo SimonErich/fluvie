@@ -24,7 +24,7 @@ Widget animateBasics() =>
 List<Animation> presetMenu() => [
   // #docregion preset-menu
   Animation.fadeIn(), // opacity 0 to natural
-  Animation.slideFade(from: Edge.left), // rise in while fading
+  Animation.slideFadeIn(from: Edge.left), // rise in while fading
   Animation.pop(overshoot: 1.2), // springy scale, peaks at 120%
   Animation.scaleIn(from: 0.7), // settle up from 70%
   Animation.blurIn(sigma: 16), // sharpen from a 16 px blur
@@ -37,7 +37,7 @@ List<Animation> presetMenu() => [
 Widget composeEnterExit() =>
     // #docregion compose-enter-exit
     const Text('In and out', style: _line).animate([
-      Animation.slideFade(),
+      Animation.slideFadeIn(),
       Animation.fadeOut(),
     ]);
 // #enddocregion compose-enter-exit
@@ -69,7 +69,7 @@ Widget springTiming() =>
 Widget triggerVocabulary(Anchor intro) =>
     // #docregion trigger-after
     const Text('Then me', style: _line).animate([
-      Animation.slideFade(at: Trigger.whenEnds(intro)),
+      Animation.slideFadeIn(at: Trigger.whenEnds(intro)),
     ]);
 // #enddocregion trigger-after
 
@@ -85,7 +85,7 @@ Widget staggerChildren() =>
         Text('Three', style: _line),
       ],
     ).animate([
-      Animation.slideFade(stagger: const Stagger.each(Time.frames(8))),
+      Animation.slideFadeIn(stagger: const Stagger.each(Time.frames(8))),
     ]);
 // #enddocregion stagger
 

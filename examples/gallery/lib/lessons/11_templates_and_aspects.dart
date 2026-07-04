@@ -26,7 +26,7 @@ const _stat = StatHighlightProps(value: 48230, label: 'minutes listened');
 /// (the determinism contract: `.animate()`'s animations must be stable across
 /// frames — a fresh list literal inside a per-frame builder would re-register a
 /// new token after resolution and throw).
-final List<Animation> _slideFade = [Animation.slideFade()];
+final List<Animation> _slideFade = [Animation.slideFadeIn()];
 final List<Animation> _pop = [Animation.pop()];
 
 /// Lesson 11 — templates, aspects, and theme: a built-in

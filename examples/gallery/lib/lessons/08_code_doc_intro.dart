@@ -98,7 +98,7 @@ Scene _codeScene() => Scene(
           reveal: CodeReveal.typing(1.frames),
           focusLines: const {5},
           highlightLines: const {5},
-        ).animate([Animation.slideFade()]),
+        ).animate([Animation.slideFadeIn()]),
         // #enddocregion code
       ),
     ),
@@ -122,7 +122,7 @@ Scene _terminalScene() => Scene(
             TerminalLine.out('Rendering 270 frames...'),
             TerminalLine.out('Wrote hello.mp4 (9.0s, 1080x1080)'),
           ],
-        ).animate([Animation.slideFade()]),
+        ).animate([Animation.slideFadeIn()]),
         // #enddocregion terminal
       ),
     ),
