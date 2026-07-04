@@ -29,9 +29,8 @@ final class FfmpegPcmDecoder implements PcmDecoder {
   /// The ffmpeg spawn glue this decoder reads f32le PCM through.
   final FfmpegAudioDecoder decoder;
 
-  // Reason: process glue. It spawns the real ffmpeg binary via the decoder, so
-  // it runs only under the ffmpeg-tagged suite, never the unit gate.
-  // coverage:ignore-start
+  // coverage:ignore-start: process glue; it spawns the real ffmpeg binary via the decoder,
+  // so it runs only under the ffmpeg-tagged suite, never the unit gate.
   @override
   Future<PcmAudio> decode(AudioSource source) async {
     final path = switch (source) {

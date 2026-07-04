@@ -47,8 +47,7 @@ Widget buildAnimatedFrame({
 }) {
   assert(
     schedule.spans.length == animations.length,
-    // Reason: defensive assert message. The resolver always aligns the counts.
-    // coverage:ignore-start
+    // coverage:ignore-start: defensive assert message; the resolver always aligns the counts.
     'ElementSchedule carries ${schedule.spans.length} spans for '
     '${animations.length} animations — they must align index by index.',
     // coverage:ignore-end

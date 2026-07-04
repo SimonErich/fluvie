@@ -47,9 +47,8 @@ final class RepaintBoundaryCaptureService implements FrameCaptureService {
       // here, and asserted byte-for-byte by the spike + acceptance tests.
       final data = await image.toByteData();
       if (data == null) {
-        // Reason: defensive engine-failure guard. toByteData returns data for a
-        // valid RepaintBoundary, so this never fires in tests.
-        // coverage:ignore-start
+        // coverage:ignore-start: defensive engine-failure guard; toByteData returns data
+        // for a valid RepaintBoundary, so this never fires in tests.
         throw FluvieRenderException(
           'The engine returned no byte data for frame $frameIndex '
           '(${width}x$height rawRgba read-back failed).',

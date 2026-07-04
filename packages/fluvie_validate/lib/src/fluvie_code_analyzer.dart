@@ -37,9 +37,8 @@ final class FluvieCodeAnalyzer {
       ..writeAsStringSync(code);
     try {
       final resolved = await resolveFile(path: file.absolute.path);
-      // coverage:ignore-start
-      // resolveFile yields a ResolvedUnitResult for any readable Dart file we
-      // just wrote, so this only guards the unreachable InvalidResult case.
+      // coverage:ignore-start: resolveFile yields a ResolvedUnitResult for any readable
+      // Dart file we just wrote, so this only guards the unreachable InvalidResult case.
       if (resolved is! ResolvedUnitResult) {
         return const [
           FluvieDiagnostic(

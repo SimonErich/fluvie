@@ -16,9 +16,8 @@ final class CaptionPosition {
   /// The lower third of the canvas — the default caption placement.
   const CaptionPosition.bottomThird() : alignment = const Alignment(0, 1 / 3), safeArea = 64;
 
-  // Reason: const-ctor artifacts. caption_values_coverage_test pins each
+  // coverage:ignore-start: const-ctor artifacts; caption_values_coverage_test pins each
   // preset alignment and safe area.
-  // coverage:ignore-start
   /// The upper third of the canvas.
   const CaptionPosition.topThird() : alignment = const Alignment(0, -1 / 3), safeArea = 64;
 

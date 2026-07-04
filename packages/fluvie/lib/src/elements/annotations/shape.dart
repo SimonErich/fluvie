@@ -49,9 +49,8 @@ final class Shape extends StatelessWidget {
     super.key,
   });
 
-  // Reason: const-ctor artifacts. shape_test pins Shape.line and Shape.rect
+  // coverage:ignore-start: const-ctor artifacts; shape_test pins Shape.line and Shape.rect
   // geometry (kind plus the painter inputs). Const literals are not instrumented.
-  // coverage:ignore-start
   /// A straight line from [from] to [to].
   const Shape.line({
     required Offset from,

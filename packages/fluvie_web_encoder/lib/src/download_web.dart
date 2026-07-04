@@ -8,7 +8,7 @@ import 'package:web/web.dart' as web;
 /// Wraps the bytes in a `Blob`, points a temporary object-URL anchor at it,
 /// clicks it, and revokes the URL — the standard browser save flow. The MP4
 /// (or GIF/WebM) never leaves the page.
-// coverage:ignore-start
+// coverage:ignore-start: browser-only JS interop; the Blob/anchor save flow cannot run on the VM
 void downloadBytes(Uint8List bytes, {required String filename, String mimeType = 'video/mp4'}) {
   final blob = web.Blob([bytes.toJS].toJS, web.BlobPropertyBag(type: mimeType));
   final url = web.URL.createObjectURL(blob);

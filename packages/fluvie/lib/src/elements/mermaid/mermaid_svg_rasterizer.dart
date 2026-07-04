@@ -30,9 +30,8 @@ final class MermaidSvgRasterizer {
     final width = targetWidth ?? source.width.round();
     final height = targetHeight ?? source.height.round();
     if (width <= 0 || height <= 0) {
-      // Reason: defensive guard. A parsed picture always has a positive size,
-      // so this arm cannot run with valid SVG input.
-      // coverage:ignore-start
+      // coverage:ignore-start: defensive guard; a parsed picture always has a positive
+      // size, so this arm cannot run with valid SVG input.
       throw FluvieRenderException(
         'SVG rasterize produced a non-positive size (${width}x$height).',
       );

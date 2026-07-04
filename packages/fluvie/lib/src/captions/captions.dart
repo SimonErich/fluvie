@@ -16,9 +16,8 @@ import 'package:meta/meta.dart';
 /// caption layer mounts above the composition and shows the active cue.
 @immutable
 final class Captions {
-  // Reason: const-ctor artifacts. The caption feature tests pin the fromSrt and
-  // fromVtt fields.
-  // coverage:ignore-start
+  // coverage:ignore-start: const-ctor artifacts; the caption feature tests pin the fromSrt
+  // and fromVtt fields.
   /// Captions imported from the SubRip file at [path], optionally [style]d and
   /// [position]ed.
   const Captions.fromSrt(String path, {this.style, this.position})

@@ -75,9 +75,8 @@ List<SceneFrameState> stageAt({
 }) {
   assert(
     transitions.isEmpty || transitions.length == offsets.transitionFrames.length,
-    // Reason: the assert message only builds on failure; the caller always
+    // coverage:ignore-start: the assert message only builds on failure; the caller always
     // passes a matching count, so this string never executes in a valid run.
-    // coverage:ignore-start
     'transitions (${transitions.length}) must be empty or match the '
     '${offsets.transitionFrames.length} boundaries of the offsets.',
     // coverage:ignore-end

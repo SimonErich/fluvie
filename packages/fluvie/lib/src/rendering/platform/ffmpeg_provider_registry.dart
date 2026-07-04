@@ -39,9 +39,8 @@ final class FfmpegProviderRegistry {
     );
   }
 
-  // Reason: web-only fail-loud defaults. The VM render path never takes the
+  // coverage:ignore-start: web-only fail-loud defaults; the VM render path never takes the
   // isWeb branch, so these unwired guards cannot run in a unit test.
-  // coverage:ignore-start
   static Future<Uint8List> _unwiredReadInput(String name) => throw UnsupportedError(
     'WasmFfmpegProvider has no readInput wired: the web render path must '
     'provide one to FfmpegProviderRegistry.select before encoding "$name".',
