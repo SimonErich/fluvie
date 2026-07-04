@@ -29,15 +29,15 @@ const _points = [
   ChartPoint(x: 5, y: 3),
 ];
 
-Widget _pie() => Chart.pie(data: _pieData, sweepIn: const Time.frames(30));
+Widget _pie() => Chart.pie(data: _pieData, reveal: const Time.frames(30));
 
-Widget _donut() => Chart.donut(data: _pieData, sweepIn: const Time.frames(30), innerRadius: 0.55);
+Widget _donut() => Chart.donut(data: _pieData, reveal: const Time.frames(30), innerRadius: 0.55);
 
-Widget _scatter() => Chart.scatter(points: _points, popIn: const Time.frames(30));
+Widget _scatter() => Chart.scatter(points: _points, reveal: const Time.frames(30));
 
 Widget _scatterStaggered() => Chart.scatter(
   points: _points,
-  popIn: const Time.frames(18),
+  reveal: const Time.frames(18),
   stagger: const Stagger.each(Time.frames(6)),
 );
 

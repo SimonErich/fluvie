@@ -99,16 +99,16 @@ Video chartsVideo() => Video(
     Scene(duration: 3.seconds, children: [
       Chart.bar(
         data: {'Q1': 42, 'Q2': 58, 'Q3': 71, 'Q4': 96},
-        growIn: 1.seconds,
+        reveal: 1.seconds,
       ),
     ]),
     Scene(duration: 3.seconds, children: [
-      Chart.line(data: {'W1': 12, 'W2': 26, /* ... */}, drawIn: 1500.ms),
+      Chart.line(data: {'W1': 12, 'W2': 26, /* ... */}, reveal: 1500.ms),
     ]),
     Scene(duration: 2500.ms, children: [
       Chart.donut(
         data: {'Search': 48, 'Social': 27, /* ... */},
-        sweepIn: 1.seconds,
+        reveal: 1.seconds,
       ),
     ]),
   ],

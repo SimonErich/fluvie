@@ -44,7 +44,7 @@ Video _themedChartVideo() => Video(
             height: 200,
             child: Chart.bar(
               data: const {'A': 30, 'B': 80},
-              growIn: const Time.frames(30),
+              reveal: const Time.frames(30),
             ).animate([Animation.slideFade()]),
           ),
         ),

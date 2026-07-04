@@ -169,7 +169,7 @@ Positioned.fill(
   child: Arrow.to(
     from: const Offset(720, 200),
     to: const Offset(910, 300),
-    drawIn: 500.ms,
+    reveal: 500.ms,
   ),
 ),
 ```
@@ -185,7 +185,7 @@ Spotlight.on(
   child: Padding(
     padding: const EdgeInsets.fromLTRB(64, 120, 64, 96),
     child: _themed(
-      Chart.line(data: _signups, drawIn: 1500.ms).animate([Animation.fadeIn()]),
+      Chart.line(data: _signups, reveal: 1500.ms).animate([Animation.fadeIn()]),
     ),
   ),
 ),

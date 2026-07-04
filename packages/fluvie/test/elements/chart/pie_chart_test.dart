@@ -62,7 +62,7 @@ void main() {
     testWidgets('nothing is swept at frame 0', (tester) async {
       final painter = await _piePainterAt(
         tester,
-        Chart.pie(data: const {'A': 1, 'B': 3}, sweepIn: const Time.frames(30)),
+        Chart.pie(data: const {'A': 1, 'B': 3}, reveal: const Time.frames(30)),
         frame: 0,
       );
       for (final angle in painter.sweepAngles) {
@@ -73,7 +73,7 @@ void main() {
     testWidgets('segments sum to 2 pi at the reveal end', (tester) async {
       final painter = await _piePainterAt(
         tester,
-        Chart.pie(data: const {'A': 1, 'B': 3}, sweepIn: const Time.frames(30)),
+        Chart.pie(data: const {'A': 1, 'B': 3}, reveal: const Time.frames(30)),
         frame: 30,
       );
       final total = painter.sweepAngles.fold<double>(0, (a, b) => a + b);
@@ -83,7 +83,7 @@ void main() {
     testWidgets('each full segment angle is proportional to its value', (tester) async {
       final painter = await _piePainterAt(
         tester,
-        Chart.pie(data: const {'A': 1, 'B': 3}, sweepIn: const Time.frames(30)),
+        Chart.pie(data: const {'A': 1, 'B': 3}, reveal: const Time.frames(30)),
         frame: 30,
       );
       // A is 1/4 of the total, B is 3/4.
@@ -94,7 +94,7 @@ void main() {
     testWidgets('mid-reveal sweeps part of the full angle', (tester) async {
       final painter = await _piePainterAt(
         tester,
-        Chart.pie(data: const {'A': 1, 'B': 3}, sweepIn: const Time.frames(30)),
+        Chart.pie(data: const {'A': 1, 'B': 3}, reveal: const Time.frames(30)),
         frame: 15,
       );
       final total = painter.sweepAngles.fold<double>(0, (a, b) => a + b);
@@ -105,7 +105,7 @@ void main() {
     testWidgets("segments start at 12 o'clock", (tester) async {
       final painter = await _piePainterAt(
         tester,
-        Chart.pie(data: const {'A': 1, 'B': 1}, sweepIn: const Time.frames(30)),
+        Chart.pie(data: const {'A': 1, 'B': 1}, reveal: const Time.frames(30)),
         frame: 30,
       );
       // The canvas zero angle is 3 o'clock; 12 o'clock is -pi/2.
@@ -117,7 +117,7 @@ void main() {
     testWidgets('a pie has no inner radius', (tester) async {
       final painter = await _piePainterAt(
         tester,
-        Chart.pie(data: const {'A': 1, 'B': 1}, sweepIn: const Time.frames(30)),
+        Chart.pie(data: const {'A': 1, 'B': 1}, reveal: const Time.frames(30)),
         frame: 30,
       );
       expect(painter.innerRadius, 0);
@@ -128,7 +128,7 @@ void main() {
         tester,
         Chart.donut(
           data: const {'A': 1, 'B': 1},
-          sweepIn: const Time.frames(30),
+          reveal: const Time.frames(30),
           innerRadius: 0.5,
         ),
         frame: 30,
@@ -144,7 +144,7 @@ void main() {
         tester,
         Chart.donut(
           data: const {'A': 1, 'B': 1},
-          sweepIn: const Time.frames(30),
+          reveal: const Time.frames(30),
           innerRadius: 0.5,
         ),
         frame: 30,
@@ -159,7 +159,7 @@ void main() {
     testWidgets('segment colors cycle the palette', (tester) async {
       final painter = await _piePainterAt(
         tester,
-        Chart.pie(data: const {'A': 1, 'B': 2, 'C': 3}, sweepIn: const Time.frames(30)),
+        Chart.pie(data: const {'A': 1, 'B': 2, 'C': 3}, reveal: const Time.frames(30)),
         frame: 30,
       );
       expect(painter.colors.length, 3);
@@ -168,7 +168,7 @@ void main() {
   });
 
   group('Chart.pie content fields and anchor', () {
-    test('default sweepIn is a 0.6 relative window', () {
+    test('default reveal is a 0.6 relative window', () {
       final chart = Chart.pie(data: const {'A': 1});
       expect(chart.reveal, const Time.relative(0.6));
     });
@@ -187,13 +187,13 @@ void main() {
     testWidgets('the same frame resolves identical sweep angles twice', (tester) async {
       final first = await _piePainterAt(
         tester,
-        Chart.pie(data: const {'A': 1, 'B': 3, 'C': 2}, sweepIn: const Time.frames(30)),
+        Chart.pie(data: const {'A': 1, 'B': 3, 'C': 2}, reveal: const Time.frames(30)),
         frame: 13,
       );
       final firstAngles = List<double>.of(first.sweepAngles);
       final second = await _piePainterAt(
         tester,
-        Chart.pie(data: const {'A': 1, 'B': 3, 'C': 2}, sweepIn: const Time.frames(30)),
+        Chart.pie(data: const {'A': 1, 'B': 3, 'C': 2}, reveal: const Time.frames(30)),
         frame: 13,
       );
       expect(second.sweepAngles, firstAngles);

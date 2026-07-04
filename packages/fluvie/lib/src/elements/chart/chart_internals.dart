@@ -70,21 +70,21 @@ extension _ChartPainters on Chart {
 final class ChartLineFactory {
   const ChartLineFactory._();
 
-  /// A single-series line chart over [data], drawn on over [drawIn].
+  /// A single-series line chart over [data], drawn on over [reveal].
   Chart call({
     required Map<String, num> data,
-    Time drawIn = const Time.relative(0.6),
+    Time reveal = const Time.relative(0.6),
     Anchor? shared,
     Key? key,
-  }) => Chart._(kind: _ChartKind.line, reveal: drawIn, data: data, shared: shared, key: key);
+  }) => Chart._(kind: _ChartKind.line, reveal: reveal, data: data, shared: shared, key: key);
 
   /// A multi-series line chart over [series], each a colored polyline.
   Chart series(
     List<ChartSeries> series, {
-    Time drawIn = const Time.relative(0.6),
+    Time reveal = const Time.relative(0.6),
     Anchor? shared,
     Key? key,
-  }) => Chart._(kind: _ChartKind.line, reveal: drawIn, series: series, shared: shared, key: key);
+  }) => Chart._(kind: _ChartKind.line, reveal: reveal, series: series, shared: shared, key: key);
 }
 
 /// The callable behind `Chart.area`: invoke it for a single series, or call
@@ -92,21 +92,21 @@ final class ChartLineFactory {
 final class ChartAreaFactory {
   const ChartAreaFactory._();
 
-  /// A single-series area chart over [data], filled on over [drawIn].
+  /// A single-series area chart over [data], filled on over [reveal].
   Chart call({
     required Map<String, num> data,
-    Time drawIn = const Time.relative(0.6),
+    Time reveal = const Time.relative(0.6),
     Anchor? shared,
     Key? key,
-  }) => Chart._(kind: _ChartKind.area, reveal: drawIn, data: data, shared: shared, key: key);
+  }) => Chart._(kind: _ChartKind.area, reveal: reveal, data: data, shared: shared, key: key);
 
   /// A multi-series area chart over [series], each a filled region.
   Chart series(
     List<ChartSeries> series, {
-    Time drawIn = const Time.relative(0.6),
+    Time reveal = const Time.relative(0.6),
     Anchor? shared,
     Key? key,
-  }) => Chart._(kind: _ChartKind.area, reveal: drawIn, series: series, shared: shared, key: key);
+  }) => Chart._(kind: _ChartKind.area, reveal: reveal, series: series, shared: shared, key: key);
 }
 
 /// The callable behind `Chart.scatter`: invoke it with explicit `points` or a
@@ -115,14 +115,14 @@ final class ChartScatterFactory {
   const ChartScatterFactory._();
 
   /// A scatter chart over explicit [points] or a category → value [data] map
-  /// (exactly one is non-null), each marker popping in over [popIn].
+  /// (exactly one is non-null), each marker popping in over [reveal].
   ///
   /// With [data], the category index is the x and the value is the y. An
   /// optional [stagger] offsets each point's pop so the markers pop in a wave.
   Chart call({
     List<ChartPoint>? points,
     Map<String, num>? data,
-    Time popIn = const Time.relative(0.6),
+    Time reveal = const Time.relative(0.6),
     Stagger? stagger,
     Anchor? shared,
     Key? key,
@@ -133,7 +133,7 @@ final class ChartScatterFactory {
     );
     return Chart._(
       kind: _ChartKind.scatter,
-      reveal: popIn,
+      reveal: reveal,
       points: points,
       data: data,
       stagger: stagger,
@@ -143,16 +143,16 @@ final class ChartScatterFactory {
   }
 
   /// A scatter chart over a single colored point [series], popping in over
-  /// [popIn] with an optional [stagger].
+  /// [reveal] with an optional [stagger].
   Chart series(
     ChartSeries series, {
-    Time popIn = const Time.relative(0.6),
+    Time reveal = const Time.relative(0.6),
     Stagger? stagger,
     Anchor? shared,
     Key? key,
   }) => Chart._(
     kind: _ChartKind.scatter,
-    reveal: popIn,
+    reveal: reveal,
     series: [series],
     color: series.color,
     stagger: stagger,

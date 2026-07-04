@@ -128,7 +128,7 @@ final Map<String, Object?> _kitchenSink = {
           'type': 'Counter',
           'to': 1000,
           'from': 0,
-          'duration': '1.5s',
+          'reveal': '1.5s',
           'style': {'color': '#FFFFFF00', 'fontSize': 48},
         },
       ],

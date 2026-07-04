@@ -47,7 +47,7 @@ const lesson07Charts = Lesson(
 ///
 /// A single [FluvieTokensScope] wraps all four scenes, so every chart reads the
 /// same brand palette from `context.fluvie`. Each chart's reveal
-/// is intrinsic (`growIn` / `drawIn` / `sweepIn` resolve against the scene
+/// is intrinsic (`reveal` / `reveal` / `reveal` resolve against the scene
 /// window); `.animate()` only adds the outer slide-in. The bar scene draws an
 /// [Arrow.to] at the Q4 peak and the line scene puts a [Spotlight.on] the
 /// week-six surge, both at explicit positions.
@@ -80,7 +80,7 @@ Scene _headlineScene() => Scene(
           const Text('Revenue this year', style: _headline),
           Counter.currency(
             to: 267000,
-            duration: 1500.ms,
+            reveal: 1500.ms,
             style: _metric,
           ).animate([Animation.slideFade()]),
           const Text('up 38% over last year', style: _caption),
@@ -102,7 +102,7 @@ Scene _barScene() => Scene(
         // #docregion bar
         Chart.bar(
           data: _revenue,
-          growIn: 1.seconds,
+          reveal: 1.seconds,
           stagger: const Stagger.each(Time.frames(6)),
         ).animate([Animation.slideFade()]),
         // #enddocregion bar
@@ -121,7 +121,7 @@ Scene _barScene() => Scene(
       child: Arrow.to(
         from: const Offset(720, 200),
         to: const Offset(910, 300),
-        drawIn: 500.ms,
+        reveal: 500.ms,
       ),
     ),
     // #enddocregion arrow
@@ -146,7 +146,7 @@ Scene _lineScene() => Scene(
         padding: const EdgeInsets.fromLTRB(64, 120, 64, 96),
         child: _themed(
           // #docregion line
-          Chart.line(data: _signups, drawIn: 1500.ms).animate([Animation.fadeIn()]),
+          Chart.line(data: _signups, reveal: 1500.ms).animate([Animation.fadeIn()]),
           // #enddocregion line
         ),
       ),
@@ -173,7 +173,7 @@ Scene _donutScene() => Scene(
           // #docregion donut
           Chart.donut(
             data: _channels,
-            sweepIn: 1.seconds,
+            reveal: 1.seconds,
             innerRadius: 0.62,
           ).animate([Animation.slideFade()]),
           // #enddocregion donut

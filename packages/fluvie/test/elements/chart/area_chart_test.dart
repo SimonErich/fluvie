@@ -54,7 +54,7 @@ void main() {
     testWidgets('the filled area is empty at frame 0', (tester) async {
       final painter = await _areaPainterAt(
         tester,
-        Chart.area(data: const {'A': 10, 'B': 40, 'C': 25}, drawIn: const Time.frames(30)),
+        Chart.area(data: const {'A': 10, 'B': 40, 'C': 25}, reveal: const Time.frames(30)),
         frame: 0,
       );
       expect(painter.fillArea(_probeSize, 0), closeTo(0, 0.001));
@@ -63,13 +63,13 @@ void main() {
     testWidgets('the filled area grows with the sweep', (tester) async {
       final mid = await _areaPainterAt(
         tester,
-        Chart.area(data: const {'A': 10, 'B': 40, 'C': 25}, drawIn: const Time.frames(30)),
+        Chart.area(data: const {'A': 10, 'B': 40, 'C': 25}, reveal: const Time.frames(30)),
         frame: 15,
       );
       final midArea = mid.fillArea(_probeSize, 0);
       final full = await _areaPainterAt(
         tester,
-        Chart.area(data: const {'A': 10, 'B': 40, 'C': 25}, drawIn: const Time.frames(30)),
+        Chart.area(data: const {'A': 10, 'B': 40, 'C': 25}, reveal: const Time.frames(30)),
         frame: 30,
       );
       expect(midArea, greaterThan(0));
@@ -79,7 +79,7 @@ void main() {
     testWidgets('the fill closes to the baseline (bottom edge present)', (tester) async {
       final painter = await _areaPainterAt(
         tester,
-        Chart.area(data: const {'A': 10, 'B': 40, 'C': 25}, drawIn: const Time.frames(30)),
+        Chart.area(data: const {'A': 10, 'B': 40, 'C': 25}, reveal: const Time.frames(30)),
         frame: 30,
       );
       final bounds = painter.fillPath(_probeSize, 0).getBounds();
@@ -96,7 +96,7 @@ void main() {
             ChartSeries.values(name: 'one', data: {'A': 1, 'B': 4}),
             ChartSeries.values(name: 'two', data: {'A': 3, 'B': 2}),
           ],
-          drawIn: const Time.frames(30),
+          reveal: const Time.frames(30),
         ),
         frame: 30,
       );
@@ -108,13 +108,13 @@ void main() {
     testWidgets('the same frame resolves the same fill area twice', (tester) async {
       final first = await _areaPainterAt(
         tester,
-        Chart.area(data: const {'A': 10, 'B': 40, 'C': 25}, drawIn: const Time.frames(30)),
+        Chart.area(data: const {'A': 10, 'B': 40, 'C': 25}, reveal: const Time.frames(30)),
         frame: 13,
       );
       final firstArea = first.fillArea(_probeSize, 0);
       final second = await _areaPainterAt(
         tester,
-        Chart.area(data: const {'A': 10, 'B': 40, 'C': 25}, drawIn: const Time.frames(30)),
+        Chart.area(data: const {'A': 10, 'B': 40, 'C': 25}, reveal: const Time.frames(30)),
         frame: 13,
       );
       expect(second.fillArea(_probeSize, 0), firstArea);

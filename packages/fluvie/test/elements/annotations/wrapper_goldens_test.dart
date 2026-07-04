@@ -25,7 +25,7 @@ Widget _spotlight() => const Spotlight.on(
 
 Widget _lowerThird() => const ColoredBox(
   color: Color(0xFF2E5AAC),
-  child: LowerThird(name: 'Ada Lovelace', title: 'Mathematician', slideIn: Time.frames(10)),
+  child: LowerThird(name: 'Ada Lovelace', title: 'Mathematician', reveal: Time.frames(10)),
 );
 
 Widget _titleCard() => const ColoredBox(

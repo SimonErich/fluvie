@@ -17,12 +17,12 @@ const double _defaultStrokeWidth = 3;
 ///
 /// A `Shape` is a leaf painter: it draws geometry and wraps no child, so it is
 /// not a `CollectibleChildren`. Each variant draws on left-to-right over its
-/// [drawIn] reveal (the same `0 -> 1` reveal math charts use): the stroke grows
-/// along its own length rather than fading. With no [drawIn] it renders fully at
+/// [reveal] reveal (the same `0 -> 1` reveal math charts use): the stroke grows
+/// along its own length rather than fading. With no [reveal] it renders fully at
 /// every frame.
 ///
 /// ```dart
-/// Shape.circle(center: const Offset(160, 90), radius: 40, drawIn: 12.frames)
+/// Shape.circle(center: const Offset(160, 90), radius: 40, reveal: 12.frames)
 ///     .animate([Animation.fadeIn()]);
 /// ```
 ///
@@ -31,6 +31,9 @@ const double _defaultStrokeWidth = 3;
 /// override. Transforms and effects ride `.animate()` only — the constructor
 /// takes geometry and nothing else. [shared] wraps the result in a
 /// `SharedElement` for a hero morph across a scene boundary.
+///
+/// Two durations can meet here: [reveal] times the intrinsic draw-on,
+/// while transforms and opacity ride `.animate()` with their own timing.
 final class Shape extends StatelessWidget {
   /// The base constructor every named factory delegates to; carries the resolved
   /// [kind] geometry and shared draw-on inputs.
@@ -44,7 +47,7 @@ final class Shape extends StatelessWidget {
     this.path,
     this.color,
     this.strokeWidth = _defaultStrokeWidth,
-    this.drawIn,
+    this.reveal,
     this.shared,
     super.key,
   });
@@ -56,7 +59,7 @@ final class Shape extends StatelessWidget {
     required Offset to,
     Color? color,
     double strokeWidth = _defaultStrokeWidth,
-    Time? drawIn,
+    Time? reveal,
     Anchor? shared,
     Key? key,
   }) : this._(
@@ -65,7 +68,7 @@ final class Shape extends StatelessWidget {
          to: to,
          color: color,
          strokeWidth: strokeWidth,
-         drawIn: drawIn,
+         reveal: reveal,
          shared: shared,
          key: key,
        );
@@ -75,7 +78,7 @@ final class Shape extends StatelessWidget {
     required Rect rect,
     Color? color,
     double strokeWidth = _defaultStrokeWidth,
-    Time? drawIn,
+    Time? reveal,
     Anchor? shared,
     Key? key,
   }) : this._(
@@ -83,7 +86,7 @@ final class Shape extends StatelessWidget {
          rect: rect,
          color: color,
          strokeWidth: strokeWidth,
-         drawIn: drawIn,
+         reveal: reveal,
          shared: shared,
          key: key,
        );
@@ -95,7 +98,7 @@ final class Shape extends StatelessWidget {
     required double radius,
     Color? color,
     double strokeWidth = _defaultStrokeWidth,
-    Time? drawIn,
+    Time? reveal,
     Anchor? shared,
     Key? key,
   }) : this._(
@@ -104,7 +107,7 @@ final class Shape extends StatelessWidget {
          radius: radius,
          color: color,
          strokeWidth: strokeWidth,
-         drawIn: drawIn,
+         reveal: reveal,
          shared: shared,
          key: key,
        );
@@ -114,7 +117,7 @@ final class Shape extends StatelessWidget {
     required Path path,
     Color? color,
     double strokeWidth = _defaultStrokeWidth,
-    Time? drawIn,
+    Time? reveal,
     Anchor? shared,
     Key? key,
   }) : this._(
@@ -122,7 +125,7 @@ final class Shape extends StatelessWidget {
          path: path,
          color: color,
          strokeWidth: strokeWidth,
-         drawIn: drawIn,
+         reveal: reveal,
          shared: shared,
          key: key,
        );
@@ -157,7 +160,7 @@ final class Shape extends StatelessWidget {
 
   /// The draw-on reveal window resolved against the element scope, or `null` to
   /// render fully at every frame.
-  final Time? drawIn;
+  final Time? reveal;
 
   /// An optional hero anchor: when non-null the shape morphs across the
   /// boundary it shares with the same anchor in the adjacent scene. `null`
@@ -182,12 +185,12 @@ final class Shape extends StatelessWidget {
     return wrapShared(shared, CustomPaint(painter: painter));
   }
 
-  /// The draw-on progress at this frame: `1` when there is no [drawIn], else the
+  /// The draw-on progress at this frame: `1` when there is no [reveal], else the
   /// shared reveal math resolved against the element scope.
   double _progress(BuildContext context) {
-    final reveal = drawIn;
-    if (reveal == null) return 1;
+    final window = reveal;
+    if (window == null) return 1;
     final frame = FrameProvider.of(context).frame;
-    return revealProgress(frame, TimeScopeProvider.of(context), reveal);
+    return revealProgress(frame, TimeScopeProvider.of(context), window);
   }
 }

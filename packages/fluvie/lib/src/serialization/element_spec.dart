@@ -15,7 +15,7 @@ const Map<String, Set<String>> knownElementProps = {
   'Text': {'text', 'style'},
   'Box': {'color', 'size'},
   'Image': {'source', 'fit'},
-  'Counter': {'to', 'from', 'duration', 'style'},
+  'Counter': {'to', 'from', 'reveal', 'style'},
 };
 
 /// The data form of one scene child: a `type`, its content `props`, an optional

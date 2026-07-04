@@ -8,7 +8,7 @@ the data and the reveal happens for you:
 ```dart
 Chart.bar(
   data: _revenue,
-  growIn: 1.seconds,
+  reveal: 1.seconds,
   stagger: const Stagger.each(Time.frames(6)),
 ).animate([Animation.slideFade()]),
 ```
@@ -42,20 +42,20 @@ A chart's reveal is part of its constructor, not its `.animate()` list. You pass
 a `Time` to the reveal parameter, and the chart resolves it against its own
 window:
 
-- `Chart.bar` and `Chart.area` grow over `growIn`.
-- `Chart.line` and `Chart.area` draw on over `drawIn`.
-- `Chart.pie` and `Chart.donut` sweep over `sweepIn`.
-- `Chart.scatter` pops over `popIn`.
+- `Chart.bar` and `Chart.area` grow over `reveal`.
+- `Chart.line` and `Chart.area` draw on over `reveal`.
+- `Chart.pie` and `Chart.donut` sweep over `reveal`.
+- `Chart.scatter` pops over `reveal`.
 
-A relative time scales with the window. `growIn: 0.6.relative` grows over the
-first 60 percent of the scene; `growIn: 1.seconds` grows over one second. The
+A relative time scales with the window. `reveal: 0.6.relative` grows over the
+first 60 percent of the scene; `reveal: 1.seconds` grows over one second. The
 default for every reveal is `0.6.relative`.
 
 A line draws on by trimming its path left to right:
 
 <!-- code-excerpt "examples/gallery/lib/lessons/07_charts.dart (line)" -->
 ```dart
-Chart.line(data: _signups, drawIn: 1500.ms).animate([Animation.fadeIn()]),
+Chart.line(data: _signups, reveal: 1500.ms).animate([Animation.fadeIn()]),
 ```
 
 A donut sweeps its wedges round and leaves a hole. `innerRadius` is the hole
@@ -65,7 +65,7 @@ size as a fraction of the outer radius:
 ```dart
 Chart.donut(
   data: _channels,
-  sweepIn: 1.seconds,
+  reveal: 1.seconds,
   innerRadius: 0.62,
 ).animate([Animation.slideFade()]),
 ```
@@ -137,7 +137,7 @@ Center(
       const Text('Revenue this year', style: _headline),
       Counter.currency(
         to: 267000,
-        duration: 1500.ms,
+        reveal: 1500.ms,
         style: _metric,
       ).animate([Animation.slideFade()]),
       const Text('up 38% over last year', style: _caption),

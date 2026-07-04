@@ -33,7 +33,7 @@ Widget typedHeadline() => const Typewriter(
 /// A counter that tweens to a compact-formatted number.
 // #docregion counter
 Widget viewsCounter() =>
-    Counter(to: 12500, duration: 2.seconds, format: NumberFormat.compact()); // "12.5K"
+    Counter(to: 12500, reveal: 2.seconds, format: NumberFormat.compact()); // "12.5K"
 // #enddocregion counter
 
 /// The currency and percent presets, formatted at a fixed locale.

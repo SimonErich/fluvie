@@ -19,7 +19,7 @@ import '../../animation/helpers/golden_frame.dart';
 Widget _arrow() => const Arrow.to(
   from: Offset(20, 100),
   to: Offset(100, 20),
-  drawIn: Time.frames(30),
+  reveal: Time.frames(30),
   strokeWidth: 4,
   headLength: 18,
 );

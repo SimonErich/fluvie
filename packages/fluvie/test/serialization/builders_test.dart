@@ -120,7 +120,7 @@ void main() {
           'type': 'Counter',
           'to': 100,
           'from': 10,
-          'duration': '2s',
+          'reveal': '2s',
           'style': {'fontSize': 40},
         }),
         isA<Counter>(),

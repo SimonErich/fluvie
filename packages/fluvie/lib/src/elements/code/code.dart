@@ -48,6 +48,9 @@ part 'code_internals.dart';
 /// Colors come from [theme] when given, else `context.fluvie.code`. Transforms
 /// and effects ride `.animate()`; [shared] wraps the result in a `SharedElement`
 /// for a hero morph across a scene boundary.
+///
+/// Two durations can meet here: [reveal] times the intrinsic code reveal,
+/// while transforms and opacity ride `.animate()` with their own timing.
 final class Code extends StatelessWidget {
   /// Renders [source] in [language] (default `'plaintext'`), revealed by
   /// [reveal], focused / highlighted by [focusLines] / [highlightLines], colored

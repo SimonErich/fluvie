@@ -34,8 +34,8 @@ void main() {
     });
 
     test('overshoot p > 1 extrapolates (spring support)', () {
-      const popIn = KeyframeEffect(from: Keyframe(scale: 0), to: Keyframe.natural);
-      final over = popIn.keyframeAt(1.1);
+      const reveal = KeyframeEffect(from: Keyframe(scale: 0), to: Keyframe.natural);
+      final over = reveal.keyframeAt(1.1);
       expect(over.scale, closeTo(1.1, 1e-12));
     });
 

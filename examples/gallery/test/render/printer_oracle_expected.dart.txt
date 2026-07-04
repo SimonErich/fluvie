@@ -31,7 +31,7 @@ Video build() {
           Counter(
             to: 100,
             from: 0,
-            duration: 0.8.seconds,
+            reveal: 0.8.seconds,
             style: TextStyle(color: Color(0xFFFFFF00), fontSize: 48),
           ),
           Text('Raw', style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 40)).animate([

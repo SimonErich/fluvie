@@ -22,26 +22,29 @@ const String _fixedLocale = 'en_US';
 ///
 /// The displayed value is `lerp(from, to, ease(progress))`, where `progress` is
 /// the frames elapsed since the enclosing time scope began over the resolved
-/// [duration], clamped to `[0, 1]` ([FrameProvider] is the only clock). [ease]
+/// [reveal], clamped to `[0, 1]` ([FrameProvider] is the only clock). [ease]
 /// shapes the count (the default [Ease.linear] is the mechanical motion a
 /// counter wants); the result is formatted by [format] when given, or a
 /// thousands-grouped decimal at a fixed locale.
 ///
 /// ```dart
-/// Counter(to: 12500, duration: 2.seconds, format: NumberFormat.compact()) // "12.5K"
+/// Counter(to: 12500, reveal: 2.seconds, format: NumberFormat.compact()) // "12.5K"
 /// Counter.currency(to: 4999, symbol: r'$')   Counter.percent(to: 0.87)
 /// ```
 ///
 /// Transforms and effects come through `.animate()` only — the constructor
 /// takes content parameters and nothing else. [shared] wraps the result in a
 /// `SharedElement` for a hero morph across a scene boundary.
+///
+/// Two durations can meet on a counter: [reveal] times the count itself,
+/// while transforms and opacity ride `.animate()` with their own timing.
 final class Counter extends StatelessWidget {
-  /// Counts from [from] (default `0`) to [to] over [duration], formatted by
+  /// Counts from [from] (default `0`) to [to] over [reveal], formatted by
   /// [format] (default: a fixed-locale grouped decimal), in [style].
   const Counter({
     required this.to,
     this.from = 0,
-    this.duration = const Time.seconds(1),
+    this.reveal = const Time.seconds(1),
     this.ease = Ease.linear,
     this.format,
     this.style,
@@ -55,7 +58,7 @@ final class Counter extends StatelessWidget {
     required this.to,
     String symbol = r'$',
     this.from = 0,
-    this.duration = const Time.seconds(1),
+    this.reveal = const Time.seconds(1),
     this.ease = Ease.linear,
     this.style,
     this.shared,
@@ -67,7 +70,7 @@ final class Counter extends StatelessWidget {
   Counter.percent({
     required this.to,
     this.from = 0,
-    this.duration = const Time.seconds(1),
+    this.reveal = const Time.seconds(1),
     this.ease = Ease.linear,
     this.style,
     this.shared,
@@ -82,7 +85,7 @@ final class Counter extends StatelessWidget {
 
   /// How long the count takes; resolved against the enclosing scope so a
   /// relative or seconds duration scales with fps.
-  final Time duration;
+  final Time reveal;
 
   /// The curve shaping the count's progress; the default [Ease.linear] is the
   /// mechanical motion a counter wants (any acceleration reads as a glitch).
@@ -109,7 +112,7 @@ final class Counter extends StatelessWidget {
 
   /// The formatted value at [frame] within [scope].
   String _formatted(int frame, TimeScopeData scope) {
-    final progress = revealProgress(frame, scope, duration);
+    final progress = revealProgress(frame, scope, reveal);
     final value = lerpDouble(from, to, ease.transform(progress))!;
     final formatter = format ?? NumberFormat.decimalPattern(_fixedLocale);
     return formatter.format(value);

@@ -33,14 +33,14 @@ enum _ChartKind { bar, line, area, pie, donut, scatter }
 /// `Chart` is one public type with named factories per chart shape:
 ///
 /// ```dart
-/// Chart.bar(data: {'Jan': 30, 'Feb': 45}, growIn: 0.6.relative)
-/// Chart.line(data: {'Jan': 30, 'Feb': 45}, drawIn: 0.6.relative)
+/// Chart.bar(data: {'Jan': 30, 'Feb': 45}, reveal: 0.6.relative)
+/// Chart.line(data: {'Jan': 30, 'Feb': 45}, reveal: 0.6.relative)
 /// Chart.line.series([ChartSeries.values(name: 'Sales', data: {...})])
 /// ```
 ///
 /// Like `Counter` and `Typewriter`, a chart reads the frame clock and its time
 /// scope, computes a `0 -> 1` reveal progress against its own window, and paints
-/// a `CustomPaint`. The reveal (`growIn` / `drawIn`) is a [Time] resolved
+/// a `CustomPaint`. The reveal (`reveal` / `reveal`) is a [Time] resolved
 /// against the element window, exactly as `Counter.duration` is. Outer
 /// transforms ride `.animate()` — the constructor takes content parameters
 /// only. A [shared] anchor wraps the chart in a `SharedElement` for a hero morph
@@ -51,6 +51,10 @@ enum _ChartKind { bar, line, area, pie, donut, scatter }
 /// `context.fluvie`, so wrapping a chart in a [FluvieTokensScope] (or the
 /// `FluvieTheme`) themes it; with no scope it uses the package
 /// `FluvieTokens.fallback` palette. A per-series `color:` override wins.
+///
+/// Two durations can meet on a chart: [reveal] times the intrinsic reveal
+/// (grow, draw, sweep, pop), while transforms and opacity ride `.animate()`
+/// with their own timing.
 final class Chart extends StatelessWidget {
   const Chart._({
     required this._kind,
@@ -67,19 +71,19 @@ final class Chart extends StatelessWidget {
 
   /// A bar (column) chart over an ordered category to value [data] map.
   ///
-  /// Each bar grows from the baseline by `value x ease(progress)` over [growIn]
+  /// Each bar grows from the baseline by `value x ease(progress)` over [reveal]
   /// (default a `0.6` relative window). An optional [stagger] delays each bar's
   /// growth so the columns rise in a wave. [shared] wraps the chart in a
   /// `SharedElement`.
   factory Chart.bar({
     required Map<String, num> data,
-    Time growIn = const Time.relative(0.6),
+    Time reveal = const Time.relative(0.6),
     Stagger? stagger,
     Anchor? shared,
     Key? key,
   }) => Chart._(
     kind: _ChartKind.bar,
-    reveal: growIn,
+    reveal: reveal,
     data: data,
     stagger: stagger,
     shared: shared,
@@ -89,15 +93,15 @@ final class Chart extends StatelessWidget {
   /// A pie chart whose segments sweep clockwise from 12 o'clock.
   ///
   /// Each segment's angle is proportional to its value, and the whole disc
-  /// sweeps angularly over [sweepIn] (default a `0.6` relative window) so the pie
+  /// sweeps angularly over [reveal] (default a `0.6` relative window) so the pie
   /// fills in. Segment colors cycle the theme palette. [shared] wraps the chart
   /// in a `SharedElement`.
   factory Chart.pie({
     required Map<String, num> data,
-    Time sweepIn = const Time.relative(0.6),
+    Time reveal = const Time.relative(0.6),
     Anchor? shared,
     Key? key,
-  }) => Chart._(kind: _ChartKind.pie, reveal: sweepIn, data: data, shared: shared, key: key);
+  }) => Chart._(kind: _ChartKind.pie, reveal: reveal, data: data, shared: shared, key: key);
 
   /// A donut chart: a [Chart.pie] with an inner-radius hole.
   ///
@@ -107,13 +111,13 @@ final class Chart extends StatelessWidget {
   /// Everything else matches [Chart.pie].
   factory Chart.donut({
     required Map<String, num> data,
-    Time sweepIn = const Time.relative(0.6),
+    Time reveal = const Time.relative(0.6),
     double innerRadius = 0.6,
     Anchor? shared,
     Key? key,
   }) => Chart._(
     kind: _ChartKind.donut,
-    reveal: sweepIn,
+    reveal: reveal,
     data: data,
     innerRadius: innerRadius,
     shared: shared,
@@ -122,14 +126,14 @@ final class Chart extends StatelessWidget {
 
   /// A line chart that draws its polyline on left to right.
   ///
-  /// Call it as `Chart.line(data: {...}, drawIn: ...)` for a single series, or
+  /// Call it as `Chart.line(data: {...}, reveal: ...)` for a single series, or
   /// `Chart.line.series([...])` for several colored polylines. The line is
-  /// trimmed to the reveal progress, so it draws on over its `drawIn` window.
+  /// trimmed to the reveal progress, so it draws on over its `reveal` window.
   static const ChartLineFactory line = ChartLineFactory._();
 
   /// An area chart that fills under its sweeping line.
   ///
-  /// Call it as `Chart.area(data: {...}, drawIn: ...)` for a single series, or
+  /// Call it as `Chart.area(data: {...}, reveal: ...)` for a single series, or
   /// `Chart.area.series([...])` for several stacked fills. The fill follows the
   /// line sweep and closes to the value baseline.
   static const ChartAreaFactory area = ChartAreaFactory._();
@@ -139,14 +143,14 @@ final class Chart extends StatelessWidget {
   /// Call it as `Chart.scatter(points: [...])` for explicit `(x, y)` points,
   /// `Chart.scatter(data: {...})` for a category → value map (the category index
   /// is the x), or `Chart.scatter.series([...])` for an explicit colored series.
-  /// Each marker's scale springs `0 -> 1` with an overshoot over its `popIn`
+  /// Each marker's scale springs `0 -> 1` with an overshoot over its `reveal`
   /// window; an optional `stagger` offsets each point's pop so the markers pop
   /// in a wave.
   static const ChartScatterFactory scatter = ChartScatterFactory._();
 
   final _ChartKind _kind;
 
-  /// The reveal window resolved against the element scope (`growIn` / `drawIn`).
+  /// The reveal window resolved against the element scope (`reveal` / `reveal`).
   final Time reveal;
 
   /// The single-series category to value data, or `null` for a multi-series

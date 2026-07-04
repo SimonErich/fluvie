@@ -46,9 +46,9 @@ Widget _base(ElementSpec spec) {
       return Counter(
         to: _num(props['to'], 'to'),
         from: _numOr(props['from'], 0),
-        duration: props['duration'] == null
+        reveal: props['reveal'] == null
             ? const Time.seconds(1)
-            : decodeTime(props['duration'], path: const ['duration']),
+            : decodeTime(props['reveal'], path: const ['reveal']),
         style: props['style'] == null
             ? null
             : decodeTextStyle(props['style'], path: const ['style']),

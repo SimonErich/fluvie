@@ -37,7 +37,7 @@ String _elementBase(Map<String, Object?> element) {
       return 'Counter(${_args([
         'to: ${_num(element['to'])}',
         if (element['from'] != null) 'from: ${_num(element['from'])}',
-        if (element['duration'] != null) 'duration: ${_time(element['duration']! as String)}',
+        if (element['reveal'] != null) 'reveal: ${_time(element['reveal']! as String)}',
         if (element['style'] != null) 'style: ${_textStyle(_map(element['style']))}',
       ])})';
   }

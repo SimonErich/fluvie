@@ -68,7 +68,7 @@ void main() {
       const shape = Shape.line(
         from: Offset.zero,
         to: Offset(100, 0),
-        drawIn: Time.frames(10),
+        reveal: Time.frames(10),
       );
       await pumpAnnotation(tester, shape);
       expect(_painter(tester).progress, 0);
@@ -78,7 +78,7 @@ void main() {
       expect(_painter(tester).progress, 1);
     });
 
-    testWidgets('no drawIn renders fully revealed', (tester) async {
+    testWidgets('no reveal renders fully revealed', (tester) async {
       await pumpAnnotation(
         tester,
         const Shape.line(from: Offset.zero, to: Offset(100, 0)),

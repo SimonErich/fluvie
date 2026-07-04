@@ -39,6 +39,10 @@ const double _defaultFontSize = 14;
 /// `context.fluvie.code`. Transforms and effects ride `.animate()`; [shared]
 /// wraps the result in a `SharedElement` for a hero morph across a scene
 /// boundary.
+///
+/// Two timings can meet here: [typingSpeed] and [lineGap] are per-item
+/// rates of the session replay, while transforms and opacity ride
+/// `.animate()` with their own duration.
 final class Terminal extends StatelessWidget {
   /// Renders [lines] in sequence, each command prefixed by [prompt] (default
   /// `$ `), typed at [typingSpeed], spaced by [lineGap], with optional [chrome]

@@ -89,7 +89,7 @@ final Map<String, Object?> printerOracleSpec = {
           'type': 'Counter',
           'to': 100,
           'from': 0,
-          'duration': '0.8s',
+          'reveal': '0.8s',
           'style': {'color': '#FFFFFF00', 'fontSize': 48},
         },
         {

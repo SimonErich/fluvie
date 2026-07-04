@@ -51,7 +51,7 @@ Object _elementPropSchema(String prop) => switch (prop) {
   'fit' => {'type': 'string', 'enum': _boxFitNames},
   'to' => {'type': 'number'},
   'from' => {'type': 'number'},
-  'duration' => {r'$ref': r'#/$defs/time'},
+  'reveal' => {r'$ref': r'#/$defs/time'},
   _ => const <String, Object?>{},
 };
 

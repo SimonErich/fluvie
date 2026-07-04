@@ -55,7 +55,7 @@ void main() {
       const arrow = Arrow.to(
         from: Offset(0, 50),
         to: Offset(100, 50),
-        drawIn: Time.frames(10),
+        reveal: Time.frames(10),
       );
       await pumpAnnotation(tester, arrow);
       expect(_painter(tester).progress, 0);
@@ -86,7 +86,7 @@ void main() {
       expect(done.headVisible, isTrue);
     });
 
-    testWidgets('no drawIn renders fully (head visible at frame 0)', (tester) async {
+    testWidgets('no reveal renders fully (head visible at frame 0)', (tester) async {
       await pumpAnnotation(
         tester,
         const Arrow.to(from: Offset.zero, to: Offset(100, 0)),

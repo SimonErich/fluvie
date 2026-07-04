@@ -19,15 +19,15 @@ import '../../animation/helpers/golden_frame.dart';
 const _data = {'A': 30, 'B': 75, 'C': 45, 'D': 90, 'E': 60};
 const _revealFrames = [9, 21, 30];
 
-Widget _bar() => Chart.bar(data: _data, growIn: const Time.frames(30));
+Widget _bar() => Chart.bar(data: _data, reveal: const Time.frames(30));
 
-Widget _line() => Chart.line(data: _data, drawIn: const Time.frames(30));
+Widget _line() => Chart.line(data: _data, reveal: const Time.frames(30));
 
-Widget _area() => Chart.area(data: _data, drawIn: const Time.frames(30));
+Widget _area() => Chart.area(data: _data, reveal: const Time.frames(30));
 
 Widget _staggered() => Chart.bar(
   data: _data,
-  growIn: const Time.frames(30),
+  reveal: const Time.frames(30),
   stagger: const Stagger.each(Time.frames(4)),
 );
 

@@ -36,6 +36,9 @@ const Color _defaultDim = Color(0xB3000000);
 /// The dim [color] defaults to a translucent black. Transforms and effects ride
 /// `.animate()` only. [shared] wraps the result in a `SharedElement` for a hero
 /// morph across a scene boundary.
+///
+/// Two durations can meet here: [reveal] times the intrinsic dim-in,
+/// while transforms and opacity ride `.animate()` with their own timing.
 final class Spotlight extends StatelessWidget implements CollectibleChildren {
   /// Lights [region] over [child], dimming the rest, with the hole grown by the
   /// optional [reveal].

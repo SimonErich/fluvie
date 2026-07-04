@@ -198,19 +198,19 @@ void main() {
       const counter = Counter(
         to: 200,
         from: 10,
-        duration: Time.seconds(2),
+        reveal: Time.seconds(2),
         style: style,
       );
       expect(counter.to, 200);
       expect(counter.from, 10);
-      expect(counter.duration, const Time.seconds(2));
+      expect(counter.reveal, const Time.seconds(2));
       expect(counter.style, same(style));
     });
 
-    test('defaults: from 0, duration 1s, no format, no style', () {
+    test('defaults: from 0, reveal 1s, no format, no style', () {
       const counter = Counter(to: 5);
       expect(counter.from, 0);
-      expect(counter.duration, const Time.seconds(1));
+      expect(counter.reveal, const Time.seconds(1));
       expect(counter.format, isNull);
       expect(counter.style, isNull);
     });

@@ -61,7 +61,7 @@ void main() {
     ) async {
       final painter = await _painterAt<BarChartPainter>(
         tester,
-        Chart.bar(data: const {'A': 30, 'B': 80}, growIn: const Time.frames(30)),
+        Chart.bar(data: const {'A': 30, 'B': 80}, reveal: const Time.frames(30)),
         tokens: _custom,
       );
       expect(painter.colors[0], const Color(0xFFAA0000));
@@ -71,7 +71,7 @@ void main() {
     testWidgets('a bar chart with no scope uses the fallback palette', (tester) async {
       final painter = await _painterAt<BarChartPainter>(
         tester,
-        Chart.bar(data: const {'A': 30, 'B': 80}, growIn: const Time.frames(30)),
+        Chart.bar(data: const {'A': 30, 'B': 80}, reveal: const Time.frames(30)),
       );
       const fallback = FluvieTokens.fallback();
       expect(painter.colors[0], fallback.palette.colorAt(0));
@@ -89,7 +89,7 @@ void main() {
               color: Color(0xFF123456),
             ),
           ],
-          drawIn: const Time.frames(30),
+          reveal: const Time.frames(30),
         ),
         tokens: _custom,
       );

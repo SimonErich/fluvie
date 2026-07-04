@@ -46,6 +46,10 @@ import 'package:meta/meta.dart';
 /// The bundled headless-Chrome rasterizer is not wired in this 1.0 build, so
 /// `Mermaid` is marked [experimental]: it renders only with an injected
 /// `SnapshotService`, and the live transport may change.
+///
+/// Two durations can meet here: [reveal] times the intrinsic diagram
+/// reveal, while transforms and opacity ride `.animate()` with their own
+/// timing.
 @experimental
 final class Mermaid extends StatelessWidget implements MediaCarrier {
   /// A diagram from Mermaid [source], optionally [theme]d, revealed by [reveal]

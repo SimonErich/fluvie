@@ -151,7 +151,7 @@ Scene _counterScene() => Scene(
               // #docregion counter
               Counter(
                 to: 12000,
-                duration: const Time.seconds(1.5),
+                reveal: const Time.seconds(1.5),
                 style: context.fluvie.type.display.copyWith(color: context.fluvie.brand.accent),
               ),
               // #enddocregion counter

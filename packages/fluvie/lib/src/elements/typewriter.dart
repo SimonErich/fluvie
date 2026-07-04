@@ -30,6 +30,10 @@ import 'package:fluvie/src/timing/time_scope_provider.dart';
 /// `.animate()` only — the constructor takes content parameters ([speed],
 /// [caret], [style]) and nothing else. [shared] wraps the result in a
 /// `SharedElement` for a hero morph across a scene boundary.
+///
+/// Two timings can meet here: [speed] is the per-character rate of the
+/// typing itself, while transforms and opacity ride `.animate()` with
+/// their own duration.
 final class Typewriter extends StatelessWidget {
   /// Types out [text] at [speed] frames per glyph, optionally trailing a
   /// blinking [caret], in [style].

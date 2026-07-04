@@ -18,8 +18,8 @@ const double _defaultStrokeWidth = 2;
 /// A `Connector` is a leaf painter — it draws geometry and wraps no child, so it
 /// is not a `CollectibleChildren`. It joins [from] to [to] with a straight line,
 /// or with a right-angle [elbow] that bends through a corner (horizontal first,
-/// then vertical). Over its [drawIn] reveal it draws on from [from] toward [to];
-/// with no [drawIn] it renders complete at every frame.
+/// then vertical). Over its [reveal] reveal it draws on from [from] toward [to];
+/// with no [reveal] it renders complete at every frame.
 ///
 /// ```dart
 /// Connector(from: const Offset(60, 60), to: const Offset(220, 160), elbow: true)
@@ -30,6 +30,9 @@ const double _defaultStrokeWidth = 2;
 /// `FluvieTokensScope` rebrands every annotation at once; pass [color] to
 /// override. Transforms and effects ride `.animate()` only. [shared] wraps the
 /// result in a `SharedElement` for a hero morph across a scene boundary.
+///
+/// Two durations can meet here: [reveal] times the intrinsic draw-on,
+/// while transforms and opacity ride `.animate()` with their own timing.
 final class Connector extends StatelessWidget {
   /// A connector from [from] to [to], straight unless [elbow] is set.
   const Connector({
@@ -38,7 +41,7 @@ final class Connector extends StatelessWidget {
     this.elbow = false,
     this.color,
     this.strokeWidth = _defaultStrokeWidth,
-    this.drawIn,
+    this.reveal,
     this.shared,
     super.key,
   });
@@ -62,7 +65,7 @@ final class Connector extends StatelessWidget {
 
   /// The draw-on reveal window resolved against the element scope, or `null` to
   /// render fully at every frame.
-  final Time? drawIn;
+  final Time? reveal;
 
   /// An optional hero anchor: when non-null the connector morphs across the
   /// boundary it shares with the same anchor in the adjacent scene. `null`
@@ -82,12 +85,12 @@ final class Connector extends StatelessWidget {
     return wrapShared(shared, CustomPaint(painter: painter));
   }
 
-  /// The draw-on progress at this frame: `1` when there is no [drawIn], else the
+  /// The draw-on progress at this frame: `1` when there is no [reveal], else the
   /// shared reveal math resolved against the element scope.
   double _progress(BuildContext context) {
-    final reveal = drawIn;
-    if (reveal == null) return 1;
+    final window = reveal;
+    if (window == null) return 1;
     final frame = FrameProvider.of(context).frame;
-    return revealProgress(frame, TimeScopeProvider.of(context), reveal);
+    return revealProgress(frame, TimeScopeProvider.of(context), window);
   }
 }

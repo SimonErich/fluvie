@@ -48,7 +48,7 @@ through `.animate()`; the constructor only takes content.
 <!-- code-excerpt "examples/gallery/lib/snippets/phase_08_snippets.dart (counter)" -->
 ```dart
 Widget viewsCounter() =>
-    Counter(to: 12500, duration: 2.seconds, format: NumberFormat.compact()); // "12.5K"
+    Counter(to: 12500, reveal: 2.seconds, format: NumberFormat.compact()); // "12.5K"
 ```
 
 The displayed value is `lerp(from, to, ease(progress))` over the resolved

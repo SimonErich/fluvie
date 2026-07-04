@@ -170,14 +170,14 @@ void main() {
       expect(file, contains("Image.file('/tmp/a.png')"));
     });
 
-    test('Counter with from, duration and style', () {
+    test('Counter with from, reveal and style', () {
       final code = printVideoSpecJson(
         _spec([
           {
             'type': 'Counter',
             'to': 12500,
             'from': 100,
-            'duration': '2.0s',
+            'reveal': '2.0s',
             'style': {'fontSize': 48},
           },
         ]),
@@ -185,7 +185,7 @@ void main() {
       expect(
         code,
         containsCode(
-          'Counter(to: 12500, from: 100, duration: 2.seconds, style: TextStyle(fontSize: 48))',
+          'Counter(to: 12500, from: 100, reveal: 2.seconds, style: TextStyle(fontSize: 48))',
         ),
       );
     });

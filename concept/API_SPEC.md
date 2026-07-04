@@ -624,12 +624,12 @@ The chart family — intrinsic, frame-driven elements whose reveal (growth, draw
 
 #### `Chart.bar` — column chart
 
-Bars grow from the baseline by `value × ease(progress)` over `growIn`. An optional `stagger` delays each bar's growth so the columns rise in a wave.
+Bars grow from the baseline by `value × ease(progress)` over `reveal`. An optional `stagger` delays each bar's growth so the columns rise in a wave.
 
 ```dart
 Chart.bar(
   data: {'Jan': 30, 'Feb': 45, 'Mar': 80},
-  growIn: 0.6.relative,
+  reveal: 0.6.relative,
   stagger: Stagger.each(0.06.seconds),
   shared: logoAnchor,  // optional hero anchor
 )
@@ -637,17 +637,17 @@ Chart.bar(
 
 #### `Chart.line` — polyline chart
 
-Single or multi-series line drawn left to right, trimmed to the reveal progress so it draws on over the `drawIn` window.
+Single or multi-series line drawn left to right, trimmed to the reveal progress so it draws on over the `reveal` window.
 
 ```dart
 // Single series:
-Chart.line(data: {'Jan': 30, 'Feb': 45}, drawIn: 0.6.relative)
+Chart.line(data: {'Jan': 30, 'Feb': 45}, reveal: 0.6.relative)
 
 // Multi-series (colored):
 Chart.line.series([
   ChartSeries.values(name: 'Sales', data: {'Jan': 30, 'Feb': 45}),
   ChartSeries.values(name: 'Costs', data: {'Jan': 20, 'Feb': 35}, color: Colors.red),
-], drawIn: 0.6.relative)
+], reveal: 0.6.relative)
 ```
 
 #### `Chart.area` — filled area chart
@@ -656,7 +656,7 @@ Fills under a sweeping line, stacking multiple series. The fill follows the line
 
 ```dart
 // Single series:
-Chart.area(data: {'Jan': 30, 'Feb': 45}, drawIn: 0.6.relative)
+Chart.area(data: {'Jan': 30, 'Feb': 45}, reveal: 0.6.relative)
 
 // Multi-series (stacked):
 Chart.area.series([
@@ -667,10 +667,10 @@ Chart.area.series([
 
 #### `Chart.pie` — pie chart
 
-Segments sweep clockwise from 12 o'clock. Each segment's angle is proportional to its value; the whole disc sweeps angularly over `sweepIn` (default `0.6` relative window) so the pie fills in. Segment colors cycle the theme palette.
+Segments sweep clockwise from 12 o'clock. Each segment's angle is proportional to its value; the whole disc sweeps angularly over `reveal` (default `0.6` relative window) so the pie fills in. Segment colors cycle the theme palette.
 
 ```dart
-Chart.pie(data: {'A': 30, 'B': 45, 'C': 25}, sweepIn: 0.6.relative)
+Chart.pie(data: {'A': 30, 'B': 45, 'C': 25}, reveal: 0.6.relative)
 ```
 
 #### `Chart.donut` — donut chart
@@ -680,7 +680,7 @@ A pie chart with an inner-radius hole. The hole is cut with an even-odd ring pat
 ```dart
 Chart.donut(
   data: {'A': 30, 'B': 45, 'C': 25},
-  sweepIn: 0.6.relative,
+  reveal: 0.6.relative,
   innerRadius: 0.6,  // fraction of outer radius; default 0.6
 )
 ```
@@ -693,7 +693,7 @@ Markers pop in with a spring scale. Use explicit `(x, y)` points, a category →
 // Explicit points:
 Chart.scatter(
   points: [ChartPoint(x: 1, y: 2), ChartPoint(x: 2, y: 4)],
-  popIn: 0.6.relative,
+  reveal: 0.6.relative,
 )
 
 // From data map (index → value):
@@ -705,7 +705,7 @@ Chart.scatter.series(
     ChartPoint(x: 1, y: 2, label: 'Q1'),
     ChartPoint(x: 2, y: 4, label: 'Q2'),
   ]),
-  popIn: 0.6.relative,
+  reveal: 0.6.relative,
   stagger: Stagger.each(0.08.seconds),
 )
 ```
@@ -1033,7 +1033,7 @@ All three must be positive. The bundled headless-Chrome rasterizer is experiment
 
 Annotation elements draw geometric emphasis (arrows, shapes, spotlights) or text overlays (callouts, titles, lower thirds) over scenes. All accept `.animate([...])` and most accept a `shared:` anchor for hero morphs across scene boundaries.
 
-**Arrow** — Points from one position to another with a stroked shaft and triangular head. Optionally draws on over a `drawIn` window (the shaft grows, then the head appears).
+**Arrow** — Points from one position to another with a stroked shaft and triangular head. Optionally draws on over a `reveal` window (the shaft grows, then the head appears).
 
 ```dart
 const Arrow.to({
@@ -1042,7 +1042,7 @@ const Arrow.to({
   Color? color,                      // defaults to context.fluvie palette[0]
   double strokeWidth = 3,
   double headLength = 16,
-  Time? drawIn,                      // optional reveal window
+  Time? reveal,                      // optional reveal window
   Anchor? shared,
   Key? key,
 })
@@ -1062,7 +1062,7 @@ const Callout({
 })
 ```
 
-**Connector** — A straight or right-angle line linking two points. When `elbow: true`, bends through a corner (horizontal first, then vertical). Draws on over `drawIn`.
+**Connector** — A straight or right-angle line linking two points. When `elbow: true`, bends through a corner (horizontal first, then vertical). Draws on over `reveal`.
 
 ```dart
 const Connector({
@@ -1071,7 +1071,7 @@ const Connector({
   bool elbow = false,
   Color? color,                      // defaults to palette[0]
   double strokeWidth = 2,
-  Time? drawIn,
+  Time? reveal,
   Anchor? shared,
   Key? key,
 })
@@ -1091,7 +1091,7 @@ const LowerThird({
 })
 ```
 
-**Shape** — A stroked annotation primitive: line, rectangle, circle, or arbitrary path. Each variant draws on left-to-right over its `drawIn` window (the stroke grows along its length).
+**Shape** — A stroked annotation primitive: line, rectangle, circle, or arbitrary path. Each variant draws on left-to-right over its `reveal` window (the stroke grows along its length).
 
 ```dart
 const Shape.line({
@@ -1099,7 +1099,7 @@ const Shape.line({
   required Offset to,
   Color? color,
   double strokeWidth = 3,
-  Time? drawIn,
+  Time? reveal,
   Anchor? shared,
   Key? key,
 })
@@ -1108,7 +1108,7 @@ const Shape.rect({
   required Rect rect,
   Color? color,
   double strokeWidth = 3,
-  Time? drawIn,
+  Time? reveal,
   Anchor? shared,
   Key? key,
 })
@@ -1118,7 +1118,7 @@ const Shape.circle({
   required double radius,
   Color? color,
   double strokeWidth = 3,
-  Time? drawIn,
+  Time? reveal,
   Anchor? shared,
   Key? key,
 })
@@ -1127,7 +1127,7 @@ const Shape.path({
   required Path path,
   Color? color,
   double strokeWidth = 3,
-  Time? drawIn,
+  Time? reveal,
   Anchor? shared,
   Key? key,
 })
@@ -1174,7 +1174,7 @@ Scene(duration: 6.seconds, children: [
   Arrow.to(
     from: const Offset(240, 100),
     to: const Offset(420, 180),
-    drawIn: 1.seconds,
+    reveal: 1.seconds,
   ).animate([Animation.fadeIn()]),
 
   // Circle highlight around a button
@@ -1182,7 +1182,7 @@ Scene(duration: 6.seconds, children: [
     center: const Offset(640, 320),
     radius: 60,
     color: Colors.green,
-    drawIn: 12.frames,
+    reveal: 12.frames,
   ),
 
   // Callout label pointing at active metric

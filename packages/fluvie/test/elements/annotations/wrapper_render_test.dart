@@ -147,7 +147,7 @@ void main() {
     });
 
     testWidgets('slides in from the edge over its reveal (offset shrinks)', (tester) async {
-      const lowerThird = LowerThird(name: 'Ada', slideIn: Time.frames(10));
+      const lowerThird = LowerThird(name: 'Ada', reveal: Time.frames(10));
       await pumpAnnotation(tester, lowerThird);
       final atStart = _slideDx(tester);
       await pumpAnnotation(tester, lowerThird, frame: 10);

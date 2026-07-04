@@ -100,7 +100,7 @@ final class StatHighlight extends VideoTemplate<StatHighlightProps> {
           children: [
             Counter(
               to: props.value,
-              duration: _countDuration,
+              reveal: _countDuration,
               style: TextStyle(fontSize: 120, color: props.accent),
             ),
             const SizedBox(height: 24),

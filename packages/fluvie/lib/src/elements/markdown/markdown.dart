@@ -49,6 +49,10 @@ import 'package:meta/meta.dart' show visibleForTesting;
 /// Colors follow [style] or `context.fluvie`. Transforms and effects ride
 /// `.animate()`; [shared] wraps the result in a `SharedElement` for a hero morph
 /// across a scene boundary.
+///
+/// Two durations can meet here: [reveal] times the intrinsic content
+/// reveal, while transforms and opacity ride `.animate()` with their own
+/// timing.
 final class Markdown extends StatelessWidget {
   /// Renders [source] in [style] (or `context.fluvie`), optionally revealed
   /// block by block over [reveal].

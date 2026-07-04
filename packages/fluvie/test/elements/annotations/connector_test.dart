@@ -56,7 +56,7 @@ void main() {
       const connector = Connector(
         from: Offset.zero,
         to: Offset(100, 0),
-        drawIn: Time.frames(20),
+        reveal: Time.frames(20),
       );
       await pumpAnnotation(tester, connector);
       expect(_painter(tester).progress, 0);

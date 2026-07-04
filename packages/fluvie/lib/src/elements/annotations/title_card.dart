@@ -42,6 +42,9 @@ import 'package:fluvie/src/timing/time_scope_provider.dart';
 /// The title [color] defaults to white. Transforms and effects ride
 /// `.animate()` on top of the intrinsic reveal. [shared] wraps the result in a
 /// `SharedElement` for a hero morph across a scene boundary.
+///
+/// Two durations can meet here: [reveal] times the intrinsic reveal,
+/// while transforms and opacity ride `.animate()` with their own timing.
 final class TitleCard extends StatelessWidget implements CollectibleChildren {
   /// A title card showing [title] and an optional [subtitle], over an optional
   /// [child], revealing over [reveal].

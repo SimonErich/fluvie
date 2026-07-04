@@ -68,7 +68,7 @@ void main() {
     testWidgets('every point scale is zero at frame 0', (tester) async {
       final painter = await _scatterPainterAt(
         tester,
-        Chart.scatter(points: _points, popIn: const Time.frames(30)),
+        Chart.scatter(points: _points, reveal: const Time.frames(30)),
         frame: 0,
       );
       for (final scale in painter.scales) {
@@ -79,7 +79,7 @@ void main() {
     testWidgets('every point scale settles to one at the reveal end', (tester) async {
       final painter = await _scatterPainterAt(
         tester,
-        Chart.scatter(points: _points, popIn: const Time.frames(30)),
+        Chart.scatter(points: _points, reveal: const Time.frames(30)),
         frame: 30,
       );
       for (final scale in painter.scales) {
@@ -93,7 +93,7 @@ void main() {
       for (var frame = 1; frame < 30; frame++) {
         final painter = await _scatterPainterAt(
           tester,
-          Chart.scatter(points: _points, popIn: const Time.frames(30)),
+          Chart.scatter(points: _points, reveal: const Time.frames(30)),
           frame: frame,
         );
         if (painter.scales.first > 1.0001) sawOvershoot = true;
@@ -110,7 +110,7 @@ void main() {
         tester,
         Chart.scatter(
           points: _points,
-          popIn: const Time.frames(20),
+          reveal: const Time.frames(20),
           stagger: const Stagger.each(Time.frames(10)),
         ),
         frame: 4,
@@ -125,7 +125,7 @@ void main() {
         tester,
         Chart.scatter(
           points: _points,
-          popIn: const Time.frames(20),
+          reveal: const Time.frames(20),
           stagger: const Stagger.each(Time.frames(10)),
         ),
         frame: 14,
@@ -138,7 +138,7 @@ void main() {
     testWidgets('points place at (LinearScale x, LinearScale y)', (tester) async {
       final painter = await _scatterPainterAt(
         tester,
-        Chart.scatter(points: _points, popIn: const Time.frames(30)),
+        Chart.scatter(points: _points, reveal: const Time.frames(30)),
         frame: 30,
       );
       final centers = painter.centersFor(_probeSize);
@@ -153,7 +153,7 @@ void main() {
     testWidgets('a category map places points at the category index x', (tester) async {
       final painter = await _scatterPainterAt(
         tester,
-        Chart.scatter(data: const {'A': 2, 'B': 5}, popIn: const Time.frames(30)),
+        Chart.scatter(data: const {'A': 2, 'B': 5}, reveal: const Time.frames(30)),
         frame: 30,
       );
       final centers = painter.centersFor(_probeSize);
@@ -168,7 +168,7 @@ void main() {
         tester,
         Chart.scatter.series(
           const ChartSeries.points(name: 'cloud', data: _points),
-          popIn: const Time.frames(30),
+          reveal: const Time.frames(30),
         ),
         frame: 30,
       );
@@ -186,7 +186,7 @@ void main() {
         tester,
         Chart.scatter.series(
           const ChartSeries.points(name: 'cloud', data: _points, color: override),
-          popIn: const Time.frames(30),
+          reveal: const Time.frames(30),
         ),
         frame: 30,
       );
@@ -195,7 +195,7 @@ void main() {
   });
 
   group('Chart.scatter content fields and anchor', () {
-    test('default popIn is a 0.6 relative window', () {
+    test('default reveal is a 0.6 relative window', () {
       final chart = Chart.scatter(data: const {'A': 1});
       expect(chart.reveal, const Time.relative(0.6));
     });
@@ -214,14 +214,14 @@ void main() {
     testWidgets('the same frame resolves identical scales and centers twice', (tester) async {
       final first = await _scatterPainterAt(
         tester,
-        Chart.scatter(points: _points, popIn: const Time.frames(30)),
+        Chart.scatter(points: _points, reveal: const Time.frames(30)),
         frame: 12,
       );
       final firstScales = List<double>.of(first.scales);
       final firstCenters = List<Offset>.of(first.centersFor(_probeSize));
       final second = await _scatterPainterAt(
         tester,
-        Chart.scatter(points: _points, popIn: const Time.frames(30)),
+        Chart.scatter(points: _points, reveal: const Time.frames(30)),
         frame: 12,
       );
       expect(second.scales, firstScales);

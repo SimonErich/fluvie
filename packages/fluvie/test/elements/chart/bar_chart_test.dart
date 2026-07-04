@@ -1,6 +1,6 @@
 // Epic 10.2 WI-6 (D1/D2/D6/D7): the intrinsic, frame-driven `Chart.bar`. Each
 // bar grows from the baseline by `height x ease(segmentProgress)`, where the
-// segment progress is the frames elapsed over the resolved `growIn`, optionally
+// segment progress is the frames elapsed over the resolved `reveal`, optionally
 // delayed per bar by a `Stagger`. The widget reads the frame clock + scope, the
 // reveal is intrinsic (transforms ride `.animate()`), and a `shared:` anchor
 // wraps the result in a `SharedElement`. The painter exposes its resolved bar
@@ -65,7 +65,7 @@ void main() {
     testWidgets('every bar is zero height at frame 0', (tester) async {
       final painter = await _barPainterAt(
         tester,
-        Chart.bar(data: const {'A': 30, 'B': 80}, growIn: const Time.frames(30)),
+        Chart.bar(data: const {'A': 30, 'B': 80}, reveal: const Time.frames(30)),
         frame: 0,
       );
       expect(_barHeight(painter, 0), 0);
@@ -75,7 +75,7 @@ void main() {
     testWidgets('every bar is at full scaled height at the reveal end', (tester) async {
       final painter = await _barPainterAt(
         tester,
-        Chart.bar(data: const {'A': 30, 'B': 80}, growIn: const Time.frames(30)),
+        Chart.bar(data: const {'A': 30, 'B': 80}, reveal: const Time.frames(30)),
         frame: 30,
       );
       final value = painter.valueScale(_probeSize);
@@ -88,7 +88,7 @@ void main() {
     testWidgets('mid-reveal is between zero and full', (tester) async {
       final painter = await _barPainterAt(
         tester,
-        Chart.bar(data: const {'A': 30, 'B': 80}, growIn: const Time.frames(30)),
+        Chart.bar(data: const {'A': 30, 'B': 80}, reveal: const Time.frames(30)),
         frame: 15,
       );
       final value = painter.valueScale(_probeSize);
@@ -107,7 +107,7 @@ void main() {
         tester,
         Chart.bar(
           data: const {'A': 30, 'B': 80},
-          growIn: const Time.frames(30),
+          reveal: const Time.frames(30),
           stagger: const Stagger.each(Time.frames(6)),
         ),
         frame: 4,
@@ -121,7 +121,7 @@ void main() {
         tester,
         Chart.bar(
           data: const {'A': 30, 'B': 80},
-          growIn: const Time.frames(30),
+          reveal: const Time.frames(30),
           stagger: const Stagger.each(Time.frames(6)),
         ),
         frame: 12,
@@ -134,7 +134,7 @@ void main() {
     test('exposes data, reveal, and stagger (content params only)', () {
       final chart = Chart.bar(
         data: const {'A': 1, 'B': 2},
-        growIn: const Time.frames(20),
+        reveal: const Time.frames(20),
         stagger: const Stagger.each(Time.frames(3)),
       );
       expect(chart.data, const {'A': 1, 'B': 2});
@@ -142,7 +142,7 @@ void main() {
       expect(chart.stagger, const Stagger.each(Time.frames(3)));
     });
 
-    test('default growIn is a 0.6 relative window', () {
+    test('default reveal is a 0.6 relative window', () {
       final chart = Chart.bar(data: const {'A': 1});
       expect(chart.reveal, const Time.relative(0.6));
       expect(chart.stagger, isNull);
@@ -170,13 +170,13 @@ void main() {
     testWidgets('the same frame resolves identical bar rects twice', (tester) async {
       final first = await _barPainterAt(
         tester,
-        Chart.bar(data: const {'A': 30, 'B': 80, 'C': 55}, growIn: const Time.frames(30)),
+        Chart.bar(data: const {'A': 30, 'B': 80, 'C': 55}, reveal: const Time.frames(30)),
         frame: 17,
       );
       final firstRects = List<Rect>.of(first.barRectsFor(_probeSize));
       final second = await _barPainterAt(
         tester,
-        Chart.bar(data: const {'A': 30, 'B': 80, 'C': 55}, growIn: const Time.frames(30)),
+        Chart.bar(data: const {'A': 30, 'B': 80, 'C': 55}, reveal: const Time.frames(30)),
         frame: 17,
       );
       expect(second.barRectsFor(_probeSize), firstRects);

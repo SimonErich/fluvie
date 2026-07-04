@@ -17,6 +17,9 @@ change below is mechanical.
 | `FfmpegProvider`, `ProcessFfmpegProvider`, `WasmFfmpegProvider`, `ffmpegProviderProvider` | `FfmpegRunner`, `ProcessFfmpegRunner`, `WasmFfmpegRunner`, `ffmpegRunnerProvider` (on the rendering barrel) |
 | `RenderService.render(provider:)` | `RenderService.render(runner:)` |
 | `Trigger.after(a)` (and the JSON trigger kind `"after"`) | `Trigger.whenEnds(a)` / `"whenEnds"` — the parallel twin of `Trigger.whenStarts(a)`; old specs fail with a rename hint |
+| `Chart.bar(growIn:)`, `Chart.line/area(drawIn:)`, `Chart.pie/donut(sweepIn:)`, `Chart.scatter(popIn:)` | `reveal:` on every chart — one word for "how long the built-in reveal takes" |
+| `Counter(duration:)` (and the Counter spec prop `"duration"`) | `Counter(reveal:)` / `"reveal"` |
+| `Arrow(drawIn:)`, `Shape(drawIn:)`, `Connector(drawIn:)`, `LowerThird(slideIn:)` | `reveal:` — annotations share the same word |
 
 The authoring surface (`Video`, `Scene`, elements, `Animation`, `Trigger`,
 themes, specs, the preview runtime) stays on `package:fluvie/fluvie.dart`.

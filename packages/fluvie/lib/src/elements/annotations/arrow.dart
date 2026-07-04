@@ -19,13 +19,13 @@ const double _defaultHeadLength = 16;
 /// triangular head.
 ///
 /// An `Arrow` is a leaf painter — it draws geometry and wraps no child, so it is
-/// not a `CollectibleChildren`. Over its [drawIn] reveal the shaft draws on from
+/// not a `CollectibleChildren`. Over its [reveal] reveal the shaft draws on from
 /// [from] toward [to], and the head appears once the shaft has fully drawn, so
-/// the arrow reads as arriving. With no [drawIn] it renders complete at every
+/// the arrow reads as arriving. With no [reveal] it renders complete at every
 /// frame.
 ///
 /// ```dart
-/// Arrow.to(from: const Offset(40, 200), to: const Offset(160, 90), drawIn: 12.frames)
+/// Arrow.to(from: const Offset(40, 200), to: const Offset(160, 90), reveal: 12.frames)
 ///     .animate([Animation.fadeIn()]);
 /// ```
 ///
@@ -33,6 +33,9 @@ const double _defaultHeadLength = 16;
 /// `FluvieTokensScope` rebrands every annotation at once; pass [color] to
 /// override. Transforms and effects ride `.animate()` only. [shared] wraps the
 /// result in a `SharedElement` for a hero morph across a scene boundary.
+///
+/// Two durations can meet here: [reveal] times the intrinsic draw-on,
+/// while transforms and opacity ride `.animate()` with their own timing.
 final class Arrow extends StatelessWidget {
   /// An arrow whose head points at [to], with its shaft starting at [from].
   const Arrow.to({
@@ -41,7 +44,7 @@ final class Arrow extends StatelessWidget {
     this.color,
     this.strokeWidth = _defaultStrokeWidth,
     this.headLength = _defaultHeadLength,
-    this.drawIn,
+    this.reveal,
     this.shared,
     super.key,
   });
@@ -64,7 +67,7 @@ final class Arrow extends StatelessWidget {
 
   /// The draw-on reveal window resolved against the element scope, or `null` to
   /// render fully at every frame.
-  final Time? drawIn;
+  final Time? reveal;
 
   /// An optional hero anchor: when non-null the arrow morphs across the boundary
   /// it shares with the same anchor in the adjacent scene. `null` mounts no
@@ -84,12 +87,12 @@ final class Arrow extends StatelessWidget {
     return wrapShared(shared, CustomPaint(painter: painter));
   }
 
-  /// The draw-on progress at this frame: `1` when there is no [drawIn], else the
+  /// The draw-on progress at this frame: `1` when there is no [reveal], else the
   /// shared reveal math resolved against the element scope.
   double _progress(BuildContext context) {
-    final reveal = drawIn;
-    if (reveal == null) return 1;
+    final window = reveal;
+    if (window == null) return 1;
     final frame = FrameProvider.of(context).frame;
-    return revealProgress(frame, TimeScopeProvider.of(context), reveal);
+    return revealProgress(frame, TimeScopeProvider.of(context), window);
   }
 }

@@ -35,7 +35,7 @@ y, width, textAlign, or fill at the element level):
   pixels or "100%". A Box is one solid color; it has no gradient or image.
 - Image: {"source": {"kind": "asset"|"network"|"file", "value": string},
   "fit"?: "cover"|"contain"|"fill"|"fitWidth"|"fitHeight"|"none"|"scaleDown"}.
-- Counter: {"to": number, "from"?: number, "duration"?: time, "style"?: <a Text
+- Counter: {"to": number, "from"?: number, "reveal"?: time, "style"?: <a Text
   style object>}.
 
 Backgrounds belong to the SCENE, not to an element. A gradient is a scene
