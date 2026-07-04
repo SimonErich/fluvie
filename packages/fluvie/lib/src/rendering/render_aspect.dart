@@ -13,6 +13,7 @@ import 'package:fluvie/src/core/contracts/clip_frame_preparer.dart';
 import 'package:fluvie/src/core/contracts/generative_resolver.dart'
     show GenerativeProgress, GenerativeResolver;
 import 'package:fluvie/src/core/contracts/media_resolver.dart' show MediaResolver;
+import 'package:fluvie/src/core/defaults.dart';
 import 'package:fluvie/src/rendering/capture/capture_shell.dart';
 import 'package:fluvie/src/rendering/capture/render_manifest.dart';
 import 'package:fluvie/src/rendering/clip_audio_staging.dart';
@@ -83,8 +84,8 @@ Future<RenderAspectResult> render({
   required RenderService service,
   required ShellMount pumpWidget,
   required ShellFramePump pumpFrame,
-  int longEdge = 1920,
-  int fps = 30,
+  int longEdge = VideoDefaults.longEdge,
+  int fps = VideoDefaults.fps,
   String compositionKey = 'render',
   bool cacheEnabled = false,
   AudioMixStager? stageAudio,

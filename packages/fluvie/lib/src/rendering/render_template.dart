@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart' show Directionality, TextDirection;
 import 'package:fluvie/src/core/aspect.dart';
+import 'package:fluvie/src/core/defaults.dart';
 import 'package:fluvie/src/rendering/render_aspect.dart';
 import 'package:fluvie/src/rendering/render_service.dart';
 import 'package:fluvie/src/templates/video_template.dart';
@@ -45,8 +46,8 @@ Future<RenderAspectResult> renderTemplate<P>(
   required ShellMount pumpWidget,
   required ShellFramePump pumpFrame,
   Aspect aspect = Aspect.reels,
-  int longEdge = 1920,
-  int fps = 30,
+  int longEdge = VideoDefaults.longEdge,
+  int fps = VideoDefaults.fps,
   String compositionKey = 'template',
   bool cacheEnabled = false,
 }) {

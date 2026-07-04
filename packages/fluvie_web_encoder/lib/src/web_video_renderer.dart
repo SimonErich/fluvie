@@ -97,7 +97,7 @@ final class WebVideoRenderer {
     required Widget composition,
     required Aspect aspect,
     required Duration duration,
-    int fps = 30,
+    int fps = VideoDefaults.fps,
     int longEdge = 1080,
     bool audio = false,
     bool warnOnDroppedAudio = true,

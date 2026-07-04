@@ -4,6 +4,8 @@ import 'package:fluvie/src/core/stagger.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:meta/meta.dart';
 
+part 'video_defaults.dart';
+
 /// Inheritable animation defaults: set once, overridable locally.
 ///
 /// Precedence is **animation-local > `Scene` > `Video` > [package]**; each

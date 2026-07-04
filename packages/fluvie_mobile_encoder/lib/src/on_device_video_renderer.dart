@@ -99,8 +99,8 @@ final class OnDeviceVideoRenderer {
     required Widget composition,
     required Aspect aspect,
     required Duration duration,
-    int fps = 30,
-    int longEdge = 1920,
+    int fps = VideoDefaults.fps,
+    int longEdge = VideoDefaults.longEdge,
     MobileVideoCodec codec = MobileVideoCodec.h264,
     int? bitRate,
     bool audio = false,
@@ -139,8 +139,8 @@ final class OnDeviceVideoRenderer {
         () => _captureToSandbox(
           // The offscreen capture host mounts this with no app ancestors, so the
           // tree needs an ambient Directionality for Text/RichText to lay out
-          // (the CLI capture harness wraps the same way). _audioFor below reads
-          // the raw Video, so the wrap stays off the audio path.
+          // (the CLI capture harness wraps the same way). _resolveAudioTracks
+          // below reads the raw Video, so the wrap stays off the audio path.
           composition: Directionality(textDirection: TextDirection.ltr, child: composition),
           aspect: aspect,
           frameCount: frameCount,

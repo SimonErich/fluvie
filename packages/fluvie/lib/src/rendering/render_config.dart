@@ -1,3 +1,4 @@
+import 'package:fluvie/src/core/defaults.dart';
 import 'package:fluvie/src/core/quality.dart';
 import 'package:meta/meta.dart';
 
@@ -20,7 +21,7 @@ final class RenderConfig {
     required this.width,
     required this.height,
     required this.frameCount,
-    this.fps = 30,
+    this.fps = VideoDefaults.fps,
     this.startFrame = 0,
     this.quality = Quality.high,
     this.cacheEnabled = true,

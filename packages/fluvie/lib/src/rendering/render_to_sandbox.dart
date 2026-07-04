@@ -8,6 +8,7 @@ import 'package:fluvie/src/core/aspect.dart';
 import 'package:fluvie/src/core/contracts/generative_resolver.dart'
     show GenerativeProgress, GenerativeResolver;
 import 'package:fluvie/src/core/contracts/media_resolver.dart' show MediaResolver;
+import 'package:fluvie/src/core/defaults.dart';
 import 'package:fluvie/src/core/export.dart';
 import 'package:fluvie/src/rendering/audio_sandbox_staging.dart';
 import 'package:fluvie/src/rendering/capture/capture_shell.dart';
@@ -68,8 +69,8 @@ Future<RenderManifest> renderToSandbox({
   required FrameCaptureService capture,
   required SandboxMount pumpWidget,
   required SandboxFramePump pumpFrame,
-  int longEdge = 1920,
-  int fps = 30,
+  int longEdge = VideoDefaults.longEdge,
+  int fps = VideoDefaults.fps,
   String compositionKey = 'render',
   Export? export,
   int? posterFrame,

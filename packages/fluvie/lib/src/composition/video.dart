@@ -66,7 +66,7 @@ final class Video extends StatefulWidget {
     this.size,
     int width = 1080,
     int height = 1920,
-    this.fps = 30,
+    this.fps = VideoDefaults.fps,
     this.motionDefaults,
     this.transition,
     this.audio = const [],
