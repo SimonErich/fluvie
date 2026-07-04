@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:fluvie_server/src/api/config/duration_parsing.dart';
 import 'package:fluvie_server/src/api/config/s3_config.dart';
-import 'package:fluvie_server/src/config/env_trim.dart';
 import 'package:fluvie_server/src/api/ratelimit/rate_limit_config.dart';
+import 'package:fluvie_server/src/config/env_trim.dart';
 import 'package:meta/meta.dart';
 
 /// Which storage backend serves rendered files.

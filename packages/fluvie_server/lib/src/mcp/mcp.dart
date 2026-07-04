@@ -10,7 +10,7 @@ export 'fluvie_tools.dart';
 export 'http_transport.dart';
 export 'jsonrpc.dart';
 export 'mcp_server.dart';
+export 'mcp_server_config.dart';
 export 'mcp_tool.dart';
 export 'render_gateway.dart';
-export 'mcp_server_config.dart';
 export 'stdio_transport.dart';
