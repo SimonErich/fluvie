@@ -2,7 +2,7 @@
 // a remove-the-declaration quick-fix.
 // ignore_for_file: unused_local_variable
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 Widget build() {

@@ -3,7 +3,7 @@
 // so at progress 0.5 the painted length is about half the total. The multi-
 // series `Chart.line.series([...])` paints one colored polyline per series.
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/elements/chart/chart.dart';

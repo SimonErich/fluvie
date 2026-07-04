@@ -8,7 +8,7 @@
 // The float snippet spells out the default amplitude so the doc reads as a full
 // reference, which trips avoid_redundant_argument_values.
 // ignore_for_file: avoid_redundant_argument_values, experimental_member_use
-import 'package:flutter/widgets.dart' hide Animation, Image;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 /// A caption with a seeded confetti burst — the same field every render.

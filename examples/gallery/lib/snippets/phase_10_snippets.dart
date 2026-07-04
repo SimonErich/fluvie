@@ -3,7 +3,7 @@
 // a real API. Each `#docregion` flows into one fence via a
 // `<!-- code-excerpt -->` marker.
 
-import 'package:flutter/widgets.dart' hide Animation, Image;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 /// The two audio-track constructors, as a reference menu. `path` is an asset

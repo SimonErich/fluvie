@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animate_extension.dart';
 import 'package:fluvie/src/animation/animation.dart';

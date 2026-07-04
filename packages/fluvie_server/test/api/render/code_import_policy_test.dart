@@ -71,7 +71,7 @@ Video build() {
 
     test('allows the flutter UI framework a real composition needs', () {
       const code = '''
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter/widgets.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/animation.dart';

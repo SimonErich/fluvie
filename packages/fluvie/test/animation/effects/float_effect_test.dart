@@ -5,7 +5,7 @@
 // offset which stays continuous across the loop wrap.
 import 'dart:math' as math;
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animation.dart';
 import 'package:fluvie/src/animation/effect_kind.dart';

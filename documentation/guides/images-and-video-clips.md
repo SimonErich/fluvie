@@ -34,7 +34,7 @@ Flutter under a prefix:
 
 <!-- code-excerpt "examples/gallery/lib/lessons/05_images_and_clips.dart (imports-flutter)" -->
 ```dart
-import 'package:flutter/material.dart' hide Animation, Image;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 ```
 
 ## Four ways to name an image

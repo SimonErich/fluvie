@@ -6,7 +6,7 @@
 // wraps the result in a `SharedElement`. The painter exposes its resolved bar
 // rects so the geometry is asserted without a pixel readback.
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/composition/transition/shared_element.dart';
 import 'package:fluvie/src/core/anchor.dart';

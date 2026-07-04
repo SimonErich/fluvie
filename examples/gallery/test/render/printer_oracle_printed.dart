@@ -8,7 +8,7 @@
 // under --fatal-infos) without altering the asserted body text.
 //
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, avoid_redundant_argument_values
-import 'package:flutter/material.dart' hide Animation, Image;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 Video build() {

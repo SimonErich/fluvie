@@ -3,7 +3,7 @@
 // documentation never drifts from a real API. Each `#docregion` flows into one
 // fence via a `<!-- code-excerpt -->` marker.
 
-import 'package:flutter/widgets.dart' hide Animation, Image;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 const _title = TextStyle(color: Color(0xFFE6EDF3), fontSize: 64, fontWeight: FontWeight.bold);

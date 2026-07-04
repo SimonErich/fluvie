@@ -3,7 +3,7 @@
 // service, so the experimental-use warning is expected and silenced here.
 // ignore_for_file: experimental_member_use
 
-import 'package:flutter/material.dart' hide Animation, Image;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_example/lessons/lesson.dart';
 

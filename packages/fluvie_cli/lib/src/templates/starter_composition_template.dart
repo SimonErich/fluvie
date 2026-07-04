@@ -18,7 +18,7 @@ String starterCompositionSource({String functionName = 'starterVideo', String ke
 // Preview it:  flutter run
 // Render it:   fluvie render $key --out $key.mp4
 
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 /// Builds the starter composition: a 4 second square clip with a title that

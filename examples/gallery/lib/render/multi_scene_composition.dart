@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_example/render/composition_entry.dart';
 

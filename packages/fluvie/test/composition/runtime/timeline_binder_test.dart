@@ -4,7 +4,7 @@
 // placed at the resolved absolute start via Trigger.at; an unanchored child or an
 // anchor with no placement passes through unchanged.
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animate_extension.dart';
 import 'package:fluvie/src/animation/animation.dart';

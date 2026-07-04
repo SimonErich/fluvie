@@ -5,7 +5,7 @@
 // highlighted sides so the add / remove / change / slide branches unit-test
 // without a pixel readback.
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/composition/transition/shared_element.dart';
 import 'package:fluvie/src/core/anchor.dart';

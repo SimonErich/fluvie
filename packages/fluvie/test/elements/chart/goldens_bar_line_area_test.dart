@@ -8,7 +8,7 @@
 @Tags(['golden'])
 library;
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart' show Tags;
 import 'package:fluvie/src/core/stagger.dart';
 import 'package:fluvie/src/core/time.dart';

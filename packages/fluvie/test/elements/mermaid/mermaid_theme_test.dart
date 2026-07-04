@@ -4,7 +4,7 @@
 // compile unchanged; `context.fluvie.mermaid` resolves through the existing
 // scope; a `theme:` override differs from the token default by its cache key.
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/theme/build_context_tokens.dart';
 import 'package:fluvie/src/theme/fluvie_tokens.dart';

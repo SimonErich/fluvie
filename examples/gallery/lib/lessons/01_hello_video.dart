@@ -1,5 +1,5 @@
 // #docregion imports
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 // #enddocregion imports
 import 'package:fluvie_example/lessons/lesson.dart';

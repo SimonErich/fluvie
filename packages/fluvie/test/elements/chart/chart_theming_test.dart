@@ -3,7 +3,7 @@
 // palette paints the custom colors; with no scope it uses the fallback palette;
 // a per-series `color:` override wins over the palette slot.
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/elements/chart/bar_chart.dart';

@@ -8,7 +8,7 @@
 library;
 
 import 'package:alchemist/alchemist.dart';
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/composition/adaptive.dart';
 import 'package:fluvie/src/composition/runtime/aspect_scope.dart';

@@ -24,7 +24,7 @@ const String _preview = r'''
 // `Video` is driven by a frame index, not a wall clock, so this app owns a
 // `RenderController` and advances it from a `Ticker`. Drag the slider to scrub.
 
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 {{IMPORT}}
 

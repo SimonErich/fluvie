@@ -4,7 +4,7 @@
 // with the regions below.
 
 // #docregion imports
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 // #enddocregion imports
 

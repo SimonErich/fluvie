@@ -8,7 +8,7 @@
 // ignore_for_file: experimental_member_use
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart' hide Animation, Image;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 import 'package:intl/intl.dart' show NumberFormat;
 

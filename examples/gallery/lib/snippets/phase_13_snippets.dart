@@ -10,7 +10,7 @@
 // lints — fine for documentation samples.
 // ignore_for_file: experimental_member_use, avoid_redundant_argument_values
 // ignore_for_file: prefer_const_constructors
-import 'package:flutter/widgets.dart' hide Animation, Image;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 /// `Snapshot` rasterizes any Flutter subtree once, before frame 0, then paints

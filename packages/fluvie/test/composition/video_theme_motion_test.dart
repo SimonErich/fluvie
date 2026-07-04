@@ -5,7 +5,7 @@
 // derives its duration / ease from the theme — and an explicit
 // Video.motionDefaults always beats it (the precedence pin).
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animate_extension.dart';
 import 'package:fluvie/src/animation/animation.dart';

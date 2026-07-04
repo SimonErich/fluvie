@@ -6,7 +6,7 @@
 /// `examples/mobile_purrfect`.
 library;
 
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_mobile_encoder/fluvie_mobile_encoder.dart';
 

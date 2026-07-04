@@ -3,7 +3,7 @@
 // new forms compile here, so the migration target can never drift from the API.
 // Each `#docregion` flows into one fence via a `<!-- code-excerpt -->` marker.
 
-import 'package:flutter/widgets.dart' hide Animation, Image;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 const _line = TextStyle(color: Color(0xFFE6EDF3), fontSize: 40);

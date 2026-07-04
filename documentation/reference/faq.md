@@ -125,13 +125,14 @@ so Fluvie's versions win:
 
 <!-- code-excerpt "examples/gallery/lib/lessons/01_hello_video.dart (imports)" -->
 ```dart
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 ```
 
-`hide Animation` (add `Image`, `Tween`, or `Clip` if you use them) resolves the
-shadow. `src/` stays private, so you never import an internal path. The
-`no_src_import` lint enforces this.
+The four-name `hide` list resolves the shadow once; `fluvie init` writes it
+for you. If you need a hidden Flutter type, import it with a prefix
+(`import 'package:flutter/widgets.dart' as flutter;`). `src/` stays private,
+so you never import an internal path. The `no_src_import` lint enforces this.
 
 ## Where do I report a bug or a confusing API?
 

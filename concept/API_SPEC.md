@@ -10,7 +10,7 @@ A [Decision log](#decision-log) at the end records the design choices behind the
 ## Contents
 
 1. [Principles](#1-principles)
-2. [One import](#2-one-import)
+2. [Two deliberate imports](#2-two-deliberate-imports)
 3. [Quickstart](#3-quickstart)
 4. [`Time`](#4-time)
 5. [`Keyframe`](#5-keyframe)
@@ -56,22 +56,29 @@ A [Decision log](#decision-log) at the end records the design choices behind the
 
 ---
 
-## 2. One import
+## 2. Two deliberate imports
 
-A single barrel re-exports the Flutter widgets you need for a video plus Fluvie's own `Image` and `Animation`:
+One Fluvie barrel carries the whole authoring surface; Flutter you import yourself, since you use
+its widgets anyway. Fluvie deliberately reuses the familiar names **`Animation`**, **`Clip`**,
+**`Image`**, and **`Tween`**, so the Flutter import hides those four and Fluvie's versions win:
 
 ```dart
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 ```
 
-Because Fluvie deliberately reuses the familiar names **`Image`** and **`Animation`**, the barrel hides
-Flutter's versions and provides Fluvie's. You won't notice — video authors don't use Flutter's
-`Animation<T>`/`AnimationController` (Fluvie abstracts those) or its async `Image` (see §15). If you ever
-need a raw Flutter type, import it with a prefix:
+That prelude is the whole story — `fluvie init` writes it, every lesson uses it, and you never
+import a second Fluvie file to author (`src/` stays private). You won't miss the hidden names:
+video authors don't use Flutter's `Animation<T>`/`AnimationController` (Fluvie abstracts those)
+or its async `Image` (see §15). Note the hide list also costs you bare access to the `dart:ui`
+`Clip` enum (`clipBehavior: Clip.antiAlias`); for that, or any raw Flutter type, use a prefix:
 
 ```dart
-import 'package:flutter/widgets.dart' as flutter; // only if you need flutter.Animation<T> etc.
+import 'package:flutter/widgets.dart' as flutter; // flutter.Animation<T>, flutter.Clip.none, ...
 ```
+
+Render harnesses and encoder backends add the pipeline barrel, `package:fluvie/rendering.dart` —
+capture services, sandboxes, encoders. Compositions never need it.
 
 ---
 
@@ -2251,7 +2258,7 @@ The design choices behind the API:
 | 21 | `Keyframe` offset units               | Fraction of the element's own size                            |
 | 22 | Default ease                          | `Ease.smooth` (ease-in-out)                                   |
 | 23 | `Box` helper                          | Kept                                                          |
-| 24 | Imports                               | Single barrel `package:fluvie/fluvie.dart`                    |
+| 24 | Imports                               | Two deliberate imports: the Flutter prelude hiding the four shadowed names, plus the authoring barrel `package:fluvie/fluvie.dart`; pipeline machinery behind `package:fluvie/rendering.dart` |
 | 25 | Authoring as data                     | `VideoSpec` is a JSON mirror; `buildVideo` is pure; `fluvie_ai` and `fluvie_server`'s MCP emit specs |
 | 26 | Rendering backends                    | One deterministic capture loop + pluggable encoders: FFmpeg process, mobile hardware, web wasm |
 | 27 | Design tokens                         | `FluvieTokens` + `FluvieTokensScope` carry every token; `FluvieTheme` is brand-group sugar |

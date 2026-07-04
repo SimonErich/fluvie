@@ -511,7 +511,7 @@ dart pub global activate fluvie_cli
 Hide Flutter's own `Animation` so Fluvie's wins. (This is lesson 01, verbatim.)
 
 ```dart
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 Video lesson01Video() {

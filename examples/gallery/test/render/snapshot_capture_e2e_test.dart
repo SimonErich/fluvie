@@ -13,7 +13,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart' hide Animation, Image;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter/widgets.dart' as flutter;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';

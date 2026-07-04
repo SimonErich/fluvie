@@ -33,6 +33,12 @@ import 'package:fluvie/src/elements/runtime/element_shared.dart';
 /// consumes it at render); [shared] wraps the result in a `SharedElement` for a
 /// hero morph across a scene boundary. Transforms and effects come through
 /// `.animate()` only, like every element.
+///
+/// The name deliberately shadows the `dart:ui` `Clip` enum (the standard
+/// prelude hides it), so a bare `clipBehavior: Clip.antiAlias` does not
+/// resolve inside a video file. Reach the enum through a prefix when you need
+/// it: `import 'package:flutter/widgets.dart' as flutter;` then
+/// `flutter.Clip.antiAlias`.
 final class Clip extends StatelessWidget implements MediaCarrier {
   /// A bundled video addressed by its asset key [name]
   /// (for example `fixtures/clip_1s.mp4`).

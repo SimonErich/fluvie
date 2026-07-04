@@ -2,7 +2,7 @@
 // scale, so relative_outside_scope flags it. A scene defines its own scope.
 // ignore_for_file: unused_local_variable
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 Widget build() {

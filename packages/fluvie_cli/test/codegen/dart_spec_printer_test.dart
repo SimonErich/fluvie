@@ -36,7 +36,7 @@ Matcher containsCode(String fragment) => predicate<String>(
 
 void main() {
   const preamble =
-      "import 'package:flutter/material.dart' hide Animation, Image;\n"
+      "import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;\n"
       "import 'package:fluvie/fluvie.dart';\n"
       '\n'
       'Video build() {';

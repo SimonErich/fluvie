@@ -3,7 +3,7 @@
 // documentation never drifts from a real API. Each `#docregion` flows into one
 // fence via a `<!-- code-excerpt -->` marker.
 
-import 'package:flutter/widgets.dart' hide Animation, Image;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 /// A `FluvieTheme` brands a subtree from one palette, type scale, and motion

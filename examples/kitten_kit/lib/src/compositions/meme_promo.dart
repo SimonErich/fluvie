@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart' hide Animation, Image;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 import 'package:kitten_kit/src/assets/kitten_assets.dart';
 import 'package:kitten_kit/src/compositions/kitten_durations.dart';

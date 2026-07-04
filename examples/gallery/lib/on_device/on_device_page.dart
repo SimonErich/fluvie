@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_example/lessons/10_audio_and_captions.dart';
 import 'package:fluvie_mobile_encoder/fluvie_mobile_encoder.dart';

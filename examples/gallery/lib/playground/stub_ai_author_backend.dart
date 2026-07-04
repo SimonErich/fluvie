@@ -81,7 +81,7 @@ bool _has(String haystack, List<String> needles) => needles.any(haystack.contain
 /// gradient stops.
 String _videoSource({required String headline, required String top, required String bottom}) =>
     '''
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 Video build() {

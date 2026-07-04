@@ -9,7 +9,7 @@
 // for documentation samples (the real lessons keep the const-correct forms).
 // ignore_for_file: avoid_redundant_argument_values, prefer_const_constructors
 // ignore_for_file: prefer_const_literals_to_create_immutables
-import 'package:flutter/widgets.dart' hide Animation, Image;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 /// `Code` highlights a source string in a named highlight.js language.

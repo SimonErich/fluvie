@@ -48,7 +48,7 @@ A Fluvie video is real Flutter widget code. Two imports, then a `Video` of
 
 <!-- code-excerpt "examples/gallery/lib/starter/starter_video.dart (imports)" -->
 ```dart
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 ```
 

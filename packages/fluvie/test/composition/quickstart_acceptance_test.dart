@@ -9,7 +9,7 @@
 // they are the defaults — the tree stays verbatim.
 // ignore_for_file: avoid_redundant_argument_values
 import 'package:flutter/material.dart' show Colors;
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animate_extension.dart';
 import 'package:fluvie/src/animation/animation.dart';

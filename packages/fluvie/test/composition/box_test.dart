@@ -2,7 +2,7 @@
 // half the parent's width by 1% of its height; null expands. Absolute sizing
 // stays SizedBox per the §14 layout story.
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animate_extension.dart';
 import 'package:fluvie/src/animation/animation.dart';

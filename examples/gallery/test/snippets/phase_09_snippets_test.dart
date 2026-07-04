@@ -2,7 +2,7 @@
 // page pulls these via code-excerpt markers, so a failing build here means a
 // doc would ship dead code.
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_example/snippets/phase_09_snippets.dart';

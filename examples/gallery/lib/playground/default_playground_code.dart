@@ -4,7 +4,7 @@
 /// It mirrors lesson 01 so the first render always succeeds, giving newcomers a
 /// known-good starting point to edit.
 const defaultPlaygroundCode = '''
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 Video build() {

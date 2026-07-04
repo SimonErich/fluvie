@@ -3,7 +3,7 @@
 // *under* the advancing line). The multi-series `Chart.area.series([...])`
 // stacks one filled area per series.
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/elements/chart/area_chart.dart';

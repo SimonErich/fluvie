@@ -5,7 +5,7 @@
 // timeline positions (a probe debugTimeline shows the rows, warning-free), and
 // mounted in a Video the scene offset and total match the derived length.
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animate_extension.dart';
 import 'package:fluvie/src/animation/animation.dart';

@@ -113,7 +113,8 @@ final Map<String, Object?> printerOracleSpec = {
 
 /// The header the checked-in fixture carries before the printed body; the body
 /// asserted against the golden starts at the first printed line.
-const String _bodyStartsAt = "import 'package:flutter/material.dart' hide Animation, Image;";
+const String _bodyStartsAt =
+    "import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;";
 
 /// The printed `build()` body of printer_oracle_printed.dart, with its leading
 /// ignore/comment header stripped — i.e. exactly what the printer should emit.

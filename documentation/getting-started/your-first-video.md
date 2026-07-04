@@ -4,12 +4,12 @@ You describe what the video is. Fluvie computes when everything happens.
 Lesson 01 is the smallest complete example: one scene, one background, one
 animated title.
 
-Start with two imports. Fluvie's `Animation` replaces Flutter's, so hide the
-Flutter one:
+Start with two imports. Fluvie's `Animation`, `Clip`, `Image`, and `Tween`
+replace Flutter's, so hide those four:
 
 <!-- code-excerpt "examples/gallery/lib/lessons/01_hello_video.dart (imports)" -->
 ```dart
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 ```
 

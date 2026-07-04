@@ -31,7 +31,7 @@ part 'dart_spec_printer_literals.dart';
 String printVideoSpecJson(Map<String, Object?> spec) {
   final anchors = _Anchors()..collect(spec);
   final buffer = StringBuffer()
-    ..writeln("import 'package:flutter/material.dart' hide Animation, Image;")
+    ..writeln("import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;")
     ..writeln("import 'package:fluvie/fluvie.dart';")
     ..writeln()
     ..writeln('Video build() {');

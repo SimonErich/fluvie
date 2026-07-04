@@ -3,7 +3,7 @@
 // chart call sites compile unchanged; a custom `code:` is carried value-equal;
 // `context.fluvie.code` resolves it through the existing scope (no new scope).
 
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/theme/build_context_tokens.dart';
 import 'package:fluvie/src/theme/fluvie_tokens.dart';

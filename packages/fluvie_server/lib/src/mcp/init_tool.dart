@@ -53,7 +53,7 @@ Add the dependency:
 
 Write the composition (lib/videos/starter.dart):
 
-    import 'package:flutter/material.dart' hide Animation;
+    import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
     import 'package:fluvie/fluvie.dart';
 
     Video starterVideo() {

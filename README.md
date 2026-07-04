@@ -36,7 +36,7 @@ This is lesson 01, in full: about 16 lines of widgets become a 4 second clip.
 <td>
 
 ```dart
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 Video helloVideo() => Video(

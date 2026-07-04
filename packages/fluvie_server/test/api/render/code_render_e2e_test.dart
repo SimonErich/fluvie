@@ -18,7 +18,7 @@ import 'package:fluvie_server/src/api/render/render_request.dart';
 import 'package:test/test.dart';
 
 const _tinyVideo = '''
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 Video build() => Video(

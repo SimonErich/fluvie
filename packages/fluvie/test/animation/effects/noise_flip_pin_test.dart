@@ -7,7 +7,7 @@
 import 'dart:typed_data' show ByteData;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart' hide Animation;
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/animation/animation.dart';
 import 'package:fluvie/src/animation/effects/float_effect.dart';
