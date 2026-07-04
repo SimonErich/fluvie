@@ -29,6 +29,7 @@ already exists and what is coming.
 | (root) | [cookbook](cookbook.md) | shipped |
 | advanced/ | custom-animations · [timeline-orchestration](advanced/timeline-orchestration.md) · [frame-builder](advanced/frame-builder.md) · [shaders-and-effects](advanced/shaders-and-effects.md) · [templates](advanced/templates.md) · [multi-aspect](advanced/multi-aspect.md) · [theming](advanced/theming.md) · [performance](advanced/performance.md) | performance + frame-builder + shaders-and-effects + templates + multi-aspect + theming + timeline-orchestration shipped; custom-animations per page |
 | reference/ | [cheatsheet](reference/cheatsheet.md) | shipped, living |
+| reference/ | [rendering-surface](reference/rendering-surface.md) | shipped |
 | reference/ | [migration](reference/migration.md) · [faq](reference/faq.md) | shipped |
 | contributing/ | [overview](contributing/overview.md) · [testing](contributing/testing.md) · [coverage](contributing/coverage.md) | shipped |
 
