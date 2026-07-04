@@ -2,7 +2,7 @@ import 'package:fluvie_server/client.dart';
 import 'package:fluvie_server/src/mcp/mcp.dart';
 import 'package:test/test.dart';
 
-import 'fake_render_gateway.dart';
+import 'fakes/fake_render_gateway.dart';
 
 McpTool _tool(List<McpTool> tools, String name) => tools.firstWhere((t) => t.name == name);
 

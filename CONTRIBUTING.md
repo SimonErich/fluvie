@@ -31,6 +31,9 @@ render-integration tests.
 6. **Docs ship with features.** A new public API needs dartdoc; a new
    capability needs its page in `documentation/` (see the voice rules in
    [documentation/README.md](documentation/README.md)).
+7. **One home per fake.** A fake that package consumers use in their own tests
+   ships in `lib/src/fake/` and is exported from the barrel; a fake only this
+   repository's tests use lives in `test/**/fakes/` next to its suite.
 
 ## Where things live
 

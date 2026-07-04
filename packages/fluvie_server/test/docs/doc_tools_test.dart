@@ -5,7 +5,7 @@ import 'package:fluvie_server/src/docs/doc_tools.dart';
 import 'package:fluvie_server/src/mcp/mcp_tool.dart';
 import 'package:test/test.dart';
 
-import 'fake_doc_repository.dart';
+import 'fakes/fake_doc_repository.dart';
 
 void main() {
   late Map<String, McpTool> tools;

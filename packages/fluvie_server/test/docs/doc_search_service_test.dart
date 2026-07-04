@@ -1,7 +1,7 @@
 import 'package:fluvie_server/src/docs/doc_search_service.dart';
 import 'package:test/test.dart';
 
-import 'fake_doc_repository.dart';
+import 'fakes/fake_doc_repository.dart';
 
 void main() {
   late DocSearchService docs;

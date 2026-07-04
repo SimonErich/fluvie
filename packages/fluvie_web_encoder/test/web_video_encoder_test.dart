@@ -6,7 +6,7 @@ import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
 import 'package:fluvie_web_encoder/src/web_video_encoder.dart'
     show expandImagePattern, fileInputNames;
 
-import 'fake_wasm_runtime.dart';
+import 'fakes/fake_wasm_runtime.dart';
 
 void main() {
   RenderManifest manifest(List<String> args) => RenderManifest(

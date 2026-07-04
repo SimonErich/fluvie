@@ -7,7 +7,7 @@ import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
 import 'package:fluvie_web_encoder/src/png_frame_encoder.dart' show encodeFramePng;
 
-import 'fake_wasm_runtime.dart';
+import 'fakes/fake_wasm_runtime.dart';
 
 /// An identity frame "encoder": stores each frame's raw RGBA under its PNG name
 /// so a test can assert the bounded-memory per-frame files and their pixel bytes

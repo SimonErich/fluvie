@@ -8,7 +8,7 @@ import 'package:fluvie_server/src/mcp/mcp_server.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 
-import '../docs/fake_doc_repository.dart';
+import '../docs/fakes/fake_doc_repository.dart';
 import '../support/test_deps.dart';
 
 void main() {

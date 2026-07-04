@@ -13,9 +13,9 @@ import 'package:fluvie_server/src/api/validate/code_validation_service.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 
-import '../../ratelimit/fake_rate_limiter.dart';
+import '../../ratelimit/fakes/fake_rate_limiter.dart';
 import '../../render/fakes/fake_render_runner.dart';
-import '../../validate/fake_code_validation_service.dart';
+import '../../validate/fakes/fake_code_validation_service.dart';
 
 const _goodCode = '''
 import 'package:fluvie/fluvie.dart';

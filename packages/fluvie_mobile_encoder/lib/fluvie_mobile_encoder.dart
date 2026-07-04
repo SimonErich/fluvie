@@ -12,7 +12,7 @@
 library;
 
 export 'src/capture_host.dart';
-export 'src/fake_mobile_video_encoder.dart';
+export 'src/fake/fake_mobile_video_encoder.dart';
 export 'src/fluvie_mobile_encoder_exception.dart';
 export 'src/method_channel_mobile_video_encoder.dart';
 export 'src/mobile_audio_materializer.dart';

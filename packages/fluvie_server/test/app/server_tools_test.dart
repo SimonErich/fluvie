@@ -4,8 +4,8 @@ import 'package:fluvie_server/src/docs/doc_search_service.dart';
 import 'package:fluvie_server/src/mcp/mcp_tool.dart';
 import 'package:test/test.dart';
 
-import '../docs/fake_doc_repository.dart';
-import '../mcp/fake_render_gateway.dart';
+import '../docs/fakes/fake_doc_repository.dart';
+import '../mcp/fakes/fake_render_gateway.dart';
 
 void main() {
   late DocSearchService docs;

@@ -6,7 +6,7 @@ import 'package:fluvie_server/src/api/validate/code_validation_result.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 
-import 'fake_code_validation_service.dart';
+import 'fakes/fake_code_validation_service.dart';
 
 void main() {
   Request post(Object? body) => Request(
