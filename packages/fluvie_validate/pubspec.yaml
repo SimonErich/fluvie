@@ -21,8 +21,8 @@ dependencies:
   # DartLintRule.testRun, which is @visibleForTesting, so a patch bump could
   # still move it — the rule-fires test guards against silent drift.
   custom_lint_builder: ^0.8.1
-  fluvie: ^0.1.0
-  fluvie_lints: ^0.1.0
+  fluvie: ^0.1.10
+  fluvie_lints: ^0.1.10
 dev_dependencies:
   coverage: ^1.15.1
   test: ^1.31.0

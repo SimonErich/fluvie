@@ -41,10 +41,17 @@ stamp_changelog() {
   ' "$changelog" > "$changelog.tmp" && mv "$changelog.tmp" "$changelog"
 }
 
+# Every in-repo package name, as an alternation for the constraint rewrite.
+packages_alt="$(for d in packages/*/; do basename "$d"; done | paste -sd'|')"
+
 changed=()
 for pubspec in packages/*/pubspec.yaml; do
   grep -qE '^version:' "$pubspec" || continue # the workspace root has no version
   sed -i -E "s/^version:.*/version: ${version}/" "$pubspec"
+  # Inter-package constraints track the release version so publish.yml's
+  # `needs:` ordering can guarantee each dependent resolves against the version
+  # published in the same run. Path deps (dev_dependencies) don't match.
+  sed -i -E "s/^(  (${packages_alt}): )\^?[0-9][0-9A-Za-z.+-]*$/\1^${version}/" "$pubspec"
   stamp_changelog "$(dirname "$pubspec")/CHANGELOG.md"
   changed+=("$(basename "$(dirname "$pubspec")")")
 done

@@ -20,8 +20,8 @@ resolution: workspace
 # web-safe; `http` and `meta` are shared by the client and the server.
 dependencies:
   crypto: ^3.0.7
-  fluvie_cli: ^0.1.0
-  fluvie_validate: ^0.1.0
+  fluvie_cli: ^0.1.10
+  fluvie_validate: ^0.1.10
   http: ^1.5.0
   meta: ^1.16.0
   minio: ^3.5.8

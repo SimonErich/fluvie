@@ -16,10 +16,10 @@ environment:
 resolution: workspace
 
 dependencies:
-  ai_abstracted: ^0.1.0
+  ai_abstracted: ^0.1.10
   flutter:
     sdk: flutter
-  fluvie: ^0.1.0
+  fluvie: ^0.1.10
   http: ^1.5.0
   meta: ^1.16.0
   riverpod: ^3.3.2
