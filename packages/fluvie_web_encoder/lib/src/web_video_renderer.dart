@@ -28,7 +28,7 @@ typedef WebCaptureHostFactory = WebCaptureHost Function(Size size);
 /// [onWarning]. Every dependency is injected so the orchestration is
 /// unit-testable: tests pass a tester-backed [WebCaptureHost], a [WebVideoEncoder]
 /// over a fake runtime, and a fake [WebAudioMaterializer].
-final class WebVideoRenderer {
+final class WebVideoRenderer implements VideoRenderer<Uint8List> {
   /// Creates a renderer; the defaults target a real browser.
   WebVideoRenderer({
     WebVideoEncoder? encoder,
@@ -94,6 +94,7 @@ final class WebVideoRenderer {
   ///
   /// Throws an [ArgumentError] for a non-positive [duration] or [fps], and a
   /// `FluvieEncodeException` when ffmpeg.wasm fails.
+  @override
   Future<Uint8List> render({
     required Widget composition,
     required Aspect aspect,

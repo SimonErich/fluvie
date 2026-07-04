@@ -1659,7 +1659,16 @@ Video(poster: 1.seconds);                       // thumbnail frame
 
 ### Rendering entry points
 
-Three free functions drive offline video capture. All return manifests encoding the ffmpeg arguments to materialize the output; the CLI wires them through an `FfmpegProvider` for encoding. A capture failure surfaces as a `FluvieRenderException`; an encode failure as a `FluvieEncodeException`.
+One contract fronts the platform renderers: `VideoRenderer<T>` (on `package:fluvie/rendering.dart`)
+with `render({composition, aspect, duration, fps, longEdge, audio, warnOnDroppedAudio, ...}) → T`.
+Its three symmetric arms are `DesktopVideoRenderer` (local FFmpeg → `File`), `OnDeviceVideoRenderer`
+(`fluvie_mobile_encoder`, hardware encoder → `File`), and `WebVideoRenderer` (`fluvie_web_encoder`,
+ffmpeg.wasm → bytes). All three run the same deterministic capture loop; only the encode edge differs.
+
+Underneath, three free functions drive offline capture — the primitives the renderers (and the CLI)
+share. All return manifests encoding the ffmpeg arguments to materialize the output; an
+`FfmpegRunner` executes them. A capture failure surfaces as a `FluvieRenderException`; an encode
+failure as a `FluvieEncodeException`.
 
 #### `render(...)` — multi-aspect canonical
 

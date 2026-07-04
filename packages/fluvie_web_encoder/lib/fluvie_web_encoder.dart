@@ -13,6 +13,9 @@
 /// render via the API stay free of the wasm payload. `src/` stays private.
 library;
 
+export 'package:fluvie/rendering.dart'
+    show NetworkAllowlist, RenderPhase, RenderProgress, RenderProgressCallback, VideoRenderer;
+
 export 'src/clip_decoder.dart' show createWebClipDecoder;
 export 'src/download.dart' show downloadBytes;
 export 'src/fluvie_web_stage.dart' show FluvieWebStage;

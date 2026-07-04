@@ -63,11 +63,19 @@ void main() {
       expect(FrameCache.defaultRoot, isNotNull);
     });
 
+    test('the VideoRenderer contract and its desktop arm are reachable', () {
+      const VideoRenderer<Object?>? contract = null;
+      expect(contract, isNull);
+      expect(DesktopVideoRenderer, isNotNull);
+    });
+
     test('the ffmpeg runner seam is reachable', () {
       // The registry-selected runner is what RenderService.render requires; the
       // contract and its provider must live on this barrel.
       const FfmpegRunner? runner = null;
+      const FfmpegVersion? version = null;
       expect(runner, isNull);
+      expect(version, isNull, reason: 'probeVersion returns it, so implementers need the type');
       expect(ffmpegRunnerProvider, isNotNull);
       expect(FfmpegRunnerRegistry, isNotNull);
       expect(WasmRuntime, isNotNull);

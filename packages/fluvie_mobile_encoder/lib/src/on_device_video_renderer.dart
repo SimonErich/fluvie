@@ -36,7 +36,7 @@ typedef SandboxFactory = Future<Directory> Function();
 /// opt-in: pass `audio: true` to [render] to decode, mix, and mux a `Video`'s
 /// declared `Audio` tracks; by default a `Video` with audio renders silent and
 /// (unless silenced) [render] warns through [onWarning].
-final class OnDeviceVideoRenderer {
+final class OnDeviceVideoRenderer implements VideoRenderer<File> {
   /// Creates a renderer over its seams; the defaults target a real device.
   ///
   /// [mediaResolver] resolves a composition's `Image`/`Clip` sources; when left
@@ -96,6 +96,7 @@ final class OnDeviceVideoRenderer {
   ///
   /// Throws an [ArgumentError] for a non-positive [duration] or [fps], and a
   /// `FluvieMobileEncoderException` when the device encoder fails.
+  @override
   Future<File> render({
     required Widget composition,
     required Aspect aspect,

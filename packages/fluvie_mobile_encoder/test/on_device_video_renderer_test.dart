@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
-import 'package:fluvie/rendering.dart';
 import 'package:fluvie_mobile_encoder/fluvie_mobile_encoder.dart';
 
 /// A [CaptureHost] backed by the widget tester: it sizes the test view to the

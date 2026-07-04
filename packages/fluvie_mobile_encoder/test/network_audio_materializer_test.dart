@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
-import 'package:fluvie/rendering.dart';
 import 'package:fluvie_mobile_encoder/fluvie_mobile_encoder.dart';
 
 class _RecordingDelegate implements MobileAudioMaterializer {

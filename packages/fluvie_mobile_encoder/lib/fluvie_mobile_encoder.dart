@@ -11,6 +11,9 @@
 /// frames never leave the device. `src/` stays private.
 library;
 
+export 'package:fluvie/rendering.dart'
+    show NetworkAllowlist, RenderPhase, RenderProgress, RenderProgressCallback, VideoRenderer;
+
 export 'src/capture_host.dart';
 export 'src/fake/fake_mobile_video_encoder.dart';
 export 'src/fluvie_mobile_encoder_exception.dart';

@@ -15,9 +15,11 @@ List<McpTool> buildFluvieTools(RenderGateway gateway) => [
     name: 'generate_video',
     description:
         'Author a Fluvie video from a natural-language prompt and render it. '
-        'Returns a download URL. This authors a JSON VideoSpec; if the user asks '
-        'for real Flutter/Dart widget code or to start a project, use init_project '
-        'instead.',
+        'Returns a download URL. Use this only when a prompt is all you have: '
+        'it authors a JSON VideoSpec first. If you already hold a VideoSpec, '
+        'use render_video; if the project registers the composition by key, '
+        'use render_composition; if the user asks for real Flutter/Dart widget '
+        'code or to start a project, use init_project instead.',
     inputSchema: const {
       'type': 'object',
       'properties': {
@@ -90,7 +92,10 @@ List<McpTool> buildFluvieTools(RenderGateway gateway) => [
   ),
   McpTool(
     name: 'render_video',
-    description: 'Render a Fluvie VideoSpec (JSON) to a video. Returns a download URL.',
+    description:
+        'Render a Fluvie VideoSpec (JSON) you already hold to a video. Returns '
+        'a download URL. No model runs: the spec renders as-is. From a prompt '
+        'use generate_video; from a registered key use render_composition.',
     inputSchema: const {
       'type': 'object',
       'properties': {
@@ -117,7 +122,8 @@ List<McpTool> buildFluvieTools(RenderGateway gateway) => [
     name: 'render_composition',
     description:
         'Render a composition registered in the render project by its key '
-        '(for example "demo" or a lesson key). Returns a download URL.',
+        '(for example "demo" or a lesson key). Returns a download URL. For a '
+        'JSON VideoSpec use render_video; from a prompt use generate_video.',
     inputSchema: const {
       'type': 'object',
       'properties': {

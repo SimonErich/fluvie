@@ -19,6 +19,7 @@ declarative; the pipeline machinery lives here.
 
 | Group | Surface |
 | --- | --- |
+| Renderers | `VideoRenderer<T>` (the contract), `DesktopVideoRenderer` (local FFmpeg; mobile and web arms live in their encoder packages) |
 | Entry points | `render`, `renderToSandbox`, `renderTemplate`, `RenderService`, `RenderConfig` |
 | Host seams | `ShellMount`, `ShellFramePump`, `SandboxMount`, `SandboxFramePump`, `FrameEncoder` |
 | Capture | `FrameCaptureService`, `RepaintBoundaryCaptureService`, `RawFrame`, `RenderManifest`, `FrameCache` |

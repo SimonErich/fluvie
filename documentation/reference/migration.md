@@ -20,6 +20,12 @@ change below is mechanical.
 The authoring surface (`Video`, `Scene`, elements, `Animation`, `Trigger`,
 themes, specs, the preview runtime) stays on `package:fluvie/fluvie.dart`.
 
+New in 0.2.0, not a rename: the `VideoRenderer<T>` contract unifies the render
+entry points. `DesktopVideoRenderer` (local FFmpeg, returns a `File`),
+`OnDeviceVideoRenderer` (mobile hardware encoder, returns a `File`), and
+`WebVideoRenderer` (ffmpeg.wasm, returns bytes) all implement it, so the same
+call shape renders on every platform.
+
 Most renames are mechanical. Here is the most common one, an animated text line,
 before and after:
 
