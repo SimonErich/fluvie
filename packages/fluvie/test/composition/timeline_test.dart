@@ -14,6 +14,7 @@ import 'package:fluvie/src/core/defaults.dart';
 import 'package:fluvie/src/core/ease.dart';
 import 'package:fluvie/src/core/keyframe.dart';
 import 'package:fluvie/src/core/time.dart';
+import 'package:fluvie/src/timing/time_scope_data.dart';
 import 'package:fluvie/src/core/time_extensions.dart';
 import 'package:fluvie/src/core/trigger.dart';
 
@@ -23,7 +24,13 @@ Animation _enter(int frames) =>
 
 /// The placement for [target] in [timeline]'s plan.
 TimelinePlacement _placementFor(Timeline timeline, Anchor target) =>
-    timeline.placements.firstWhere((p) => identical(p.target, target));
+    timeline.placementsAt(30).firstWhere((p) => identical(p.target, target));
+
+/// The schedule duration resolved at 30 fps (the scope-computed [Time] has no
+/// eager value; the timeline resolves at the consuming video's fps).
+int _durationFrames(Timeline timeline) => timeline.duration.resolveFrames(
+  const TimeScopeData(fps: 30, startFrame: 0, durationFrames: 0),
+);
 
 void main() {
   group('Timeline is a TimelineSchedule', () {
@@ -32,7 +39,7 @@ void main() {
     });
 
     test('an empty timeline has zero duration', () {
-      expect(Timeline().duration, Time.zero);
+      expect(_durationFrames(Timeline()), 0);
     });
   });
 
@@ -40,7 +47,7 @@ void main() {
     test('a single play sets duration to the animation length', () {
       final title = Anchor('title');
       final tl = Timeline()..play(title, _enter(20));
-      expect(tl.duration, const Time.frames(20));
+      expect(_durationFrames(tl), 20);
       expect(_placementFor(tl, title).startFrame, 0);
     });
 
@@ -52,14 +59,14 @@ void main() {
         ..play(b, _enter(10));
       expect(_placementFor(tl, a).startFrame, 0);
       expect(_placementFor(tl, b).startFrame, 20);
-      expect(tl.duration, const Time.frames(30));
+      expect(_durationFrames(tl), 30);
     });
 
     test('a play with no explicit duration uses the Defaults duration', () {
       final a = Anchor('a');
       final tl = Timeline(defaults: const Defaults(duration: Time.frames(15)))
         ..play(a, Animation.fadeIn());
-      expect(tl.duration, const Time.frames(15));
+      expect(_durationFrames(tl), 15);
     });
   });
 
@@ -70,7 +77,7 @@ void main() {
         ..wait(const Time.frames(12))
         ..play(a, _enter(10));
       expect(_placementFor(tl, a).startFrame, 12);
-      expect(tl.duration, const Time.frames(22));
+      expect(_durationFrames(tl), 22);
     });
   });
 
@@ -79,7 +86,7 @@ void main() {
       final a = Anchor('a');
       final tl = Timeline()..play(a, _enter(10), at: const Trigger.at(Time.frames(40)));
       expect(_placementFor(tl, a).startFrame, 40);
-      expect(tl.duration, const Time.frames(50));
+      expect(_durationFrames(tl), 50);
     });
 
     test('Trigger.whenEnds chains after the named anchor ends', () {
@@ -185,7 +192,7 @@ void main() {
       final two = Anchor('2');
       final tl = Timeline()..playAll([one, two], _enter(10), stagger: const Time.frames(4));
       // last target starts at 4, lasts 10 -> ends at 14.
-      expect(tl.duration, const Time.frames(14));
+      expect(_durationFrames(tl), 14);
       // playhead advances to the union end so the next play follows it.
       final after = Anchor('after');
       tl.play(after, _enter(5));
@@ -226,7 +233,7 @@ void main() {
       final a = Anchor('a');
       final anim = _enter(10);
       final tl = Timeline()..play(a, anim, at: const Trigger.at(Time.frames(7)));
-      final placement = tl.placements.single;
+      final placement = tl.placementsAt(30).single;
       expect(identical(placement.target, a), isTrue);
       expect(identical(placement.animation, anim), isTrue);
       expect(placement.start, const Time.frames(7));

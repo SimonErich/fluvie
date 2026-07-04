@@ -16,6 +16,7 @@ import 'package:fluvie/src/core/ease.dart';
 import 'package:fluvie/src/core/keyframe.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/core/trigger.dart';
+import 'package:fluvie/src/timing/time_scope_data.dart';
 
 Animation _enter(int frames) =>
     Animation.from(const Keyframe(opacity: 0), duration: Time.frames(frames), ease: Ease.linear);
@@ -23,6 +24,13 @@ Animation _enter(int frames) =>
 /// The single MotionTarget wrapping the widget anchored to [anchor] in [bound].
 MotionTarget _targetFor(List<Widget> bound, Anchor anchor) =>
     bound.whereType<MotionTarget>().firstWhere((t) => identical(t.anchor, anchor));
+
+/// The bound animation's placement start, resolved at 30 fps: the binder
+/// positions each placement with a scope-computed `Trigger.at`.
+int _startFrameOf(Animation animation) {
+  final trigger = animation.at as AbsoluteTrigger;
+  return trigger.time.resolveFrames(const TimeScopeData(fps: 30, startFrame: 0, durationFrames: 0));
+}
 
 void main() {
   group('bindTimeline', () {
@@ -36,7 +44,7 @@ void main() {
       final target = _targetFor(bound, title);
       expect(target.child, same(child));
       expect(target.animations, hasLength(1));
-      expect(target.animations.single.at, const Trigger.at(Time.frames(10)));
+      expect(_startFrameOf(target.animations.single), 10);
     });
 
     test('preserves the original effect, phase, and timing of the placed animation', () {
@@ -62,8 +70,8 @@ void main() {
         const Text('A', textDirection: TextDirection.ltr).animate(const [], anchor: a),
         const Text('B', textDirection: TextDirection.ltr).animate(const [], anchor: b),
       ]);
-      expect(_targetFor(bound, a).animations.single.at, const Trigger.at(Time.zero));
-      expect(_targetFor(bound, b).animations.single.at, const Trigger.at(Time.frames(20)));
+      expect(_startFrameOf(_targetFor(bound, a).animations.single), 0);
+      expect(_startFrameOf(_targetFor(bound, b).animations.single), 20);
     });
 
     test('a playAll stagger places each bullet at its own start', () {
@@ -74,8 +82,8 @@ void main() {
         const Text('1', textDirection: TextDirection.ltr).animate(const [], anchor: one),
         const Text('2', textDirection: TextDirection.ltr).animate(const [], anchor: two),
       ]);
-      expect(_targetFor(bound, one).animations.single.at, const Trigger.at(Time.zero));
-      expect(_targetFor(bound, two).animations.single.at, const Trigger.at(Time.frames(4)));
+      expect(_startFrameOf(_targetFor(bound, one).animations.single), 0);
+      expect(_startFrameOf(_targetFor(bound, two).animations.single), 4);
     });
 
     test('an unanchored child passes through untouched', () {

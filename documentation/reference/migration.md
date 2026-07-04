@@ -24,6 +24,7 @@ change below is mechanical.
 | `Animation.maskWipe(...)` | `Animation.maskWipeIn(...)`; a new `maskWipeOut` mirrors it |
 | `Animation.spin(per:)` (and the spec arg `"per"`) | `Animation.spin(period:)` / `"period"` |
 | `Animation.float(frequency: 0.4)` (cycles per second) | `Animation.float(period: 2.5.seconds)` (one bob per period) |
+| `Timeline(fps: 30)` | `Timeline()` — the timeline resolves at the enclosing `Video`'s fps, so a 60 fps video can no longer silently mistime a schedule; `timeline.placements` becomes `placementsAt(fps)` |
 
 New preset mirrors in 0.2.0: `scaleOut`, `glitchOut`, `slideFadeOut`, and
 `maskWipeOut` complete every directional pair, so guessing the `*Out` twin of

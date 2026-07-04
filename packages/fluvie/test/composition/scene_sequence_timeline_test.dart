@@ -18,6 +18,7 @@ import 'package:fluvie/src/core/ease.dart';
 import 'package:fluvie/src/core/keyframe.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/core/time_extensions.dart';
+import 'package:fluvie/src/timing/time_scope_data.dart';
 import 'package:fluvie/src/core/trigger.dart';
 import 'package:fluvie/src/rendering/runtime/render_controller.dart';
 import 'package:fluvie/src/rendering/runtime/render_controller_scope.dart';
@@ -76,7 +77,12 @@ void main() {
         children: sequenced.children,
       );
       // title 0..20, subtitle 20..35, wait -> 44, bullets 44 & 48, last ends 58.
-      expect(scene.duration, const Time.frames(58));
+      expect(
+        scene.duration.resolveFrames(
+          const TimeScopeData(fps: 30, startFrame: 0, durationFrames: 0),
+        ),
+        58,
+      );
     });
 
     testWidgets('mounted in a Video the offset and total match the derived length', (tester) async {

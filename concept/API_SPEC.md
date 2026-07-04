@@ -383,6 +383,9 @@ final tl = Timeline(defaults: const Defaults(duration: Time.seconds(0.5)))
 Scene.sequence(timeline: tl, children: [...]);   // duration DERIVED from tl (see §12)
 ```
 
+The timeline has no fps of its own — every recorded `Time` resolves at the enclosing `Video`'s
+frame rate, so a seconds-based schedule places identically at 30 or 60 fps.
+
 ---
 
 ## 9. Easing & springs

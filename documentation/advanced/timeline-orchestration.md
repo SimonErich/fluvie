@@ -56,8 +56,9 @@ Scene sequencedScene(Timeline timeline) => Scene.sequence(
 );
 ```
 
-Build the timeline at the same fps as its `Video`, because every `Time` in it
-resolves against that frame rate.
+The timeline has no clock of its own: every `Time` in it resolves at the
+enclosing `Video`'s fps, so the same timeline places identically at 30 or
+60 fps.
 
 ## Where to next
 

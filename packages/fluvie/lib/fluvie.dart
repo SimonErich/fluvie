@@ -65,7 +65,7 @@ export 'src/core/repeat.dart';
 export 'src/core/snapshot/snapshot_viewport.dart' show SnapshotViewport;
 export 'src/core/stagger.dart';
 export 'src/core/stagger_origin.dart';
-export 'src/core/time.dart';
+export 'src/core/time.dart' hide ComputedTime;
 export 'src/core/time_extensions.dart';
 export 'src/core/time_range.dart';
 export 'src/core/time_scope.dart';
