@@ -1,10 +1,8 @@
 part of 'on_device_video_renderer.dart';
 
-/// Resolves a composition's audio into materialized [MobileAudioTrack]s.
-///
-/// A non-`Video` or audio-less composition yields no tracks. With audio present
-/// but [encode] `false`, it warns once (when [warn]) and yields no tracks;
-/// otherwise it materializes every track's source through [materializer].
+/// Resolves a composition's audio into materialized [MobileAudioTrack]s —
+/// the shared opt-in gate ([gateOptInAudio]) with the on-device label, then
+/// each surviving track's source materialized through [materializer].
 Future<({List<MobileAudioTrack> tracks, double masterVolume})> _resolveAudioTracks(
   Widget composition, {
   required bool encode,
@@ -13,19 +11,16 @@ Future<({List<MobileAudioTrack> tracks, double masterVolume})> _resolveAudioTrac
   required int frameCount,
   required MobileAudioMaterializer materializer,
 }) async {
-  if (composition is! Video) return (tracks: const <MobileAudioTrack>[], masterVolume: 1.0);
-  final mix = resolveAudioMix(video: composition, fps: fps, totalFrames: frameCount);
-  if (mix.isEmpty) return (tracks: const <MobileAudioTrack>[], masterVolume: 1.0);
-  if (!encode) {
-    if (warn) {
-      OnDeviceVideoRenderer.onWarning(
-        'This Video declares ${mix.tracks.length} audio track(s), but on-device '
-        'audio is off, so the MP4 will be silent. Pass audio: true to encode it, '
-        'or warnOnDroppedAudio: false to silence this warning.',
-      );
-    }
-    return (tracks: const <MobileAudioTrack>[], masterVolume: 1.0);
-  }
+  final mix = gateOptInAudio(
+    composition: composition,
+    encode: encode,
+    warn: warn,
+    fps: fps,
+    frameCount: frameCount,
+    warnSink: OnDeviceVideoRenderer.onWarning,
+    platformLabel: 'on-device',
+  );
+  if (mix == null) return (tracks: const <MobileAudioTrack>[], masterVolume: 1.0);
   return (
     tracks: [
       for (final track in mix.tracks)

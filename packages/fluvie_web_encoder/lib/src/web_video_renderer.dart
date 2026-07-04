@@ -175,11 +175,8 @@ final class WebVideoRenderer implements VideoRenderer<Uint8List> {
     }
   }
 
-  /// Resolves [composition]'s audio into resolved tracks to stage, or none.
-  ///
-  /// A non-`Video` or audio-less composition yields no tracks. With audio present
-  /// but [encode] `false`, it warns once (when [warn]) and yields none; a non-MP4
-  /// [export] cannot carry audio, so it warns and yields none too.
+  /// Resolves [composition]'s audio into resolved tracks to stage, or none —
+  /// the shared opt-in gate ([gateOptInAudio]) with the in-browser label.
   ({List<ResolvedAudioTrack> tracks, double masterVolume}) _audioFor(
     Widget composition, {
     required bool encode,
@@ -188,29 +185,17 @@ final class WebVideoRenderer implements VideoRenderer<Uint8List> {
     required int fps,
     required int frameCount,
   }) {
-    const none = (tracks: <ResolvedAudioTrack>[], masterVolume: 1.0);
-    if (composition is! Video) return none;
-    final mix = resolveAudioMix(video: composition, fps: fps, totalFrames: frameCount);
-    if (mix.isEmpty) return none;
-    if (!encode) {
-      if (warn) {
-        onWarning(
-          'This Video declares ${mix.tracks.length} audio track(s), but in-browser '
-          'audio is off, so the MP4 will be silent. Pass audio: true to encode it, '
-          'or warnOnDroppedAudio: false to silence this warning.',
-        );
-      }
-      return none;
-    }
-    if (export != null && export.mode != ExportMode.mp4) {
-      if (warn) {
-        onWarning(
-          'Audio is only muxed into MP4 renders; this ${export.mode.name} export '
-          'drops the ${mix.tracks.length} declared audio track(s).',
-        );
-      }
-      return none;
-    }
+    final mix = gateOptInAudio(
+      composition: composition,
+      encode: encode,
+      warn: warn,
+      export: export,
+      fps: fps,
+      frameCount: frameCount,
+      warnSink: onWarning,
+      platformLabel: 'in-browser',
+    );
+    if (mix == null) return (tracks: const <ResolvedAudioTrack>[], masterVolume: 1.0);
     return (tracks: mix.tracks, masterVolume: mix.masterVolume);
   }
 

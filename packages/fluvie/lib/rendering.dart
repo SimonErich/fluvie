@@ -29,6 +29,7 @@ export 'src/media/net/network_allowlist.dart' show NetworkAllowlist;
 export 'src/media/render_resolver_scope.dart' show ResolverScope, resolverScope;
 export 'src/media/web_clip_decoder.dart' show WebClipDecoder;
 export 'src/rendering/audio_mix_resolution.dart' show resolveAudioMix;
+export 'src/rendering/audio_opt_in_gate.dart' show gateOptInAudio;
 export 'src/rendering/audio_sandbox_staging.dart' show AudioByteLoader, stageResolvedAudioToSandbox;
 export 'src/rendering/capture/frame_capture_service.dart';
 export 'src/rendering/capture/raw_frame.dart';

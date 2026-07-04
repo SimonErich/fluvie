@@ -8,7 +8,7 @@ import 'package:fluvie/src/core/defaults.dart';
 import 'package:fluvie/src/core/render_phase.dart';
 import 'package:fluvie/src/media/net/network_allowlist.dart';
 import 'package:fluvie/src/media/render_resolver_scope.dart';
-import 'package:fluvie/src/rendering/audio_mix_resolution.dart';
+import 'package:fluvie/src/rendering/audio_opt_in_gate.dart';
 import 'package:fluvie/src/rendering/capture/repaint_boundary_capture_service.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/platform/process_ffmpeg_runner.dart';
@@ -137,15 +137,17 @@ final class DesktopVideoRenderer implements VideoRenderer<File> {
     }
   }
 
-  /// Warns once when [composition] declares audio that `audio: false` drops.
+  /// Warns once when [composition] declares audio that `audio: false` drops —
+  /// the shared opt-in gate ([gateOptInAudio]) in its warn-only role.
   void _warnIfDroppingAudio(Widget composition, bool warn, int fps, int frameCount) {
-    if (!warn || composition is! Video) return;
-    final mix = resolveAudioMix(video: composition, fps: fps, totalFrames: frameCount);
-    if (mix.isEmpty) return;
-    onWarning(
-      'This Video declares ${mix.tracks.length} audio track(s), but audio is '
-      'off, so the MP4 will be silent. Leave audio: true to encode it, or pass '
-      'warnOnDroppedAudio: false to silence this warning.',
+    gateOptInAudio(
+      composition: composition,
+      encode: false,
+      warn: warn,
+      fps: fps,
+      frameCount: frameCount,
+      warnSink: onWarning,
+      platformLabel: 'local',
     );
   }
 
