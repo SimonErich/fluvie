@@ -3,9 +3,7 @@ import 'package:ai_abstracted/src/core/generation_result.dart';
 import 'package:ai_abstracted/src/core/requests/video_request.dart';
 
 /// The capability of turning a [VideoRequest] into video bytes.
-// One member by design: the contract is the *type*, injected where a bare
-// function could not be.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the contract is the type: injectable where a bare function isn't.
 abstract interface class VideoGenerator {
   /// Generates a video for [request].
   ///

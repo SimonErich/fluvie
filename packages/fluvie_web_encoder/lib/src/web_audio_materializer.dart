@@ -10,8 +10,7 @@ import 'package:http/http.dart' as http;
 /// encoder writes those bytes into its in-memory sandbox, so a materializer just
 /// returns them. The default [BundleWebAudioMaterializer] reads bundled assets
 /// and fetches allowlisted network audio; tests inject a fake.
-// A single-method seam by design: it stays mockable behind its provider.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the seam stays mockable behind its provider.
 abstract interface class WebAudioMaterializer {
   /// Resolves [source] to its bytes, fetching it if needed.
   Future<Uint8List> materialize(String source);

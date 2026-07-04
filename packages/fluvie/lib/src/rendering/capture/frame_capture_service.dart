@@ -10,9 +10,7 @@ import 'package:riverpod/riverpod.dart';
 /// never advance time, never await anything frame-dependent, and capture the
 /// same pixels for an identical pumped tree, which is what the frame cache and
 /// the golden harness rely on.
-// A single-method contract is the point: the capture seam stays mockable
-// behind its provider (new-service house pattern, as with BeatGrid).
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the capture seam is mockable behind its provider (new-service).
 abstract interface class FrameCaptureService {
   /// Reads the current pixels of the boundary under [boundaryKey] at exactly
   /// [width]x[height], tagged with [frameIndex].

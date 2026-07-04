@@ -15,9 +15,7 @@ import 'package:fluvie/src/core/audio/band_table.dart';
 /// analyse-twice→identical-table property is the determinism proof. `BandTable`
 /// is the result; the real `SpectralFrequencyAnalyzer` is named in prose because
 /// it lives above `core`.
-// One member by design: the contract is the *type*, injected via a provider so
-// the reactive scope reads a real band table at render and a fake in tests.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — provider-injected contract: real table at render, fake in tests.
 abstract interface class FrequencyAnalyzer {
   /// Analyses [source] into a [BandTable] over a video of [totalFrames] frames
   /// at [fps].

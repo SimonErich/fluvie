@@ -12,9 +12,7 @@ import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 ///
 /// The default implementation is [FragmentProgramShaderLoader]; tests inject a
 /// fake so the unit path never touches the asset bundle.
-// A single-method contract is the point: the shader-load boundary stays
-// mockable behind a fake.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the shader-load boundary stays mockable behind a fake.
 abstract interface class ShaderLoader {
   /// Loads the shader at [asset] (the `flutter: shaders:` key, e.g.
   /// `shaders/ripple.frag`).

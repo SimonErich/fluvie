@@ -7,9 +7,7 @@ import 'dart:io';
 /// the Flutter package): every process the CLI spawns — the ffmpeg probe,
 /// `flutter test`, the encode — goes through this seam so unit tests never
 /// touch a real binary. Implementations never involve a shell.
-// One member by design: the seam is the *type* — a mock is injected where a
-// bare function could not be.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the seam is the type: mockable where a bare function isn't.
 abstract interface class ProcessRunner {
   /// Executes [executable] with [args] (optionally in [workingDirectory])
   /// and completes with its exit code and collected stdout/stderr.

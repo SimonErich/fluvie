@@ -33,9 +33,7 @@ import 'package:fluvie/src/composition/video.dart';
 /// The built-in templates (`TitleIntro`, `StatHighlight`) extend this on the
 /// public element API, so each is also a worked example of building a Video from
 /// props.
-// The subclassing base: built-ins and user templates
-// extend it; it is never a single-method interface to implement.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the subclassing base, not an interface; templates extend it.
 abstract class VideoTemplate<P> {
   /// Const so a template carries no state of its own — every choice flows
   /// through [build]'s [P], keeping the definition a pure function of its props.

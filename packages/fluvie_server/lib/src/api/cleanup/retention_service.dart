@@ -48,7 +48,7 @@ final class RetentionReport {
 }
 
 /// Deletes expired render files and their job records.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the seam is the type; a fake backs it in tests.
 abstract interface class RetentionService {
   /// Deletes everything whose expiry is at or before [now] (default: the
   /// current time). [dryRun] reports what would be deleted without deleting.

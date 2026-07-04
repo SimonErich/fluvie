@@ -10,8 +10,7 @@ import 'package:fluvie_mobile_encoder/src/fluvie_mobile_encoder_exception.dart';
 /// the native mixer needs a real local file, so an implementation resolves each
 /// source to one. The default [BundleAudioMaterializer] reads bundled assets and
 /// passes local file paths through; tests inject a fake.
-// A single-method seam by design: it stays mockable behind its provider.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the seam stays mockable behind its provider.
 abstract interface class MobileAudioMaterializer {
   /// Resolves [source] to a local file path, fetching it if needed.
   Future<String> materialize(String source);

@@ -17,10 +17,7 @@ import 'package:fluvie/src/core/contracts/beat_grid.dart';
 ///
 /// `BeatGrid` is the queryable result; the real `SpectralBeatDetectionService`
 /// is named in prose because it lives in a layer above `core`.
-// One member by design: the contract is the *type*, injected via a provider so
-// the timing engine resolves `Trigger.beat` against a real grid at render and a
-// fake in tests.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — provider-injected contract: real grid at render, fake in tests.
 abstract interface class BeatDetectionService {
   /// Detects [source]'s beats and returns them as a [BeatGrid] over a video of
   /// [totalFrames] frames at [fps].

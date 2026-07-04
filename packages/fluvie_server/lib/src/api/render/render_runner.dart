@@ -43,7 +43,7 @@ final class RenderOutcome {
 ///
 /// The real implementation drives the `fluvie_cli` capture→encode pipeline; the
 /// fake scripts outputs for tests. A failure is a [RenderFailure].
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the seam is the type; a scripted fake backs it in tests.
 abstract interface class RenderRunner {
   /// Renders [request] into [workDir], reporting live frame [onProgress], and
   /// returns the produced paths. Throws [RenderFailure] on any failure.

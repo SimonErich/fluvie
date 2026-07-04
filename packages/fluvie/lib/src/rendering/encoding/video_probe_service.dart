@@ -8,9 +8,7 @@ import 'package:riverpod/riverpod.dart';
 
 /// Reads the stream facts of an encoded video file (codec, size, frame
 /// count, duration) — what the determinism tests assert against.
-// One member by design: the seam is the *type* — the ffprobe-backed service
-// is mocked behind its provider (new-service house pattern).
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — new-service seam; ffprobe is mocked behind its provider.
 abstract interface class VideoProbeService {
   /// Probes the video at [filePath].
   ///

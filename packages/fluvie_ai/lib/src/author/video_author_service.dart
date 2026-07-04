@@ -8,9 +8,7 @@ import 'package:fluvie_ai/src/client/ai_client.dart';
 ///
 /// The model runs only here, at authoring time. Its output is a deterministic
 /// spec; rendering that spec never calls a model.
-// One member by design: the seam is the *type*, mocked behind its provider
-// (new-service house pattern).
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the seam is the type; mocked behind its provider (new-service).
 abstract interface class VideoAuthorService {
   /// Authors a spec from [prompt].
   ///

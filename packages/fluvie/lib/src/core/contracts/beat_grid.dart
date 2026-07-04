@@ -11,10 +11,7 @@
 /// Beat positions are expressed in **absolute video frames**: the resolver
 /// queries with the element window's absolute start frame, so the detection
 /// service must emit its grid in the same frame space.
-// One member by design: the contract is the *type* — a fake in tests and the
-// real detection service at render are injected where a bare function could not
-// be.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the contract is the type; a fake in tests, detection at render.
 abstract interface class BeatGrid {
   /// The frame of the first qualifying beat at or after [frame], or `null`
   /// when no qualifying beat remains.

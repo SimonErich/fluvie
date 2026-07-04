@@ -10,9 +10,7 @@ import 'package:riverpod/riverpod.dart';
 /// a fake (or a canned `http.Client`) and never touch the live network. The
 /// allowlist check happens *before* [MediaHttpClient.get] is called (in the
 /// byte loader), so a client may assume its URL is already permitted.
-// One member by design: the seam is the *type* — a mock is injected where a
-// bare function could not be (new-service house pattern).
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — new-service seam; mockable where a bare function isn't.
 abstract interface class MediaHttpClient {
   /// Fetches [url] and completes with its body bytes.
   ///

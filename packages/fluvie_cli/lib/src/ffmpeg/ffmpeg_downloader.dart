@@ -13,8 +13,7 @@ const Set<String> ffmpegDownloadHostAllowlist = {
 
 /// Fetches the bytes of a pinned FFmpeg archive. Injectable so the provisioner
 /// can be unit-tested without a network.
-// The seam is the type; a function could not be mocked the same way.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the seam is the type; a function can't be mocked the same way.
 abstract interface class FfmpegDownloader {
   /// Downloads every byte at [url]. Throws a [CliFailure] on a disallowed URL,
   /// a transport error, or a non-200 response.

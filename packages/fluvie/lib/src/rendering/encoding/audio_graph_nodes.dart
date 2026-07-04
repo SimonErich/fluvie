@@ -34,8 +34,7 @@ abstract interface class FfmpegAudioNode {
 /// produced and the single output label to bind, and emits the returned chain
 /// after the per-track chains. Kept abstract here so the builder stays in
 /// `rendering` while the real `AmixNode` lives in the `audio` layer.
-// One member by design: the contract is the *type* injected into the arg builder.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the contract is the type injected into the arg builder.
 abstract interface class FfmpegAudioMix {
   /// The chain reading every pad in [labels] and producing the [outLabel] pad.
   String mixChain({required List<String> labels, required String outLabel});

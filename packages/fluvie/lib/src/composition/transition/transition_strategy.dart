@@ -10,9 +10,7 @@ import 'package:fluvie/src/core/transition.dart';
 /// strategy via [strategyFor], and mounts whatever comes back; each strategy
 /// owns its own stacking because paint order is kind-specific (zoom paints
 /// the outgoing on top, every other kind the incoming).
-// One method is the whole contract; a function type could not be
-// documented per implementation.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — strategy contract; a function type can't carry per-impl docs.
 abstract interface class TransitionStrategy {
   /// Builds the blended pair for one frame, **in paint order** — the first
   /// widget paints below the second.

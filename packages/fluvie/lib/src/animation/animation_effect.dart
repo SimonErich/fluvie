@@ -17,9 +17,7 @@ import 'package:flutter/widgets.dart' show Widget;
 ///       Transform(transform: Matrix4.skewX((1 - progress) * maxSkew), child: child);
 /// }
 /// ```
-// One member by design: the custom-effect contract is pinned to this exact
-// shape so user effects write `implements AnimationEffect` verbatim.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the contract is pinned so user effects implement it verbatim.
 abstract interface class AnimationEffect {
   /// Wraps [child] with this effect's visual state at [progress].
   Widget build(Widget child, double progress);

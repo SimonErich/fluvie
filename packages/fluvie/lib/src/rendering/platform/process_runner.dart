@@ -9,9 +9,7 @@ import 'package:riverpod/riverpod.dart';
 /// provider and the probe service depend on this contract, so their logic is
 /// unit-tested without spawning a single real process. Implementations never
 /// involve a shell — arguments reach the OS exactly as the array says.
-// One member by design: the seam is the *type* — a mocktail mock is injected
-// where a bare function could not be (new-service house pattern).
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — new-service seam; mockable (mocktail) where a function isn't.
 abstract interface class ProcessRunner {
   /// Executes [executable] with [args] (optionally in [workingDirectory])
   /// and completes with its exit code and collected stdout/stderr.

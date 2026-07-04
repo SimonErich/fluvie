@@ -6,8 +6,7 @@ import 'package:fluvie_mobile_encoder/src/mobile_encode_request.dart';
 /// `MethodChannelMobileVideoEncoder`, calls the platform's hardware encoder over
 /// a method channel; tests use `FakeMobileVideoEncoder`. A failure surfaces as a
 /// `FluvieMobileEncoderException`.
-// A single-method seam by design: it stays mockable behind its provider.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — platform seam (method channel behind it); mockable via provider.
 abstract interface class MobileVideoEncoder {
   /// Encodes [request], writing the MP4 to `request.outputPath`.
   Future<void> encode(MobileEncodeRequest request);

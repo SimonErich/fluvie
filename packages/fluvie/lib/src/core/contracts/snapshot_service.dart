@@ -18,9 +18,7 @@ import 'package:fluvie/src/core/snapshot/snapshot_request.dart';
 ///
 /// `FakeSnapshotService` and `ChromeSnapshotService` are named in prose, not as
 /// doc links, because they live in layers above `core`.
-// One member by design: the contract is the *type*, injected where a bare
-// function could not be.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the contract is the type: injectable where a bare function isn't.
 abstract interface class SnapshotService {
   /// Rasterizes [request] to a [SnapshotRaster], asynchronously.
   ///

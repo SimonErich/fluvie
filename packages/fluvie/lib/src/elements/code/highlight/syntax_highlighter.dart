@@ -12,7 +12,7 @@ import 'package:fluvie/src/elements/code/highlight/highlight_span.dart';
 /// The returned spans' concatenated text must equal `source` (lossless),
 /// so the reveal arithmetic indexes one joined string while the painter colors
 /// each run by its kind.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the tokenizer seam is the type; a fake backs it in tests.
 abstract interface class SyntaxHighlighter {
   /// The colored spans for [source] written in [language].
   ///

@@ -16,8 +16,7 @@ void _noLog(String _) {}
 /// The provisioning seam the FFmpeg gate depends on: download-and-install the
 /// pinned build, returning its path. An interface so the gate can be tested
 /// without a network (the concrete [FfmpegProvisioner] is `final`).
-// The seam is the type; a function could not be injected the same way.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the seam is the type; a function can't be injected the same way.
 abstract interface class FfmpegInstaller {
   /// Installs the pinned build and returns the binary path. A present install
   /// is reused unless [force].

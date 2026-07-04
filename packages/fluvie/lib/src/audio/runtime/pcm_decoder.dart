@@ -12,9 +12,7 @@ import 'package:fluvie/src/core/audio/dsp/wav_reader.dart';
 ///
 /// The real ffmpeg-backed decoder is named in prose; the tests inject a
 /// WAV-reader decoder.
-// One member by design: the contract is the *type*, injected so analysis runs
-// without ffmpeg.
-// ignore: one_member_abstracts
+// ignore: one_member_abstracts — the seam is the type, injected so analysis runs without ffmpeg.
 abstract interface class PcmDecoder {
   /// Decodes [source] to mono [PcmAudio] (samples in `[-1, 1]` at the source
   /// sample rate).
