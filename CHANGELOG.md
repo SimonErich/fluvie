@@ -6,6 +6,79 @@ All notable changes to the Fluvie workspace. The format follows
 
 Per-package changelogs live next to each package.
 
+## [0.2.0] - 2026-07-06
+
+The API restructuring release. One authoring barrel, one rendering barrel, one
+render contract, and a set of hard renames that make the surface guessable.
+Old names are gone, not deprecated; every rename is mechanical. The full map
+lives in the [migration guide](documentation/reference/migration.md).
+
+### Changed
+
+- **The barrel split.** `package:fluvie/fluvie.dart` is now the authoring-only
+  surface (`Video`, `Scene`, elements, `Animation`, `Trigger`, themes, specs,
+  the preview runtime). The render pipeline (`RenderService`, `RenderConfig`,
+  `render`, `renderToSandbox`, `renderTemplate`, sandboxes, capture services,
+  resolver contracts, `resolveAudioMix`, collectors, `FadeBox`, the wasm
+  runtime) moved to the new `package:fluvie/rendering.dart`. The barrel no
+  longer re-exports `NumberFormat`; import `package:intl/intl.dart` yourself.
+- **One render contract.** `VideoRenderer<T>` unifies the render entry points:
+  `DesktopVideoRenderer` (local FFmpeg, returns a `File`),
+  `OnDeviceVideoRenderer` (mobile hardware encoder, returns a `File`), and
+  `WebVideoRenderer` (ffmpeg.wasm, returns bytes) all implement it.
+- **The two-import prelude.** Every example, doc, and template opens with
+  `import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;`
+  followed by the fluvie import. The barrel deliberately does not re-export
+  Flutter widgets.
+- `FfmpegProvider`, `ProcessFfmpegProvider`, `WasmFfmpegProvider`, and
+  `ffmpegProviderProvider` are now `FfmpegRunner`, `ProcessFfmpegRunner`,
+  `WasmFfmpegRunner`, and `ffmpegRunnerProvider`;
+  `RenderService.render(provider:)` is `render(runner:)`.
+- `Trigger.after` is now `Trigger.whenEnds`, the parallel twin of
+  `Trigger.whenStarts`; the spec kind `"after"` fails with a rename hint.
+- **One reveal vocabulary.** Charts (`growIn`/`drawIn`/`sweepIn`/`popIn`),
+  `Counter(duration:)`, and annotations (`drawIn`/`slideIn`) all take
+  `reveal:`.
+- **Complete preset pairs.** `slideFade` is `slideFadeIn`, `maskWipe` is
+  `maskWipeIn`; ambient time is `period:` (`spin(per:)` and
+  `float(frequency:)` are gone).
+- `Timeline` no longer takes an `fps`; it resolves at the enclosing `Video`'s
+  fps, so a 60 fps video can no longer silently mistime a schedule.
+  `timeline.placements` is `placementsAt(fps)`.
+- The decorative photo mat `Frame` is now `PhotoFrame`; "Frame" always means
+  the render clock (`FrameBuilder`, `n.frames`, `RawFrame`).
+
+### Added
+
+- New preset mirrors `scaleOut`, `glitchOut`, `slideFadeOut`, and `maskWipeOut`
+  complete every directional In/Out pair.
+- `fluvie init` wires `fluvie_lints` and `custom_lint` into new projects, so
+  the guardrail lints run from the first `dart analyze`.
+- The 97% coverage gate now spans all nine packages: `fluvie_validate` and
+  `fluvie_ai` joined it (fluvie_ai gained a wire-level MockClient suite over
+  the generative provider dispatch).
+
+### Fixed
+
+- Offscreen capture wraps the composition in an ambient `Directionality`, so a
+  headless render no longer fails when the tree provides none.
+- The in-browser render example works end to end (authenticated web-server
+  render, browser render e2e on Google Chrome).
+- `// coverage:ignore` reasons are pinned to the collector-safe charset
+  (letters, digits, spaces). Punctuation silently dropped a marker and an
+  unbalanced pair crashed `flutter test --coverage`; a tool test now enforces
+  the syntax.
+- Publishing hygiene: `fluvie_validate`'s `custom_lint_builder` pin widened to
+  a range, `ai_abstracted` gained its LICENSE, example, and publish-workflow
+  job, inter-package constraints now track the release version, and every
+  package carries `documentation:` and `funding:` metadata plus an `example/`.
+
+### Removed
+
+- Unused repo assets that predated the public release: placeholder
+  movie-character images, an orphaned promo render, stale logos, and the
+  retired `RELEASE_MIGRATION.md`.
+
 ## [0.1.10] - 2026-06-24
 
 ### Added

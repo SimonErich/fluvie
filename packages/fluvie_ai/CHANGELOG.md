@@ -3,6 +3,17 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-07-06
+
+### Changed
+
+- The authored spec vocabulary tracks the 0.2.0 surface (`whenEnds`,
+  `reveal`, `period`, `slideFadeIn`).
+- The AI client contract is one public type per file; imports stay on
+  `package:fluvie_ai/fluvie_ai.dart`.
+- The generative provider dispatch is covered by a wire-level MockClient
+  suite; the package joined the workspace 97% coverage gate at 100%.
+
 ## [0.1.10] - 2026-06-24
 
 ### Added

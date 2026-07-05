@@ -1,6 +1,6 @@
 name: ai_abstracted
 description: "Provider-agnostic generative AI: one set of contracts for text, image, video, speech, sound-effect, and music generation across many providers."
-version: 0.1.10
+version: 0.2.0
 repository: https://github.com/SimonErich/fluvie/tree/main/packages/ai_abstracted
 homepage: https://github.com/SimonErich/fluvie
 issue_tracker: https://github.com/SimonErich/fluvie/issues

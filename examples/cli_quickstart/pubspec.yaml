@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_riverpod: ^3.3.2
-  fluvie: ^0.1.0
+  fluvie: ^0.2.0
   kitten_kit:
     path: ../kitten_kit
 
@@ -22,7 +22,7 @@ dev_dependencies:
   custom_lint: ^0.8.1
   flutter_test:
     sdk: flutter
-  fluvie_cli: ^0.1.0
+  fluvie_cli: ^0.2.0
   fluvie_lints:
     path: ../../packages/fluvie_lints
   mocktail: ^1.0.5

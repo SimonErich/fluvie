@@ -12,7 +12,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  fluvie: ^0.1.0
+  fluvie: ^0.2.0
 
 dev_dependencies:
   alchemist: ^0.14.0

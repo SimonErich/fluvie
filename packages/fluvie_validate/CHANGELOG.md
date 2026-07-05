@@ -3,6 +3,14 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-07-06
+
+### Changed
+
+- The `custom_lint_builder` constraint widened from a pin to a range so the
+  package publishes cleanly.
+- The analyzer surface tracks the renamed `Trigger.whenEnds`.
+
 ## [0.1.10] - 2026-06-24
 
 Lockstep release; no changes to this package since 0.1.9.

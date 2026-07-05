@@ -3,6 +3,51 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-07-06
+
+The API restructuring release. Old names are gone, not deprecated; every
+rename is mechanical. The full map lives in the
+[migration guide](https://docs.fluvie.dev/reference/migration/).
+
+### Changed
+
+- **Barrel split.** `package:fluvie/fluvie.dart` keeps only the authoring
+  surface; the pipeline moved to the new `package:fluvie/rendering.dart`
+  (`RenderService`, `RenderConfig`, `render`, `renderToSandbox`,
+  `renderTemplate`, sandboxes, capture services, resolver contracts,
+  `resolveAudioMix`, collectors, `FadeBox`, the wasm runtime,
+  `FfmpegVersion`). `NumberFormat` is no longer re-exported; import
+  `package:intl/intl.dart` yourself.
+- `FfmpegProvider`, `ProcessFfmpegProvider`, `WasmFfmpegProvider`, and
+  `ffmpegProviderProvider` are now `FfmpegRunner`, `ProcessFfmpegRunner`,
+  `WasmFfmpegRunner`, and `ffmpegRunnerProvider`;
+  `RenderService.render(provider:)` is `render(runner:)`.
+- `Trigger.after` is now `Trigger.whenEnds`, the parallel twin of
+  `Trigger.whenStarts`; the spec kind `"after"` fails with a rename hint.
+- **One reveal vocabulary.** Charts (`growIn`/`drawIn`/`sweepIn`/`popIn`),
+  `Counter(duration:)`, and annotations (`drawIn`/`slideIn`) all take
+  `reveal:`.
+- `Animation.slideFade` is `slideFadeIn`; `Animation.maskWipe` is
+  `maskWipeIn`; ambient presets take `period:` (`spin(per:)` and
+  `float(frequency:)` are gone).
+- `Timeline` no longer takes an `fps`; it resolves at the enclosing
+  `Video`'s fps, so a 60 fps video can no longer silently mistime a
+  schedule. `timeline.placements` is `placementsAt(fps)`.
+- The decorative photo mat `Frame` is now `PhotoFrame`; "Frame" always
+  means the render clock (`FrameBuilder`, `n.frames`, `RawFrame`).
+
+### Added
+
+- The `VideoRenderer<T>` render contract and `DesktopVideoRenderer`;
+  `OnDeviceVideoRenderer` and `WebVideoRenderer` implement the same shape.
+- Preset mirrors `scaleOut`, `glitchOut`, `slideFadeOut`, and `maskWipeOut`
+  complete every directional In/Out pair.
+
+### Fixed
+
+- Offscreen capture wraps the composition in an ambient `Directionality`,
+  so a headless render no longer fails when the tree provides none.
+
 ## [0.1.10] - 2026-06-24
 
 ### Added

@@ -61,7 +61,7 @@
   "lessons": [
     { "key": "01", "title": "Hello, video", "teaches": "One scene, a gradient, a title that fades and pops.", "category": "basics", "clip": true },
     { "key": "02", "title": "Text and motion", "teaches": "A staggered enter, previous trigger chains, an ambient float.", "category": "basics", "clip": false },
-    { "key": "03", "title": "Timing and triggers", "teaches": "Anchored gradient shift, Trigger.after gating, .show windows.", "category": "basics", "clip": false },
+    { "key": "03", "title": "Timing and triggers", "teaches": "Anchored gradient shift, Trigger.whenEnds gating, .show windows.", "category": "basics", "clip": false },
     { "key": "04", "title": "Scenes and transitions", "teaches": "A crossFade, a SharedElement morph, a camera push, a wipe.", "category": "transitions", "clip": false },
     { "key": "05", "title": "Images and clips", "teaches": "A polaroid with Ken Burns, plus a trimmed video clip.", "category": "media", "clip": false },
     { "key": "06", "title": "A photo collage", "teaches": "A photo wall staggering in, grain, a seeded confetti burst.", "category": "media", "clip": false },

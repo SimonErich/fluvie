@@ -3,6 +3,16 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-07-06
+
+### Changed
+
+- The render path consumes `package:fluvie/rendering.dart` and the shared
+  `VideoRenderer` contract; the MCP render-verb descriptions state what
+  each verb produces.
+- The authored and validated spec vocabulary tracks the 0.2.0 surface
+  (`whenEnds`, `reveal`, `period`, `slideFadeIn`).
+
 ## [0.1.10] - 2026-06-24
 
 Lockstep release; no changes to this package since 0.1.9.

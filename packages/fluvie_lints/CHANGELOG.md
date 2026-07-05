@@ -3,6 +3,14 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-07-06
+
+### Changed
+
+- The trigger rules (`cyclic_trigger`, `dangling_anchor`, `unused_anchor`)
+  match the renamed `Trigger.whenEnds`, and the `deprecated_member`
+  quick-fix notes point at the 0.2.0 names (`PhotoFrame`).
+
 ## [0.1.10] - 2026-06-24
 
 Lockstep release; no changes to this package since 0.1.9.

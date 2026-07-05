@@ -3,6 +3,16 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-07-06
+
+### Changed
+
+- `OnDeviceVideoRenderer` implements the shared `VideoRenderer<File>`
+  contract, re-exported from the barrel, so the same call shape renders on
+  every platform.
+- Clip audio passes through the shared opt-in audio gate used by all three
+  renderers.
+
 ## [0.1.10] - 2026-06-24
 
 Lockstep release; no changes to this package since 0.1.9.

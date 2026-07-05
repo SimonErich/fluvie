@@ -3,6 +3,16 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-07-06
+
+### Changed
+
+- `fluvie init` wires `fluvie_lints` and `custom_lint` into the scaffolded
+  project, so the guardrail lints run from the first `dart analyze`.
+- The bundled templates and generated harnesses use the 0.2.0 surface (the
+  two-import prelude, `package:fluvie/rendering.dart` for the pipeline, and
+  the renamed presets and triggers).
+
 ## [0.1.10] - 2026-06-24
 
 ### Changed

@@ -3,6 +3,14 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-07-06
+
+### Changed
+
+- Packaging only: the package gained its LICENSE, a runnable example, and a
+  publish-workflow job, and now publishes to pub.dev in lockstep with the
+  rest of the workspace.
+
 ## [0.1.10] - 2026-06-24
 
 ### Added
