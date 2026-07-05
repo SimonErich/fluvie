@@ -56,6 +56,13 @@ for pubspec in packages/*/pubspec.yaml; do
   changed+=("$(basename "$(dirname "$pubspec")")")
 done
 
+# Example apps carry the same constraints so a minor or major bump still
+# resolves; they are not published, so only the constraint line moves.
+for pubspec in examples/*/pubspec.yaml packages/*/example/pubspec.yaml; do
+  [[ -f "$pubspec" ]] || continue
+  sed -i -E "s/^(  (${packages_alt}): )\^?[0-9][0-9A-Za-z.+-]*$/\1^${version}/" "$pubspec"
+done
+
 echo "Set ${#changed[@]} packages to ${version}: ${changed[*]}"
 echo "Stamped a [${version}] section into each package CHANGELOG (idempotent)."
 echo "Next: edit the CHANGELOG sections, commit, then create the GitHub Release for v${version}."
