@@ -110,6 +110,51 @@ void main() {
     expect(() => resolver().mediaFor(img), throwsA(isA<FluvieGenerativeException>()));
   });
 
+  test('generateAll reports generating/done progress, then cached on a hit', () async {
+    final events = <String>[];
+    void record(({int index, int total, String providerId, String stage}) p) =>
+        events.add('${p.index}/${p.total} ${p.providerId} ${p.stage}');
+    await resolver().generateAll([img], onProgress: record);
+    expect(events, ['0/1 flux generating', '0/1 flux done']);
+    events.clear();
+    await resolver().generateAll([img], onProgress: record);
+    expect(events, ['0/1 flux cached']);
+  });
+
+  test('wav and ogg mime types pick the matching cache extension', () async {
+    const wav = GenerativeSource.music(providerId: 'suno', prompt: 'a wav track');
+    const ogg = GenerativeSource.music(providerId: 'suno', prompt: 'an ogg track');
+    final r = resolver(
+      generate: (s) async => GenerationResult(
+        bytes: Uint8List.fromList([1]),
+        mimeType: s == wav ? 'audio/wav' : 'audio/ogg',
+        kind: MediaKind.music,
+        metadata: const GenerationMetadata(model: 'fake'),
+      ),
+    );
+    await r.generateAll([wav, ogg]);
+    expect(r.audioFor(wav), AudioSource.file('${tmp.path}/suno/${wav.cacheKey}.wav'));
+    expect(r.audioFor(ogg), AudioSource.file('${tmp.path}/suno/${ogg.cacheKey}.ogg'));
+    expect(File('${tmp.path}/suno/${wav.cacheKey}.wav').existsSync(), isTrue);
+    expect(File('${tmp.path}/suno/${ogg.cacheKey}.ogg').existsSync(), isTrue);
+  });
+
+  test('an unknown mime type falls back to the extension for the media kind', () async {
+    const rawImage = GenerativeSource.image(providerId: 'flux', prompt: 'a raw image');
+    const rawVideo = GenerativeSource.video(providerId: 'veo', prompt: 'a raw video');
+    final r = resolver(
+      generate: (s) async => GenerationResult(
+        bytes: Uint8List.fromList([2]),
+        mimeType: 'application/octet-stream',
+        kind: s == rawImage ? MediaKind.image : MediaKind.video,
+        metadata: const GenerationMetadata(model: 'fake'),
+      ),
+    );
+    await r.generateAll([rawImage, rawVideo]);
+    expect(r.mediaFor(rawImage), MediaSource.file('${tmp.path}/flux/${rawImage.cacheKey}.png'));
+    expect(r.mediaFor(rawVideo), MediaSource.file('${tmp.path}/veo/${rawVideo.cacheKey}.mp4'));
+  });
+
   test('GenerativeConfig.fromEnv reads keys, cache dir, and offline', () {
     final config = GenerativeConfig.fromEnv(const {
       'BFL_API_KEY': 'k',
