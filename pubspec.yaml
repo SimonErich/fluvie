@@ -150,7 +150,7 @@ melos:
     coverage:dart:
       description: Pure-Dart package tests with lcov coverage (ffmpeg/download/render/analysis e2e excluded).
       run: >
-        dart test --exclude-tags "ffmpeg || download || render || analysis || generative" --coverage=coverage &&
+        dart test -j1 --exclude-tags "ffmpeg || download || render || analysis || generative" --coverage=coverage &&
         dart run coverage:format_coverage --lcov --in=coverage
         --out=coverage/lcov.info --report-on=lib
       exec:
