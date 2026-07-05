@@ -1,9 +1,8 @@
 # Coverage and the ignore policy
 
-Fluvie gates line coverage at 97% on three library packages. They are `fluvie`,
-`fluvie_lints`, and `fluvie_cli`. The goal is 100%. This page explains when you
-may mark a line `// coverage:ignore`. It also says when you must write a test
-instead.
+Fluvie gates line coverage at 97% on every package under `packages/`. The goal
+is 100%. This page explains when you may mark a line `// coverage:ignore`. It
+also says when you must write a test instead.
 
 Run the gate before you commit:
 
