@@ -36,8 +36,8 @@ MCP, and demo services run as Dokploy containers.
 
 All packages share one version and publish from one umbrella tag, but pub.dev
 must trust this repo first. For every package (`fluvie`, `fluvie_cli`,
-`fluvie_lints`, `ai_abstracted`, `fluvie_ai`, `fluvie_server`,
-`fluvie_validate`, `fluvie_mobile_encoder`, `fluvie_web_encoder`):
+`fluvie_lints`, `fluvie_ai`, `fluvie_server`, `fluvie_validate`,
+`fluvie_mobile_encoder`, `fluvie_web_encoder`):
 
 1. Reserve the name with a first manual publish from the package directory:
    ```sh
@@ -52,9 +52,8 @@ must trust this repo first. For every package (`fluvie`, `fluvie_cli`,
 
 A package that has never been published has no Admin page yet: do its first
 manual publish (`cd packages/<name> && dart pub publish`) before the tagged
-release, then set its tag pattern to `v{{version}}`. As of 0.1.10 that applies
-to `ai_abstracted` (publish it before `fluvie_ai`, which depends on it). Also
-verify `fluvie_server` has **Admin → Automated publishing** enabled — its 0.1.10
+release, then set its tag pattern to `v{{version}}`. Verify `fluvie_server`
+has **Admin → Automated publishing** enabled — its 0.1.10
 publish job failed because the setting was never turned on after the 0.1.4
 manual publish. The retired
 `fluvie_api` and `fluvie_mcp` packages are no longer in the workspace, so the

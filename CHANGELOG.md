@@ -54,7 +54,7 @@ lives in the [migration guide](documentation/reference/migration.md).
   complete every directional In/Out pair.
 - `fluvie init` wires `fluvie_lints` and `custom_lint` into new projects, so
   the guardrail lints run from the first `dart analyze`.
-- The 97% coverage gate now spans all nine packages: `fluvie_validate` and
+- The 97% coverage gate now spans all eight packages: `fluvie_validate` and
   `fluvie_ai` joined it (fluvie_ai gained a wire-level MockClient suite over
   the generative provider dispatch).
 
@@ -69,12 +69,14 @@ lives in the [migration guide](documentation/reference/migration.md).
   unbalanced pair crashed `flutter test --coverage`; a tool test now enforces
   the syntax.
 - Publishing hygiene: `fluvie_validate`'s `custom_lint_builder` pin widened to
-  a range, `ai_abstracted` gained its LICENSE, example, and publish-workflow
-  job, inter-package constraints now track the release version, and every
+  a range, inter-package constraints now track the release version, and every
   package carries `documentation:` and `funding:` metadata plus an `example/`.
 
 ### Removed
 
+- The `ai_abstracted` package moved to its own repository at
+  <https://github.com/SimonErich/dart_ai_abstracted>. `fluvie_ai` now depends
+  on it as a normal pub.dev package (`^0.1.0`) instead of a workspace member.
 - Unused repo assets that predated the public release: placeholder
   movie-character images, an orphaned promo render, stale logos, and the
   retired `RELEASE_MIGRATION.md`.

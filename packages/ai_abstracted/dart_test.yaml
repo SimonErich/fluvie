@@ -1,3 +1,0 @@
-tags:
-  generative:
-    description: Hits real generative-AI provider APIs; needs keys, excluded from CI.

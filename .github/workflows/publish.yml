@@ -42,15 +42,8 @@ jobs:
     with:
       working-directory: packages/fluvie_lints
 
-  ai_abstracted:
-    permissions:
-      id-token: write
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
-    with:
-      working-directory: packages/ai_abstracted
-
   fluvie_ai:
-    needs: [fluvie, ai_abstracted]
+    needs: [fluvie]
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1

@@ -7,7 +7,6 @@ environment:
 
 # Native pub workspace (Dart 3.6+). Melos 7 orchestrates scripts on top of this.
 workspace:
-  - packages/ai_abstracted
   - packages/fluvie
   - packages/fluvie_lints
   - packages/fluvie_lints/example
@@ -170,7 +169,7 @@ melos:
         Evaluate lcov reports against the 97% threshold (generated files
         excluded, // coverage:ignore markers honored — see
         documentation/contributing/coverage.md).
-      run: dart tool/check_coverage.dart --min 97 packages/ai_abstracted packages/fluvie packages/fluvie_lints packages/fluvie_validate packages/fluvie_cli packages/fluvie_server packages/fluvie_mobile_encoder packages/fluvie_web_encoder packages/fluvie_ai
+      run: dart tool/check_coverage.dart --min 97 packages/fluvie packages/fluvie_lints packages/fluvie_validate packages/fluvie_cli packages/fluvie_server packages/fluvie_mobile_encoder packages/fluvie_web_encoder packages/fluvie_ai
 
     test:tool:
       description: Root tool tests (coverage gate parser).

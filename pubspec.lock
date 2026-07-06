@@ -9,6 +9,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "91.0.0"
+  ai_abstracted:
+    dependency: transitive
+    description:
+      name: ai_abstracted
+      sha256: "098531eb6ea690f55cc1bb583acf568a800e7d84eecca83a46f3ed8c27e96873"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   alchemist:
     dependency: transitive
     description:

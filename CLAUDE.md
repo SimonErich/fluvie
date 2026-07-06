@@ -73,7 +73,7 @@ that is fine — the bar is "it looks right," not "the bytes match."
 - **Unit tests** for everything pure (core, timing, services, math) — the bulk. Mock with **mocktail**; inject fakes through Riverpod overrides. No real network or filesystem in unit tests.
 - **Goldens via Alchemist** (`golden` tag): visual-regression on the Linux baseline. ci goldens (Ahem font) run everywhere; platform goldens (real, bundled fonts) run on Linux only. Fixed fps, fixed seed, DPR 1.0. Regenerate with `flutter test --update-goldens --tags golden`, then review the PNG before committing.
 - **Integration tests** are tagged by what they need: `ffmpeg`, `snapshot` (live Chromium), `wasm`, `render`. Plain `melos run test` excludes goldens/snapshots; CI gates tags per platform.
-- **Coverage gate: ≥97% line coverage** on every package under `packages/` (all nine; generated files excluded, `// coverage:ignore` markers honored), enforced by `melos run coverage:check`; 100% is the goal. Justified `// coverage:ignore` needs a reason on the same line — see `documentation/contributing/coverage.md`.
+- **Coverage gate: ≥97% line coverage** on every package under `packages/` (all eight; generated files excluded, `// coverage:ignore` markers honored), enforced by `melos run coverage:check`; 100% is the goal. Justified `// coverage:ignore` needs a reason on the same line — see `documentation/contributing/coverage.md`.
 
 ---
 

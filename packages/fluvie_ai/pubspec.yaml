@@ -19,7 +19,7 @@ environment:
 resolution: workspace
 
 dependencies:
-  ai_abstracted: ^0.2.0
+  ai_abstracted: ^0.1.0
   flutter:
     sdk: flutter
   fluvie: ^0.2.0
