@@ -78,6 +78,7 @@ final class RenderConfig {
   final bool cacheEnabled;
 
   /// A copy with the given fields replaced (re-validated on construction).
+  @useResult
   RenderConfig copyWith({
     int? width,
     int? height,

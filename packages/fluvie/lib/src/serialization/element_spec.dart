@@ -22,7 +22,7 @@ const Map<String, Set<String>> knownElementProps = {
 /// `anchor` id, and the `animate` list applied through `.animate(...)`.
 ///
 /// [buildElement] turns it into a real widget.
-class ElementSpec {
+final class ElementSpec {
   /// Creates an element spec of [type] with [props], an optional [anchor] id,
   /// and an [animate] list.
   ElementSpec({

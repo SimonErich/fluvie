@@ -11,7 +11,7 @@ import 'package:fluvie/src/core/anchor.dart';
 ///
 /// This is a pure exception in `core` (not `diagnostics`): every layer above
 /// may throw and catch it without violating the layering law.
-class FluvieTimingError implements Exception {
+final class FluvieTimingError implements Exception {
   /// Creates a timing error described by [message], optionally naming the
   /// [anchors] involved.
   FluvieTimingError(this.message, {this.anchors = const []});

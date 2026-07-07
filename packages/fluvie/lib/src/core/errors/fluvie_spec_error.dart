@@ -10,7 +10,7 @@
 /// This is a pure exception in `core` (not `diagnostics`): every layer above —
 /// including the serialization layer and the AI authoring package — may throw
 /// and catch it without violating the layering law.
-class FluvieSpecError implements Exception {
+final class FluvieSpecError implements Exception {
   /// Creates a spec error described by [message], optionally locating it at the
   /// document [path].
   FluvieSpecError(this.message, {this.path = const []});

@@ -15,7 +15,7 @@ part 'video_defaults.dart';
 /// nullable here even though the resolved cascade always ends in the non-null
 /// [package] values.
 @immutable
-class Defaults {
+final class Defaults {
   /// Creates a (possibly partial) set of defaults; `null` fields inherit.
   const Defaults({this.duration, this.ease, this.stagger});
 
@@ -48,6 +48,7 @@ class Defaults {
   /// ```dart
   /// local.mergeOver(scene.mergeOver(video.mergeOver(Defaults.package)))
   /// ```
+  @useResult
   Defaults mergeOver(Defaults base) => Defaults(
     duration: duration ?? base.duration,
     ease: ease ?? base.ease,

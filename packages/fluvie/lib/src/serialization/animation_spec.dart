@@ -40,7 +40,7 @@ const Set<String> knownAnimationPresets = {
 /// This is a pure data object: `buildAnimation` turns it into a real
 /// `Animation`. The reserved keys that make up the tail are never treated as
 /// preset arguments.
-class AnimationSpec {
+final class AnimationSpec {
   /// Creates an animation spec of [kind] with preset/raw [args] and the common
   /// timing tail.
   AnimationSpec({

@@ -6,7 +6,7 @@ import 'package:fluvie/src/elements/mermaid/mermaid_theme.dart';
 import 'package:fluvie/src/theme/caption_theme.dart';
 import 'package:fluvie/src/theme/palette.dart';
 import 'package:fluvie/src/theme/type_scale.dart';
-import 'package:meta/meta.dart' show immutable;
+import 'package:meta/meta.dart' show immutable, useResult;
 
 export 'package:fluvie/src/elements/chart/palette/chart_palette.dart' show ChartPalette;
 export 'package:fluvie/src/elements/code/theme/code_theme.dart' show CodeTheme;
@@ -123,6 +123,7 @@ final class FluvieTokens {
   final Defaults motion;
 
   /// Returns a copy with the given fields replaced; omitted fields are kept.
+  @useResult
   FluvieTokens copyWith({
     ChartPalette? palette,
     Color? axisColor,

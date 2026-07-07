@@ -1,4 +1,5 @@
 import 'package:fluvie/src/core/render_phase.dart';
+import 'package:meta/meta.dart';
 
 /// A progress update from a render: the current [phase], optional frame counts
 /// while capturing, and the [compositionKey] so concurrent renders stay
@@ -7,7 +8,8 @@ import 'package:fluvie/src/core/render_phase.dart';
 /// One callback shape serves both on-device renderers: web reports per-frame
 /// capture counts; mobile reports them too when its capture loop surfaces them,
 /// and leaves [completedFrames]/[totalFrames] null otherwise.
-class RenderProgress {
+@immutable
+final class RenderProgress {
   /// Creates a progress update for [phase].
   const RenderProgress(
     this.phase, {

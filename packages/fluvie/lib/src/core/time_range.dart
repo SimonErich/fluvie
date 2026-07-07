@@ -15,7 +15,7 @@ import 'package:meta/meta.dart';
 /// A range whose resolved end lands *before* its resolved start is invalid
 /// and throws an [ArgumentError] at resolve time.
 @immutable
-class TimeRange {
+final class TimeRange {
   /// Creates a range running from [start] to [end].
   const TimeRange(this.start, this.end);
 

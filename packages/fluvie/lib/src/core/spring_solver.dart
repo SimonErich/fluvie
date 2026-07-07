@@ -11,7 +11,7 @@ import 'package:fluvie/src/core/timing.dart';
 /// deterministic across runs and platforms. Springs have no fixed duration:
 /// [settleTime] is what Fluvie uses to window a spring-timed animation and to
 /// chain `Trigger.previous` after it.
-class SpringSolver {
+final class SpringSolver {
   /// Creates a solver for [spring], precomputing the regime coefficients.
   SpringSolver(this.spring) : _omega = math.sqrt(spring.stiffness / spring.mass) {
     final m = spring.mass;

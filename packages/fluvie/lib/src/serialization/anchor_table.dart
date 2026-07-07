@@ -8,7 +8,7 @@ import 'package:fluvie/src/core/anchor.dart';
 /// it and every `Trigger.whenEnds`/`Trigger.whenStarts`/`Audio.track` that points
 /// at it — resolves to the **same** [Anchor] instance, so identity survives
 /// serialization.
-class AnchorTable {
+final class AnchorTable {
   /// Creates an empty table; anchors are minted lazily by [resolve].
   AnchorTable();
 

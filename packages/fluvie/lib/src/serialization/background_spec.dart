@@ -32,7 +32,7 @@ const Map<String, Set<String>> knownBackgroundProps = {
 /// The data form of a [Background]: a `kind` plus that variant's properties.
 ///
 /// [buildBackground] turns it into a real [Background] widget.
-class BackgroundSpec {
+final class BackgroundSpec {
   /// Creates a background spec of [kind] with the variant [props].
   BackgroundSpec({required this.kind, this.props = const {}});
 

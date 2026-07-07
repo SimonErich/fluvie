@@ -12,7 +12,7 @@ part 'spec_validation_message.dart';
 /// Surfaced (not thrown) on the default render path so a typo is visible without
 /// failing the render, and promoted to a [FluvieSpecError] on the AI authoring
 /// path via [assertNoUnknownSpecProps] so the repair loop corrects it.
-class FluvieSpecWarning {
+final class FluvieSpecWarning {
   /// Creates a warning described by [message], optionally located at [path].
   FluvieSpecWarning(this.message, {this.path = const []});
 

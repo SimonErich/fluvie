@@ -16,7 +16,7 @@ import 'package:meta/meta.dart' show immutable;
 /// right and `y: 1` one element-height down, regardless of resolution, so a
 /// slide reads the same on a phone story and a 4K landscape.
 @immutable
-class Keyframe {
+final class Keyframe {
   /// Creates a keyframe that overrides exactly the properties passed as
   /// non-null; everything left `null` keeps its natural value.
   const Keyframe({

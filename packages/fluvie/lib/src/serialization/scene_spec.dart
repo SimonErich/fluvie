@@ -13,7 +13,7 @@ import 'package:fluvie/src/serialization/element_spec.dart';
 /// The data form of a [Scene]: its `duration`, optional `background`, the
 /// `children`, optional `enter`/`exit` transitions, and optional
 /// `motionDefaults`.
-class SceneSpec {
+final class SceneSpec {
   /// Creates a scene spec lasting [duration] with the given parts.
   SceneSpec({
     required this.duration,

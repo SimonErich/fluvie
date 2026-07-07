@@ -11,7 +11,7 @@
 ///
 /// This is a pure exception in `core` (not `diagnostics`): every layer above
 /// may throw and catch it without violating the layering law.
-class FluvieSnapshotUnavailableError implements Exception {
+final class FluvieSnapshotUnavailableError implements Exception {
   /// Creates the error described by [message], optionally carrying an
   /// [installHint] that names how to provide the missing capability.
   FluvieSnapshotUnavailableError(this.message, {this.installHint});

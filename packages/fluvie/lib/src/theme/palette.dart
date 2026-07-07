@@ -1,5 +1,5 @@
 import 'package:flutter/painting.dart' show Color;
-import 'package:meta/meta.dart' show immutable;
+import 'package:meta/meta.dart' show immutable, useResult;
 
 /// The brand color palette of a `FluvieTheme`: the [bg] backdrop, the [accent]
 /// brand color, the [onBg] foreground that reads on [bg], and the optional
@@ -59,6 +59,7 @@ final class Palette {
   /// The optional [surface] / [onSurface] cannot be cleared back to `null`
   /// through `copyWith`: passing `null` keeps the current value, matching the
   /// `copyWith` idiom across the codebase.
+  @useResult
   Palette copyWith({
     Color? bg,
     Color? accent,

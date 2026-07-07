@@ -7,7 +7,7 @@ import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 /// runner provides them, so the actual FFmpeg diagnostic reaches the caller
 /// instead of a bare "encode failed". Both are optional: a wasm runtime may
 /// surface neither.
-class FluvieEncodeException extends FluvieRenderException {
+final class FluvieEncodeException extends FluvieRenderException {
   /// Creates an encode exception described by `message`, optionally carrying
   /// the process [exitCode] and the last portion of its stderr.
   FluvieEncodeException(super.message, {this.exitCode, this.stderrTail});

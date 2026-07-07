@@ -24,7 +24,7 @@ import 'package:fluvie/src/serialization/scene_spec.dart';
 /// for the whole document, so triggers that reference an anchor and the element
 /// that declares it resolve to the same `Anchor` instance (see [AnchorTable]) —
 /// which is why [build] reuses the table [VideoSpec.fromJson] created.
-class VideoSpec {
+final class VideoSpec {
   /// Creates a video spec from its [scenes] and composition-wide settings.
   ///
   /// [anchors] is the identity table; [VideoSpec.fromJson] supplies the one it

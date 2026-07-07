@@ -9,7 +9,7 @@
 ///
 /// `FluvieRenderException` is named in prose, not as a doc link, to avoid a
 /// cross-reference that would not survive the layering.
-class FluvieGenerativeException implements Exception {
+final class FluvieGenerativeException implements Exception {
   /// Creates a generative exception described by [message].
   FluvieGenerativeException(this.message);
 

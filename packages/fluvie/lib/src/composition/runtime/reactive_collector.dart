@@ -11,7 +11,7 @@ import 'package:fluvie/src/core/audio/audio_source.dart';
 /// reactive effect with no `track:` reads); [allSources] is the deduplicated set
 /// the shell hands to `MediaResolver.preResolveReactive` so each track is
 /// analysed once before frame 0.
-class ReactiveTracks {
+final class ReactiveTracks {
   /// Creates the gathered reactive tracks.
   const ReactiveTracks({
     required this.byAnchor,
