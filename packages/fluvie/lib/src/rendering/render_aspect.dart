@@ -1,3 +1,4 @@
+// fluvie:large-file-ok: the canonical multi-aspect render entry; one public render() plus its private audio-mix helper
 import 'dart:io';
 
 import 'package:flutter/widgets.dart' show GlobalKey, Widget;

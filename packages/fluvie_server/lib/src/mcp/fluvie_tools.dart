@@ -1,3 +1,4 @@
+// fluvie:large-file-ok: one cohesive MCP tool registry; buildFluvieTools is the surface, the rest are its private formatters
 import 'dart:convert';
 
 import 'package:fluvie_server/client.dart';
