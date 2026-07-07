@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_mobile_encoder/fluvie_mobile_encoder.dart';
 
 /// A [CaptureHost] backed by the widget tester: it sizes the test view to the
@@ -45,6 +46,19 @@ class _ThrowingDisposeHost extends _TesterCaptureHost {
     await super.dispose();
     throw StateError('dispose boom');
   }
+}
+
+/// A media resolver that records whether the pipeline disposed it. Its
+/// pre-resolve calls no-op (the compositions here declare no media), so it can
+/// stand in as a caller-injected resolver and prove it is left untouched.
+class _TrackingResolver implements MediaResolver, DisposableResolver {
+  bool disposed = false;
+
+  @override
+  void dispose() => disposed = true;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => Future<void>.value();
 }
 
 Directory _sandbox() {
@@ -92,6 +106,28 @@ void main() {
     expect(req.bitRate, defaultBitRate(width: 64, height: 64, fps: 30));
     expect(File(req.framesPath).existsSync(), isTrue);
     expect(File(req.framesPath).lengthSync(), 3 * 64 * 64 * 4);
+  });
+
+  testWidgets('never disposes a caller-injected media resolver', (tester) async {
+    final sandbox = _sandbox();
+    final tracking = _TrackingResolver();
+    final renderer = OnDeviceVideoRenderer(
+      encoder: FakeMobileVideoEncoder(),
+      hostFactory: (size) => _TesterCaptureHost(tester, size),
+      sandboxFactory: () async => sandbox,
+      mediaResolver: tracking,
+    );
+
+    await tester.runAsync(
+      () => renderer.render(
+        composition: _composition,
+        aspect: Aspect.square,
+        duration: const Duration(milliseconds: 100),
+        longEdge: 64,
+      ),
+    );
+
+    expect(tracking.disposed, isFalse, reason: 'the caller owns an injected resolver');
   });
 
   testWidgets('honors an explicit bitrate and codec', (tester) async {
