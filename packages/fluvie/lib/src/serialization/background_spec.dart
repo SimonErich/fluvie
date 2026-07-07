@@ -96,8 +96,8 @@ Background buildBackground(BackgroundSpec spec) {
     case 'vhs':
       return const Background.vhs();
   }
-  // Defensive: fromJson validates the kind, so this is unreachable.
-  throw FluvieSpecError('Unknown background "${spec.kind}"'); // coverage:ignore-line
+  // coverage:ignore-line unreachable fromJson validates the kind before this dispatch
+  throw FluvieSpecError('Unknown background "${spec.kind}"');
 }
 
 List<Color> _colors(Object? raw) {

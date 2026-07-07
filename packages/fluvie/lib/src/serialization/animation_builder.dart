@@ -240,8 +240,8 @@ Animation buildAnimation(AnimationSpec spec) {
         label: spec.label,
       );
   }
-  // Defensive: AnimationSpec.fromJson validates kind, so this is unreachable.
-  throw FluvieSpecError('Unknown animation kind "${spec.kind}"'); // coverage:ignore-line
+  // coverage:ignore-line unreachable AnimationSpec.fromJson validates the kind before this dispatch
+  throw FluvieSpecError('Unknown animation kind "${spec.kind}"');
 }
 
 Edge? _edge(Object? raw) => raw == null ? null : decodeEnum(Edge.values, raw, 'edge');

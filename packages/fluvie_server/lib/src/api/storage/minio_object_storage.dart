@@ -1,6 +1,6 @@
-// coverage:ignore-file thin minio network adapter exercised by the Tags s3
-// integration suite against a live bucket, not unit-testable. The mapping logic
-// it feeds (S3FileStore) is fully unit-tested through the S3ObjectStorage fake.
+// coverage:ignore-file thin minio network adapter that needs a live S3 bucket,
+// so it is not exercised by the unit suite. The mapping logic it feeds
+// (S3FileStore) is fully unit-tested through the S3ObjectStorage fake.
 import 'dart:typed_data';
 
 import 'package:fluvie_server/src/api/storage/s3_object_storage.dart';

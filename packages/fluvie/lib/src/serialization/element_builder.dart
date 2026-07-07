@@ -54,8 +54,8 @@ Widget _base(ElementSpec spec) {
             : decodeTextStyle(props['style'], path: const ['style']),
       );
   }
-  // Defensive: ElementSpec.fromJson validates the type, so this is unreachable.
-  throw FluvieSpecError('Unknown element "${spec.type}"'); // coverage:ignore-line
+  // coverage:ignore-line unreachable ElementSpec.fromJson validates the type before this dispatch
+  throw FluvieSpecError('Unknown element "${spec.type}"');
 }
 
 Widget _image(Map<String, Object?> props) {
