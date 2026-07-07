@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluvie/src/composition/runtime/media_collector.dart';
 import 'package:fluvie/src/composition/runtime/clip_plan_collector.dart';
+import 'package:fluvie/src/composition/runtime/media_collector.dart';
 import 'package:fluvie/src/composition/scene.dart';
 import 'package:fluvie/src/core/media/clip_audio.dart';
 import 'package:fluvie/src/core/media/generative_source.dart';
