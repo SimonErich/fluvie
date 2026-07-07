@@ -117,7 +117,11 @@ final class RenderQueue {
       );
     } on RenderFailure catch (failure) {
       job = job.copyWith(status: JobStatus.failed, finishedAt: _now(), error: failure.message);
-    } on Object {
+    } on Object catch (error, stackTrace) {
+      // The client message stays generic (an unexpected internal error must not
+      // leak internals), but the operator needs the real cause: log it to stderr
+      // before persisting the opaque status, mirroring render_code_printer.
+      stderr.writeln('fluvie_server: render job ${job.id} failed: $error\n$stackTrace');
       job = job.copyWith(
         status: JobStatus.failed,
         finishedAt: _now(),

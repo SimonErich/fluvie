@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluvie_server/src/api/http/api_error.dart';
 import 'package:shelf/shelf.dart';
 
@@ -9,7 +11,13 @@ Middleware jsonErrors() =>
         return await handler(request);
       } on ApiError catch (error) {
         return error.toResponse();
-      } on Object {
+      } on Object catch (error, stackTrace) {
+        // The 500 body stays generic (no stack or secrets), but the operator
+        // needs the cause: log it to stderr before returning the opaque error.
+        stderr.writeln(
+          'fluvie_server: unhandled error on ${request.method} ${request.requestedUri.path}: '
+          '$error\n$stackTrace',
+        );
         return const ApiError(500, 'internal', 'Internal server error').toResponse();
       }
     };
