@@ -1,5 +1,6 @@
 import 'dart:ui' show Canvas, Color, Paint, PaintingStyle, Path, Rect, Size, StrokeCap, StrokeJoin;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/elements/chart/data/chart_series.dart';
 import 'package:fluvie/src/elements/chart/painter/axis_painter.dart';
@@ -86,5 +87,5 @@ final class LineChartPainter extends ChartPainter {
       oldDelegate is! LineChartPainter ||
       oldDelegate.progress != progress ||
       oldDelegate.tokens != tokens ||
-      oldDelegate.seriesCount != seriesCount;
+      !listEquals(oldDelegate.series, series);
 }

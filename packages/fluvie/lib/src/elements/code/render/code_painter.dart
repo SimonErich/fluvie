@@ -158,5 +158,6 @@ final class CodePainter extends CustomPainter {
       oldDelegate.highlightLines != highlightLines ||
       oldDelegate.theme != theme ||
       oldDelegate.fontSize != fontSize ||
+      oldDelegate.fontFamily != fontFamily ||
       !identical(oldDelegate.lines, lines);
 }

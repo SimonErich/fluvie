@@ -1,5 +1,6 @@
 import 'dart:ui' show Canvas, Offset, Paint, PaintingStyle, Path, Rect, Size;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/elements/chart/data/chart_series.dart';
 import 'package:fluvie/src/elements/chart/painter/axis_painter.dart';
@@ -113,5 +114,5 @@ final class AreaChartPainter extends ChartPainter {
       oldDelegate is! AreaChartPainter ||
       oldDelegate.progress != progress ||
       oldDelegate.tokens != tokens ||
-      oldDelegate.seriesCount != seriesCount;
+      !listEquals(oldDelegate.series, series);
 }

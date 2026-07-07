@@ -4,6 +4,7 @@ library;
 
 import 'dart:ui' show Color, Offset, Path, Size;
 
+import 'package:flutter/foundation.dart' show immutable, listEquals;
 import 'package:fluvie/src/elements/chart/data/chart_series.dart';
 import 'package:fluvie/src/elements/chart/painter/chart_painter.dart';
 import 'package:fluvie/src/elements/chart/scale/chart_scale.dart';
@@ -18,6 +19,7 @@ const ChartGutters lineGutters = ChartGutters(left: 8, top: 8, right: 8, bottom:
 /// per-category [values], and the resolved [color] — so the pixel polyline is
 /// rebuilt from any paint `size`. Both [LineChartPainter] and [AreaChartPainter]
 /// read it, sharing the scale / path math (the DRY guardrail).
+@immutable
 final class LineSeriesGeometry {
   /// Creates geometry for the series named by its [color], over [keys] and
   /// [values] (one value per key, in key order).
@@ -31,6 +33,16 @@ final class LineSeriesGeometry {
 
   /// The resolved series color (a palette slot or an explicit override).
   final Color color;
+
+  @override
+  bool operator ==(Object other) =>
+      other is LineSeriesGeometry &&
+      color == other.color &&
+      listEquals(keys, other.keys) &&
+      listEquals(values, other.values);
+
+  @override
+  int get hashCode => Object.hash(color, Object.hashAll(keys), Object.hashAll(values));
 }
 
 /// Resolves one [LineSeriesGeometry] per series, with a shared category order

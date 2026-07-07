@@ -162,5 +162,7 @@ final class BarChartPainter extends ChartPainter {
       oldDelegate.progress != progress ||
       oldDelegate.tokens != tokens ||
       !listEquals(oldDelegate.barProgress, barProgress) ||
-      !listEquals(oldDelegate.values, values);
+      !listEquals(oldDelegate.values, values) ||
+      !listEquals(oldDelegate.categories, categories) ||
+      !listEquals(oldDelegate.colors, colors);
 }

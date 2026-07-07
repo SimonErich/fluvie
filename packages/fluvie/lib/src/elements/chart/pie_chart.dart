@@ -168,5 +168,6 @@ final class PieChartPainter extends ChartPainter {
       oldDelegate.progress != progress ||
       oldDelegate.tokens != tokens ||
       oldDelegate.innerRadius != innerRadius ||
-      !listEquals(oldDelegate.fullAngles, fullAngles);
+      !listEquals(oldDelegate.fullAngles, fullAngles) ||
+      !listEquals(oldDelegate.colors, colors);
 }

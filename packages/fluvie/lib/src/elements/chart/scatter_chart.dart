@@ -148,7 +148,8 @@ final class ScatterChartPainter extends ChartPainter {
       oldDelegate.progress != progress ||
       oldDelegate.tokens != tokens ||
       oldDelegate.color != color ||
-      !listEquals(oldDelegate.pointProgress, pointProgress);
+      !listEquals(oldDelegate.pointProgress, pointProgress) ||
+      !listEquals(oldDelegate.points, points);
 }
 
 /// Resolves a single-series category → value [data] map into points whose x is
