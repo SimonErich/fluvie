@@ -38,6 +38,10 @@ Future<MediaResolver?> prepareSnapshotMedia(Set<SnapshotSource> sources) async {
       bundle: rootBundle,
       httpClient: const _OfflineHttpClient(),
       allowlist: NetworkAllowlist.allowAny(),
+      // Defense-in-depth: no untrusted snapshot reaches a FileSource today, but
+      // honor the untrusted define so this loader stays hardened if ever wired in.
+      // ignore: avoid_redundant_argument_values
+      blockFileSources: const bool.fromEnvironment('FLUVIE_BLOCK_FILE_SOURCES'),
     ),
   );
   await preResolveSnapshotsOnto(repository, sources);

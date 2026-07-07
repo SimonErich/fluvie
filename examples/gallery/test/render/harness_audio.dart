@@ -127,6 +127,10 @@ MediaRepository offlineAudioRepository() => MediaRepository(
     bundle: rootBundle,
     httpClient: const _OfflineAudioHttpClient(),
     allowlist: NetworkAllowlist.allowAny(),
+    // Defense-in-depth: untrusted audio is dropped upstream today, but honor the
+    // untrusted define so this loader stays hardened if ever wired in.
+    // ignore: avoid_redundant_argument_values
+    blockFileSources: const bool.fromEnvironment('FLUVIE_BLOCK_FILE_SOURCES'),
   ),
   probeService: const FfprobeVideoProbeService(),
   frameExtractor: const FfmpegFrameExtractionService(),
