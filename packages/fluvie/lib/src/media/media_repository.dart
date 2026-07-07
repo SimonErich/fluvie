@@ -86,6 +86,10 @@ final class MediaRepository
   /// the shared [ClipResolveCache].
   final Map<MediaSource, String> _clipPaths = {};
 
+  /// Temp directories staged for materialized audio and clip source files, so
+  /// [dispose] can delete them (each holds one written media file).
+  final Set<Directory> _stagedDirs = {};
+
   // Audio, reactive, snapshot, and caption caches keyed by source value: the
   // encoder `-i`s the materialized audio, `Trigger.beat` reads the grid, the
   // ReactiveScope the table, paint the snapshot raster (by content-hash
@@ -229,8 +233,18 @@ final class MediaRepository
   void dispose() {
     disposeCachedImages();
     disposeClipFrames();
-    // Delete the on-disk clip-frame store in the background (dispose is sync).
+    // Delete the on-disk clip-frame store in the background (it can hold many
+    // frame files); the staged source dirs hold one small file each, so delete
+    // them synchronously and tolerate a dir that is already gone.
     unawaited(clipFrameStore?.dispose() ?? Future<void>.value());
+    for (final dir in _stagedDirs) {
+      try {
+        dir.deleteSync(recursive: true);
+      } on FileSystemException {
+        // Best effort: an already-removed or locked temp dir is not fatal.
+      }
+    }
+    _stagedDirs.clear();
     for (final image in _snapshots.values) {
       image.dispose();
     }

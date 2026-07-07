@@ -29,6 +29,7 @@ extension _AudioResolution on MediaRepository {
   Future<String> _materializeAudio(AudioSource source) async {
     final bytes = await loader.load(_audioMediaSource(source));
     final dir = await Directory.systemTemp.createTemp('fluvie_audio_src_');
+    _stagedDirs.add(dir);
     final file = File('${dir.path}/${source.cacheKey}');
     await file.writeAsBytes(bytes);
     return file.path;

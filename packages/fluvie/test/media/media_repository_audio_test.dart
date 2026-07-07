@@ -117,5 +117,17 @@ void main() {
         ),
       );
     });
+
+    test('dispose deletes the staged audio source temp dir', () async {
+      final repo = _repo(assets: {'a.mp3': pcm});
+      const a = AudioSource.asset('a.mp3');
+      await repo.preResolveAudio(const [a]);
+      final dir = File(repo.materializedAudioPathFor(a)).parent;
+      expect(dir.existsSync(), isTrue);
+
+      repo.dispose();
+
+      expect(dir.existsSync(), isFalse);
+    });
   });
 }

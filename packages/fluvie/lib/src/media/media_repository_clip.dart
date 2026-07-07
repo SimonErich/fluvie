@@ -59,6 +59,7 @@ extension _ClipResolution on MediaRepository {
     if (existing != null) return existing;
     final bytes = await loader.load(source);
     final dir = await Directory.systemTemp.createTemp('fluvie_clip_src_');
+    _stagedDirs.add(dir);
     final file = File('${dir.path}/clip.mp4');
     await file.writeAsBytes(bytes);
     return _clipPaths[source] = file.path;
