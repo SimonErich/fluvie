@@ -157,11 +157,27 @@ void main() {
   });
 
   test('constructs its own http client when none is injected', () {
-    ApiRenderClient(baseUrl: base).close();
+    expect(() => ApiRenderClient(baseUrl: base).close(), returnsNormally);
   });
 
   test('close closes an injected client', () {
-    final mock = MockClient((_) async => http.Response('', 200));
-    client(mock).close();
+    final recording = _RecordingClient();
+    ApiRenderClient(baseUrl: base, httpClient: recording).close();
+    expect(recording.closed, isTrue);
   });
+}
+
+/// An http client that records whether it was closed, to prove `close`
+/// propagates to an injected client.
+class _RecordingClient extends http.BaseClient {
+  bool closed = false;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) => throw UnimplementedError();
+
+  @override
+  void close() {
+    closed = true;
+    super.close();
+  }
 }
