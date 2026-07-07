@@ -55,6 +55,12 @@ void main() {
       );
     });
   });
+
+  test('close closes the underlying http client', () {
+    final inner = _MockHttpClient();
+    HttpMediaHttpClient(inner).close();
+    verify(() => inner.close()).called(1);
+  });
 }
 
 class _Boom implements Exception {

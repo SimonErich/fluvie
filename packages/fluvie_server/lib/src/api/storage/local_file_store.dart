@@ -38,10 +38,15 @@ final class LocalFileStore implements FileStore {
     final sink = temp.openWrite();
     try {
       await sink.addStream(data);
-    } finally {
       await sink.close();
+      await temp.rename(file.path);
+    } on Object {
+      // A mid-stream (or rename) failure must not leave an orphan .tmp behind:
+      // close the sink and delete the partial file before surfacing the error.
+      await sink.close().catchError((Object _) {});
+      if (temp.existsSync()) temp.deleteSync();
+      rethrow;
     }
-    await temp.rename(file.path);
     await _metaFileFor(key).writeAsString(
       jsonEncode({
         'contentType': contentType,

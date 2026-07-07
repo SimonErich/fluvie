@@ -40,8 +40,18 @@ final class HttpMediaHttpClient implements MediaHttpClient {
     }
     return response.bodyBytes;
   }
+
+  /// Closes the underlying `http.Client`, releasing its connection pool. The
+  /// provider calls this when its container is disposed.
+  void close() => _inner.close();
 }
 
 /// The media HTTP client used by the byte loader; defaults to a real
-/// [HttpMediaHttpClient] and is overridable with a fake in tests.
-final mediaHttpClientProvider = Provider<MediaHttpClient>((ref) => HttpMediaHttpClient());
+/// [HttpMediaHttpClient] and is overridable with a fake in tests. The default
+/// client is closed when the container is disposed so its connections do not
+/// leak.
+final mediaHttpClientProvider = Provider<MediaHttpClient>((ref) {
+  final client = HttpMediaHttpClient();
+  ref.onDispose(client.close);
+  return client;
+});

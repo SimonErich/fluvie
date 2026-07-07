@@ -45,6 +45,20 @@ void main() {
     expect(read.expiresAt, expiry);
   });
 
+  test('put deletes the orphan .tmp when the data stream fails', () async {
+    await expectLater(
+      store.put(
+        'rnd_9/video.mp4',
+        Stream<List<int>>.error(StateError('stream boom')),
+        contentType: 'video/mp4',
+        visibility: StoreVisibility.private,
+      ),
+      throwsA(isA<StateError>()),
+    );
+    expect(File('${root.path}/rnd_9/video.mp4.tmp').existsSync(), isFalse);
+    expect(File('${root.path}/rnd_9/video.mp4').existsSync(), isFalse);
+  });
+
   test('put writes atomically (no leftover .tmp) and openRead streams the bytes', () async {
     await putVideo('rnd_1/video.mp4', bytes: [9, 8, 7]);
     expect(File('${root.path}/rnd_1/video.mp4.tmp').existsSync(), isFalse);

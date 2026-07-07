@@ -198,9 +198,17 @@ ReactiveTracks reactiveTracksFor(CompositionEntry entry) {
 /// the resampler maps into the clip finds a decoded frame waiting.
 Future<void> _preResolveWholeClip(MediaRepository repository, MediaSource clip) async {
   final path = await _materialize(clip);
-  final probe = await const FfprobeVideoProbeService().probe(path);
-  final frames = List<int>.generate(probe.nbFrames, (index) => index);
-  await repository.preResolveClip(clip, frames);
+  try {
+    final probe = await const FfprobeVideoProbeService().probe(path);
+    final frames = List<int>.generate(probe.nbFrames, (index) => index);
+    await repository.preResolveClip(clip, frames);
+  } finally {
+    // The materialized file existed only for the probe; the repository
+    // re-resolves the clip itself. Delete the temp dir so a multi-clip render
+    // does not pile up in /tmp (which can fill the tmpfs and hang the gate).
+    final dir = File(path).parent;
+    if (dir.existsSync()) dir.deleteSync(recursive: true);
+  }
 }
 
 /// Writes [clip]'s bytes to a temp file the probe can read, returning its path.
