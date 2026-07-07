@@ -1,18 +1,29 @@
 /// The Playground import allowlist: which libraries a submitted `Video build()`
 /// snippet may `import`/`export`. Everything else is rejected before the code is
-/// ever compiled or run, because the snippet executes as untrusted code inside a
-/// `flutter test` capture.
+/// compiled or run.
 ///
 /// Allowed:
-/// - any `package:fluvie/...` path (the public API and its `src/`),
-/// - any `package:flutter/...` library (the UI framework: `material`, `widgets`,
-///   `painting`, `animation`, ...), none of which can touch the filesystem or
-///   network — a composition is a widget tree,
+/// - `package:fluvie/fluvie.dart` — the single public barrel ONLY. Not the
+///   private `src/` tree (its `IoProcessRunner`/`readFileBytes` reach dart:io)
+///   and not the low-level `rendering.dart` pipeline barrel.
+/// - `package:flutter/<lib>.dart` — the framework's public libraries, but NOT
+///   `package:flutter/src/`.
 /// - `dart:math` and `dart:ui`.
 ///
-/// Rejected (a non-exhaustive list of the dangerous ones): `dart:io`, `dart:ffi`,
-/// `dart:isolate`, `dart:mirrors`, any `http`/network package, and any other
-/// third-party package — none of which a pure composition needs.
+/// Rejected: `dart:io`, `dart:ffi`, `dart:isolate`, `dart:mirrors`, any
+/// `http`/network package, any third-party package, and any package's `src/`.
+///
+/// SECURITY WARNING — this allowlist is DEFENSE IN DEPTH, not a boundary. The
+/// snippet is JIT-run with full VM privileges inside `flutter test`, and the
+/// allowed `package:flutter` surface still reaches the filesystem and network
+/// WITHOUT any `dart:io` import: `rootBundle` (flutter/services) reads arbitrary
+/// host paths under the tester, `NetworkImage` (flutter/painting) performs
+/// outbound requests, and `Image.file` reaches a raw file read. A red-team
+/// executed all three. Do NOT rely on this allowlist alone to contain untrusted
+/// code — the render must run under OS-level sandboxing (a locked-down
+/// process/container with no filesystem or network and dropped privileges)
+/// before the Playground is exposed to untrusted input. See
+/// `documentation/contributing/untrusted-render-security.md`.
 library;
 
 import 'package:analyzer/dart/analysis/utilities.dart';
