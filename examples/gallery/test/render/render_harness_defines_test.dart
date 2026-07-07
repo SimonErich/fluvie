@@ -140,4 +140,45 @@ void main() {
       expect(plain.ffmpegArgs, contains('libx264'));
     });
   });
+
+  group('assertRenderWithinBounds bounds an untrusted render', () {
+    test('rejects a canvas over the 8K pixel ceiling', () {
+      expect(
+        () =>
+            assertRenderWithinBounds(untrusted: true, width: 100000, height: 100000, frameCount: 1),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('rejects a total frame size over the byte budget', () {
+      expect(
+        () => assertRenderWithinBounds(
+          untrusted: true,
+          width: 7680,
+          height: 4320,
+          frameCount: 100000,
+        ),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('allows a normal untrusted preview', () {
+      expect(
+        () => assertRenderWithinBounds(untrusted: true, width: 1080, height: 1920, frameCount: 300),
+        returnsNormally,
+      );
+    });
+
+    test('never bounds a trusted render, however large', () {
+      expect(
+        () => assertRenderWithinBounds(
+          untrusted: false,
+          width: 100000,
+          height: 100000,
+          frameCount: 1000000,
+        ),
+        returnsNormally,
+      );
+    });
+  });
 }

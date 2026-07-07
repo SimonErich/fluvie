@@ -73,6 +73,53 @@ class _CountingCaptureService implements FrameCaptureService {
   }
 }
 
+/// The most pixels an untrusted render's final canvas may allocate (8K UHD): a
+/// frame buffer is width*height*4 bytes, so a bigger canvas OOMs the worker on
+/// frame 0.
+const int _maxUntrustedCanvasPixels = 7680 * 4320;
+
+/// The most raw-frame bytes an untrusted render may accumulate on disk
+/// (width*height*4 per frame, summed over the frame count). Bounds a runaway
+/// render's disk use independently of the wall-clock timeout.
+const int _maxUntrustedFrameBytes = 10 * 1024 * 1024 * 1024;
+
+/// Rejects an [untrusted] render whose final [width]x[height] canvas or total
+/// frame size is out of bounds, before the frame loop allocates anything. A
+/// trusted render (untrusted == false) is never bounded. Pure and directly
+/// unit-testable; [_guardUntrustedRender] reads the untrusted flag from the
+/// build define.
+void assertRenderWithinBounds({
+  required bool untrusted,
+  required int width,
+  required int height,
+  required int frameCount,
+}) {
+  if (!untrusted) return;
+  if (width <= 0 || height <= 0 || width * height > _maxUntrustedCanvasPixels) {
+    throw StateError(
+      'Untrusted render canvas ${width}x$height exceeds the '
+      '$_maxUntrustedCanvasPixels-pixel limit.',
+    );
+  }
+  if (frameCount < 0 || width * height * 4 * frameCount > _maxUntrustedFrameBytes) {
+    throw StateError(
+      'Untrusted render of $frameCount ${width}x$height frames exceeds the '
+      '$_maxUntrustedFrameBytes-byte limit.',
+    );
+  }
+}
+
+/// `FLUVIE_BLOCK_FILE_SOURCES` marks an untrusted render (a Playground snippet,
+/// a posted spec, or an AI-authored spec); a trusted key/desktop render keeps
+/// whatever size it declares, so the bound applies only under that define.
+void _guardUntrustedRender({required int width, required int height, required int frameCount}) =>
+    assertRenderWithinBounds(
+      untrusted: const bool.fromEnvironment('FLUVIE_BLOCK_FILE_SOURCES'),
+      width: width,
+      height: height,
+      frameCount: frameCount,
+    );
+
 /// Mounts [entry] in capture mode and renders it into [outDir]
 /// (`frames.rgba` + `manifest.json`, manifest written last).
 ///
@@ -109,6 +156,12 @@ Future<RenderManifest> runCaptureHarness({
   final size = aspect?.sizeFor(entry.width > entry.height ? entry.width : entry.height);
   final width = size?.width ?? entry.width;
   final height = size?.height ?? entry.height;
+  final frameCount = frameCountOverride ?? entry.frameCount;
+  // The one chokepoint every render passes with its FINAL, post-aspect canvas
+  // and frame count. An untrusted render's size is runtime-derived (a snippet's
+  // Video(size:) or a spec width/height, possibly reshaped by aspect), so this
+  // is the only place a bound can be enforced for every path.
+  _guardUntrustedRender(width: width, height: height, frameCount: frameCount);
   tester.view.physicalSize = ui.Size(width.toDouble(), height.toDouble());
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
@@ -118,7 +171,7 @@ Future<RenderManifest> runCaptureHarness({
     width: width,
     height: height,
     fps: entry.fps,
-    frameCount: frameCountOverride ?? entry.frameCount,
+    frameCount: frameCount,
     cacheEnabled: cacheEnabled,
     quality: quality ?? Quality.high,
   );
