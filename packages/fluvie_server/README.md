@@ -1,5 +1,8 @@
 # fluvie_server
 
+[![pub package](https://img.shields.io/pub/v/fluvie_server.svg)](https://pub.dev/packages/fluvie_server)
+[![license: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+
 One self-hostable server for the full AI power of [Fluvie](https://fluvie.dev): the
 render API, AI authoring, the MCP server, and a documentation helper, all in one
 binary. Enable the parts you want with environment variables; install one image,

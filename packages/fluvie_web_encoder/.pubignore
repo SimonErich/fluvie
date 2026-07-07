@@ -1,0 +1,4 @@
+# Kept in the repo for the working demo, but too heavy for the published
+# archive: the demo audio loop and the ffmpeg-fetch build script.
+example/assets/audio/beat_loop.wav
+example/tool/
