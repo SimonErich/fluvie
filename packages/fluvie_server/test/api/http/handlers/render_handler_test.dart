@@ -91,6 +91,24 @@ void main() {
       expect(await jobs.get('rnd_0'), isNull, reason: 'must not enqueue an OOM-sized spec');
     });
 
+    test('rejects a dimension that would overflow width*height', () async {
+      // 2^32 * 2^32 wraps to 0; the per-axis check must reject it anyway.
+      await expectLater(
+        handler().create(
+          post({
+            'spec': {
+              'size': {'width': 4294967296, 'height': 4294967296},
+              'scenes': [
+                {'duration': '1s'},
+              ],
+            },
+          }),
+        ),
+        throwsA(isA<ApiError>().having((e) => e.statusCode, 'statusCode', 400)),
+      );
+      expect(await jobs.get('rnd_0'), isNull);
+    });
+
     test('accepts a spec within the ceiling', () async {
       final response = await handler().create(
         post({

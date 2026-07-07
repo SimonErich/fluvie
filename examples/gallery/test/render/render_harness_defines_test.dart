@@ -142,7 +142,7 @@ void main() {
   });
 
   group('assertRenderWithinBounds bounds an untrusted render', () {
-    test('rejects a canvas over the 8K pixel ceiling', () {
+    test('rejects a canvas over the 8K per-axis ceiling', () {
       expect(
         () =>
             assertRenderWithinBounds(untrusted: true, width: 100000, height: 100000, frameCount: 1),
@@ -150,7 +150,22 @@ void main() {
       );
     });
 
-    test('rejects a total frame size over the byte budget', () {
+    test('rejects a dimension that would overflow width*height to a small value', () {
+      // 2^32 * 2^32 wraps to 0 in a 64-bit multiply; the per-axis check catches
+      // it first, before the product is ever formed.
+      const overflowDim = 1 << 32;
+      expect(
+        () => assertRenderWithinBounds(
+          untrusted: true,
+          width: overflowDim,
+          height: overflowDim,
+          frameCount: 1,
+        ),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('rejects a frame count over the frame budget', () {
       expect(
         () => assertRenderWithinBounds(
           untrusted: true,

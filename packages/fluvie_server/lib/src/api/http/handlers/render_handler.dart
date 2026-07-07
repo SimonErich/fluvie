@@ -53,12 +53,15 @@ final class RenderHandler {
   /// The largest accepted `code` snippet, in bytes.
   final int maxCodeBytes;
 
-  /// The most pixels a posted spec's explicit `{width, height}` canvas may
-  /// declare (8K UHD). A spec is untrusted, and the harness allocates a frame
-  /// buffer of `width * height * 4` bytes, so an unbounded size (e.g.
-  /// 100000x100000) would exhaust the worker's memory on the first frame. Named
-  /// presets (`reels`/`square`/`hd`/`fourK`) are always within this ceiling.
-  static const int _maxSpecPixels = 7680 * 4320;
+  /// The most pixels a posted spec's explicit `{width, height}` canvas may span
+  /// on either axis (8K). A spec is untrusted and the harness allocates a
+  /// `width * height * 4` frame buffer, so an unbounded size OOMs the worker.
+  /// The bound is PER AXIS, checked before any multiply, so a huge dimension
+  /// cannot overflow `width * height` to a small value and slip through. Named
+  /// presets (`reels`/`square`/`hd`/`fourK`) are always within this ceiling. The
+  /// authoritative bound is at the capture chokepoint (post-aspect); this is the
+  /// cheap early reject.
+  static const int _maxSpecDimension = 7680;
 
   /// Creates a render job from the request body.
   Future<Response> create(Request request) async {
@@ -180,9 +183,12 @@ final class RenderHandler {
     final width = size['width'];
     final height = size['height'];
     if (width is! int || height is! int) return;
-    if (width <= 0 || height <= 0 || width * height > _maxSpecPixels) {
+    // Per-axis, before any multiply: a huge width or height must not overflow
+    // width*height to a small (or negative) value and pass.
+    if (width <= 0 || height <= 0 || width > _maxSpecDimension || height > _maxSpecDimension) {
       throw ApiError.badRequest(
-        'size must be positive and at most $_maxSpecPixels pixels (8K); got ${width}x$height',
+        'each of width and height must be positive and at most $_maxSpecDimension (8K); '
+        'got ${width}x$height',
       );
     }
   }
