@@ -100,5 +100,18 @@ final class DiffPainter extends CustomPainter {
       oldDelegate.theme != theme ||
       oldDelegate.fontSize != fontSize ||
       oldDelegate.fontFamily != fontFamily ||
-      !listEquals(oldDelegate.lines, lines);
+      !listEquals(oldDelegate.lines, lines) ||
+      !_tokensEqual(oldDelegate.tokensPerLine, tokensPerLine);
+
+  /// Deep value-equality over the per-line highlight tokens: `paint` reads
+  /// [tokensPerLine], so re-highlighting the same text (a language change) must
+  /// repaint even when [lines] and [progress] are unchanged. A flat `listEquals`
+  /// would compare the inner lists by identity and miss it.
+  static bool _tokensEqual(List<List<CodeToken>> a, List<List<CodeToken>> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (!listEquals(a[i], b[i])) return false;
+    }
+    return true;
+  }
 }

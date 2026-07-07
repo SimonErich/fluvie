@@ -285,6 +285,17 @@ void main() {
       final b = await _diffAt(tester, const Code.diff(_before, _after, language: 'dart'));
       expect(b.shouldRepaint(a), isFalse);
     });
+
+    testWidgets('repaints when only the highlight tokens differ', (tester) async {
+      // Same diff text (so lines and progress match), re-highlighted in a
+      // different language: only tokensPerLine changes, and paint reads it.
+      final dart = await _diffAt(tester, const Code.diff(_before, _after, language: 'dart'));
+      final plain = await _diffAt(
+        tester,
+        const Code.diff(_before, _after, language: 'plaintext'),
+      );
+      expect(plain.shouldRepaint(dart), isTrue);
+    });
   });
 }
 
