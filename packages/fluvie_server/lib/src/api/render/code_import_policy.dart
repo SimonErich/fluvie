@@ -15,6 +15,9 @@
 /// third-party package — none of which a pure composition needs.
 library;
 
+import 'package:analyzer/dart/analysis/utilities.dart';
+import 'package:analyzer/dart/ast/ast.dart';
+
 /// Libraries a snippet may import or export, matched exactly.
 const Set<String> _allowedExact = {'dart:math', 'dart:ui'};
 
@@ -22,41 +25,42 @@ const Set<String> _allowedExact = {'dart:math', 'dart:ui'};
 /// The flutter framework is pure UI — it exposes no filesystem or socket APIs.
 const List<String> _allowedPrefixes = ['package:fluvie/', 'package:flutter/'];
 
-// A whole import/export directive from the start of a (possibly indented) line
-// up to its terminating semicolon. Anchored to a line start so an import-like
-// string inside a body or a trailing comment is not mistaken for a directive.
-// Spans lines because a directive may wrap, and captures the whole directive so
-// every URI it names is checked (see [disallowedImports]).
-final RegExp _directive = RegExp(
-  r'''^[ \t]*(?:import|export)\b[^;]*;''',
-  multiLine: true,
-);
-
-// A quoted URI inside a directive.
-final RegExp _uri = RegExp('''['"]([^'"]+)['"]''');
-
-// A whole-line `//` comment, removed before scanning so a commented-out import
-// is ignored.
-final RegExp _lineComment = RegExp(r'^[ \t]*//.*$', multiLine: true);
-
 /// The libraries [code] imports or exports that are not on the allowlist, in
 /// source order with duplicates removed. Empty means the snippet's imports are
 /// safe to compile.
 ///
-/// Every URI a directive names is checked, so a conditional import
-/// (`import '...' if (dart.library.io) 'dart:io';`) cannot smuggle a disallowed
-/// library past the allowlist through its second URI.
+/// The snippet is parsed with the real Dart front end (`parseString`), so every
+/// `import`/`export` directive is seen exactly as the compiler will see it —
+/// regardless of how many share a physical line, of leading block comments or
+/// metadata annotations, or of adjacent-string URIs. A hand-rolled scan over the
+/// source text cannot make that guarantee, and this is a security boundary: the
+/// snippet runs as untrusted code, so a directive we fail to see is a directive
+/// that reaches, say, `dart:io`. Every URI a directive names — including each
+/// branch of a conditional `import '...' if (...) '...'` — is checked.
 List<String> disallowedImports(String code) {
-  final scrubbed = code.replaceAll(_lineComment, '');
+  // throwIfDiagnostics: false so a snippet that does not fully parse still
+  // yields a best-effort unit; the directives the parser does recognize are the
+  // ones the compiler would honor, which is exactly the set we must gate.
+  final unit = parseString(content: code, throwIfDiagnostics: false).unit;
   final disallowed = <String>[];
-  for (final directive in _directive.allMatches(scrubbed)) {
-    for (final match in _uri.allMatches(directive.group(0)!)) {
-      final uri = match.group(1)!;
-      if (_isAllowed(uri) || disallowed.contains(uri)) continue;
+  for (final directive in unit.directives) {
+    if (directive is! NamespaceDirective) continue; // import or export only
+    for (final uri in _urisOf(directive)) {
+      if (uri == null || _isAllowed(uri) || disallowed.contains(uri)) continue;
       disallowed.add(uri);
     }
   }
   return disallowed;
+}
+
+/// The default URI plus every conditional-configuration URI a directive names.
+/// A `null` URI (an interpolated string, which cannot be a real import target)
+/// is yielded and skipped by the caller.
+Iterable<String?> _urisOf(NamespaceDirective directive) sync* {
+  yield directive.uri.stringValue;
+  for (final configuration in directive.configurations) {
+    yield configuration.uri.stringValue;
+  }
 }
 
 bool _isAllowed(String uri) {

@@ -90,6 +90,31 @@ import 'package:flutter/widgets.dart'
       expect(disallowedImports(code), contains('dart:io'));
     });
 
+    test('rejects a second directive sharing a physical line with an allowed one', () {
+      // A line-anchored scan sees only the first directive; the real parser
+      // sees both, so the smuggled dart:io is caught.
+      expect(
+        disallowedImports("import 'dart:math'; import 'dart:io';"),
+        contains('dart:io'),
+      );
+    });
+
+    test('rejects a directive hidden behind a leading block comment', () {
+      expect(disallowedImports("/* c */ import 'dart:io';"), contains('dart:io'));
+    });
+
+    test('rejects a metadata-annotated directive', () {
+      expect(
+        disallowedImports("@Deprecated('x') import 'dart:io';"),
+        contains('dart:io'),
+      );
+    });
+
+    test('rejects an adjacent-string uri that concatenates to a banned library', () {
+      // 'dart:' 'io' is one StringLiteral whose value is dart:io.
+      expect(disallowedImports("import 'dart:' 'io';"), contains('dart:io'));
+    });
+
     test('allows a conditional whose branches are all on the allowlist', () {
       const code =
           "import 'package:fluvie/fluvie.dart' "
