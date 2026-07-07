@@ -144,5 +144,20 @@ void main() {
       ).map((image) => (image.mediaSource! as NetworkSource).url.toString()).toList();
       expect(urls, ['https://ex.com/a.png', 'https://ex.com/b.png']);
     });
+
+    test('collects images in headings, lists, and blockquotes', () {
+      expect(collected('# ![h](https://ex.com/h.png)'), hasLength(1));
+      expect(collected('- ![l](https://ex.com/l.png)'), hasLength(1));
+      expect(collected('> ![q](https://ex.com/q.png)'), hasLength(1));
+      // Bold-wrapped image inside a paragraph still descends.
+      expect(collected('text **![b](https://ex.com/b.png)** more'), hasLength(1));
+    });
+
+    test('does not collect an image the renderer never paints (a GFM table cell)', () {
+      // The table renders as fallback plain text (no Image), so pre-resolving its
+      // image would fail a document that renders fine on a bad URL.
+      const doc = '| a | b |\n|---|---|\n| x | ![t](https://ex.com/t.png) |';
+      expect(collected(doc), isEmpty);
+    });
   });
 }
