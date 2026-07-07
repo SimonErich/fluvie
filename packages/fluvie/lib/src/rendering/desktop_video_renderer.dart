@@ -41,17 +41,19 @@ final class DesktopVideoRenderer implements VideoRenderer<File> {
     FfmpegRunner? runner,
     RenderService? service,
     Future<Directory> Function()? sandboxFactory,
+    void Function(String message)? onWarning,
     this.mediaResolver,
     this.networkAllowlist,
   }) : _runner = runner ?? ProcessFfmpegRunner(),
        _service = service ?? RenderService(capture: const RepaintBoundaryCaptureService()),
-       _sandboxFactory = sandboxFactory ?? _defaultSandboxFactory;
+       _sandboxFactory = sandboxFactory ?? _defaultSandboxFactory,
+       _onWarning = onWarning ?? _defaultWarn;
 
   /// Sink for renderer warnings (e.g. a `Video` declares audio but `audio:
-  /// false` drops it). Defaults to [debugPrint]; replace it to route warnings.
-  static void Function(String message) onWarning = _defaultWarn;
+  /// false` drops it). Defaults to [debugPrint]; inject one to route warnings.
+  final void Function(String message) _onWarning;
 
-  // coverage:ignore-line the default sink runs only when onWarning is not overridden which tests always do
+  // coverage:ignore-line the default sink runs only when no onWarning is injected which tests always do
   static void _defaultWarn(String message) => debugPrint('fluvie: $message');
 
   /// Mounts the capture shell into the host's element tree.
@@ -78,7 +80,7 @@ final class DesktopVideoRenderer implements VideoRenderer<File> {
   ///
   /// With [audio] left `true`, a `Video`'s declared `Audio` tracks are staged
   /// into the FFmpeg mix; pass `false` for a silent render (warned once
-  /// through [onWarning] unless [warnOnDroppedAudio] is `false`).
+  /// through the injected warning sink unless [warnOnDroppedAudio] is `false`).
   @override
   Future<File> render({
     required Widget composition,
@@ -132,7 +134,7 @@ final class DesktopVideoRenderer implements VideoRenderer<File> {
     } finally {
       await runGuarded([
         scope.dispose,
-      ], (error, _) => onWarning('Cleanup after render failed: $error'));
+      ], (error, _) => _onWarning('Cleanup after render failed: $error'));
     }
   }
 
@@ -145,7 +147,7 @@ final class DesktopVideoRenderer implements VideoRenderer<File> {
       warn: warn,
       fps: fps,
       frameCount: frameCount,
-      warnSink: onWarning,
+      warnSink: _onWarning,
       platformLabel: 'local',
     );
   }

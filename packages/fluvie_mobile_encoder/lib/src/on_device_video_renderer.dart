@@ -35,7 +35,7 @@ typedef SandboxFactory = Future<Directory> Function();
 /// Every dependency is injected so the orchestration is unit-testable. Audio is
 /// opt-in: pass `audio: true` to [render] to decode, mix, and mux a `Video`'s
 /// declared `Audio` tracks; by default a `Video` with audio renders silent and
-/// (unless silenced) [render] warns through [onWarning].
+/// (unless silenced) [render] warns through the injected warning sink.
 final class OnDeviceVideoRenderer implements VideoRenderer<File> {
   /// Creates a renderer over its seams; the defaults target a real device.
   ///
@@ -48,20 +48,22 @@ final class OnDeviceVideoRenderer implements VideoRenderer<File> {
     SandboxFactory? sandboxFactory,
     RenderService? service,
     MobileAudioMaterializer? audioMaterializer,
+    void Function(String message)? onWarning,
     this.mediaResolver,
     this.networkAllowlist,
   }) : _encoder = encoder ?? const MethodChannelMobileVideoEncoder(),
        _hostFactory = hostFactory ?? _defaultHostFactory,
        _sandboxFactory = sandboxFactory ?? _defaultSandboxFactory,
        _service = service ?? RenderService(capture: const RepaintBoundaryCaptureService()),
-       _audioMaterializer = audioMaterializer ?? BundleAudioMaterializer();
+       _audioMaterializer = audioMaterializer ?? BundleAudioMaterializer(),
+       _onWarning = onWarning ?? _defaultWarn;
 
   /// Sink for renderer warnings (e.g. a `Video` declares audio but on-device
-  /// audio is off). Defaults to [debugPrint]; replace it to route warnings (a
+  /// audio is off). Defaults to [debugPrint]; inject one to route warnings (a
   /// test captures them here).
-  static void Function(String message) onWarning = _defaultWarn;
+  final void Function(String message) _onWarning;
 
-  // coverage:ignore-line the default sink runs only when onWarning is not overridden which tests always do
+  // coverage:ignore-line the default sink runs only when no onWarning is injected which tests always do
   static void _defaultWarn(String message) => debugPrint('fluvie_mobile_encoder: $message');
 
   final MobileVideoEncoder _encoder;
@@ -91,7 +93,7 @@ final class OnDeviceVideoRenderer implements VideoRenderer<File> {
   ///
   /// When [composition] is a `Video` with declared `Audio`, pass [audio] `true`
   /// to decode, mix, and mux those tracks; left `false` the render is silent and,
-  /// unless [warnOnDroppedAudio] is `false`, [onWarning] is called once. Audio is
+  /// unless [warnOnDroppedAudio] is `false`, the injected warning sink is called once. Audio is
   /// resolved with the renderer's `MobileAudioMaterializer`.
   ///
   /// Throws an [ArgumentError] for a non-positive [duration] or [fps], and a
@@ -164,6 +166,7 @@ final class OnDeviceVideoRenderer implements VideoRenderer<File> {
         fps: fps,
         frameCount: frameCount,
         materializer: _audioMaterializer,
+        warnSink: _onWarning,
       );
       final outputPath = outputFile?.path ?? '${sandbox.path}/${manifest.outputFileName}';
       onProgress?.call(RenderProgress(RenderPhase.encoding, compositionKey: compositionKey));
@@ -192,12 +195,14 @@ final class OnDeviceVideoRenderer implements VideoRenderer<File> {
       await runGuarded([
         host.dispose,
         () async {
-          if (resolver is DisposableResolver) {
+          // Only dispose the resolver this render built; a caller-injected
+          // resolver is the caller's to dispose.
+          if (ownedContainer != null && resolver is DisposableResolver) {
             (resolver as DisposableResolver).dispose();
           }
           ownedContainer?.dispose();
         },
-      ], (error, _) => onWarning('Cleanup after render failed: $error'));
+      ], (error, _) => _onWarning('Cleanup after render failed: $error'));
     }
   }
 

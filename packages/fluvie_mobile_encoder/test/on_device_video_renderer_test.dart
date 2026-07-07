@@ -145,12 +145,9 @@ void main() {
 
   testWidgets('a cleanup failure is reported, not masked, and the render succeeds', (tester) async {
     final messages = <String>[];
-    final previous = OnDeviceVideoRenderer.onWarning;
-    OnDeviceVideoRenderer.onWarning = messages.add;
-    addTearDown(() => OnDeviceVideoRenderer.onWarning = previous);
-
     final sandbox = _sandbox();
     final renderer = OnDeviceVideoRenderer(
+      onWarning: messages.add,
       encoder: FakeMobileVideoEncoder(),
       hostFactory: (size) => _ThrowingDisposeHost(tester, size),
       sandboxFactory: () async => sandbox,
@@ -305,12 +302,9 @@ void main() {
 
     testWidgets('warns once when a Video has audio but audio is off', (tester) async {
       final messages = <String>[];
-      final previous = OnDeviceVideoRenderer.onWarning;
-      OnDeviceVideoRenderer.onWarning = messages.add;
-      addTearDown(() => OnDeviceVideoRenderer.onWarning = previous);
-
       final encoder = FakeMobileVideoEncoder();
       final renderer = OnDeviceVideoRenderer(
+        onWarning: messages.add,
         encoder: encoder,
         hostFactory: (size) => _TesterCaptureHost(tester, size),
         sandboxFactory: () async => _sandbox(),
@@ -332,12 +326,9 @@ void main() {
 
     testWidgets('stays silent without warning when warnings are suppressed', (tester) async {
       final messages = <String>[];
-      final previous = OnDeviceVideoRenderer.onWarning;
-      OnDeviceVideoRenderer.onWarning = messages.add;
-      addTearDown(() => OnDeviceVideoRenderer.onWarning = previous);
-
       final encoder = FakeMobileVideoEncoder();
       final renderer = OnDeviceVideoRenderer(
+        onWarning: messages.add,
         encoder: encoder,
         hostFactory: (size) => _TesterCaptureHost(tester, size),
         sandboxFactory: () async => _sandbox(),
@@ -359,12 +350,9 @@ void main() {
 
     testWidgets('a Video with no audio neither warns nor adds tracks', (tester) async {
       final messages = <String>[];
-      final previous = OnDeviceVideoRenderer.onWarning;
-      OnDeviceVideoRenderer.onWarning = messages.add;
-      addTearDown(() => OnDeviceVideoRenderer.onWarning = previous);
-
       final encoder = FakeMobileVideoEncoder();
       final renderer = OnDeviceVideoRenderer(
+        onWarning: messages.add,
         encoder: encoder,
         hostFactory: (size) => _TesterCaptureHost(tester, size),
         sandboxFactory: () async => _sandbox(),

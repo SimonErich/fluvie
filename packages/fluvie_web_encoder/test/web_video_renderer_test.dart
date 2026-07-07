@@ -195,11 +195,8 @@ void main() {
 
   testWidgets('a cleanup failure is reported, not masked, and the render succeeds', (tester) async {
     final warnings = <String>[];
-    final previous = WebVideoRenderer.onWarning;
-    WebVideoRenderer.onWarning = warnings.add;
-    addTearDown(() => WebVideoRenderer.onWarning = previous);
-
     final renderer = WebVideoRenderer(
+      onWarning: warnings.add,
       encoder: WebVideoEncoder(runtime: FakeWasmRuntime()),
       hostFactory: (size) => _ThrowingDisposeHost(tester, size),
     );
@@ -267,12 +264,9 @@ void main() {
 
   testWidgets('a Video with audio but audio:false renders silent and warns once', (tester) async {
     final warnings = <String>[];
-    final previous = WebVideoRenderer.onWarning;
-    WebVideoRenderer.onWarning = warnings.add;
-    addTearDown(() => WebVideoRenderer.onWarning = previous);
-
     final runtime = FakeWasmRuntime();
     final renderer = WebVideoRenderer(
+      onWarning: warnings.add,
       encoder: WebVideoEncoder(runtime: runtime),
       hostFactory: (size) => _TesterHost(tester, size),
       audioMaterializer: _FakeAudioMaterializer(),
@@ -293,11 +287,8 @@ void main() {
 
   testWidgets('warnOnDroppedAudio:false suppresses the silent-render warning', (tester) async {
     final warnings = <String>[];
-    final previous = WebVideoRenderer.onWarning;
-    WebVideoRenderer.onWarning = warnings.add;
-    addTearDown(() => WebVideoRenderer.onWarning = previous);
-
     final renderer = WebVideoRenderer(
+      onWarning: warnings.add,
       encoder: WebVideoEncoder(runtime: FakeWasmRuntime()),
       hostFactory: (size) => _TesterHost(tester, size),
       audioMaterializer: _FakeAudioMaterializer(),
@@ -318,12 +309,9 @@ void main() {
 
   testWidgets('a non-MP4 export with audio:true drops audio and warns', (tester) async {
     final warnings = <String>[];
-    final previous = WebVideoRenderer.onWarning;
-    WebVideoRenderer.onWarning = warnings.add;
-    addTearDown(() => WebVideoRenderer.onWarning = previous);
-
     final runtime = FakeWasmRuntime();
     final renderer = WebVideoRenderer(
+      onWarning: warnings.add,
       encoder: WebVideoEncoder(runtime: runtime),
       hostFactory: (size) => _TesterHost(tester, size),
       audioMaterializer: _FakeAudioMaterializer(),

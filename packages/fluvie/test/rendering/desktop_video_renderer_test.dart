@@ -52,13 +52,18 @@ void _pinView(WidgetTester tester) {
   addTearDown(tester.view.resetDevicePixelRatio);
 }
 
-DesktopVideoRenderer _renderer(WidgetTester tester, _RecordingRunner runner, Directory sandbox) =>
-    DesktopVideoRenderer(
-      pumpWidget: tester.pumpWidget,
-      pumpFrame: () => tester.pump(),
-      runner: runner,
-      sandboxFactory: () async => sandbox,
-    );
+DesktopVideoRenderer _renderer(
+  WidgetTester tester,
+  _RecordingRunner runner,
+  Directory sandbox, {
+  void Function(String message)? onWarning,
+}) => DesktopVideoRenderer(
+  pumpWidget: tester.pumpWidget,
+  pumpFrame: () => tester.pump(),
+  runner: runner,
+  sandboxFactory: () async => sandbox,
+  onWarning: onWarning,
+);
 
 void main() {
   testWidgets('renders a composition to an MP4 file through the runner', (tester) async {
@@ -94,12 +99,8 @@ void main() {
     addTearDown(() => sandbox.deleteSync(recursive: true));
 
     final warnings = <String>[];
-    final previous = DesktopVideoRenderer.onWarning;
-    DesktopVideoRenderer.onWarning = warnings.add;
-    addTearDown(() => DesktopVideoRenderer.onWarning = previous);
-
     await tester.runAsync(() async {
-      await _renderer(tester, runner, sandbox).render(
+      await _renderer(tester, runner, sandbox, onWarning: warnings.add).render(
         composition: _withAudio(),
         aspect: Aspect.square,
         duration: const Duration(milliseconds: 66),
@@ -124,12 +125,8 @@ void main() {
     addTearDown(() => sandbox.deleteSync(recursive: true));
 
     final warnings = <String>[];
-    final previous = DesktopVideoRenderer.onWarning;
-    DesktopVideoRenderer.onWarning = warnings.add;
-    addTearDown(() => DesktopVideoRenderer.onWarning = previous);
-
     await tester.runAsync(() async {
-      await _renderer(tester, runner, sandbox).render(
+      await _renderer(tester, runner, sandbox, onWarning: warnings.add).render(
         composition: _withAudio(),
         aspect: Aspect.square,
         duration: const Duration(milliseconds: 66),

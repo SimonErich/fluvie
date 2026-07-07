@@ -10,6 +10,7 @@ Future<({List<MobileAudioTrack> tracks, double masterVolume})> _resolveAudioTrac
   required int fps,
   required int frameCount,
   required MobileAudioMaterializer materializer,
+  required void Function(String message) warnSink,
 }) async {
   final mix = gateOptInAudio(
     composition: composition,
@@ -17,7 +18,7 @@ Future<({List<MobileAudioTrack> tracks, double masterVolume})> _resolveAudioTrac
     warn: warn,
     fps: fps,
     frameCount: frameCount,
-    warnSink: OnDeviceVideoRenderer.onWarning,
+    warnSink: warnSink,
     platformLabel: 'on-device',
   );
   if (mix == null) return (tracks: const <MobileAudioTrack>[], masterVolume: 1.0);

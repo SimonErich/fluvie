@@ -25,7 +25,7 @@ typedef WebCaptureHostFactory = WebCaptureHost Function(Size size);
 /// Audio is opt-in: pass `audio: true` to [render] to mix and mux a `Video`'s
 /// declared `Audio` tracks (asset or allowlisted network audio); by default a
 /// `Video` with audio renders silent and (unless silenced) warns through
-/// [onWarning]. Every dependency is injected so the orchestration is
+/// the injected warning sink. Every dependency is injected so the orchestration is
 /// unit-testable: tests pass a tester-backed [WebCaptureHost], a [WebVideoEncoder]
 /// over a fake runtime, and a fake [WebAudioMaterializer].
 final class WebVideoRenderer implements VideoRenderer<Uint8List> {
@@ -36,6 +36,7 @@ final class WebVideoRenderer implements VideoRenderer<Uint8List> {
     WebAudioMaterializer? audioMaterializer,
     WebClipDecoder? clipDecoder,
     FrameEncoder? frameEncoder,
+    void Function(String message)? onWarning,
     this.mediaResolver,
     this.networkAllowlist,
   }) : _hostFactory = hostFactory ?? _defaultHostFactory,
@@ -44,7 +45,8 @@ final class WebVideoRenderer implements VideoRenderer<Uint8List> {
        // coverage:ignore-line the default materializer reads rootBundle only in a browser
        _audioMaterializer = audioMaterializer ?? BundleWebAudioMaterializer(),
        _clipDecoder = clipDecoder ?? createWebClipDecoder(),
-       _frameEncoder = frameEncoder ?? encodeFramePng;
+       _frameEncoder = frameEncoder ?? encodeFramePng,
+       _onWarning = onWarning ?? _defaultWarn;
 
   /// The injected media resolver, or null to build (and dispose) one per
   /// [render] from `mediaResolverProvider` — a `WebImageMediaResolver` on web,
@@ -58,11 +60,11 @@ final class WebVideoRenderer implements VideoRenderer<Uint8List> {
   final NetworkAllowlist? networkAllowlist;
 
   /// Sink for renderer warnings (for example a `Video` declares audio but
-  /// in-browser audio is off). Defaults to [debugPrint]; replace it to route
+  /// in-browser audio is off). Defaults to [debugPrint]; inject one to route
   /// warnings (a test captures them here).
-  static void Function(String message) onWarning = _defaultWarn;
+  final void Function(String message) _onWarning;
 
-  // coverage:ignore-line the default sink runs only when onWarning is not overridden which tests always do
+  // coverage:ignore-line the default sink runs only when no onWarning is injected which tests always do
   static void _defaultWarn(String message) => debugPrint('fluvie_web_encoder: $message');
 
   final WebVideoEncoder _encoder;
@@ -89,7 +91,7 @@ final class WebVideoRenderer implements VideoRenderer<Uint8List> {
   ///
   /// When [composition] is a `Video` with declared `Audio`, pass [audio] `true`
   /// to mix and mux those tracks; left `false` the render is silent and, unless
-  /// [warnOnDroppedAudio] is `false`, [onWarning] is called once. Audio rides the
+  /// [warnOnDroppedAudio] is `false`, the injected warning sink is called once. Audio rides the
   /// MP4 export only — a GIF or transparent [export] drops it (also warned).
   ///
   /// Throws an [ArgumentError] for a non-positive [duration] or [fps], and a
@@ -171,7 +173,7 @@ final class WebVideoRenderer implements VideoRenderer<Uint8List> {
       await runGuarded([
         host.dispose,
         scope.dispose,
-      ], (error, _) => onWarning('Cleanup after render failed: $error'));
+      ], (error, _) => _onWarning('Cleanup after render failed: $error'));
     }
   }
 
@@ -192,7 +194,7 @@ final class WebVideoRenderer implements VideoRenderer<Uint8List> {
       export: export,
       fps: fps,
       frameCount: frameCount,
-      warnSink: onWarning,
+      warnSink: _onWarning,
       platformLabel: 'in-browser',
     );
     if (mix == null) return (tracks: const <ResolvedAudioTrack>[], masterVolume: 1.0);
