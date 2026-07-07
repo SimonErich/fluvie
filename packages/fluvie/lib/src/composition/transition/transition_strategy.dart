@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
-import 'package:fluvie/src/composition/transition/fade_strategies.dart';
-import 'package:fluvie/src/composition/transition/move_strategies.dart';
+import 'package:fluvie/src/composition/transition/cross_fade_strategy.dart';
+import 'package:fluvie/src/composition/transition/slide_strategy.dart';
+import 'package:fluvie/src/composition/transition/wipe_strategy.dart';
+import 'package:fluvie/src/composition/transition/zoom_strategy.dart';
 import 'package:fluvie/src/core/transition.dart';
 
 /// One blend interface, many strategies: how a [Transition]

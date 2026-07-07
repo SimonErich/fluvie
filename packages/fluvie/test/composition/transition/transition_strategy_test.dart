@@ -1,8 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluvie/src/composition/transition/fade_strategies.dart';
-import 'package:fluvie/src/composition/transition/move_strategies.dart';
+import 'package:fluvie/src/composition/transition/cross_fade_strategy.dart';
+import 'package:fluvie/src/composition/transition/slide_strategy.dart';
 import 'package:fluvie/src/composition/transition/transition_strategy.dart';
+import 'package:fluvie/src/composition/transition/wipe_strategy.dart';
+import 'package:fluvie/src/composition/transition/zoom_strategy.dart';
 import 'package:fluvie/src/core/edge.dart';
 import 'package:fluvie/src/core/time_extensions.dart';
 import 'package:fluvie/src/core/transition.dart';
