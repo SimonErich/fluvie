@@ -24,8 +24,11 @@ dependencies:
   # DartLintRule.testRun, which is @visibleForTesting, so a patch bump could
   # still move it — the rule-fires test guards against silent drift.
   custom_lint_builder: ^0.8.1
-  fluvie: ^0.2.0
   fluvie_lints: ^0.2.0
 dev_dependencies:
   coverage: ^1.15.1
+  # Only test/ and example/ resolve snippets against package:fluvie; the library
+  # itself never imports it, so it is a dev dependency (pana penalizes an unused
+  # runtime dep). fluvie_server still gets fluvie transitively via fluvie_cli.
+  fluvie: ^0.2.0
   test: ^1.31.0
