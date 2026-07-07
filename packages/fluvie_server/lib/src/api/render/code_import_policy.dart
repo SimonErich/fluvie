@@ -33,7 +33,7 @@ final RegExp _directive = RegExp(
 );
 
 // A quoted URI inside a directive.
-final RegExp _uri = RegExp(r'''['"]([^'"]+)['"]''');
+final RegExp _uri = RegExp('''['"]([^'"]+)['"]''');
 
 // A whole-line `//` comment, removed before scanning so a commented-out import
 // is ignored.
