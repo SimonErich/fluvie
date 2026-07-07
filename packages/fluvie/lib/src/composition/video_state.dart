@@ -1,3 +1,4 @@
+// fluvie:large-file-ok: one cohesive Video lifecycle state machine, split from video.dart as a part
 part of 'video.dart';
 
 /// `Video`'s internal lifecycle surface — public only so tests can reach it
