@@ -22,13 +22,18 @@ const Set<String> _allowedExact = {'dart:math', 'dart:ui'};
 /// The flutter framework is pure UI — it exposes no filesystem or socket APIs.
 const List<String> _allowedPrefixes = ['package:fluvie/', 'package:flutter/'];
 
-// A directive at the start of a (possibly indented) line, capturing its URI.
-// Anchored to a line start so an import-like string inside a body or a trailing
-// comment is not mistaken for a directive.
+// A whole import/export directive from the start of a (possibly indented) line
+// up to its terminating semicolon. Anchored to a line start so an import-like
+// string inside a body or a trailing comment is not mistaken for a directive.
+// Spans lines because a directive may wrap, and captures the whole directive so
+// every URI it names is checked (see [disallowedImports]).
 final RegExp _directive = RegExp(
-  r'''^[ \t]*(?:import|export)\s+['"]([^'"]+)['"]''',
+  r'''^[ \t]*(?:import|export)\b[^;]*;''',
   multiLine: true,
 );
+
+// A quoted URI inside a directive.
+final RegExp _uri = RegExp(r'''['"]([^'"]+)['"]''');
 
 // A whole-line `//` comment, removed before scanning so a commented-out import
 // is ignored.
@@ -37,13 +42,19 @@ final RegExp _lineComment = RegExp(r'^[ \t]*//.*$', multiLine: true);
 /// The libraries [code] imports or exports that are not on the allowlist, in
 /// source order with duplicates removed. Empty means the snippet's imports are
 /// safe to compile.
+///
+/// Every URI a directive names is checked, so a conditional import
+/// (`import '...' if (dart.library.io) 'dart:io';`) cannot smuggle a disallowed
+/// library past the allowlist through its second URI.
 List<String> disallowedImports(String code) {
   final scrubbed = code.replaceAll(_lineComment, '');
   final disallowed = <String>[];
-  for (final match in _directive.allMatches(scrubbed)) {
-    final uri = match.group(1)!;
-    if (_isAllowed(uri) || disallowed.contains(uri)) continue;
-    disallowed.add(uri);
+  for (final directive in _directive.allMatches(scrubbed)) {
+    for (final match in _uri.allMatches(directive.group(0)!)) {
+      final uri = match.group(1)!;
+      if (_isAllowed(uri) || disallowed.contains(uri)) continue;
+      disallowed.add(uri);
+    }
   }
   return disallowed;
 }

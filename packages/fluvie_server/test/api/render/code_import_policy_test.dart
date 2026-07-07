@@ -69,6 +69,34 @@ Video build() {
       expect(disallowedImports("export 'dart:io';"), contains('dart:io'));
     });
 
+    test('rejects a conditional import that hides dart:io behind a config', () {
+      const code =
+          "import 'package:flutter/widgets.dart' "
+          "if (dart.library.io) 'dart:io' as io;";
+      expect(disallowedImports(code), contains('dart:io'));
+    });
+
+    test('rejects a conditional import that wraps across lines', () {
+      const code = '''
+import 'package:flutter/widgets.dart'
+    if (dart.library.io) 'dart:io'
+    as io;
+''';
+      expect(disallowedImports(code), contains('dart:io'));
+    });
+
+    test('rejects a conditional export too', () {
+      const code = "export 'package:fluvie/fluvie.dart' if (dart.library.io) 'dart:io';";
+      expect(disallowedImports(code), contains('dart:io'));
+    });
+
+    test('allows a conditional whose branches are all on the allowlist', () {
+      const code =
+          "import 'package:fluvie/fluvie.dart' "
+          "if (dart.library.ui) 'package:flutter/widgets.dart';";
+      expect(disallowedImports(code), isEmpty);
+    });
+
     test('allows the flutter UI framework a real composition needs', () {
       const code = '''
 import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
