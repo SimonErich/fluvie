@@ -5,6 +5,7 @@ library;
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart' show useResult;
 
 /// Identifies one [Snapshot] instance deterministically across the capture
 /// pre-pass and the frame loop.
@@ -126,6 +127,7 @@ final class SnapshotCaptureScope extends InheritedWidget {
 
   /// A copy of this scope wrapping a new [child], reusing the same [images]
   /// (a convenience for re-pumping the same captures around a fresh subtree).
+  @useResult
   SnapshotCaptureScope copyWithChild(Widget child) =>
       SnapshotCaptureScope(images: images, child: child);
 

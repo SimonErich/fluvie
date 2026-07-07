@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/composition/runtime/collectible_children.dart';
+import 'package:meta/meta.dart' show useResult;
 
 /// The deterministic shadow color and drop offset shared by [PhotoFrame.card] and
 /// [PhotoFrame.polaroid]: 25% black, dropped 8 down. The blur radius
@@ -97,6 +98,7 @@ final class PhotoFrame extends StatelessWidget implements CollectibleChildren {
   /// Re-issues this frame's style around [newChild]: a `PhotoFrame`
   /// declares its style at construction, so an element wrapping itself rebuilds
   /// the same style with itself as the child, caption and metrics preserved.
+  @useResult
   PhotoFrame withChild(Widget newChild) => switch (_style) {
     _FrameStyle.none => PhotoFrame.none(key: key, child: newChild),
     _FrameStyle.rounded => PhotoFrame.rounded(key: key, radius: radius, child: newChild),
