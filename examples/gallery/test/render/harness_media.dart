@@ -53,9 +53,10 @@ Future<MediaResolver?> prepareEntryMedia(CompositionEntry entry) async {
   if (sources.isEmpty && snapshots.isEmpty && captions == null && reactiveVideo == null) {
     return null;
   }
-  // The untrusted Playground render sets this define so a submitted snippet or
-  // spec cannot read the host's filesystem through a FileSource. Trusted key,
-  // spec, and lesson renders leave it off and read local files normally.
+  // The untrusted Playground render sets this define so a submitted snippet,
+  // spec, or AI-authored spec cannot read the host's filesystem through a
+  // FileSource. Only a trusted key/lesson render (a bundled, developer-authored
+  // composition) leaves it off and reads local files normally.
   final repository = MediaRepository(
     loader: MediaBytesLoader(
       bundle: rootBundle,
@@ -208,6 +209,11 @@ Future<String> _materialize(MediaSource clip) async {
     bundle: rootBundle,
     httpClient: const _OfflineHttpClient(),
     allowlist: NetworkAllowlist.allowAny(),
+    // The clip pre-pass reads on the same untrusted path as the main loader, so
+    // it honors the same FileSource block; without it Clip.file('/host.mp4')
+    // would read a host file into worker memory even on the hardened path.
+    // ignore: avoid_redundant_argument_values
+    blockFileSources: const bool.fromEnvironment('FLUVIE_BLOCK_FILE_SOURCES'),
   );
   final bytes = await loader.load(clip);
   final dir = await Directory.systemTemp.createTemp('fluvie_harness_clip_');

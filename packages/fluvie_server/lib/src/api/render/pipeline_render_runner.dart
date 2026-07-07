@@ -122,12 +122,16 @@ final class PipelineRenderRunner implements RenderRunner {
             poster: request.options.poster,
           ),
           harnessPath: staging?.harnessPath ?? _defaultHarnessPath,
-          // A code render runs an untrusted snippet: block FileSource so it
-          // cannot read the worker's filesystem. Trusted key/spec renders read
-          // local files normally and carry their config defines instead.
-          extraDefines: isCode
-              ? const {'FLUVIE_BLOCK_FILE_SOURCES': 'true'}
-              : _defines(request, workDir, specOut),
+          // Every render fed by an untrusted submission — a snippet, a posted
+          // spec, or an AI-authored spec — blocks FileSource so it cannot read
+          // the worker's filesystem. Only a trusted key render (a bundled,
+          // developer-authored lesson) reads local files normally. The block
+          // merges over each request's own defines (empty for a code render,
+          // which takes the staged path).
+          extraDefines: {
+            ..._defines(request, workDir, specOut),
+            if (request is! KeyRenderRequest) 'FLUVIE_BLOCK_FILE_SOURCES': 'true',
+          },
           environment: environment,
           out: out,
           err: err,
@@ -173,7 +177,8 @@ final class PipelineRenderRunner implements RenderRunner {
 
   Map<String, String> _defines(RenderRequest request, Directory workDir, String specOut) =>
       switch (request) {
-        // coverage:ignore-line unreachable code renders take the staged path
+        // A code render carries no defines of its own; the block below is
+        // merged in and the staged harness supplies the rest.
         CodeRenderRequest() => const {},
         KeyRenderRequest() => const {},
         SpecRenderRequest(:final spec) => specDefines(

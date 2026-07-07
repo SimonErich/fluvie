@@ -133,6 +133,34 @@ void main() {
 
     expect(File('${workDir.path}/input.fluvie.json').existsSync(), isTrue);
     expect(argv.any((a) => a.startsWith('--dart-define=FLUVIE_RENDER_SPEC=')), isTrue);
+    // An untrusted posted spec blocks FileSource so it cannot read host files.
+    expect(argv, contains('--dart-define=FLUVIE_BLOCK_FILE_SOURCES=true'));
+  });
+
+  test('a key render does not block FileSource (trusted, reads local files)', () async {
+    stubProbe();
+    late List<String> argv;
+    when(
+      () => runner.run(
+        'flutter',
+        captureAny(),
+        workingDirectory: any(named: 'workingDirectory'),
+        environment: any(named: 'environment'),
+      ),
+    ).thenAnswer((invocation) async {
+      argv = invocation.positionalArguments[1] as List<String>;
+      File('${sandbox.path}/frames.rgba').writeAsBytesSync(List.filled(8, 0));
+      File('${sandbox.path}/manifest.json').writeAsStringSync(jsonEncode(_manifest()));
+      return const ProcessRunResult(exitCode: 0, stdout: '', stderr: '');
+    });
+    stubEncode();
+
+    await makeRunner().run(
+      const KeyRenderRequest('demo', (format: null, aspect: null, quality: null, poster: null)),
+      workDir: workDir,
+    );
+
+    expect(argv, isNot(contains('--dart-define=FLUVIE_BLOCK_FILE_SOURCES=true')));
   });
 
   test('an edit request writes the base spec and passes FLUVIE_AI_BASE_SPEC', () async {
