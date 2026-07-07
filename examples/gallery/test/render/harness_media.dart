@@ -53,11 +53,18 @@ Future<MediaResolver?> prepareEntryMedia(CompositionEntry entry) async {
   if (sources.isEmpty && snapshots.isEmpty && captions == null && reactiveVideo == null) {
     return null;
   }
+  // The untrusted Playground render sets this define so a submitted snippet or
+  // spec cannot read the host's filesystem through a FileSource. Trusted key,
+  // spec, and lesson renders leave it off and read local files normally.
   final repository = MediaRepository(
     loader: MediaBytesLoader(
       bundle: rootBundle,
       httpClient: const _OfflineHttpClient(),
       allowlist: NetworkAllowlist.allowAny(),
+      // A build-time define, true only on the untrusted Playground path (it
+      // reads false here, at analysis time, which is not the same as unset).
+      // ignore: avoid_redundant_argument_values
+      blockFileSources: const bool.fromEnvironment('FLUVIE_BLOCK_FILE_SOURCES'),
     ),
     probeService: const FfprobeVideoProbeService(),
     frameExtractor: const FfmpegFrameExtractionService(),

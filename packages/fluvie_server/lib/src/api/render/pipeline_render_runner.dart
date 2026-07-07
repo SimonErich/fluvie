@@ -122,7 +122,12 @@ final class PipelineRenderRunner implements RenderRunner {
             poster: request.options.poster,
           ),
           harnessPath: staging?.harnessPath ?? _defaultHarnessPath,
-          extraDefines: isCode ? const {} : _defines(request, workDir, specOut),
+          // A code render runs an untrusted snippet: block FileSource so it
+          // cannot read the worker's filesystem. Trusted key/spec renders read
+          // local files normally and carry their config defines instead.
+          extraDefines: isCode
+              ? const {'FLUVIE_BLOCK_FILE_SOURCES': 'true'}
+              : _defines(request, workDir, specOut),
           environment: environment,
           out: out,
           err: err,

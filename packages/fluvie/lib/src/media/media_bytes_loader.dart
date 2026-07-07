@@ -26,6 +26,7 @@ final class MediaBytesLoader {
     required this.allowlist,
     AssetBundle? bundle,
     Future<Uint8List> Function(String path)? readFile,
+    this.blockFileSources = false,
   }) : bundle = bundle ?? rootBundle,
        _readFile = readFile ?? readFileBytes;
 
@@ -37,6 +38,13 @@ final class MediaBytesLoader {
 
   /// The safety gate every network URL is checked against before a fetch.
   final NetworkAllowlist allowlist;
+
+  /// Whether a [FileSource] is rejected outright instead of read.
+  ///
+  /// Set this on the untrusted render path (a server rendering a submitted
+  /// spec or snippet): those inputs have no legitimate local-path need, so a
+  /// `FileSource` is treated as an attempt to read the host's filesystem.
+  final bool blockFileSources;
 
   // The injectable file-read seam (see the [readFile] constructor argument).
   final Future<Uint8List> Function(String path) _readFile;
@@ -60,6 +68,12 @@ final class MediaBytesLoader {
   }
 
   Future<Uint8List> _loadFile(String path) async {
+    if (blockFileSources) {
+      throw FluvieRenderException(
+        'A FileSource is not allowed here: reading local files is disabled on '
+        'this render path (path "$path").',
+      );
+    }
     try {
       return await _readFile(path);
     } on FluvieRenderException {

@@ -48,11 +48,13 @@ MediaBytesLoader _loader({
   MediaHttpClient? client,
   NetworkAllowlist? allowlist,
   Future<Uint8List> Function(String path)? readFile,
+  bool blockFileSources = false,
 }) => MediaBytesLoader(
   bundle: _MapBundle(assets),
   httpClient: client ?? _RecordingHttpClient(network),
   allowlist: allowlist ?? NetworkAllowlist.allowAny(),
   readFile: readFile,
+  blockFileSources: blockFileSources,
 );
 
 void main() {
@@ -82,6 +84,31 @@ void main() {
       final file = File('${dir.path}/photo.bin')..writeAsBytesSync([4, 5, 6]);
       final loader = _loader();
       expect(await loader.load(MediaSource.file(file.path)), [4, 5, 6]);
+    });
+
+    test('blockFileSources rejects a FileSource without reading it', () async {
+      final dir = Directory.systemTemp.createTempSync('fluvie_loader_');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final file = File('${dir.path}/secret.bin')..writeAsBytesSync([7]);
+      var read = false;
+      final loader = _loader(
+        blockFileSources: true,
+        readFile: (path) async {
+          read = true;
+          return Uint8List.fromList([7]);
+        },
+      );
+      await expectLater(
+        () => loader.load(MediaSource.file(file.path)),
+        throwsA(
+          isA<FluvieRenderException>().having(
+            (e) => e.message,
+            'message',
+            contains('not allowed'),
+          ),
+        ),
+      );
+      expect(read, isFalse, reason: 'the file must never be read');
     });
 
     test('a mid-read failure on an existing file is wrapped, naming the path', () async {
