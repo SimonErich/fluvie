@@ -19,11 +19,23 @@ import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 
 /// Libraries a snippet may import or export, matched exactly.
-const Set<String> _allowedExact = {'dart:math', 'dart:ui'};
+///
+/// `package:fluvie` is granted ONLY through its single public barrel. Its
+/// private `src/` tree and the low-level `rendering.dart` pipeline barrel are
+/// deliberately excluded: they publicly re-export dart:io-backed helpers
+/// (`IoProcessRunner.run` → `Process.run`, `readFileBytes` → `File.readAsBytes`,
+/// the ffmpeg runners) as plain-`String` APIs, so allowing a `package:fluvie/`
+/// sub-path would hand an untrusted snippet arbitrary process and file access
+/// without it ever naming a blocked `dart:` library.
+const Set<String> _allowedExact = {'dart:math', 'dart:ui', 'package:fluvie/fluvie.dart'};
 
-/// Library prefixes a snippet may import or export (any sub-path is allowed).
-/// The flutter framework is pure UI — it exposes no filesystem or socket APIs.
-const List<String> _allowedPrefixes = ['package:fluvie/', 'package:flutter/'];
+/// Library prefixes a snippet may import or export. Only a package's PUBLIC
+/// libraries are granted — never its private `src/` tree. The flutter framework
+/// is pure UI (no filesystem or socket APIs) once `src/` is excluded.
+const List<String> _allowedPrefixes = ['package:flutter/'];
+
+/// The private sub-tree of any package: never importable, whatever the package.
+const String _privateSubtree = 'src/';
 
 /// The libraries [code] imports or exports that are not on the allowlist, in
 /// source order with duplicates removed. Empty means the snippet's imports are
@@ -38,6 +50,11 @@ const List<String> _allowedPrefixes = ['package:fluvie/', 'package:flutter/'];
 /// that reaches, say, `dart:io`. Every URI a directive names — including each
 /// branch of a conditional `import '...' if (...) '...'` — is checked.
 List<String> disallowedImports(String code) {
+  // A cheap O(n) guard BEFORE the parse: the analyzer's error recovery is
+  // super-linear in bracket-nesting depth, so a `{{{{…` bomb under the byte
+  // limit would otherwise burn seconds of synchronous CPU on the request
+  // isolate here, before the render is even enqueued. Reject it as unparseable.
+  if (_nestsPastLimit(code)) return const [_tooDeeplyNested];
   // throwIfDiagnostics: false so a snippet that does not fully parse still
   // yields a best-effort unit; the directives the parser does recognize are the
   // ones the compiler would honor, which is exactly the set we must gate.
@@ -53,6 +70,31 @@ List<String> disallowedImports(String code) {
   return disallowed;
 }
 
+/// The deepest bracket nesting an authored composition should ever reach.
+/// Anything deeper is a parser-DoS attempt, not a real widget tree.
+const int _maxNestingDepth = 1024;
+
+/// The pseudo-entry [disallowedImports] returns for over-nested source, so the
+/// caller rejects it exactly as it rejects a disallowed import.
+const String _tooDeeplyNested = 'the source nests too deeply to analyze safely';
+
+/// Whether [code] nests `(`/`[`/`{` past [_maxNestingDepth] — a linear scan run
+/// before [parseString] so a bracket bomb cannot stall the isolate. It counts
+/// brackets in strings and comments too, which only makes it stricter; a real
+/// composition stays far below the limit.
+bool _nestsPastLimit(String code) {
+  var depth = 0;
+  for (var i = 0; i < code.length; i++) {
+    final c = code.codeUnitAt(i);
+    if (c == 0x28 || c == 0x5B || c == 0x7B) {
+      if (++depth > _maxNestingDepth) return true;
+    } else if (c == 0x29 || c == 0x5D || c == 0x7D) {
+      if (depth > 0) depth--;
+    }
+  }
+  return false;
+}
+
 /// The default URI plus every conditional-configuration URI a directive names.
 /// A `null` URI (an interpolated string, which cannot be a real import target)
 /// is yielded and skipped by the caller.
@@ -66,7 +108,12 @@ Iterable<String?> _urisOf(NamespaceDirective directive) sync* {
 bool _isAllowed(String uri) {
   if (_allowedExact.contains(uri)) return true;
   for (final prefix in _allowedPrefixes) {
-    if (uri.startsWith(prefix)) return true;
+    // A prefix grants the package's public libraries only. Its `src/` tree is
+    // private and re-exposes dart:io internals, so it stays out of reach even
+    // though it lives under the same package.
+    if (uri.startsWith(prefix) && !uri.startsWith('$prefix$_privateSubtree')) {
+      return true;
+    }
   }
   return false;
 }

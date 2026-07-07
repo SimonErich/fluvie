@@ -14,8 +14,47 @@ Video build() => Video(scenes: const []);
       expect(disallowedImports(code), isEmpty);
     });
 
-    test('allows a sub-path under package:fluvie', () {
-      expect(disallowedImports("import 'package:fluvie/src/whatever.dart';"), isEmpty);
+    test('allows the public fluvie barrel', () {
+      expect(disallowedImports("import 'package:fluvie/fluvie.dart';"), isEmpty);
+    });
+
+    test('rejects a package:fluvie/src path (private internals expose dart:io)', () {
+      // IoProcessRunner (Process.run) and readFileBytes (File.readAsBytes) live
+      // under src/ as public helpers; a src import must never be green-lit.
+      expect(
+        disallowedImports("import 'package:fluvie/src/rendering/platform/process_runner.dart';"),
+        contains('package:fluvie/src/rendering/platform/process_runner.dart'),
+      );
+      expect(
+        disallowedImports("import 'package:fluvie/src/media/io/file_bytes.dart';"),
+        contains('package:fluvie/src/media/io/file_bytes.dart'),
+      );
+    });
+
+    test('rejects the low-level rendering pipeline barrel', () {
+      // rendering.dart re-exports the ffmpeg/process/file pipeline; a
+      // composition only ever needs the public fluvie.dart barrel.
+      expect(
+        disallowedImports("import 'package:fluvie/rendering.dart';"),
+        contains('package:fluvie/rendering.dart'),
+      );
+    });
+
+    test('allows flutter public libraries but not flutter/src', () {
+      expect(disallowedImports("import 'package:flutter/material.dart';"), isEmpty);
+      expect(
+        disallowedImports("import 'package:flutter/src/services/binary_messenger.dart';"),
+        contains('package:flutter/src/services/binary_messenger.dart'),
+      );
+    });
+
+    test('rejects an over-nested bracket bomb without a full parse', () {
+      // A deeply-nested bomb would make the analyzer parser burn seconds of CPU;
+      // the linear pre-scan rejects it instead.
+      final bomb = 'Widget build() { return ${'(' * 5000}0${')' * 5000}; }';
+      final result = disallowedImports(bomb);
+      expect(result, isNotEmpty, reason: 'an over-nested source is rejected');
+      expect(result.single, contains('nests too deeply'));
     });
 
     test('rejects dart:io', () {
