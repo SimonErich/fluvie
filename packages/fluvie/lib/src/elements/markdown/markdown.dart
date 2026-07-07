@@ -11,9 +11,11 @@ import 'package:flutter/widgets.dart'
         Transform,
         Widget;
 import 'package:fluvie/src/animation/stagger/stagger_offsets.dart';
+import 'package:fluvie/src/composition/runtime/collectible_children.dart';
 import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/stagger.dart';
 import 'package:fluvie/src/core/time.dart';
+import 'package:fluvie/src/elements/image.dart';
 import 'package:fluvie/src/elements/markdown/parse/markdown_parser.dart';
 import 'package:fluvie/src/elements/markdown/render/ast_renderer.dart';
 import 'package:fluvie/src/elements/markdown/render/markdown_style.dart';
@@ -53,7 +55,7 @@ import 'package:meta/meta.dart' show visibleForTesting;
 /// Two durations can meet here: [reveal] times the intrinsic content
 /// reveal, while transforms and opacity ride `.animate()` with their own
 /// timing.
-final class Markdown extends StatelessWidget {
+final class Markdown extends StatelessWidget implements CollectibleChildren {
   /// Renders [source] in [style] (or `context.fluvie`), optionally revealed
   /// block by block over [reveal].
   const Markdown(this.source, {this.style, this.reveal, this.shared, super.key});
@@ -80,6 +82,33 @@ final class Markdown extends StatelessWidget {
   @visibleForTesting
   List<Widget> blocksFor(List<md.Node> nodes, {MarkdownStyle? style}) =>
       AstRenderer(style: style ?? const MarkdownStyle.fallback()).render(nodes);
+
+  /// The inline images the document renders, as bare [Image] widgets, so the
+  /// collect pass pre-resolves each one before the frame loop.
+  ///
+  /// The `AstRenderer` mounts every image inside a `WidgetSpan`, which the
+  /// structural walk cannot see into (a `StatelessWidget`'s built spans are
+  /// invisible to it), so without this a document with an image would throw at
+  /// paint in capture (its source never pre-resolved). Each carrier mirrors
+  /// `_imageSpan`'s `Image.network(src)` exactly, so it shares the content hash
+  /// the painted image looks up.
+  @override
+  Iterable<Widget> get collectibleChildren sync* {
+    for (final src in _imageSources(parseMarkdownCached(source))) {
+      yield Image.network(src);
+    }
+  }
+
+  /// Every `img` node's `src` in the document, in reading order (recursing into
+  /// nested inline containers), mirroring `AstRenderer._imageSpan`'s fallback.
+  static Iterable<String> _imageSources(List<md.Node> nodes) sync* {
+    for (final node in nodes) {
+      if (node is! md.Element) continue;
+      if (node.tag == 'img') yield node.attributes['src'] ?? '';
+      final children = node.children;
+      if (children != null) yield* _imageSources(children);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

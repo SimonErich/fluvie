@@ -5,8 +5,10 @@
 
 import 'package:flutter/widgets.dart' hide Image;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fluvie/src/composition/runtime/collectible_children.dart';
 import 'package:fluvie/src/composition/transition/shared_element.dart';
 import 'package:fluvie/src/core/anchor.dart';
+import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/elements/code/code.dart';
 import 'package:fluvie/src/elements/image.dart';
@@ -114,6 +116,33 @@ void main() {
         sceneFrames: 120,
       );
       expect(_textCount(tester), greaterThanOrEqualTo(4));
+    });
+  });
+
+  group('collectibleChildren pre-resolves inline images', () {
+    List<Image> collected(String source) =>
+        (Markdown(source) as CollectibleChildren).collectibleChildren.cast<Image>().toList();
+
+    test('a document with no image contributes nothing', () {
+      expect(collected('# Title\n\nJust prose.'), isEmpty);
+    });
+
+    test('an inline image is exposed as an Image carrier for the collect pass', () {
+      final children = collected('Look: ![alt](https://ex.com/p.png)');
+      expect(children, hasLength(1));
+      expect(children.single.mediaSource, isA<NetworkSource>());
+      expect(
+        (children.single.mediaSource! as NetworkSource).url.toString(),
+        'https://ex.com/p.png',
+      );
+    });
+
+    test('every image in the document is collected, in reading order', () {
+      const doc = '![one](https://ex.com/a.png)\n\ntext ![two](https://ex.com/b.png) more';
+      final urls = collected(
+        doc,
+      ).map((image) => (image.mediaSource! as NetworkSource).url.toString()).toList();
+      expect(urls, ['https://ex.com/a.png', 'https://ex.com/b.png']);
     });
   });
 }
