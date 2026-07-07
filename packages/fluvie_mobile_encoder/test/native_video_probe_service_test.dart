@@ -97,4 +97,13 @@ void main() {
       ),
     );
   });
+  test('probe maps a missing platform implementation to a typed error', () async {
+    // No mock handler registered: the method is unimplemented, as on iOS.
+    await expectLater(
+      () => const NativeVideoProbeService().probe('/clips/a.mp4'),
+      throwsA(
+        isA<FluvieMobileEncoderException>().having((e) => e.code, 'code', 'unimplemented'),
+      ),
+    );
+  });
 }

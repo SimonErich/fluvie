@@ -106,9 +106,10 @@ the platform's own audio encoder. The mix uses the same timing math as the
 FFmpeg path, so the result matches a desktop render.
 
 If a `Video` declares audio but you do not pass `audio: true`, the render is
-silent and the renderer warns once through `OnDeviceVideoRenderer.onWarning`.
-Pass `warnOnDroppedAudio: false` to silence that, or replace `onWarning` to route
-it. Looping beds and network sources are not honored on-device yet.
+silent and the renderer warns once through its warning sink. Pass
+`warnOnDroppedAudio: false` to silence that, or pass `onWarning` to the
+constructor to route it. Looping beds and network sources are not honored
+on-device yet.
 
 ## Platform support
 
@@ -120,6 +121,10 @@ it. Looping beds and network sources are not honored on-device yet.
 
 On an unsupported platform the encoder throws a `FluvieMobileEncoderException`
 with code `unsupported_platform`.
+
+On-device `Clip` sources (probing and frame extraction) are Android-only today;
+on iOS they throw a `FluvieMobileEncoderException` with code `unimplemented`. A
+composition with only `Image` and text renders on both platforms.
 
 ## Testing
 

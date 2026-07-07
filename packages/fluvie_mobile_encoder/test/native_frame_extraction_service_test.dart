@@ -128,4 +128,13 @@ void main() {
     expect(frame.frameIndex, 4);
     expect(frame.rgba, everyElement(4));
   });
+  test('extractFrames maps a missing platform implementation to a typed error', () async {
+    // No mock handler registered: the method is unimplemented, as on iOS.
+    await expectLater(
+      () => service.extractFrames(source, [0], width: 4, height: 4),
+      throwsA(
+        isA<FluvieMobileEncoderException>().having((e) => e.code, 'code', 'unimplemented'),
+      ),
+    );
+  });
 }

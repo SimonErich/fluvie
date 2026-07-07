@@ -3,10 +3,15 @@ import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:fluvie/rendering.dart';
 import 'package:fluvie_mobile_encoder/src/fluvie_mobile_encoder_exception.dart';
+import 'package:fluvie_mobile_encoder/src/mobile_channel.dart';
 
 /// A [FrameExtractionService] backed by the platform decoder: decodes the
 /// requested source frames to RGBA on the device (`MediaMetadataRetriever` on
-/// Android, AVFoundation on iOS) over the mobile encoder channel — no ffmpeg.
+/// Android) over the mobile encoder channel, with no ffmpeg.
+///
+/// On-device frame extraction is Android-only today; iOS implements only
+/// encoding, so `extractFrames` there throws a [FluvieMobileEncoderException]
+/// with code `unimplemented`.
 ///
 /// The whole batch is decoded in one platform call and returned as a single
 /// row-major RGBA buffer (the requested frames concatenated in order), which
@@ -16,9 +21,7 @@ final class NativeFrameExtractionService implements FrameExtractionService {
   /// package channel; tests pass a mock-backed channel).
   const NativeFrameExtractionService([this._channel = _defaultChannel]);
 
-  static const MethodChannel _defaultChannel = MethodChannel(
-    'dev.fluvie/mobile_encoder',
-  );
+  static const MethodChannel _defaultChannel = MethodChannel(mobileEncoderChannelName);
 
   final MethodChannel _channel;
 
@@ -75,6 +78,11 @@ final class NativeFrameExtractionService implements FrameExtractionService {
           'width': width,
           'height': height,
         });
+      } on MissingPluginException {
+        throw const FluvieMobileEncoderException(
+          'On-device frame extraction is not available on this platform (Android only).',
+          code: 'unimplemented',
+        );
       } on PlatformException catch (error) {
         throw FluvieMobileEncoderException(
           error.message ?? 'The platform failed to extract frames from "$source".',

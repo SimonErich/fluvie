@@ -3,11 +3,16 @@ import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:fluvie/rendering.dart';
 import 'package:fluvie_mobile_encoder/src/fluvie_mobile_encoder_exception.dart';
+import 'package:fluvie_mobile_encoder/src/mobile_channel.dart';
 
 /// A [VideoProbeService] backed by the platform: reads a clip's dimensions,
 /// frame count, and duration through the device (`MediaMetadataRetriever` on
-/// Android, `AVAsset` on iOS) over the mobile encoder channel — no ffmpeg/
-/// ffprobe, so it works on a real device where no binary is present.
+/// Android) over the mobile encoder channel, so it works on a real device
+/// where no ffmpeg/ffprobe binary is present.
+///
+/// On-device clip probing is Android-only today; iOS implements only encoding,
+/// so `probe` there throws a [FluvieMobileEncoderException] with code
+/// `unimplemented`.
 ///
 /// The reported dimensions are capped to [maxLongEdge] so a clip is decoded at
 /// most at the render's own resolution (it is composited into the render frame
@@ -23,9 +28,7 @@ final class NativeVideoProbeService implements VideoProbeService {
     this.maxLongEdge = 1920,
   ]);
 
-  static const MethodChannel _defaultChannel = MethodChannel(
-    'dev.fluvie/mobile_encoder',
-  );
+  static const MethodChannel _defaultChannel = MethodChannel(mobileEncoderChannelName);
 
   final MethodChannel _channel;
 
@@ -39,6 +42,11 @@ final class NativeVideoProbeService implements VideoProbeService {
       facts = await _channel.invokeMapMethod<String, Object?>('probeVideo', {
         'path': filePath,
       });
+    } on MissingPluginException {
+      throw const FluvieMobileEncoderException(
+        'On-device clip probing is not available on this platform (Android only).',
+        code: 'unimplemented',
+      );
     } on PlatformException catch (error) {
       throw FluvieMobileEncoderException(
         error.message ?? 'The platform failed to probe "$filePath".',

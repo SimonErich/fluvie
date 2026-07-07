@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:fluvie_mobile_encoder/src/fluvie_mobile_encoder_exception.dart';
+import 'package:fluvie_mobile_encoder/src/mobile_channel.dart';
 import 'package:fluvie_mobile_encoder/src/mobile_encode_request.dart';
 import 'package:fluvie_mobile_encoder/src/mobile_video_encoder.dart';
 
@@ -17,7 +18,7 @@ final class MethodChannelMobileVideoEncoder implements MobileVideoEncoder {
   const MethodChannelMobileVideoEncoder([this._channel = _defaultChannel]);
 
   /// The platform channel name both native plugins register.
-  static const String channelName = 'dev.fluvie/mobile_encoder';
+  static const String channelName = mobileEncoderChannelName;
 
   /// The method the platform side handles to run one encode.
   static const String encodeMethod = 'encode';
