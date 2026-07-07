@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 /// An inline image attached to an `AiMessage` for visually grounded edits.
 @immutable
-class AiImage {
+final class AiImage {
   /// Creates an image from raw encoded [bytes] of the given [mediaType].
   const AiImage({required this.bytes, this.mediaType = 'image/png'});
 

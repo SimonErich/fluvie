@@ -22,7 +22,7 @@ import 'package:fluvie/src/elements/snapshot/cdp/chrome_finder.dart';
 /// built as validated, order-stable typed arrays (no shell, no path injection),
 /// and the result is decoded to a `ui.Image` by the resolver like any other
 /// snapshot raster.
-class ChromeSnapshotService implements SnapshotService {
+final class ChromeSnapshotService implements SnapshotService {
   /// Creates the service with an injected [exists] predicate and process [env]
   /// so the binary-resolution surface is unit-tested with no real Chrome.
   ChromeSnapshotService({BinaryExists? exists, Map<String, String>? env})

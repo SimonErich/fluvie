@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 /// A reply from an `AiClient`.
 @immutable
-class AiResponse {
+final class AiResponse {
   /// Creates a response carrying the model's [text] (JSON when a schema was set).
   const AiResponse(this.text);
 

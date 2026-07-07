@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 /// Delegates to `ai_abstracted`'s [MistralTextClient]: it uses the OpenAI-style
 /// message shape and forces valid JSON when a schema is set, leaving full-schema
 /// validation to the author service's repair loop.
-class MistralAiClient implements AiClient {
+final class MistralAiClient implements AiClient {
   /// Creates a client authenticating with [apiKey], targeting [model].
   ///
   /// [httpClient] and [endpoint] are injectable for tests.

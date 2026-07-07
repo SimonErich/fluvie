@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 /// A request to an `AiClient`.
 @immutable
-class AiRequest {
+final class AiRequest {
   /// Creates a request over [messages], optionally constrained to [jsonSchema].
   const AiRequest({
     required this.messages,

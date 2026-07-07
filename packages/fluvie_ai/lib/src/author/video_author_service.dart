@@ -20,7 +20,7 @@ abstract interface class VideoAuthorService {
 
 /// The default [VideoAuthorService]: schema-constrained generation with a
 /// validate-then-repair loop over any [AiClient].
-class LlmVideoAuthorService implements VideoAuthorService {
+final class LlmVideoAuthorService implements VideoAuthorService {
   /// Creates a service driving [client], validating against [schema] (defaults
   /// to Fluvie's [videoSpecSchema]) with up to [maxRepairs] correction rounds.
   LlmVideoAuthorService({

@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 /// `user`/`assistant` turns. The schema is delivered in the prompt (not as
 /// native structured output), so the author service's repair loop handles
 /// validation — robust across every model.
-class ClaudeAiClient implements AiClient {
+final class ClaudeAiClient implements AiClient {
   /// Creates a client authenticating with [apiKey], targeting [model].
   ///
   /// [httpClient] and [endpoint] are injectable for tests.

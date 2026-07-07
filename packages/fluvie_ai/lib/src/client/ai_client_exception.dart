@@ -1,6 +1,6 @@
 /// Thrown when an `AiClient` call fails: a transport error, an auth failure,
 /// or a malformed provider response.
-class AiClientException implements Exception {
+final class AiClientException implements Exception {
   /// Creates an exception described by [message].
   AiClientException(this.message);
 

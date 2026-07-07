@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 /// `systemInstruction`, assistant turns to the `model` role, and a JSON schema
 /// enables JSON output via `responseMimeType` — robust without committing to a
 /// strict response schema.
-class GeminiAiClient implements AiClient {
+final class GeminiAiClient implements AiClient {
   /// Creates a client authenticating with [apiKey], targeting [model].
   ///
   /// [httpClient] and [endpoint] (the full `generateContent` URL) are injectable

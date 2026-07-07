@@ -5,7 +5,7 @@ import 'package:fluvie_ai/src/client/ai_client.dart';
 ///
 /// Queue "bad then good" replies to exercise the author service's repair loop
 /// without any network.
-class FakeAiClient implements AiClient {
+final class FakeAiClient implements AiClient {
   /// Creates a fake that replies with [replies] in order.
   FakeAiClient(this.replies, {this.supportsStructuredOutput = true});
 

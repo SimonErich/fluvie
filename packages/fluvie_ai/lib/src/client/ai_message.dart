@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 /// One message in an AI conversation.
 @immutable
-class AiMessage {
+final class AiMessage {
   /// A system message that sets behavior.
   const AiMessage.system(this.text) : role = AiRole.system, image = null;
 

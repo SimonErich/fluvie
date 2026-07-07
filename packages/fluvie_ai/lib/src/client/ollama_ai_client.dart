@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 /// Delegates to `ai_abstracted`'s [OllamaTextClient]. Needs no API key — it
 /// talks to a local daemon (default `http://localhost:11434`) and forces valid
 /// JSON when a schema is set; great for offline development and tests.
-class OllamaAiClient implements AiClient {
+final class OllamaAiClient implements AiClient {
   /// Creates a client targeting [model] on the Ollama server at [endpoint]
   /// (default `http://localhost:11434/api/chat`). [httpClient] is injectable.
   OllamaAiClient({

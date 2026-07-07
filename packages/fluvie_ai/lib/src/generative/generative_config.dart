@@ -10,7 +10,7 @@ import 'package:meta/meta.dart';
 /// committed; the [cacheDir] holds the produced assets, keyed by prompt + seed +
 /// params, and is safe to commit so CI and teammates reuse them.
 @immutable
-class GenerativeConfig {
+final class GenerativeConfig {
   /// Creates a config over [credentials], an optional [cacheDir] (defaults to
   /// `.fluvie/generative` under the working directory), an [offline] switch, and
   /// an optional [maxGenerations] budget per render.
