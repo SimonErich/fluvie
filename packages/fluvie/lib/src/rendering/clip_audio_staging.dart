@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:fluvie/src/audio/encoding/audio_track_node.dart';
-import 'package:fluvie/src/composition/runtime/media_collector.dart' show ClipAudioPlan;
+import 'package:fluvie/src/composition/runtime/clip_plan_collector.dart' show ClipAudioPlan;
 import 'package:fluvie/src/core/audio/audio_source.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';

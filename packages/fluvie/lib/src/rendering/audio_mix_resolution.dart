@@ -1,6 +1,6 @@
 import 'package:fluvie/src/audio/encoding/resolved_audio_track.dart';
 import 'package:fluvie/src/composition/runtime/audio_collector.dart';
-import 'package:fluvie/src/composition/runtime/media_collector.dart';
+import 'package:fluvie/src/composition/runtime/clip_plan_collector.dart';
 import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/contracts/generative_resolver.dart';
 import 'package:fluvie/src/core/media/media_source.dart';

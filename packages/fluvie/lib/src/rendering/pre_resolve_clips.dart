@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart' show Widget;
-import 'package:fluvie/src/composition/runtime/media_collector.dart' show collectClipPlans;
+import 'package:fluvie/src/composition/runtime/clip_plan_collector.dart' show collectClipPlans;
 import 'package:fluvie/src/core/contracts/clip_frame_preparer.dart';
 import 'package:fluvie/src/core/contracts/generative_resolver.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
