@@ -2,3 +2,5 @@
 # archive: the demo audio loop and the ffmpeg-fetch build script.
 example/assets/audio/beat_loop.wav
 example/tool/
+# Tests stay in the repo but are too heavy for the published archive.
+test/
