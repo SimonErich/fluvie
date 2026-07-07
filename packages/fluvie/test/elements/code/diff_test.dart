@@ -290,10 +290,9 @@ void main() {
       // Same diff text (so lines and progress match), re-highlighted in a
       // different language: only tokensPerLine changes, and paint reads it.
       final dart = await _diffAt(tester, const Code.diff(_before, _after, language: 'dart'));
-      final plain = await _diffAt(
-        tester,
-        const Code.diff(_before, _after, language: 'plaintext'),
-      );
+      // No language argument: the default 'plaintext' highlights nothing, so its
+      // tokens differ from dart's keyword runs while the diff text is identical.
+      final plain = await _diffAt(tester, const Code.diff(_before, _after));
       expect(plain.shouldRepaint(dart), isTrue);
     });
   });
