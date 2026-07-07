@@ -8,6 +8,9 @@ import 'package:fluvie/src/timing/time_scope.dart';
 // core importing a feature (rendering): upward, forbidden.
 import 'package:fluvie/src/rendering/frame.dart';
 
+// core importing the serialization feature layer: upward, forbidden.
+import 'package:fluvie/src/serialization/video_spec.dart';
+
 // core importing another core file: same layer, allowed.
 import 'package:fluvie/src/core/time.dart';
 

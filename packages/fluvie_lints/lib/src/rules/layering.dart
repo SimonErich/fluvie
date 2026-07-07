@@ -39,6 +39,7 @@ class Layering extends DartLintRule {
     'audio',
     'theme',
     'templates',
+    'serialization',
     'captions',
     'diagnostics',
   };
@@ -52,6 +53,7 @@ class Layering extends DartLintRule {
     'audio',
     'theme',
     'templates',
+    'serialization',
     'captions',
     'diagnostics',
   };

@@ -8,7 +8,7 @@ void main() {
 
   test('core may not import timing or feature layers', () async {
     final lines = await lintLinesFor(rule, 'src/core/layering_fixture.dart');
-    expect(lines, [6, 9]);
+    expect(lines, [6, 9, 12]);
   });
 
   test('a feature may not import diagnostics but may import core/timing', () async {
