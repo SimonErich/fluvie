@@ -73,6 +73,53 @@ void main() {
   Future<Map<String, Object?>> bodyOf(Response response) async =>
       jsonDecode(await response.readAsString()) as Map<String, Object?>;
 
+  group('spec size bounds', () {
+    test('rejects a spec whose explicit canvas exceeds the pixel ceiling', () async {
+      await expectLater(
+        handler().create(
+          post({
+            'spec': {
+              'size': {'width': 100000, 'height': 100000},
+              'scenes': [
+                {'duration': '1s'},
+              ],
+            },
+          }),
+        ),
+        throwsA(isA<ApiError>().having((e) => e.statusCode, 'statusCode', 400)),
+      );
+      expect(await jobs.get('rnd_0'), isNull, reason: 'must not enqueue an OOM-sized spec');
+    });
+
+    test('accepts a spec within the ceiling', () async {
+      final response = await handler().create(
+        post({
+          'spec': {
+            'size': {'width': 1080, 'height': 1920},
+            'scenes': [
+              {'duration': '1s'},
+            ],
+          },
+        }),
+      );
+      expect(response.statusCode, 202);
+    });
+
+    test('accepts a spec that uses a named preset', () async {
+      final response = await handler().create(
+        post({
+          'spec': {
+            'size': 'reels',
+            'scenes': [
+              {'duration': '1s'},
+            ],
+          },
+        }),
+      );
+      expect(response.statusCode, 202);
+    });
+  });
+
   group('code render gate', () {
     test('202 and enqueues when validation is clean and imports are allowed', () async {
       final validator = FakeCodeValidationService();

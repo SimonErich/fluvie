@@ -30,10 +30,12 @@ final class PipelineRenderRunner implements RenderRunner {
   /// The Flutter project hosting the capture harness, or `null` to auto-discover.
   final String? renderProject;
 
-  /// The wall-clock ceiling on a code render's capture. A runaway untrusted
-  /// `build()` (an infinite loop) is abandoned and surfaced as a [RenderFailure]
-  /// rather than hanging the worker. Applied to code renders only — trusted
-  /// key/spec/AI renders keep their existing unbounded behavior.
+  /// The wall-clock ceiling on an untrusted render's capture. A runaway
+  /// submission — an infinite `build()`, or a spec with hour-long scenes that
+  /// would render millions of frames — is abandoned and surfaced as a
+  /// [RenderFailure] rather than hanging the worker. Applied to every untrusted
+  /// render (code, posted spec, and AI-authored spec); a trusted key render
+  /// keeps its unbounded behavior.
   final Duration captureTimeout;
 
   /// The ffmpeg binary, or `null` for `ffmpeg` on PATH.
@@ -72,6 +74,10 @@ final class PipelineRenderRunner implements RenderRunner {
     // job id and deletes the work dir per job, so a cross-job result cache is a
     // separate change — deliberately skipped here to keep the job model simple.
     final isCode = request is CodeRenderRequest;
+    // A code render, a posted spec, and an AI-authored spec all come from an
+    // untrusted submission; only a bundled key render is trusted. Untrusted
+    // renders block FileSource and are bounded by the wall clock.
+    final isUntrusted = request is! KeyRenderRequest;
     final staging = isCode
         ? stageCodeRenderOrFail(renderProject: renderProject, code: request.code)
         : null;
@@ -130,13 +136,13 @@ final class PipelineRenderRunner implements RenderRunner {
           // which takes the staged path).
           extraDefines: {
             ..._defines(request, workDir, specOut),
-            if (request is! KeyRenderRequest) 'FLUVIE_BLOCK_FILE_SOURCES': 'true',
+            if (isUntrusted) 'FLUVIE_BLOCK_FILE_SOURCES': 'true',
           },
           environment: environment,
           out: out,
           err: err,
         ),
-        bounded: isCode,
+        bounded: isUntrusted,
       );
       if (code != 0) throw RenderFailure('Render exited with code $code');
     } on CliFailure catch (failure) {

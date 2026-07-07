@@ -53,6 +53,13 @@ final class RenderHandler {
   /// The largest accepted `code` snippet, in bytes.
   final int maxCodeBytes;
 
+  /// The most pixels a posted spec's explicit `{width, height}` canvas may
+  /// declare (8K UHD). A spec is untrusted, and the harness allocates a frame
+  /// buffer of `width * height * 4` bytes, so an unbounded size (e.g.
+  /// 100000x100000) would exhaust the worker's memory on the first frame. Named
+  /// presets (`reels`/`square`/`hd`/`fourK`) are always within this ceiling.
+  static const int _maxSpecPixels = 7680 * 4320;
+
   /// Creates a render job from the request body.
   Future<Response> create(Request request) async {
     final body = await readJsonObject(request, maxBytes: maxCodeBytes);
@@ -69,6 +76,7 @@ final class RenderHandler {
       final rejection = await _rejectUnsafeCode(renderRequest.code);
       if (rejection != null) return rejection;
     }
+    _ensureSpecWithinBounds(renderRequest);
     _ensureAiConfigured(renderRequest);
     // The 503 above wins over rate limiting: an unconfigured server has no LLM
     // cost to guard. Only the prompt/edit path (the LLM callers) is throttled;
@@ -154,6 +162,28 @@ final class RenderHandler {
       return parseHumanDuration(value, label: 'ttl');
     } on FormatException catch (error) {
       throw ApiError.badRequest(error.message);
+    }
+  }
+
+  /// Rejects a posted spec (or an edit's base spec) whose explicit
+  /// `{width, height}` canvas is non-positive or larger than [_maxSpecPixels],
+  /// before it can OOM a worker on the first frame. A named preset or an
+  /// aspect-derived size is left to the render.
+  void _ensureSpecWithinBounds(RenderRequest request) {
+    final spec = switch (request) {
+      SpecRenderRequest(:final spec) => spec,
+      EditRenderRequest(:final baseSpec) => baseSpec,
+      _ => null,
+    };
+    final size = spec?['size'];
+    if (size is! Map) return;
+    final width = size['width'];
+    final height = size['height'];
+    if (width is! int || height is! int) return;
+    if (width <= 0 || height <= 0 || width * height > _maxSpecPixels) {
+      throw ApiError.badRequest(
+        'size must be positive and at most $_maxSpecPixels pixels (8K); got ${width}x$height',
+      );
     }
   }
 
