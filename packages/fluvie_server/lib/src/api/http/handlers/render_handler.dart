@@ -169,9 +169,9 @@ final class RenderHandler {
   }
 
   /// Rejects a posted spec (or an edit's base spec) whose explicit
-  /// `{width, height}` canvas is non-positive or larger than [_maxSpecPixels],
-  /// before it can OOM a worker on the first frame. A named preset or an
-  /// aspect-derived size is left to the render.
+  /// `{width, height}` canvas is non-positive or whose width or height exceeds
+  /// [_maxSpecDimension], before it can OOM a worker on the first frame. A
+  /// named preset or an aspect-derived size is left to the render.
   void _ensureSpecWithinBounds(RenderRequest request) {
     final spec = switch (request) {
       SpecRenderRequest(:final spec) => spec,
