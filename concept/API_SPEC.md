@@ -87,6 +87,7 @@ capture services, sandboxes, encoders. Compositions never need it.
 The brief's example, in the final API:
 
 ```dart
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 final bg = Anchor('bg');
@@ -225,11 +226,11 @@ Animation.glitchIn({Edge from = Edge.left})
 Continuous (`during`):
 
 ```dart
-Animation.float({double amplitude = 0.04, double frequency = 0.4, String? seed})
+Animation.float({double amplitude = 0.04, Time period = const Time.seconds(2.5), String? seed})
 Animation.pulse({double min = 0.97, double max = 1.03})   // sine breathe; reactive form below
 Animation.drift({Edge to = Edge.right, double distance = 0.1})
 Animation.kenBurns({double zoom = 1.15, Edge pan = Edge.left})
-Animation.spin({Time per = const Time.seconds(4)})
+Animation.spin({Time period = const Time.seconds(4)})
 Animation.parallax({double depth = 0.2})                  // offset driven by the scene clock, for layers
 ```
 
@@ -332,7 +333,7 @@ sealed class Trigger {
   const factory Trigger.at(Time t)                          = AbsoluteTrigger;
   const factory Trigger.beat({int every = 1, Anchor? track}) = BeatTrigger;
 
-  static Trigger after(Anchor a)      => …;  // when a's timeline ends
+  static Trigger whenEnds(Anchor a)   => …;  // when a's timeline ends
   static Trigger whenStarts(Anchor a) => …;  // when a's timeline starts
 }
 ```
@@ -587,8 +588,8 @@ Image.network('…').animate([Animation.slideFadeIn(from: Edge.left), Animation.
 `PhotoFrame` is an optional decorative wrapper (replaces `PhotoCard`/`PolaroidFrame`):
 
 ```dart
-PhotoFrame.none()   PhotoFrame.card({double radius = 16, double elevation = 8})
-PhotoFrame.polaroid({String? caption})   PhotoFrame.rounded(24)
+PhotoFrame.none()   PhotoFrame.card({double radius = 16, double elevation = 24})
+PhotoFrame.polaroid({String? caption})   PhotoFrame.rounded({double radius = 24})
 ```
 
 ### `Clip` — embedded video
@@ -620,7 +621,7 @@ Typewriter('Typed out one glyph at a time.', speed: 18.frames, caret: true)
 ### `Counter` (intrinsic)
 
 ```dart
-Counter(to: 12500, duration: 2.seconds, format: NumberFormat.compact())   // "12.5K"
+Counter(to: 12500, reveal: 2.seconds, format: NumberFormat.compact())   // "12.5K"
 Counter.currency(to: 4999, symbol: r'$')   Counter.percent(to: 0.87)
 ```
 
@@ -1083,14 +1084,14 @@ const Connector({
 })
 ```
 
-**LowerThird** — A broadcast-style name/title bar that slides in from the left and settles. Wraps an optional background child (gathered in collect pass). With no `slideIn`, sits in place.
+**LowerThird** — A broadcast-style name/title bar that slides in from the left and settles. Wraps an optional background child (gathered in collect pass). With no `reveal`, sits in place.
 
 ```dart
 const LowerThird({
   required String name,              // primary line
   String? title,                     // secondary line (optional)
   Widget? child,
-  Time? slideIn,                     // optional window for horizontal slide
+  Time? reveal,                      // optional window for horizontal slide
   Color color = const Color(0xCC101418),  // translucent dark band
   Anchor? shared,
   Key? key,
@@ -1203,7 +1204,7 @@ Scene(duration: 6.seconds, children: [
   LowerThird(
     name: 'Dashboard',
     title: 'Real-time metrics',
-    slideIn: 1.5.seconds,
+    reveal: 1.5.seconds,
   ).animate([Animation.fadeOut(at: Trigger.at(5.seconds))]),
 ]);
 ```
@@ -1593,7 +1594,7 @@ All tokens are `@immutable` and value-equal by field, so two identical builds pr
 ## 22. Reproducible randomness
 
 Organic motion that stays stable across frames and re-renders (so caching and goldens
-work). Effects pull randomness from a seed; prefer the seeded `noise(seed)` / `random(seed)` API over `dart:math Random()` in render code.
+work). Effects pull randomness from a seed; prefer the seeded `noise(seed)` API over `dart:math Random()` in render code.
 
 ```dart
 final n = ctx.noise('petal-$i');                 // stable per seed
@@ -1643,7 +1644,7 @@ class IntroTemplate extends VideoTemplate<IntroProps> {
 }
 
 for (final u in users) {
-  await render(IntroTemplate(), props: IntroProps(name: u.name, color: u.brandColor));
+  await renderTemplate(IntroTemplate(), props: IntroProps(name: u.name, color: u.brandColor));
 }
 ```
 
@@ -1700,7 +1701,7 @@ Future<RenderAspectResult> render({
 
 #### `renderToSandbox(...)` — in-memory, web-friendly
 
-Captures one aspect into a `RenderSandbox` (file or in-memory) without touching the file system. Used by the web encoder and tests. Video-only (no audio staging yet); the manifest carries `-an`.
+Captures one aspect into a `RenderSandbox` (file or in-memory) without touching the file system. Used by the web encoder and tests. Stages audio into the mix when `audioTracks` and `loadAudioBytes` are supplied; otherwise the manifest carries `-an`.
 
 ```dart
 Future<RenderManifest> renderToSandbox({
@@ -1717,7 +1718,9 @@ Future<RenderManifest> renderToSandbox({
   Export? export,
   int? posterFrame,
   ProgressCallback? onProgress,
-  VideoEncoderService encoder = const VideoEncoderService(),
+  List<ResolvedAudioTrack> audioTracks = const [],   // staged into the mix when present
+  AudioByteLoader? loadAudioBytes,
+  double audioMasterVolume = 1,
 }) → RenderManifest;
 ```
 
@@ -1726,8 +1729,8 @@ Future<RenderManifest> renderToSandbox({
 Renders a parameterized `VideoTemplate<P>` for one `props` value. Builds `template.build(props)`, wraps it in deterministic LTR `Directionality`, and runs the result through the same capture path as `render`. Defaults to `Aspect.reels` (9:16).
 
 ```dart
-Future<RenderAspectResult> renderTemplate<P>({
-  required VideoTemplate<P> template,
+Future<RenderAspectResult> renderTemplate<P>(
+  VideoTemplate<P> template, {
   required P props,
   required int frameCount,
   required Directory outDir,
@@ -1752,7 +1755,6 @@ final class RenderService {
     required FrameCaptureService capture,
     MediaResolver media = const NoMediaResolver(),
     FrameCache? cache,
-    VideoEncoderService encoder = const VideoEncoderService(),
   });
 
   /// Captures `config.frameCount` frames to `outDir/frames.rgba`, returns manifest.
@@ -1777,7 +1779,7 @@ final class RenderService {
     required FramePump pump,
     required GlobalKey boundaryKey,
     required String compositionKey,
-    required FfmpegProvider provider,          // encoder backend
+    required FfmpegRunner runner,              // encoder backend
     // … media, audio, export, posterFrame, onProgress
   }) → File;                                   // outDir/out.mp4 (or .gif, etc.)
 }
@@ -1845,13 +1847,11 @@ Video(
       children: [
         Align(alignment: Alignment.topLeft, child: Image.asset('logo.png', shared: logo)),  // morphs in
         Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Counter(to: 48230, duration: 2.seconds, format: NumberFormat.compact(),
+          Counter(to: 48230, reveal: 2.seconds, format: NumberFormat.compact(),
               style: TextStyle(fontSize: 96, color: Colors.greenAccent)),
           Text('minutes listened', style: TextStyle(fontSize: 32, color: Colors.white))
               .animate([Animation.fadeIn(delay: 1.5.seconds)]),
-        ])),
-      ],
-    ).animate([Animation.grain(0.2), Animation.vignette(0.4)]),   // pixel fx in the same list
+        ])).animate([Animation.grain(0.2), Animation.vignette(0.4)]),   // pixel fx compose in the same list
 
     Scene.centered(
       duration: 3.seconds, background: Background.color(Colors.black),
@@ -2084,12 +2084,11 @@ on `Timeline`/`FrameBuilder`/shader `Animation`s.
 ### Inspector & tests
 
 ```dart
-debugTimeline(video);   // prints a resolved table: element | window | animation | start | end
-testFrame(video, at: 2.seconds, matchesGolden('frames/intro_60.png'));
+debugTimeline(timeline);   // prints a resolved table: element | window | animation | start | end
 ```
 
-Both build on the same resolver Fluvie already runs — and a scrubbable live inspector is the natural next
-step (Fluvie's answer to Remotion Studio).
+`debugTimeline` builds on the same resolver Fluvie already runs, and frame-level checks ride the Alchemist
+golden harness. A scrubbable live inspector is the natural next step (Fluvie's answer to Remotion Studio).
 
 ### Diagnostics & inspector exports
 
@@ -2183,7 +2182,7 @@ This free function is a pure function: the same spec always builds the same vide
         {
           "type": "Text",
           "text": "Let's build videos",
-          "animate": [{ "preset": "fadeIn", "at": { "kind": "after", "anchor": "title" }, "delay": "0.2s" }]
+          "animate": [{ "preset": "fadeIn", "at": { "kind": "whenEnds", "anchor": "title" }, "delay": "0.2s" }]
         }
       ]
     }
@@ -2206,7 +2205,7 @@ Fluvie's modular design separates authoring (which always stays light—just `pa
 | **fluvie_cli** | Headless render CLI (`fluvie render`); FFmpeg auto-provision. | `run()` (the `fluvie render` entry) / `ensureFfmpeg` | [Exporting your video](../documentation/guides/exporting-your-video.md) / [Managing FFmpeg](../documentation/guides/managing-ffmpeg.md) |
 | **fluvie_mobile_encoder** | On-device hardware encode (MediaCodec / AVAssetWriter). No FFmpeg; frames never leave the device. | `OnDeviceVideoRenderer` | [On-device mobile rendering](../documentation/guides/on-device-mobile-rendering.md) |
 | **fluvie_web_encoder** | In-browser ffmpeg.wasm encode. Opt-in, so web apps stay light. | `WebVideoRenderer` | [package README](../packages/fluvie_web_encoder/README.md) |
-| **fluvie_server** | One self-hostable binary: HTTP render API (local or S3), MCP server (stdio/HTTP), and a docs helper, each toggled by env; web-safe client. | `ApiRenderClient` (client) / `serveFluvieApi` + `buildServerApp` (server) | [Rendering on a server](../documentation/guides/rendering-on-a-server.md) / [AI and MCP](../documentation/guides/ai-and-mcp.md) |
+| **fluvie_server** | One self-hostable binary: HTTP render API (local or S3), MCP server (stdio/HTTP), and a docs helper, each toggled by env; web-safe client. | `ApiRenderClient` (client) / `serveFluvieApi` + `buildApp` (server) | [Rendering on a server](../documentation/guides/rendering-on-a-server.md) / [AI and MCP](../documentation/guides/ai-and-mcp.md) |
 | **fluvie_ai** | NL → deterministic `VideoSpec`; provider-agnostic LLM client. | `VideoAuthorService` / `LlmVideoAuthorService` | [AI and MCP](../documentation/guides/ai-and-mcp.md) |
 
 All rendering packages are optional; the core `package:fluvie` never pulls in FFmpeg, WASM, or server deps. See [Tooling](#28-tooling) for `fluvie_lints` (available in all environments).
