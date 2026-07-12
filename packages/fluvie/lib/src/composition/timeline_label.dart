@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 /// `Timeline.play(at:)` accepts a `LabelRef` so a step can place itself relative
 /// to a named moment: `at: 'reveal'.label - 0.2.seconds` starts two tenths of a
 /// second before the `reveal` label. The reference stays symbolic until the
-/// timeline resolves it against its recorded labels at `play()` time, so it
+/// timeline resolves its placements at the enclosing `Video`'s fps, so it
 /// never reaches the per-frame hot path.
 ///
 /// ```dart
