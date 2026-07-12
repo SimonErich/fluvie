@@ -240,7 +240,7 @@ Animation buildAnimation(AnimationSpec spec) {
         label: spec.label,
       );
   }
-  // coverage:ignore-line unreachable AnimationSpec.fromJson validates the kind before this dispatch
+  // coverage:ignore-line unreachable AnimationSpec fromJson validates the kind before this dispatch
   throw FluvieSpecError('Unknown animation kind "${spec.kind}"');
 }
 

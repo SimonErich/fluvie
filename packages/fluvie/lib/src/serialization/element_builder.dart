@@ -54,7 +54,7 @@ Widget _base(ElementSpec spec) {
             : decodeTextStyle(props['style'], path: const ['style']),
       );
   }
-  // coverage:ignore-line unreachable ElementSpec.fromJson validates the type before this dispatch
+  // coverage:ignore-line unreachable ElementSpec fromJson validates the type before this dispatch
   throw FluvieSpecError('Unknown element "${spec.type}"');
 }
 

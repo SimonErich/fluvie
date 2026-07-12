@@ -1,4 +1,4 @@
-// coverage:ignore-file thin minio network adapter that needs a live S3 bucket,
+// coverage:ignore-file thin minio network adapter that needs a live S3 bucket
 // so it is not exercised by the unit suite. The mapping logic it feeds
 // (S3FileStore) is fully unit-tested through the S3ObjectStorage fake.
 import 'dart:typed_data';
