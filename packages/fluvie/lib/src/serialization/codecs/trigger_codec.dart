@@ -8,7 +8,7 @@ import 'package:fluvie/src/serialization/codecs/time_codec.dart';
 ///
 /// The keyword triggers are bare strings (`"auto"`, `"sceneStart"`,
 /// `"sceneEnd"`, `"previous"`); the rest are objects tagged by `kind`
-/// (`at`, `beat`, `after`, `whenStarts`). Anchor references serialize as the
+/// (`at`, `beat`, `whenEnds`, `whenStarts`). Anchor references serialize as the
 /// anchor's id (its `debugName`); a referenced anchor with no id throws a
 /// [FluvieSpecError] (located at [path]).
 Object encodeTrigger(Trigger trigger, {List<String> path = const []}) => switch (trigger) {
