@@ -20,8 +20,31 @@ The provider widgets live in `package:fluvie_ai/fluvie_ai.dart`:
 A visual widget (`GenerativeImage`, `GenerativeVideo`) goes in a scene's
 `children` like any element. An audio widget (`GenerativeMusic`,
 `GenerativeSpeech`, `GenerativeSoundFx`) also goes in a scene's `children`; it
-paints nothing and contributes a track to the mix. See the
-[API spec](../../concept/API_SPEC.md) for full code examples.
+paints nothing and contributes a track to the mix.
+
+Import the AI widgets next to the usual pair:
+
+<!-- code-excerpt "examples/gallery/lib/lessons/13_generative_content.dart (imports)" -->
+```dart
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
+import 'package:fluvie/fluvie.dart';
+import 'package:fluvie_ai/fluvie_ai.dart';
+```
+
+Then declare a generated image inline and animate it like any element:
+
+<!-- code-excerpt "examples/gallery/lib/lessons/13_generative_content.dart (image)" -->
+```dart
+Positioned.fill(
+  child: GenerativeImage.flux(
+    prompt: 'a neon skyline at dusk, wide angle',
+    fit: BoxFit.cover,
+  ).animate([Animation.kenBurns(zoom: 1.2)]),
+),
+```
+
+Lesson 13 renders exactly this. See the [API spec](../../concept/API_SPEC.md)
+for the full type reference.
 
 ## Set up your keys
 
@@ -77,8 +100,20 @@ A generated video that carries its own audio (Veo 3) keeps that track. The track
 plays where the clip plays, delayed to its scene window, so picture and sound stay
 in sync because they are the same file. Set `withAudio: false` to drop it.
 
+<!-- code-excerpt "examples/gallery/lib/lessons/13_generative_content.dart (video)" -->
+```dart
+Widget generatedClip() => GenerativeVideo.veo(prompt: 'a man walking down the street', seconds: 6);
+```
+
 Generated music feeds beat detection, so `Trigger.beat` works against a Suno bed.
 A generated narration or sound effect mixes like a hand-written `Audio` track.
+
+<!-- code-excerpt "examples/gallery/lib/lessons/13_generative_content.dart (audio)" -->
+```dart
+Widget generatedMusic() => GenerativeMusic.suno(prompt: 'lofi hip hop, 90bpm', seconds: 10);
+
+Widget generatedNarration() => GenerativeSpeech.eleven(text: 'Welcome to Fluvie.', voice: 'rachel');
+```
 
 ## Offline and CI
 
