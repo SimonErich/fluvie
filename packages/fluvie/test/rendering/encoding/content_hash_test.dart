@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/core/quality.dart';
@@ -6,6 +7,18 @@ import 'package:fluvie/src/rendering/encoding/content_hash.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
 
 void main() {
+  group('fluvieRenderVersion', () {
+    test('stays in lockstep with pubspec.yaml so a release invalidates the cache', () {
+      // The constant is baked into every render digest; if it drifts behind the
+      // package version, a bump stops invalidating cached frames (its dartdoc
+      // promises otherwise). Read the version straight from the pubspec.
+      final pubspec = File('pubspec.yaml').readAsStringSync();
+      final match = RegExp(r'^version:\s*(.+)$', multiLine: true).firstMatch(pubspec);
+      expect(match, isNotNull, reason: 'pubspec.yaml has a version line');
+      expect(fluvieRenderVersion, match!.group(1)!.trim());
+    });
+  });
+
   group('fnv1a64Hex', () {
     test('matches the known FNV-1a-64 vectors', () {
       // Reference vectors from the FNV specification (Fowler/Noll/Vo).
