@@ -34,12 +34,6 @@
       "icon": "&#9998;"
     },
     {
-      "key": "ai_abstracted",
-      "role": "the talent agency",
-      "line": "One set of contracts for every AI provider and medium: text, image, video, speech, sound, and music.",
-      "icon": "&#9651;"
-    },
-    {
       "key": "fluvie_server",
       "role": "the studio you host",
       "line": "Render API, MCP server, and a docs helper in one binary. Host the full AI stack yourself.",
