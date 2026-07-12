@@ -14,6 +14,9 @@ topics:
   - api
   - mcp
 
+executables:
+  fluvie_server:
+
 environment:
   sdk: ^3.12.0
 
