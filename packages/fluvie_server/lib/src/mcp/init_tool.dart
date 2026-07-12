@@ -49,7 +49,7 @@ Add the dependency:
 
     # pubspec.yaml
     dependencies:
-      fluvie: ^0.1.0
+      fluvie: ^0.2.0
 
 Write the composition (lib/videos/starter.dart):
 
