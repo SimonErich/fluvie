@@ -125,7 +125,7 @@ same tree, the same tree captures the same picture, and value-equal props let th
 frame cache share work across renders. Different props produce different frames,
 as you would expect.
 Pass a different `value` and the count changes; pass an equal `Props` and you
-get the exact same bytes.
+get the same render.
 
 This is what makes data-driven batch rendering safe. Render a thousand
 personalized intros from a thousand rows, re-run the batch tomorrow, and every

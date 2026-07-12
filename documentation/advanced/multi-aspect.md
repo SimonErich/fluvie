@@ -90,7 +90,7 @@ Widget headlineForAspect() => Builder(
 `Aspect.reels`, so an element always has a sane default.
 
 One rule for `Adaptive`: every aspect you render needs a matching branch. A null
-branch for the aspect under render throws an `ArgumentError` at construction, so
+branch for the aspect under render throws an `ArgumentError` at build time, so
 a missing layout fails loudly rather than rendering nothing.
 
 ## Timing is the same across aspects

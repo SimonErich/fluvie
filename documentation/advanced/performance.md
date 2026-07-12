@@ -35,8 +35,8 @@ cache without pumping the tree at all.
 
 The cache is advisory. The digest does not cover the composition's source code,
 so editing a composition under an unchanged key can serve stale frames. Bypass
-the cache with `--no-cache` while you iterate, and a Fluvie version bump
-invalidates every cached frame on its own.
+the cache with `--no-cache` while you iterate. A Fluvie version bump invalidates
+every cached frame on its own.
 
 ## Content-hash caching loads media once
 

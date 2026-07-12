@@ -11,7 +11,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  fluvie: ^0.1.0
+  fluvie: ^0.2.0
 ```
 
 Then fetch it:

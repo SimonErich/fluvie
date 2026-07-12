@@ -39,8 +39,9 @@ Each call advances a playhead, the running position the next step starts from:
 - a `String` label, for example `at: 'reveal'`;
 - a `LabelRef` with offset arithmetic, for example `'reveal'.label - 0.2.seconds`.
 
-Label arithmetic stays symbolic until the timeline resolves it at `play()` time,
-so it never reaches the per-frame path.
+Label arithmetic stays symbolic until the timeline resolves its placements at
+the enclosing `Video`'s fps, so it never reaches the per-frame path. An unknown
+label already throws at the `play()` call.
 
 ## Driving a scene
 

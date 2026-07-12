@@ -81,7 +81,7 @@ rendering. Effects pull randomness from a seed, so the same seed repeats.
 ## Where to next
 
 - [Layouts](../guides/layouts.md): plain Flutter layout plus `Box` and
-  `Frame`.
+  `PhotoFrame`.
 - [Backgrounds and gradients](../guides/backgrounds-and-gradients.md): fills,
   textures, and `gradientShift`.
 - [Timing and triggers](../guides/timing-and-triggers.md): anchors,

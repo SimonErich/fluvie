@@ -12,9 +12,10 @@ It is the one interactive command. It asks where to put things and offers a
 sensible default, so most of the time you just press Enter. Pass `--yes` to take
 every default with no prompts.
 
-The scaffold also turns on Fluvie's lint rules (`fluvie_lints` via
-`custom_lint`), so a dangling anchor or a cyclic trigger shows up in your IDE
-as you type, with a quick fix where one exists.
+When it scaffolds the render harness (the default), it also turns on Fluvie's
+lint rules (`fluvie_lints` via `custom_lint`), so a dangling anchor or a cyclic
+trigger shows up in your IDE as you type, with a quick fix where one exists.
+Skip the harness and you skip the lint wiring too.
 
 ## Outside a Flutter project
 
@@ -42,8 +43,8 @@ flutter pub get
 ```
 
 Useful flags: `--name` sets the render key and file name, `--path` chooses the
-file location, `--no-render` skips the harness, and `--force` overwrites an
-existing file.
+file location, `--no-render` skips the harness (and with it the lint wiring),
+and `--force` overwrites an existing file.
 
 ## The starter composition
 

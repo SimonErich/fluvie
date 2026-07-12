@@ -49,7 +49,9 @@ real binary; media flows through an injected fake client or local fixtures.
 ## Golden tests with Alchemist
 
 Goldens render at a fixed fps, a fixed seed, and DPR 1.0, so a frame is
-reproducible. Tag the file `@Tags(['golden'])` and assert with `goldenTest`.
+reproducible. Seeded effects (`noise(seed)` / `random(seed)`) keep a golden
+stable from run to run, so a diff means the output actually changed. Tag the
+file `@Tags(['golden'])` and assert with `goldenTest`.
 
 There are two flavors:
 
@@ -93,16 +95,10 @@ melos run web:smoke   # build, serve, and smoke-test the demo web app
 It needs node, python3, and a Chrome binary (set `CHROME`). Pass `SKIP_BUILD=1`
 to reuse an existing build.
 
-## Goldens for visual regression
-
-Lock in how a render looks with an Alchemist golden (the `golden` tag). Seeded
-effects (`noise(seed)` / `random(seed)`) keep a golden stable from run to run, so
-a diff means the output actually changed. The Linux baseline is authoritative.
-
 ## Coverage
 
-The gate enforces 97% line coverage on `fluvie`, `fluvie_lints`, and
-`fluvie_cli`. Run it before you commit:
+The gate enforces 97% line coverage on every package under `packages/`. Run it
+before you commit:
 
 ```sh
 melos run coverage:check

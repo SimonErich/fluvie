@@ -85,7 +85,7 @@ the PNG.
 - Page width 100, trailing commas required.
 - A new public API needs its dartdoc and its documentation page, in the same
   change. Docs snippets come from compiled sources, never hand-typed; see the
-  voice rules in [the documentation index](../index.md).
+  voice rules in [the documentation map](../README.md).
 
 ## Commits
 
