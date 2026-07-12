@@ -178,9 +178,6 @@ the model alongside the change, so a multimodal provider (Claude or Gemini) can
 see what it is editing. The committed `.fluvie.json` stays the reproducible
 artifact; the image only grounds the next edit.
 
-`ollama` needs no key and runs against a local server, which makes it the
-easiest way to try this offline.
-
 ## In the example app
 
 The example inspector has a "Generate with AI" action in its app bar. It opens a

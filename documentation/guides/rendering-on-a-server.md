@@ -51,6 +51,8 @@ A request body has exactly one input:
 - `{"prompt":"a 10s coffee promo"}` authors a spec with an LLM, then renders it.
 - `{"edit":{"base":{...},"change":"make the title pop"}}` refines a spec, then
   renders it.
+- `{"code":"Video build() { ... }"}` renders a Dart `Video build()` snippet (the
+  [playground](playground.md) path), statically checked before it runs.
 
 Add `options`, `visibility`, and `ttl`:
 
@@ -143,9 +145,9 @@ The example app renders either way:
 On-device rendering on mobile is supported by
 [fluvie_mobile_encoder](on-device-mobile-rendering.md): it drives Fluvie's capture
 loop in the running app and encodes with the platform's native hardware encoder,
-so nothing leaves the device. On the web it is not wired yet (the in-browser
-ffmpeg encoder is unconnected), so the hosted web example renders through
-`fluvie_server`.
+so nothing leaves the device. On the web,
+[fluvie_web_encoder](on-device-web-rendering.md) does the same through ffmpeg.wasm:
+it captures and encodes the video on the page, so nothing leaves the browser.
 
 ## Where to next
 

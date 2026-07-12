@@ -120,7 +120,7 @@ WebView.url('https://fluvie.dev', viewport: const SnapshotViewport(width: 1280, 
 `SnapshotViewport` fixes the layout box in logical pixels (`width`, `height`, and
 `deviceScale`, which defaults to `1.0`). A fixed viewport is what makes the
 raster deterministic: the same page laid out in the same box produces the same
-image. `WebView.url` also takes an optional `scroll` (a `ScrollOffset`) and
+image. `WebView.url` also takes an optional `scroll` (an `Offset`) and
 `clip` (a `Rect`) to capture part of a tall page.
 
 Every `WebView.url` host passes through the network allowlist before any

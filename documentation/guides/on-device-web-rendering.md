@@ -27,7 +27,7 @@ mobile reimplements it), so the feature set matches the desktop.
 
 ## Setup
 
-Two small steps, both opt-in. An app that does not add the plugin never ships any
+The steps below are opt-in. An app that does not add the plugin never ships any
 of this.
 
 **1. Add the plugin.**
@@ -97,12 +97,12 @@ fetch step rather than committing it. A runnable demo, with that step and the
 bridge wired up, lives in
 [`packages/fluvie_web_encoder/example`](https://github.com/SimonErich/fluvie/tree/main/packages/fluvie_web_encoder/example).
 
-**4. Install the clip-decoder bridge — only if you render `Clip`s.**
+**4. Install the clip-decoder bridge (only if you render `Clip`s).**
 
 A `Clip` decodes in the browser through WebCodecs, behind a second page-global
 object, `FluvieClipDecoder`. It demuxes the clip's MP4 with
 [mp4box.js](https://github.com/gpac/mp4box.js) and decodes the samples it reads
-with a `VideoDecoder`, returning RGBA pixels per source frame — the in-browser
+with a `VideoDecoder`, returning RGBA pixels per source frame, the in-browser
 analogue of the on-device native frame reader. Like the encoder bridge it loads
 its demuxer lazily, so a page that renders no clips never fetches it:
 
@@ -153,11 +153,11 @@ Video  ->  off-screen capture (Fluvie)  ->  PNG frame sequence  ->  ffmpeg.wasm 
    `FluvieWebStage` surface, sized to your target resolution and parked
    off-screen. Each captured frame is encoded to a PNG and written to an
    in-memory sandbox as a numbered image sequence (`frame_000000.png`, …), never
-   to disk. Encoding per frame keeps capture memory flat — one frame at a time —
+   to disk. Encoding per frame keeps capture memory flat (one frame at a time)
    instead of holding every raw frame at once, so a longer render no longer
    overflows the browser tab during capture.
 2. It hands the sandbox to `ffmpeg.wasm`, which runs the same H.264 encode and
-   audio-mix plan a desktop render would — reading the PNG image sequence as its
+   audio-mix plan a desktop render would, reading the PNG image sequence as its
    input (the desktop path reads a raw stream) and writing the output in its
    in-memory file system.
 3. The renderer reads the encoded file back and returns it as a `Uint8List`.
@@ -213,17 +213,17 @@ browser (there is no file system).
 A `Clip`'s own audio track is mixed in too when `audio: true`: `ffmpeg.wasm`
 demuxes the AAC straight from the clip's MP4 and the mix delays and trims it to
 where the clip plays, using the **same** plan as on mobile and the desktop. So a
-clip composition is not silent in the browser — see [Clips](#clips).
+clip composition is not silent in the browser. See [Clips](#clips).
 
 If a `Video` declares audio but you leave `audio` off, the render is silent and
-the renderer warns once through `WebVideoRenderer.onWarning` — pass
+the renderer warns once through `WebVideoRenderer.onWarning`. Pass
 `warnOnDroppedAudio: false` to silence it. Audio rides the MP4 export only; a GIF
 or transparent render drops it (also warned). For the full audio API, see
 [Audio and captions](audio-and-captions.md).
 
 ## Clips
 
-A `Clip` plays its real frames in the browser through **WebCodecs** — no FFmpeg
+A `Clip` plays its real frames in the browser through **WebCodecs**, not FFmpeg,
 for the decode. `WebVideoRenderer` wires a decoder by default; it bridges to the
 `FluvieClipDecoder` object the page installs (the same way `FluvieFfmpeg` provides
 the encoder), which demuxes the clip's MP4 with mp4box.js and decodes the samples
@@ -231,9 +231,9 @@ it reads with a `VideoDecoder`. The **same** resample math the desktop uses pick
 the source frames, so motion matches a desktop render. A clip's embedded audio is
 mixed in when you pass `audio: true` (see [Audio](#audio)).
 
-The browser has no file system to stream frames to, so — unlike the
+The browser has no file system to stream frames to. Unlike the
 [mobile](on-device-mobile-rendering.md#clips) path, which streams clip frames to
-disk — the web decoder holds every frame it extracts **in memory**, at the source
+disk, the web decoder holds every frame it extracts **in memory**, at the source
 resolution. Memory therefore scales with the clip's length × resolution: a short
 reel is fine, but a long or high-resolution clip can exhaust a browser tab. Keep
 in-browser clips short and known, and render long or full-resolution clips on the
@@ -298,7 +298,7 @@ export 'render_on_device_stub.dart'
 Each file exposes the same `Future<Uint8List> renderOnDevice(Video video)`; the
 mobile one reads the encoder's file back to bytes, the web one returns them
 directly. The runnable demo lives in
-[`examples/gallery/lib/cross_platform`](https://github.com/SimonErich/fluvie/tree/main/example/lib/cross_platform).
+[`examples/gallery/lib/cross_platform`](https://github.com/SimonErich/fluvie/tree/main/examples/gallery/lib/cross_platform).
 
 ## Testing without a browser
 

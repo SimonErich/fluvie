@@ -91,7 +91,7 @@ bed fills the whole video on both Android and iOS. For a network source,
 construct the renderer with a `NetworkAudioMaterializer` and a `NetworkAllowlist`
 of permitted hosts; the bytes are fetched to a local file, then mixed as usual.
 If a `Video` declares audio but you leave `audio` off, the render is silent and
-the renderer warns once through `OnDeviceVideoRenderer.onWarning` — pass
+the renderer warns once through `OnDeviceVideoRenderer.onWarning`. Pass
 `warnOnDroppedAudio: false` to silence it.
 
 See [Audio across platforms](audio-and-captions.md#audio-across-platforms) for the
@@ -99,7 +99,7 @@ full per-platform support table.
 
 ## Clips
 
-A `Clip` plays its real frames on-device — no FFmpeg. The platform decoder
+A `Clip` plays its real frames on-device, with no FFmpeg. The platform decoder
 (Android `MediaMetadataRetriever`/`MediaExtractor`, iOS AVFoundation) extracts
 the source frames the clip's window reads, the same resample math the desktop
 uses, so motion matches a desktop render. A clip's embedded audio is mixed in
@@ -110,14 +110,14 @@ Clip frames **stream through a disk-backed store** instead of all living in
 memory: the pre-pass extracts the window's frames to a temp directory, and the
 capture loop decodes only the few frames each composition frame paints, evicting
 the rest. So a full-resolution or multi-second clip renders without the decode
-cache exhausting the app heap — only a small, bounded window is ever decoded at
+cache exhausting the app heap. Only a small, bounded window is ever decoded at
 once, and the store is deleted when the resolver is disposed. Frames are decoded
 at most at the render's own resolution (a 4K source is scaled down to the reel
 size it is composited into), which bounds both the window and the throughput.
 
 The browser renders the same clips through WebCodecs instead of a native decoder;
 because a page has no file system to stream to, it decodes them all into memory
-rather than through a disk store — see [web clips](on-device-web-rendering.md#clips).
+rather than through a disk store. See [web clips](on-device-web-rendering.md#clips).
 
 ## Codec and bitrate
 

@@ -13,7 +13,7 @@ That one line dissolves every scene into the next over half a second. Lesson
 04 builds three scenes on it: a gradient title, a stats scene, and an outro.
 Override the default on any boundary with `Scene.enter` or `Scene.exit`.
 
-## The four transition kinds
+## The five transition kinds
 
 Every transition shares `Time` and `Ease`, and each names its own shape:
 

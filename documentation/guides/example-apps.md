@@ -8,7 +8,7 @@ builders), so each app stays tiny.
 
 | App | What it shows | Renders with |
 |---|---|---|
-| `gallery` | The twelve lessons and the scrubbable inspector | CLI (desktop) and the server (web) |
+| `gallery` | The thirteen lessons and the scrubbable inspector | CLI (desktop) and the server (web) |
 | `cli_quickstart` | Install the CLI and render from the terminal | `fluvie_cli` |
 | `desktop_studio` | A Linux desktop studio that renders to a file | `fluvie_cli`, in-process |
 | `mobile_purrfect` | An Android app that renders on the phone | `fluvie_mobile_encoder` |
@@ -67,7 +67,7 @@ flutter run -d chrome --dart-define=FLUVIE_API_URL=http://localhost:8080
 
 ## Run the gallery
 
-The twelve lessons plus the inspector. Run it from the repo root so its render
+The thirteen lessons plus the inspector. Run it from the repo root so its render
 button can find the CLI.
 
 ```sh

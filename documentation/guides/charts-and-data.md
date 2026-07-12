@@ -122,9 +122,12 @@ A chart with no scope above it uses the package fallback palette, so charts work
 without any theme. A bar, segment, or marker cycles the palette by index; a
 `ChartSeries.color` override wins over the slot the palette would pick.
 
-The full `FluvieTheme` arrives in a later phase. It mounts a `FluvieTokensScope`
-for you, so your charts read the theme through the same `context.fluvie` with no
-change.
+`FluvieTheme` ships in 0.2.0. It sets a subtree's brand palette, type scale, and
+motion defaults, and mounts a `FluvieTokensScope` for you, so charts, `Code`, and
+captions read the brand through the same `context.fluvie`. It does not set the
+chart-series `ChartPalette` though. Your series colors stay on the
+`FluvieTokensScope` above, so wrap a `FluvieTokensScope` where you want to recolor
+the series. See [Theming](../advanced/theming.md) for the full theme.
 
 A counter headline reads like the charts it sits above:
 
@@ -156,5 +159,5 @@ golden like every other element.
 
 - [Text and typography](text-and-typography.md): `Counter` and `Typewriter`, the
   elements that headline a data story.
-- [Animating elements](timing-and-triggers.md): how `.animate()` and `Stagger`
+- [Animating elements](animating-elements.md): how `.animate()` and `Stagger`
   compose the outer motion a chart rides.

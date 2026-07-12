@@ -13,8 +13,9 @@ audio: const [
 
 That plays `_track` for the length of the video, fades it up over the first 0.3
 seconds, and fades it out over the last 0.5 seconds. The picture stays the same;
-only the soundtrack changes. The rest of this page covers the three jobs audio
-does: it plays, it drives reactive motion, and it sits under captions.
+only the soundtrack changes. This page covers the three jobs audio does (it
+plays, it drives reactive motion, and it sits under captions), then closes with
+the annotation elements that point, frame, and label a scene.
 
 ## Audio tracks and mixing
 
@@ -26,12 +27,16 @@ Audio.music(path), // a looping or one-shot bed for the whole video
 Audio.sfx(path), // a one-shot effect placed at a moment
 ```
 
-Every track carries the same controls:
+Both constructors take a `volume` that scales the track from 0.0 (silent) to 1.0
+(full) and above. The rest depend on which track you build:
 
-- `volume` scales the track from 0.0 (silent) to 1.0 (full) and above.
-- `fadeIn` and `fadeOut` take a `Time` and ramp the track in or out.
-- `trim` selects a span of the source file (for example seconds 4 to 12).
-- `at` places an `Audio.sfx` at a moment, named by a `Trigger` or a `Time`.
+- `Audio.music` adds `fadeIn` and `fadeOut` (each a `Time` that ramps the bed in
+  or out), `trim` (a span of the source file, for example seconds 4 to 12), `loop`
+  (repeat the file to fill the owner's duration), and `track` (an `Anchor` that
+  tags the bed's beat grid for `Trigger.beat`).
+- `Audio.sfx` adds `at`, a `Trigger` that places the one-shot at a moment. Use
+  `Trigger.at(Time)` for an absolute moment, or a beat or anchor trigger to pin it
+  to the timeline.
 
 The encoder mixes the tracks. Each track becomes one input with its own trim,
 delay, volume, and fade filters, and the encoder sums them with `amix` into the
@@ -220,7 +225,7 @@ windows. All of them read colors from `context.fluvie`, so they match your theme
 `Connector` and `Spotlight` take explicit positions in this version. Anchoring
 them to another element's rectangle is forthcoming.
 
-## What reacts today, and what is forthcoming
+## Two ways to move with the music
 
 Beat-reactive motion works now, with one scope dependency. `Animation.pulse(on:)`,
 `Animation.scaleY(on:)`, and `Bars` all read the precomputed band table and drive
@@ -230,12 +235,14 @@ read from. The example and render paths mount it for you. If you build your own
 capture shell, mount it yourself. That is the surface to reach for when you want
 the picture to move with the music.
 
-Beat-synced timing is a separate idea, and it is not wired into the render path in
-this version. `Trigger.beat(every:)` would cut or fire an animation on the beat
-grid rather than scale a transform with band energy. The beat grid is detected in
-the pre-pass, but the trigger that reads it does not drive the render yet. Reach
-for the reactive presets above for motion that follows the music today, and treat
-beat-synced cuts as forthcoming.
+Beat-synced timing is a separate idea, and it works in 0.2.0. Reactive motion
+scales a transform with band energy; `Trigger.beat` starts an animation on the
+beat grid instead. Name a beat-tagged `Audio.music` with an `Anchor` through its
+`track:`, then fire an animation on that track's grid with `Trigger.beat(track:)`.
+The pre-pass finds the beat grid before frame 0, and the resolver snaps the
+animation to the first qualifying beat. Lesson 12 pops a brand chip on the music
+beat with `Animation.pop(at: Trigger.beat(track: music))`. Pass `every:` to fire
+on every second or fourth beat instead of every one.
 
 ## Audio across platforms
 
@@ -253,8 +260,8 @@ identically; only the encoder differs. This is the canonical support table.
 Notes:
 
 - A `Clip`'s embedded audio is demuxed from the video and folded into this same
-  mix on every renderer — including the browser, where `ffmpeg.wasm` demuxes the
-  clip's track — unless the clip is `ClipAudio.muted`.
+  mix on every renderer, including the browser, where `ffmpeg.wasm` demuxes the
+  clip's track. A `ClipAudio.muted` clip stays out of the mix.
 - Audio rides the MP4 export only. GIF, transparent WebM, and image sequences
   carry no sound.
 - "Network (allowlist)" needs an explicit allowlist of hosts. On-device it is
@@ -270,4 +277,3 @@ Notes:
   reactive presets and `Audio.sfx` placement sit beside.
 - [Charts and data](charts-and-data.md): the data story the arrow and spotlight
   annotate.
-```

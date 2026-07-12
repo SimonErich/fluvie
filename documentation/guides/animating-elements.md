@@ -33,8 +33,8 @@ The presets fall into three groups:
 
 - **Enter** plays at the start of the window: `fadeIn`, `slideIn`, `slideFadeIn`,
   `pop`, `scaleIn`, `blurIn`, `maskWipeIn`.
-- **Exit** plays at the end of the window: `fadeOut`, `slideOut`, `blurOut`,
-  `color`.
+- **Exit** plays at the end of the window: `fadeOut`, `slideOut`, `slideFadeOut`,
+  `scaleOut`, `blurOut`, `maskWipeOut`, `color`.
 - **Ambient** plays the whole window, on a loop: `float`, `pulse`, `drift`,
   `spin`, `kenBurns`.
 
@@ -86,8 +86,8 @@ const Text('Bouncy', style: _line).animate([
 ]);
 ```
 
-The springs are `Spring.gentle`, `Spring.snappy`, and `Spring.bouncy`, or build
-your own with `Spring(stiffness:, damping:)`.
+The springs are `Spring.gentle`, `Spring.snappy`, `Spring.bouncy`, and
+`Spring.stiff`, or build your own with `Spring(stiffness:, damping:)`.
 
 ## Trigger one animation off another
 
