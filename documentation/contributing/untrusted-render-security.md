@@ -90,11 +90,19 @@ framework surface, and `flutter_test`'s mocks do not survive `Isolate.run`.
 
 Defense in depth only, all under `FLUVIE_BLOCK_FILE_SOURCES` / the render path:
 
-- Import allowlist is AST-based and grants only the public `fluvie.dart` barrel
-  and flutter non-`src/` libraries (`code_import_policy.dart`).
+- Import allowlist is AST-based and grants only the public `fluvie.dart` barrel,
+  flutter non-`src/` libraries, `dart:math`, and `dart:ui` (`code_import_policy.dart`).
 - `FileSource` is blocked at every media loader on the untrusted path.
 - Canvas and frame-count bounds are overflow-safe and per-axis, enforced at the
   capture chokepoint (`render_harness.dart` `assertRenderWithinBounds`).
+- The in-process MCP render path (`LocalRenderGateway`) enqueues straight to the
+  render queue, so it leans on that capture chokepoint for its size bound instead
+  of the HTTP handler's early reject, and like code and spec renders it is not
+  rate-limited.
+- The edit poster (`renderPosterPng`) grounds an untrusted base spec for the
+  model; on the blocked path it rejects `FileSource` and network sources before
+  they reach the preview fallback, so a base spec cannot read a host file into
+  the grounding image.
 - A linear nesting pre-scan rejects bracket bombs before the parse (partial: see
   the cascade/collection-`if` bypass above).
 
