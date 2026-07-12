@@ -17,7 +17,7 @@ void main() {
       expect(result.isError, isFalse);
       expect(text, contains('fluvie init'));
       expect(text, contains('Video starterVideo()'));
-      expect(text, contains('fluvie: ^0.1.0'));
+      expect(text, contains('fluvie: ^0.2.0'));
       expect(text, contains('validate_code'));
     });
   });
