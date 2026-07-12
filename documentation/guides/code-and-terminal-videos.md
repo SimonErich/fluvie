@@ -151,14 +151,10 @@ const Markdown(
 );
 ```
 
-A fenced code block delegates to a `Code` widget highlighted in its fence
-language, and an image delegates to an `Image` widget, so the same highlighting
-and pre-resolved media you use elsewhere apply inside a document:
-
-````dart
-Markdown('```dart\nvoid main() {}\n```')   // renders a highlighted Code
-Markdown('![logo](https://.../logo.png)')   // renders an Image
-````
+A fenced code block in the source delegates to a `Code` widget highlighted in
+its fence language, and an image delegates to an `Image` widget, so the same
+highlighting and pre-resolved media you use elsewhere apply inside a document.
+The rest of the source, headings, paragraphs, and lists, renders as styled text.
 
 Pass `reveal:` a `Time` to bring the top-level blocks in one after another over
 the element window:
