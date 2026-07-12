@@ -1,3 +1,6 @@
+// fluvie:large-file-ok: one on-device render orchestration; render() is a single
+// linear capture, mix, and encode pipeline over injected seams, and the capture
+// half already lives in the on_device_video_renderer_capture.dart part.
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
