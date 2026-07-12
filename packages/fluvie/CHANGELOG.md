@@ -18,10 +18,9 @@ rename is mechanical. The full map lives in the
   `resolveAudioMix`, collectors, `FadeBox`, the wasm runtime,
   `FfmpegVersion`). `NumberFormat` is no longer re-exported; import
   `package:intl/intl.dart` yourself.
-- `FfmpegProvider`, `ProcessFfmpegProvider`, `WasmFfmpegProvider`, and
-  `ffmpegProviderProvider` are now `FfmpegRunner`, `ProcessFfmpegRunner`,
-  `WasmFfmpegRunner`, and `ffmpegRunnerProvider`;
-  `RenderService.render(provider:)` is `render(runner:)`.
+- `FfmpegProvider` and `ffmpegProviderProvider` are now `FfmpegRunner` and
+  `ffmpegRunnerProvider`, which selects the platform runner through
+  `FfmpegRunnerRegistry`; `RenderService.render(provider:)` is `render(runner:)`.
 - `Trigger.after` is now `Trigger.whenEnds`, the parallel twin of
   `Trigger.whenStarts`; the spec kind `"after"` fails with a rename hint.
 - **One reveal vocabulary.** Charts (`growIn`/`drawIn`/`sweepIn`/`popIn`),

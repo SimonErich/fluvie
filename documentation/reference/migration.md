@@ -12,20 +12,20 @@ change below is mechanical.
 
 | 0.1.x | 0.2.0 |
 | --- | --- |
-| Pipeline exports on `package:fluvie/fluvie.dart` (`RenderService`, `RenderConfig`, `render`, `renderToSandbox`, `renderTemplate`, sandboxes, capture services, resolver contracts, `resolveAudioMix`, collectors, `FadeBox`, the wasm runtime) | Import `package:fluvie/rendering.dart` — see [the rendering surface](rendering-surface.md) |
+| Pipeline exports on `package:fluvie/fluvie.dart` (`RenderService`, `RenderConfig`, `render`, `renderToSandbox`, `renderTemplate`, sandboxes, capture services, resolver contracts, `resolveAudioMix`, collectors, `FadeBox`, `FfmpegVersion`, the wasm runtime) | Import `package:fluvie/rendering.dart`. See [the rendering surface](rendering-surface.md) |
 | `NumberFormat` re-exported from the barrel | Import `package:intl/intl.dart` yourself |
-| `FfmpegProvider`, `ProcessFfmpegProvider`, `WasmFfmpegProvider`, `ffmpegProviderProvider` | `FfmpegRunner`, `ProcessFfmpegRunner`, `WasmFfmpegRunner`, `ffmpegRunnerProvider` (on the rendering barrel) |
+| `FfmpegProvider`, `ProcessFfmpegProvider`, `WasmFfmpegProvider`, `ffmpegProviderProvider` | `FfmpegRunner`; the platform runner is selected for you through `ffmpegRunnerProvider` (backed by `FfmpegRunnerRegistry`), all on the rendering barrel |
 | `RenderService.render(provider:)` | `RenderService.render(runner:)` |
-| `Trigger.after(a)` (and the JSON trigger kind `"after"`) | `Trigger.whenEnds(a)` / `"whenEnds"` — the parallel twin of `Trigger.whenStarts(a)`; old specs fail with a rename hint |
-| `Chart.bar(growIn:)`, `Chart.line/area(drawIn:)`, `Chart.pie/donut(sweepIn:)`, `Chart.scatter(popIn:)` | `reveal:` on every chart — one word for "how long the built-in reveal takes" |
+| `Trigger.after(a)` (and the JSON trigger kind `"after"`) | `Trigger.whenEnds(a)` / `"whenEnds"`, the parallel twin of `Trigger.whenStarts(a)`; old specs fail with a rename hint |
+| `Chart.bar(growIn:)`, `Chart.line/area(drawIn:)`, `Chart.pie/donut(sweepIn:)`, `Chart.scatter(popIn:)` | `reveal:` on every chart: one word for "how long the built-in reveal takes" |
 | `Counter(duration:)` (and the Counter spec prop `"duration"`) | `Counter(reveal:)` / `"reveal"` |
-| `Arrow(drawIn:)`, `Shape(drawIn:)`, `Connector(drawIn:)`, `LowerThird(slideIn:)` | `reveal:` — annotations share the same word |
+| `Arrow(drawIn:)`, `Shape(drawIn:)`, `Connector(drawIn:)`, `LowerThird(slideIn:)` | `reveal:` (annotations share the same word) |
 | `Animation.slideFade(...)` (and the spec preset `"slideFade"`) | `Animation.slideFadeIn(...)` / `"slideFadeIn"`; a new `slideFadeOut` mirrors it |
 | `Animation.maskWipe(...)` | `Animation.maskWipeIn(...)`; a new `maskWipeOut` mirrors it |
 | `Animation.spin(per:)` (and the spec arg `"per"`) | `Animation.spin(period:)` / `"period"` |
 | `Animation.float(frequency: 0.4)` (cycles per second) | `Animation.float(period: 2.5.seconds)` (one bob per period) |
-| `Timeline(fps: 30)` | `Timeline()` — the timeline resolves at the enclosing `Video`'s fps, so a 60 fps video can no longer silently mistime a schedule; `timeline.placements` becomes `placementsAt(fps)` |
-| `Frame.polaroid/card/rounded/none` (the decorative photo mat) | `PhotoFrame.*` — "Frame" now always means the render clock (`FrameBuilder`, `n.frames`, `RawFrame`) |
+| `Timeline(fps: 30)` | `Timeline()`: the timeline resolves at the enclosing `Video`'s fps, so a 60 fps video can no longer silently mistime a schedule; `timeline.placements` becomes `placementsAt(fps)` |
+| `Frame.polaroid/card/rounded/none` (the decorative photo mat) | `PhotoFrame.*`: "Frame" now always means the render clock (`FrameBuilder`, `n.frames`, `RawFrame`) |
 
 New preset mirrors in 0.2.0: `scaleOut`, `glitchOut`, `slideFadeOut`, and
 `maskWipeOut` complete every directional pair, so guessing the `*Out` twin of
@@ -54,9 +54,10 @@ AnimatedText('Hello', animation: EntryAnimation.slideFade());
 const Text('Hello', style: _line).animate([Animation.slideFadeIn()]);
 ```
 
-The `deprecated_member` lint flags the old names in your code and offers a
-quick-fix for each rename below. The rest of this page is one section per row of
-the consolidation map.
+The `deprecated_member` lint flags many of the old type names in your code and
+offers a rename quick-fix for each name it knows. It does not cover the parameter
+renames or every name below, so read the rest by hand. Each section that follows
+maps one row of the consolidation table.
 
 ## Animations become one type
 

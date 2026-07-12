@@ -25,7 +25,7 @@ declarative; the pipeline machinery lives here.
 | Capture | `FrameCaptureService`, `RepaintBoundaryCaptureService`, `RawFrame`, `RenderManifest`, `FrameCache` |
 | Progress | `RenderProgress`, `RenderPhase`, `RenderProgressCallback`, `frameCountFor`, `runStage`, `runGuarded` |
 | Sandboxes | `RenderSandbox`, `FileRenderSandbox`, `MemoryRenderSandbox`, `CaptureSink` |
-| Encoding | `FfmpegRunner`, `FfmpegRunnerRegistry`, `ffmpegRunnerProvider`, `WasmRuntime`, `createWasmRuntime` |
+| Encoding | `FfmpegRunner`, `FfmpegRunnerRegistry`, `ffmpegRunnerProvider`, `FfmpegVersion`, `WasmRuntime`, `createWasmRuntime` |
 | Media resolving | `MediaResolver`, `mediaResolverProvider`, `NoMediaResolver`, `NetworkAllowlist`, `ResolverScope`, `WebClipDecoder` |
 | Generative resolving | `GenerativeResolver`, `generativeResolverProvider`, `NoGenerativeResolver` |
 | Analysis contracts | `SnapshotService`, `BeatDetectionService`, `FrequencyAnalyzer`, `FrameExtractionService`, `VideoProbeService` |

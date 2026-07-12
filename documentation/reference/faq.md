@@ -66,8 +66,8 @@ transport is deferred: see the next answer.
 ## What is the snapshot deferral?
 
 `Mermaid`, `WebView`, and `Html` rasterize an external source (a Mermaid
-diagram, a web page, a Flutter subtree) once before the frame loop, then paint
-the cached image every frame. The element types and their painting are part of
+diagram, a web page, an inline HTML document) once before the frame loop, then
+paint the cached image every frame. The element types and their painting are part of
 v1, but the live headless-Chrome transport that captures the source is deferred.
 
 They are marked `@experimental`. To use them you inject a `SnapshotService` that
@@ -118,10 +118,12 @@ the second follows. See [Timing and triggers](../guides/timing-and-triggers.md).
 
 ## How do the imports work?
 
-`package:fluvie/fluvie.dart` is the only Fluvie entry. It exports Fluvie's whole
-surface, including `Image`, `Animation`, `Tween`, and `Clip`, which share names
-with Flutter's. You still import Flutter for the widgets you use, with a `hide`
-so Fluvie's versions win:
+`package:fluvie/fluvie.dart` is the only authoring entry. It exports the surface
+you type inside a `Video`, including `Image`, `Animation`, `Tween`, and `Clip`,
+which share names with Flutter's. The render pipeline lives on a second barrel,
+`package:fluvie/rendering.dart`; see [the rendering surface](rendering-surface.md).
+You still import Flutter for the widgets you use, with a `hide` so Fluvie's
+versions win:
 
 <!-- code-excerpt "examples/gallery/lib/lessons/01_hello_video.dart (imports)" -->
 ```dart

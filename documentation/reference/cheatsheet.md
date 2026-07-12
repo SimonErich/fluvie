@@ -26,7 +26,7 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 | `Scene.centered(duration:, child:)` | one-child convenience |
 | `Scene.sequence(timeline:, children:)` | duration from a `TimelineSchedule` |
 | `VideoSize.square / reels / story / hd / fourK` | canvas presets; `story` aliases `reels` |
-| `Transition.crossFade / slide / wipe` | between-scene transitions |
+| `Transition.cut / crossFade / wipe / zoom / slide` | between-scene transitions |
 
 ## Motion
 
@@ -35,24 +35,24 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 | `widget.animate([...], anchor:, window:, defaults:)` | attach animations to any widget |
 | `widget.show(from:, to:)` | bound an element to a window |
 | `Animation.fadeIn / fadeOut` | opacity |
-| `Animation.slideIn / slideOut / slideFadeIn` | offset, optionally with fade |
-| `Animation.pop / scaleIn` | springy scale |
+| `Animation.slideIn / slideOut / slideFadeIn / slideFadeOut` | offset, optionally with fade |
+| `Animation.pop / scaleIn / scaleOut` | springy scale |
 | `Animation.blurIn / blurOut` | blur |
 | `Animation.color(to:)` | color lerp, consumed by color-capable elements |
 | `Animation.gradientShift(to:)` | pairwise gradient lerp |
-| `Animation.maskWipeIn(shape:)` | reveal wipe |
+| `Animation.maskWipeIn(shape:) / maskWipeOut(shape:)` | reveal or hide with a wipe |
 | `Animation.float / pulse / drift / spin / kenBurns` | ambient loops |
 | `Animation.from / to / fromTo / keyframes / along / custom` | build your own |
 | `Stagger.each(time) / evenly(over:) / from(origin)` | offset multi-child targets |
 | `Repeat.forever(yoyo:) / times(n, gap:)` | loop inside the span |
 | `Defaults(duration:, ease:, stagger:)` | cascade: element over scene over video over package |
-| `Spring.gentle / snappy / bouncy`, `Ease.smooth / out / snappy / …` | timing feel |
+| `Spring.gentle / snappy / bouncy / stiff`, `Ease.smooth / out / snappy / …` | timing feel |
 
 ## Pixel effects and shaders
 
 | Surface | Notes |
 | --- | --- |
-| `Animation.grain / vignette / scanlines / chromatic / bloom / glitchIn` | post-process the rendered frame |
+| `Animation.grain / vignette / scanlines / chromatic / bloom / glitchIn / glitchOut` | post-process the rendered frame |
 | `Animation.particles(spec)` | deterministic field; build with `Particles.confetti / snow / sparkle` |
 | `Animation.parallax(depth:)` | scene-clock drift for parallax layers |
 | `Animation.shader(asset, uniforms:)` | experimental fragment shader over the element |
@@ -63,7 +63,7 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 | --- | --- |
 | `Text(...).animate([...])` | plain Flutter text plus motion |
 | `Typewriter(text, speed:, caret:)` | frame-driven per-glyph reveal |
-| `Counter(to:, from:, duration:, format:)` | frame-driven number tween, `intl`-formatted |
+| `Counter(to:, from:, reveal:, format:)` | frame-driven number tween, `intl`-formatted |
 | `Counter.currency / percent` | fixed-locale money and percentage presets |
 | `Image.asset / file / memory / network(url, fit:, frame:, shared:)` | a still, pre-resolved before frame 0 |
 | `Clip.asset / network(url, trim:, audio:, fit:, shared:)` | an embedded video |
@@ -108,7 +108,7 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 | `Background.image / video` | pre-resolved like `Image`/`Clip` |
 | `Box(color:, size:)` | fractional-size rectangle; null size fills |
 | `PhotoFrame.none / rounded / card / polaroid` | styled wrappers |
-| `FadeBox(opacity:, child:)` | render-safe opacity primitive |
+| `FadeBox(opacity:, child:)` (`package:fluvie/rendering.dart`) | render-safe opacity primitive |
 
 ## Audio and captions
 
@@ -129,7 +129,7 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 | `context.fluvie.brand / type` | read tokens at the call site |
 | `Adaptive(reels:, square:, landscape:, portrait45:)` | branch layout per aspect |
 | `Aspect.reels / square / landscape / portrait45` | aspect families |
-| `render(video, aspect:)` | render one definition for one aspect |
+| `render(video, aspect:)` (`package:fluvie/rendering.dart`) | render one definition for one aspect |
 
 ## Templates
 
@@ -137,7 +137,7 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 | --- | --- |
 | `VideoTemplate` | a pure function of props, rendered per data row |
 | `TitleIntro / TitleIntroProps`, `StatHighlight / StatHighlightProps` | built-in templates |
-| `renderTemplate(template, props)` | render one props row |
+| `renderTemplate(template, props)` (`package:fluvie/rendering.dart`) | render one props row |
 
 ## Export
 
