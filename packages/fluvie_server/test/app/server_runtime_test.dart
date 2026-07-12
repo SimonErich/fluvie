@@ -78,5 +78,15 @@ void main() {
 
       expect(server.tools.map((t) => t.name), contains('get_video_spec_schema'));
     });
+
+    test('advertises the package version so `initialize` stays in lockstep', () {
+      // The advertised version is a release-stamped constant; if it drifts
+      // behind the pubspec, `initialize` misreports the server to clients.
+      final pubspec = File('pubspec.yaml').readAsStringSync();
+      final version = RegExp(r'^version:\s*(.+)$', multiLine: true).firstMatch(pubspec)!.group(1)!;
+      final config = FluvieServerConfig.fromEnv(const {'FLUVIE_ENABLE_API': 'false'});
+
+      expect(buildMcpServer(config)!.version, version.trim());
+    });
   });
 }

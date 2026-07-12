@@ -12,9 +12,10 @@ import 'package:fluvie_server/src/mcp/mcp_server.dart';
 import 'package:fluvie_server/src/mcp/render_gateway.dart';
 
 /// The MCP server name and version advertised in `initialize`.
-/// Bump alongside the package version on release.
+/// `tool/set_version.sh` rewrites the version on release, in lockstep with the
+/// pubspec (a test guards the two staying equal).
 const String _name = 'fluvie';
-const String _version = '0.1.4';
+const String _version = '0.2.0';
 
 /// Loads the documentation corpus when docs are enabled, else `null`.
 DocSearchService? buildDocs(FluvieServerConfig config) => config.enableDocs
