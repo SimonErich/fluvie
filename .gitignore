@@ -5,6 +5,9 @@ build/
 .flutter-plugins-dependencies
 .packages
 
+# Gradle caches from the Android build (e.g. packages/fluvie_mobile_encoder/android)
+.gradle/
+
 # Coverage
 coverage/
 *.lcov

@@ -167,7 +167,7 @@ Full source: [`examples/gallery/lib/lessons/12_the_kitchen_sink.dart`](examples/
 
 ## Examples
 
-Twelve runnable lessons live in [`examples/gallery/lib/lessons/`](examples/gallery/lib/lessons),
+Thirteen runnable lessons live in [`examples/gallery/lib/lessons/`](examples/gallery/lib/lessons),
 from "Hello, Fluvie" to the kitchen sink. Try them at
 [demo.fluvie.dev](https://demo.fluvie.dev): write and render a `Video` in the
 **Playground**, or describe one in the **AI Assistant** and let a model write and

@@ -1,19 +1,20 @@
 # Fluvie documentation
 
 New here? Start with [your-first-video](getting-started/your-first-video.md).
-Pages ship with the phase that builds their feature; this map shows what
-already exists and what is coming.
+This map lists every documentation page and whether it is shipped or still a
+draft.
 
 ## Map
 
 | Section | Page | Status |
 | --- | --- | --- |
 | getting-started/ | [installation](getting-started/installation.md) | shipped |
+| getting-started/ | [start-a-project](getting-started/start-a-project.md) | shipped |
 | getting-started/ | [your-first-video](getting-started/your-first-video.md) | shipped |
 | getting-started/ | [core-concepts](getting-started/core-concepts.md) | shipped |
 | guides/ | [layouts](guides/layouts.md) | shipped |
 | guides/ | [backgrounds-and-gradients](guides/backgrounds-and-gradients.md) | shipped |
-| guides/ | [timing-and-triggers](guides/timing-and-triggers.md) | draft, grows per phase |
+| guides/ | [timing-and-triggers](guides/timing-and-triggers.md) | draft |
 | guides/ | [animating-elements](guides/animating-elements.md) | shipped |
 | guides/ | [scenes-and-transitions](guides/scenes-and-transitions.md) | shipped |
 | guides/ | [text-and-typography](guides/text-and-typography.md) · [images-and-video-clips](guides/images-and-video-clips.md) | shipped |
@@ -22,16 +23,22 @@ already exists and what is coming.
 | guides/ | [diagrams-and-webviews](guides/diagrams-and-webviews.md) | shipped |
 | guides/ | [audio-and-captions](guides/audio-and-captions.md) | shipped |
 | guides/ | [exporting-your-video](guides/exporting-your-video.md) | shipped |
+| guides/ | [managing-ffmpeg](guides/managing-ffmpeg.md) | shipped |
 | guides/ | [authoring-with-specs](guides/authoring-with-specs.md) | shipped |
 | guides/ | [ai-and-mcp](guides/ai-and-mcp.md) | shipped |
+| guides/ | [generative-media](guides/generative-media.md) | shipped |
 | guides/ | [rendering-on-a-server](guides/rendering-on-a-server.md) | shipped |
 | guides/ | [on-device-mobile-rendering](guides/on-device-mobile-rendering.md) | shipped |
+| guides/ | [on-device-web-rendering](guides/on-device-web-rendering.md) | shipped |
+| guides/ | [playground](guides/playground.md) | shipped |
+| guides/ | [example-apps](guides/example-apps.md) | shipped |
 | (root) | [cookbook](cookbook.md) | shipped |
-| advanced/ | custom-animations · [timeline-orchestration](advanced/timeline-orchestration.md) · [frame-builder](advanced/frame-builder.md) · [shaders-and-effects](advanced/shaders-and-effects.md) · [templates](advanced/templates.md) · [multi-aspect](advanced/multi-aspect.md) · [theming](advanced/theming.md) · [performance](advanced/performance.md) | performance + frame-builder + shaders-and-effects + templates + multi-aspect + theming + timeline-orchestration shipped; custom-animations per page |
+| advanced/ | custom-animations · [timeline-orchestration](advanced/timeline-orchestration.md) · [frame-builder](advanced/frame-builder.md) · [shaders-and-effects](advanced/shaders-and-effects.md) · [templates](advanced/templates.md) · [multi-aspect](advanced/multi-aspect.md) · [theming](advanced/theming.md) · [performance](advanced/performance.md) | shipped, except custom-animations (draft) |
 | reference/ | [cheatsheet](reference/cheatsheet.md) | shipped, living |
 | reference/ | [rendering-surface](reference/rendering-surface.md) | shipped |
 | reference/ | [migration](reference/migration.md) · [faq](reference/faq.md) | shipped |
 | contributing/ | [overview](contributing/overview.md) · [testing](contributing/testing.md) · [coverage](contributing/coverage.md) | shipped |
+| contributing/ | [untrusted-render-security](contributing/untrusted-render-security.md) | shipped |
 
 ## House rules for every page
 

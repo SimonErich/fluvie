@@ -127,8 +127,8 @@ Run Melos non-interactively (`CI=true`) to avoid the interactive-prompt path.
 
 - Human docs live in [`documentation/`](documentation/) (never `docs/`): `getting-started/`, `guides/`, `advanced/`, `reference/`, `contributing/`. **A new capability ships its docs page in the same change.**
 - Voice: short sentences, active voice, second person. **No em-dashes.** No marketing vocabulary (seamless, robust, leverage, powerful as filler, effortless, …). Lead with a runnable example. One page answers one question. End every page with `## Where to next`.
-- **Dart snippets are never hand-typed in docs**: they live in compiled, tested files under `examples/gallery/lib/` with `// #docregion` markers and flow into docs fences via `<?code-excerpt?>` (checked in CI).
-- The gallery example app is **12 lessons** (`examples/gallery/lib/lessons/01_hello_video.dart` … `12_the_kitchen_sink.dart`) plus the MVVM inspector. Each lesson: a short intro, one complete readable `Video`, a representative Alchemist golden, and a render-to-file action.
+- **Dart snippets are never hand-typed in docs**: they live in compiled, tested files under `examples/gallery/lib/` with `// #docregion` markers and flow into docs fences via `<!-- code-excerpt "<file> (<region>)" -->` directives (checked in CI).
+- The gallery example app is **13 lessons** (`examples/gallery/lib/lessons/01_hello_video.dart` … `13_generative_content.dart`) plus the MVVM inspector. Each lesson: a short intro, one complete readable `Video`, a representative Alchemist golden, and a render-to-file action.
 
 ---
 
