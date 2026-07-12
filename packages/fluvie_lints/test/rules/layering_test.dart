@@ -19,6 +19,21 @@ void main() {
     expect(lines, [7]);
   });
 
+  test('timing may import core but not feature layers or diagnostics', () async {
+    final lines = await lintLinesFor(rule, 'src/timing/layering_timing_fixture.dart');
+    expect(lines, [7, 10]);
+  });
+
+  test('diagnostics sits at the top, so no import here is flagged', () async {
+    final lines = await lintLinesFor(rule, 'src/diagnostics/layering_diagnostics_fixture.dart');
+    expect(lines, isEmpty);
+  });
+
+  test('a file outside any src layer is left silent', () async {
+    final lines = await lintLinesFor(rule, 'layering_toplevel_fixture.dart');
+    expect(lines, isEmpty);
+  });
+
   test('the rule exposes no quick-fix', () {
     expect(rule.getFixes(), isEmpty);
   });
