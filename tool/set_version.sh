@@ -63,6 +63,17 @@ for pubspec in examples/*/pubspec.yaml packages/*/example/pubspec.yaml; do
   sed -i -E "s/^(  (${packages_alt}): )\^?[0-9][0-9A-Za-z.+-]*$/\1^${version}/" "$pubspec"
 done
 
+# Version-bearing Dart constants that must track the release. The pubspec sed
+# above never touches these, so without this step a bump would leave a stale
+# `fluvie init` pin, render-cache key, or advertised MCP version behind. Guarded
+# by lockstep tests in each package so a missed rewrite fails the gate.
+sed -i -E "s/(const String fluvieRenderVersion = ')[^']*(';)/\1${version}\2/" \
+  packages/fluvie/lib/src/rendering/encoding/content_hash.dart
+sed -i -E "s/(const String (fluvieDependencyVersion|fluvieLintsDependencyVersion) = ')\^?[^']*(';)/\1^${version}\3/" \
+  packages/fluvie_cli/lib/src/init_support.dart
+sed -i -E "s/(const String _version = ')[^']*(';)/\1${version}\2/" \
+  packages/fluvie_server/lib/src/app/server_runtime.dart
+
 echo "Set ${#changed[@]} packages to ${version}: ${changed[*]}"
 echo "Stamped a [${version}] section into each package CHANGELOG (idempotent)."
 echo "Next: edit the CHANGELOG sections, commit, then create the GitHub Release for v${version}."
