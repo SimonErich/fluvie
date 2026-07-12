@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:fluvie_cli/src/init_command.dart';
 import 'package:fluvie_cli/src/init_prompt.dart';
+import 'package:fluvie_cli/src/init_support.dart' show fluvieDependencyVersion;
 import 'package:fluvie_cli/src/process_runner.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
@@ -78,7 +79,7 @@ ${withFluvie ? '  fluvie: ^0.1.0\n' : ''}dev_dependencies:
       expect(File('${dir.path}/test/starter_test.dart').existsSync(), isTrue);
 
       final pubspec = File('${dir.path}/pubspec.yaml').readAsStringSync();
-      expect(pubspec, contains('fluvie: ^0.1.0'));
+      expect(pubspec, contains('fluvie: $fluvieDependencyVersion'));
       expect(pubspec, contains('alchemist:'));
     });
 
@@ -244,7 +245,7 @@ dev_dependencies:
       expect(File('$proj/test/render/capture_harness_test.dart').existsSync(), isTrue);
 
       final pubspec = File('$proj/pubspec.yaml').readAsStringSync();
-      expect(pubspec, contains('fluvie: ^0.1.0'));
+      expect(pubspec, contains('fluvie: $fluvieDependencyVersion'));
       expect(pubspec, contains('alchemist:'));
 
       verify(

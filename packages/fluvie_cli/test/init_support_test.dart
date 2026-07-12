@@ -5,6 +5,18 @@ import 'package:fluvie_cli/src/init_support.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('scaffold version pins', () {
+    test('track the release version so a fresh project resolves the current fluvie', () {
+      // `fluvie init` writes these caret pins; if they lag the release, a new
+      // project pulls an older fluvie whose surface the generated harness (which
+      // imports package:fluvie/rendering.dart) does not have.
+      final pubspec = File('pubspec.yaml').readAsStringSync();
+      final version = RegExp(r'^version:\s*(.+)$', multiLine: true).firstMatch(pubspec)!.group(1)!;
+      expect(fluvieDependencyVersion, '^${version.trim()}');
+      expect(fluvieLintsDependencyVersion, '^${version.trim()}');
+    });
+  });
+
   group('namesFor', () {
     test('default starter name', () {
       expect(namesFor('starter'), (
