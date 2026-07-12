@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluvie_cli/fluvie_cli.dart';
 import 'package:fluvie_server/src/api/render/code_render_setup.dart';
+import 'package:fluvie_server/src/api/render/pipeline_render_mapping.dart';
 import 'package:fluvie_server/src/api/render/render_code_printer.dart';
 import 'package:fluvie_server/src/api/render/render_request.dart';
 import 'package:fluvie_server/src/api/render/render_runner.dart';
@@ -60,7 +60,7 @@ final class PipelineRenderRunner implements RenderRunner {
     void Function(String code, Map<String, Object?> spec)? onAuthored,
   }) async {
     await workDir.create(recursive: true);
-    final (ext, contentType) = _formatTarget(request.options.format);
+    final (ext, contentType) = formatTarget(request.options.format);
     final outPath = '${workDir.path}/video.$ext';
     final specOut = '${workDir.path}/spec.fluvie.json';
     final progressFile = '${workDir.path}/progress';
@@ -88,7 +88,7 @@ final class PipelineRenderRunner implements RenderRunner {
 
     Timer? poll;
     if (onProgress != null) {
-      poll = Timer.periodic(_pollInterval, (_) => _emit(progressFile, onProgress));
+      poll = Timer.periodic(_pollInterval, (_) => emitProgress(progressFile, onProgress));
     }
     // For an AI render, the harness writes the authored spec during capture
     // (before the encode finishes); the watcher surfaces the printed code and
@@ -135,7 +135,7 @@ final class PipelineRenderRunner implements RenderRunner {
           // merges over each request's own defines (empty for a code render,
           // which takes the staged path).
           extraDefines: {
-            ..._defines(request, workDir, specOut),
+            ...definesFor(request, workDir, specOut),
             if (isUntrusted) 'FLUVIE_BLOCK_FILE_SOURCES': 'true',
           },
           environment: environment,
@@ -152,13 +152,13 @@ final class PipelineRenderRunner implements RenderRunner {
       poll?.cancel();
       // Print the spec one last time if the poll never caught it (a fast render).
       codeWatcher?.flush();
-      if (onProgress != null) _emit(progressFile, onProgress);
+      if (onProgress != null) emitProgress(progressFile, onProgress);
     }
 
     if (!File(outPath).existsSync()) {
       throw const RenderFailure('Render produced no output file');
     }
-    final poster = File(_posterPath(outPath));
+    final poster = File(posterPath(outPath));
     final specFile = File(specOut);
     return RenderOutcome(
       videoPath: outPath,
@@ -180,51 +180,6 @@ final class PipelineRenderRunner implements RenderRunner {
               throw RenderFailure('Render timed out after ${captureTimeout.inSeconds}s'),
         )
       : pipeline;
-
-  Map<String, String> _defines(RenderRequest request, Directory workDir, String specOut) =>
-      switch (request) {
-        // A code render carries no defines of its own; the block below is
-        // merged in and the staged harness supplies the rest.
-        CodeRenderRequest() => const {},
-        KeyRenderRequest() => const {},
-        SpecRenderRequest(:final spec) => specDefines(
-          _writeJson(spec, '${workDir.path}/input.fluvie.json'),
-        ),
-        PromptRenderRequest(:final prompt, :final provider) => generateDefines(
-          prompt: prompt,
-          specOut: specOut,
-          provider: provider,
-        ),
-        EditRenderRequest(:final baseSpec, :final change, :final provider) => editDefines(
-          baseSpecPath: _writeJson(baseSpec, '${workDir.path}/base.fluvie.json'),
-          change: change,
-          specOut: specOut,
-          provider: provider,
-        ),
-      };
-
-  String _writeJson(Map<String, Object?> json, String path) {
-    File(path).writeAsStringSync(jsonEncode(json));
-    return path;
-  }
-
-  void _emit(String progressFile, void Function(RenderProgress) onProgress) {
-    final file = File(progressFile);
-    if (!file.existsSync()) return;
-    final progress = parseRenderProgress(file.readAsStringSync());
-    if (progress != null) onProgress(progress);
-  }
-
-  static (String, String) _formatTarget(String? format) => switch (format) {
-    null || 'mp4' => ('mp4', 'video/mp4'),
-    'gif' => ('gif', 'image/gif'),
-    'transparent' => ('webm', 'video/webm'),
-    // coverage:ignore-line unreachable formats are validated at request parse
-    _ => throw RenderFailure('Unsupported format: $format'),
-  };
-
-  static String _posterPath(String outPath) =>
-      outPath.replaceFirst(RegExp(r'\.[^.]+$'), '.poster.png');
 
   // coverage:ignore-start makes a real temp dir the unit tests inject their own
   static Future<Directory> _defaultSandbox() =>

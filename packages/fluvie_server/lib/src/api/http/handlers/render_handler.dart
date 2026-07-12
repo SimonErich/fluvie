@@ -9,6 +9,7 @@ import 'package:fluvie_server/src/api/jobs/render_queue.dart';
 import 'package:fluvie_server/src/api/ratelimit/client_ip.dart';
 import 'package:fluvie_server/src/api/ratelimit/rate_limiter.dart';
 import 'package:fluvie_server/src/api/render/code_import_policy.dart';
+import 'package:fluvie_server/src/api/render/render_preconditions.dart';
 import 'package:fluvie_server/src/api/render/render_request.dart';
 import 'package:fluvie_server/src/api/storage/file_store.dart';
 import 'package:fluvie_server/src/api/storage/signed_token.dart';
@@ -53,16 +54,6 @@ final class RenderHandler {
   /// The largest accepted `code` snippet, in bytes.
   final int maxCodeBytes;
 
-  /// The most pixels a posted spec's explicit `{width, height}` canvas may span
-  /// on either axis (8K). A spec is untrusted and the harness allocates a
-  /// `width * height * 4` frame buffer, so an unbounded size OOMs the worker.
-  /// The bound is PER AXIS, checked before any multiply, so a huge dimension
-  /// cannot overflow `width * height` to a small value and slip through. Named
-  /// presets (`reels`/`square`/`hd`/`fourK`) are always within this ceiling. The
-  /// authoritative bound is at the capture chokepoint (post-aspect); this is the
-  /// cheap early reject.
-  static const int _maxSpecDimension = 7680;
-
   /// Creates a render job from the request body.
   Future<Response> create(Request request) async {
     final body = await readJsonObject(request, maxBytes: maxCodeBytes);
@@ -79,8 +70,8 @@ final class RenderHandler {
       final rejection = await _rejectUnsafeCode(renderRequest.code);
       if (rejection != null) return rejection;
     }
-    _ensureSpecWithinBounds(renderRequest);
-    _ensureAiConfigured(renderRequest);
+    ensureSpecWithinBounds(renderRequest);
+    ensureAiConfigured(renderRequest, config);
     // The 503 above wins over rate limiting: an unconfigured server has no LLM
     // cost to guard. Only the prompt/edit path (the LLM callers) is throttled;
     // key/spec/code renders skip it entirely.
@@ -165,52 +156,6 @@ final class RenderHandler {
       return parseHumanDuration(value, label: 'ttl');
     } on FormatException catch (error) {
       throw ApiError.badRequest(error.message);
-    }
-  }
-
-  /// Rejects a posted spec (or an edit's base spec) whose explicit
-  /// `{width, height}` canvas is non-positive or whose width or height exceeds
-  /// [_maxSpecDimension], before it can OOM a worker on the first frame. A
-  /// named preset or an aspect-derived size is left to the render.
-  void _ensureSpecWithinBounds(RenderRequest request) {
-    final spec = switch (request) {
-      SpecRenderRequest(:final spec) => spec,
-      EditRenderRequest(:final baseSpec) => baseSpec,
-      _ => null,
-    };
-    final size = spec?['size'];
-    if (size is! Map) return;
-    final width = size['width'];
-    final height = size['height'];
-    if (width is! int || height is! int) return;
-    // Per-axis, before any multiply: a huge width or height must not overflow
-    // width*height to a small (or negative) value and pass.
-    if (width <= 0 || height <= 0 || width > _maxSpecDimension || height > _maxSpecDimension) {
-      throw ApiError.badRequest(
-        'each of width and height must be positive and at most $_maxSpecDimension (8K); '
-        'got ${width}x$height',
-      );
-    }
-  }
-
-  void _ensureAiConfigured(RenderRequest request) {
-    final String? provider;
-    if (request is PromptRenderRequest) {
-      provider = request.provider;
-    } else if (request is EditRenderRequest) {
-      provider = request.provider;
-    } else {
-      return; // key/spec renders need no AI.
-    }
-    final selected = provider ?? config.aiEnv['FLUVIE_AI_PROVIDER'] ?? 'claude';
-    if (selected == 'ollama') return; // local provider, no key needed.
-    final keyVar = switch (selected) {
-      'gemini' => 'GEMINI_API_KEY',
-      'mistral' => 'MISTRAL_API_KEY',
-      _ => 'ANTHROPIC_API_KEY',
-    };
-    if (!config.aiEnv.containsKey(keyVar)) {
-      throw const ApiError.unavailable('AI rendering is not configured on this server');
     }
   }
 }

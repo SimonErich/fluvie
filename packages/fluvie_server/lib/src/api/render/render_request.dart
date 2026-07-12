@@ -1,3 +1,6 @@
+// fluvie:large-file-ok: one sealed RenderRequest one-of; the base, its five
+// variants, and the shared body parser must live in the same library for the
+// exhaustive switch, so this stays a single cohesive surface.
 import 'package:fluvie_cli/fluvie_cli.dart' show aspectNames, formatNames, qualityNames;
 import 'package:fluvie_server/src/api/jobs/render_job.dart';
 
