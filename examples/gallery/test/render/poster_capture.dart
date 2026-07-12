@@ -5,7 +5,31 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart' show collectMediaSources;
 import 'package:fluvie_ai/fluvie_ai.dart';
+
+/// Rejects host-file and off-allowlist network sources on the untrusted render
+/// path, mirroring the main loop's `MediaBytesLoader` block.
+///
+/// The poster grounds a conversational edit: its pixels are uploaded to a
+/// multimodal model. In preview mode a `FileSource` reads a host file and a
+/// `NetworkSource` fetches an arbitrary URL with no allowlist, so an untrusted
+/// base spec could exfiltrate a local file (or probe an internal URL) through
+/// that grounding image. When [block] is set (the pipeline sets
+/// `FLUVIE_BLOCK_FILE_SOURCES` for every non-key render) reject those sources
+/// before the poster paints, exactly as the frame loop does. Trusted key
+/// renders leave [block] off and read normally.
+void assertPosterSourcesAllowed(Iterable<MediaSource> sources, {required bool block}) {
+  if (!block) return;
+  for (final source in sources) {
+    if (source is FileSource || source is NetworkSource) {
+      throw FluvieRenderException(
+        'A ${source.runtimeType} in the base spec cannot ground an untrusted '
+        'edit poster: reading local files or off-allowlist URLs is disabled here.',
+      );
+    }
+  }
+}
 
 /// Renders a representative frame of [spec] to a PNG and returns it as an
 /// [AiImage] — the visual grounding fed back to a multimodal model for a
@@ -17,6 +41,12 @@ import 'package:fluvie_ai/fluvie_ai.dart';
 /// `tester.runAsync` because `toImage` needs a real event loop.
 Future<AiImage> renderPosterPng({required WidgetTester tester, required VideoSpec spec}) async {
   final video = spec.build();
+  // The base spec is untrusted on an edit; block file and network sources on the
+  // hardened path before they reach the preview fallback and the model.
+  assertPosterSourcesAllowed(
+    collectMediaSources(video.scenes),
+    block: const bool.fromEnvironment('FLUVIE_BLOCK_FILE_SOURCES'),
+  );
   final width = spec.size.width;
   final height = spec.size.height;
   final frame = (video.totalFrames * 0.5).round().clamp(0, video.totalFrames - 1);
