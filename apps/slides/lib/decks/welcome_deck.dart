@@ -39,7 +39,7 @@ Video welcomeDeck() => Video(
         Align(
           alignment: const Alignment(0, 0.4),
           child: const Text(
-            'arrows, space, or a remote to move — F for fullscreen',
+            'arrows, space, or a remote to move. F for fullscreen',
             style: TextStyle(color: _dim, fontSize: 36),
           ).animate([Animation.fadeIn(delay: const Time.seconds(0.5))]),
         ),

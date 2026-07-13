@@ -190,21 +190,28 @@ melos:
     docs:snippets:
       description: >
         Populate every documentation code fence from its compiled
-        `// #docregion` source (see documentation/README.md).
-      run: dart run tool/docs/sync_snippets.dart
+        `// #docregion` source (see documentation/README.md); covers the
+        root docs and the presenter package docs.
+      run: >
+        dart run tool/docs/sync_snippets.dart &&
+        (cd packages/fluvie_presenter && dart run ../../tool/docs/sync_snippets.dart)
 
     docs:snippets:check:
       description: >
         Fail if any documentation code fence has drifted from its source
         (CI and the fresh-clone run; changes nothing).
-      run: dart run tool/docs/sync_snippets.dart --check
+      run: >
+        dart run tool/docs/sync_snippets.dart --check &&
+        (cd packages/fluvie_presenter && dart run ../../tool/docs/sync_snippets.dart --check)
 
     docs:lint:
       description: >
         Fail if any ```dart fence under documentation/ lacks a preceding
         code-excerpt directive (the naked-fence gate; mirrors the pre-commit
         hook over the whole tree).
-      run: bash tool/docs/check_naked_fences.sh documentation
+      run: >
+        bash tool/docs/check_naked_fences.sh documentation &&
+        bash tool/docs/check_naked_fences.sh packages/fluvie_presenter/documentation
 
     docs:dartdoc:
       description: >

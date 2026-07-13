@@ -7,4 +7,20 @@ the versions follow [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- The package skeleton: workspace wiring, the barrel, and the test harness.
+- `FluvieSlides`: present a fluvie `Video` live — one scene per slide,
+  letterboxed on a flat obers_ui stage, with the full keyboard/remote/touch
+  input map.
+- `Stop`: PowerPoint-style builds — hidden until its step, then the authored
+  entrance plays from the reveal moment; backs and jumps land on held states
+  while ambient motion keeps running.
+- `SpeakerNotes` + the notes compiler and togglable notes panel (scene
+  defaults, per-step overrides).
+- The slide sidebar and overview grid over one lazy, capped preview cache.
+- Fullscreen behind one interface (web / desktop / mobile) and black/white
+  screen covers.
+- `FluvieSpeaker` + `PresentationSyncChannel`: the speaker window with the
+  next-state preview, notes, highlights, and an elapsed clock — a synced
+  popup on the web, an app-pluggable launcher elsewhere, and an
+  open-this-URL fallback.
+- `PresentationController`, `compileSlidePlans`, and `compileNotes` as the
+  public engine surface for custom chrome.
