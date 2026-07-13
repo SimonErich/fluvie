@@ -127,6 +127,13 @@ void main() {
       final introspection = introspectTimeline(video);
       final chained = introspection.scenes[0].elements[1];
       expect(chained.animations.single.span, const FrameSpan(30, 60));
+      // The trigger rides along, so consumers can tell composition-level
+      // placement from local placement.
+      expect(chained.animations.single.at, isA<WhenEndsTrigger>());
+      expect(
+        introspection.scenes[0].elements[0].animations.single.at,
+        same(Trigger.auto),
+      );
     });
 
     test('a beat trigger without a grid throws the honest timing error', () {

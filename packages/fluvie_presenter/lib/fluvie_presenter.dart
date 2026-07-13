@@ -10,5 +10,8 @@ library;
 
 export 'src/player/live_scene_player.dart' show LiveScenePlayer;
 export 'src/shell/fluvie_slides.dart' show FluvieSlides;
+export 'src/stepping/slide_plan.dart' show SlidePlan, SlideStep;
+export 'src/stepping/step_compile_error.dart' show StepCompileError;
+export 'src/stepping/step_compiler.dart' show compileSlidePlans;
 export 'src/stepping/stop.dart' show Stop;
 export 'src/stepping/stop_state.dart' show HiddenStop, RevealedStop, StopState;

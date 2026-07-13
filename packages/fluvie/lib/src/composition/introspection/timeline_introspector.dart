@@ -72,6 +72,7 @@ TimelineIntrospection introspectTimeline(Video video) {
             AnimationIntrospection(
               phase: registration.animations[a].phase,
               span: FrameSpan(schedule.spans[a].start, schedule.spans[a].end),
+              at: registration.animations[a].at,
               label: registration.animations[a].label,
             ),
         ]),
