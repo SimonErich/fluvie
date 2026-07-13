@@ -107,6 +107,8 @@ export 'src/elements/typewriter.dart';
 export 'src/elements/webview/html.dart' show Html;
 export 'src/elements/webview/webview.dart' show WebView;
 export 'src/rendering/runtime/frame_provider.dart';
+export 'src/rendering/runtime/live_playback_controller.dart';
+export 'src/rendering/runtime/live_player.dart';
 export 'src/rendering/runtime/render_controller.dart';
 export 'src/rendering/runtime/render_controller_scope.dart';
 export 'src/rendering/runtime/render_mode.dart';
