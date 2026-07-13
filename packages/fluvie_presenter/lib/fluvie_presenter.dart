@@ -13,6 +13,9 @@ export 'src/controller/presentation_controller.dart'
     show PresentationController, presentationControllerProvider, slidePlansProvider;
 export 'src/controller/presentation_position.dart' show PresentationPosition;
 export 'src/controller/presentation_state.dart' show PresentationState;
+export 'src/notes/notes_compiler.dart' show compileNotes, slideNotesProvider;
+export 'src/notes/slide_notes.dart' show SlideNotes;
+export 'src/notes/speaker_notes.dart' show SpeakerNotes;
 export 'src/player/live_scene_player.dart' show LiveScenePlayer;
 export 'src/shell/fluvie_slides.dart' show FluvieSlides;
 export 'src/shell/presenter_theme.dart' show PresenterTheme, presenterThemeProvider;
