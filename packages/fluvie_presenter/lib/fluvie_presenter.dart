@@ -19,6 +19,10 @@ export 'src/notes/speaker_notes.dart' show SpeakerNotes;
 export 'src/player/live_scene_player.dart' show LiveScenePlayer;
 export 'src/shell/fluvie_slides.dart' show FluvieSlides;
 export 'src/shell/presenter_theme.dart' show PresenterTheme, presenterThemeProvider;
+export 'src/speaker/presentation_sync_channel.dart'
+    show PresentationSyncChannel, presentationSyncChannelProvider;
+export 'src/speaker/sync_message.dart'
+    show NavigationAction, NavigationRequest, PositionUpdate, SyncMessage;
 export 'src/stepping/slide_plan.dart' show SlidePlan, SlideStep;
 export 'src/stepping/slide_view.dart' show SlideView;
 export 'src/stepping/step_compile_error.dart' show StepCompileError;
