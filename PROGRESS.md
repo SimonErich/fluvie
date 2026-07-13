@@ -39,10 +39,10 @@ One checkbox per epic; decisions that the concept left open are recorded under
 
 ## Phase 6 — Speaker window
 
-- [ ] 6.1 `PresentationSyncChannel`
-- [ ] 6.2 Next-state preview
-- [ ] 6.3 Speaker view and window opening
-- [ ] 6.4 Sync in practice
+- [x] 6.1 `PresentationSyncChannel`
+- [x] 6.2 Next-state preview
+- [x] 6.3 Speaker view and window opening
+- [x] 6.4 Sync in practice
 
 ## Phase 7 — Slides app, examples, docs, polish
 
@@ -93,7 +93,14 @@ and the fluvie spec.
    two ever conflict — checked again in Phase 6). obers_ui is git-pinned;
    the shell mounts its own `OiThemeScope`, so the chrome renders without
    an `OiApp` above.
-7. **Riverpod flavor.** The concept asks for MVVM with Riverpod in the
+7. **Desktop speaker window is app-supplied.** The presenter owns the
+   channel, the speaker view, the web popup launcher, and the fallback; a
+   desktop shell plugs its own multi-window launcher into
+   `speakerWindowLauncherProvider` (desktop_multi_window needs per-window
+   native plugin registration, which only an app can do). The slides app
+   wires it in Phase 7; until then desktop S shows the fallback
+   instruction.
+8. **Riverpod flavor.** The concept asks for MVVM with Riverpod in the
    presenter UI; fluvie library packages use pure `riverpod` while only apps
    use `flutter_riverpod`. The presenter is a UI package (its views are
    widgets), so it takes `flutter_riverpod` — the first library package to do

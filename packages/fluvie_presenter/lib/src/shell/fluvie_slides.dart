@@ -6,6 +6,7 @@ import 'package:fluvie_presenter/src/notes/notes_compiler.dart';
 import 'package:fluvie_presenter/src/notes/slide_notes.dart';
 import 'package:fluvie_presenter/src/shell/presenter_shell.dart';
 import 'package:fluvie_presenter/src/shell/presenter_theme.dart';
+import 'package:fluvie_presenter/src/shell/screen_blank.dart';
 import 'package:fluvie_presenter/src/shell/ui_state.dart';
 import 'package:fluvie_presenter/src/stepping/slide_plan.dart';
 import 'package:fluvie_presenter/src/stepping/step_compiler.dart';
@@ -73,6 +74,13 @@ final class _FluvieSlidesState extends State<FluvieSlides> {
       overrides: [
         slidePlansProvider.overrideWithValue(_plans),
         slideNotesProvider.overrideWithValue(_notes),
+        // The presentation's whole mutable state must live in THIS scope
+        // (where the deck is) — even when a host app mounts its own
+        // ProviderScope above — so a deck swap resets everything together.
+        presentationControllerProvider.overrideWith(PresentationController.new),
+        hudVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: true)),
+        overviewVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: false)),
+        blankScreenProvider.overrideWith(BlankScreenNotifier.new),
         if (widget.theme != null) presenterThemeProvider.overrideWithValue(widget.theme!),
         sidebarVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: widget.showSidebar)),
         notesVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: widget.showNotes)),
