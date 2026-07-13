@@ -72,7 +72,7 @@ final class _FluvieSlidesState extends State<FluvieSlides> {
         sidebarVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: widget.showSidebar)),
         notesVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: widget.showNotes)),
       ],
-      child: PresenterShell(video: widget.video),
+      child: PresenterShell(video: widget.video, startFullscreen: widget.startFullscreen),
     );
     return _withAmbientScopes(context, scoped);
   }

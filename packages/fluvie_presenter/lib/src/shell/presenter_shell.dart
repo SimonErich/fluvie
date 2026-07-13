@@ -1,43 +1,123 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie/fluvie.dart' show LivePlaybackController, Video;
+import 'package:fluvie_presenter/src/controller/presentation_controller.dart';
+import 'package:fluvie_presenter/src/shell/fullscreen/fullscreen_controller.dart';
+import 'package:fluvie_presenter/src/shell/presentation_shortcuts.dart';
 import 'package:fluvie_presenter/src/shell/presenter_theme.dart';
+import 'package:fluvie_presenter/src/shell/screen_blank.dart';
 import 'package:fluvie_presenter/src/shell/stage_hud.dart';
+import 'package:fluvie_presenter/src/shell/ui_state.dart';
 import 'package:fluvie_presenter/src/stepping/slide_view.dart';
 import 'package:obers_ui/obers_ui.dart' show OiThemeScope;
 
-/// The stage everything presents on: the letterboxed slide, the HUD, and
-/// (as the phases land) the input layer, overlays, sidebar, and notes panel.
+/// The stage everything presents on: the letterboxed slide under the input
+/// layer, with the HUD and the blanking overlay on top.
 ///
-/// The shell mounts its own obers_ui theme scope, so the chrome renders the
-/// same whether the presenter is embedded in an `OiApp` or is somebody's
-/// whole `runApp`.
-final class PresenterShell extends ConsumerWidget {
+/// The shell wires input to the presentation controller and the chrome
+/// state — nothing more. It mounts its own obers_ui theme scope, so the
+/// chrome renders the same whether the presenter is embedded in an `OiApp`
+/// or is somebody's whole `runApp`.
+final class PresenterShell extends ConsumerStatefulWidget {
   /// Creates the shell for [video].
-  const PresenterShell({required this.video, this.clockFactory, super.key});
+  const PresenterShell({
+    required this.video,
+    this.startFullscreen = false,
+    this.clockFactory,
+    super.key,
+  });
 
   /// The authored deck.
   final Video video;
+
+  /// Whether the shell requests fullscreen once mounted.
+  final bool startFullscreen;
 
   /// A test seam forwarded to the slide view, so goldens hold deterministic
   /// frames. `null` (production) free-runs.
   final LivePlaybackController Function(int fps)? clockFactory;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PresenterShell> createState() => _PresenterShellState();
+}
+
+final class _PresenterShellState extends ConsumerState<PresenterShell> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.startFullscreen) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        unawaited(ref.read(fullscreenControllerProvider).enter());
+      });
+    }
+  }
+
+  /// Clears the topmost overlay (blank screen, then overview). Returns
+  /// whether anything was cleared — navigation and escape consume the input
+  /// when it was.
+  bool _clearOverlays() {
+    if (ref.read(blankScreenProvider) != null) {
+      ref.read(blankScreenProvider.notifier).clear();
+      return true;
+    }
+    if (ref.read(overviewVisibleProvider)) {
+      ref.read(overviewVisibleProvider.notifier).visible = false;
+      return true;
+    }
+    return false;
+  }
+
+  PresenterHandlers _handlers() {
+    final controller = ref.read(presentationControllerProvider.notifier);
+    return PresenterHandlers(
+      onNext: () {
+        if (_clearOverlays()) return;
+        controller.next();
+      },
+      onBack: () {
+        if (_clearOverlays()) return;
+        controller.back();
+      },
+      onFirst: () => controller.jumpToSlide(0),
+      onLast: () => controller.jumpToSlide(controller.totalSlides - 1),
+      onJump: controller.jumpToSlide,
+      onToggleFullscreen: () => unawaited(ref.read(fullscreenControllerProvider).toggle()),
+      onEscape: () {
+        if (_clearOverlays()) return;
+        unawaited(ref.read(fullscreenControllerProvider).exit());
+      },
+      onOverview: () => ref.read(overviewVisibleProvider.notifier).toggle(),
+      // The speaker window arrives in Phase 6; until then S has nothing to
+      // open and the handler stays inert.
+      onSpeakerWindow: () {},
+      onBlackScreen: () => ref.read(blankScreenProvider.notifier).toggle(BlankScreen.black),
+      onWhiteScreen: () => ref.read(blankScreenProvider.notifier).toggle(BlankScreen.white),
+      onToggleHud: () => ref.read(hudVisibleProvider.notifier).toggle(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = ref.watch(presenterThemeProvider);
     return OiThemeScope(
       data: theme.resolveTokens(),
-      child: ColoredBox(
-        color: theme.stageBackground,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Center(
-              child: SlideView(video: video, clockFactory: clockFactory),
-            ),
-            const StageHud(),
-          ],
+      child: PresentationShortcuts(
+        handlers: _handlers(),
+        child: ColoredBox(
+          color: theme.stageBackground,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Center(
+                child: SlideView(video: widget.video, clockFactory: widget.clockFactory),
+              ),
+              const StageHud(),
+              const ScreenBlankOverlay(),
+            ],
+          ),
         ),
       ),
     );

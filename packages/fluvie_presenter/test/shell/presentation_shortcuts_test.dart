@@ -119,12 +119,22 @@ void main() {
 
   testWidgets('tap advances, swipes navigate', (tester) async {
     final recorder = await pump(tester);
-    await tester.tap(find.byType(SizedBox));
+    await tester.tap(find.byType(GestureDetector), warnIfMissed: false);
     expect(recorder.calls, ['next']);
-    await tester.fling(find.byType(SizedBox), const Offset(-300, 0), 1200);
+    await tester.fling(
+      find.byType(GestureDetector),
+      const Offset(-300, 0),
+      1200,
+      warnIfMissed: false,
+    );
     await tester.pumpAndSettle();
     expect(recorder.calls, ['next', 'next']);
-    await tester.fling(find.byType(SizedBox), const Offset(300, 0), 1200);
+    await tester.fling(
+      find.byType(GestureDetector),
+      const Offset(300, 0),
+      1200,
+      warnIfMissed: false,
+    );
     await tester.pumpAndSettle();
     expect(recorder.calls, ['next', 'next', 'back']);
   });

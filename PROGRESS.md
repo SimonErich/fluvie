@@ -20,10 +20,10 @@ One checkbox per epic; decisions that the concept left open are recorded under
 
 ## Phase 3 — Presenter shell
 
-- [ ] 3.1 The stage
-- [ ] 3.2 Input mapping
-- [ ] 3.3 Fullscreen and screen blanking
-- [ ] 3.4 Minimal config surface
+- [x] 3.1 The stage
+- [x] 3.2 Input mapping
+- [x] 3.3 Fullscreen and screen blanking
+- [x] 3.4 Minimal config surface
 
 ## Phase 4 — Sidebar and slide previews
 
@@ -86,7 +86,14 @@ and the fluvie spec.
    `Transition`). Consequences, documented for authors: relative `Time`s
    resolve against the stretched scene, and elements inside a `Stop` cannot
    use cross-element or beat triggers (the compiler reports both).
-6. **Riverpod flavor.** The concept asks for MVVM with Riverpod in the
+6. **Chrome details the phases left open.** The HUD (counter + progress)
+   toggles with `H`. Presenter remotes' F5 maps to the fullscreen toggle.
+   Desktop fullscreen uses `window_manager` 0.5.2 behind a testable bridge
+   (the desktop_multi_window README recommends a pinned fork of it if the
+   two ever conflict — checked again in Phase 6). obers_ui is git-pinned;
+   the shell mounts its own `OiThemeScope`, so the chrome renders without
+   an `OiApp` above.
+7. **Riverpod flavor.** The concept asks for MVVM with Riverpod in the
    presenter UI; fluvie library packages use pure `riverpod` while only apps
    use `flutter_riverpod`. The presenter is a UI package (its views are
    widgets), so it takes `flutter_riverpod` — the first library package to do

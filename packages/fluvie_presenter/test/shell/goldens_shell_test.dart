@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_presenter/fluvie_presenter.dart';
 import 'package:fluvie_presenter/src/shell/presenter_shell.dart';
+import 'package:fluvie_presenter/src/shell/screen_blank.dart';
 
 Video _deck() => Video(
   width: 320,
@@ -28,12 +29,13 @@ Video _deck() => Video(
 );
 
 /// The shell in a viewport, deck held at frame 45 (entrances settled).
-Widget _stage(Size viewport) {
+Widget _stage(Size viewport, {BlankScreen? blank}) {
   final video = _deck();
   final container = ProviderContainer(
     overrides: [slidePlansProvider.overrideWithValue(compileSlidePlans(video))],
   );
   addTearDown(container.dispose);
+  if (blank != null) container.read(blankScreenProvider.notifier).toggle(blank);
   return UncontrolledProviderScope(
     container: container,
     child: SizedBox(
@@ -56,6 +58,24 @@ Future<void> main() async {
       children: [
         GoldenTestScenario(name: 'wide viewport', child: _stage(const Size(360, 140))),
         GoldenTestScenario(name: 'square viewport', child: _stage(const Size(240, 240))),
+      ],
+    ),
+  );
+
+  await goldenTest(
+    'the blanking screens cover the stage completely',
+    fileName: 'screen_blank',
+    builder: () => GoldenTestGroup(
+      columns: 2,
+      children: [
+        GoldenTestScenario(
+          name: 'black screen',
+          child: _stage(const Size(240, 135), blank: BlankScreen.black),
+        ),
+        GoldenTestScenario(
+          name: 'white screen',
+          child: _stage(const Size(240, 135), blank: BlankScreen.white),
+        ),
       ],
     ),
   );
