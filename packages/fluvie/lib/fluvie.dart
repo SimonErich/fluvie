@@ -26,8 +26,16 @@ export 'src/composition/adaptive.dart' show Adaptive;
 export 'src/composition/background/background.dart';
 export 'src/composition/box.dart';
 export 'src/composition/camera/camera.dart';
+export 'src/composition/introspection/animation_introspection.dart' show AnimationIntrospection;
+export 'src/composition/introspection/element_introspection.dart' show ElementIntrospection;
+export 'src/composition/introspection/frame_span.dart' show FrameSpan;
+export 'src/composition/introspection/scene_introspection.dart' show SceneIntrospection;
+export 'src/composition/introspection/timeline_introspection.dart'
+    show TimelineIntrospection, introspectTimeline;
 export 'src/composition/photo_frame.dart';
 export 'src/composition/runtime/aspect_scope.dart' show AspectScope;
+export 'src/composition/runtime/collectible_children.dart' show CollectibleChildren;
+export 'src/composition/runtime/scene_tree_walk.dart' show walkSceneTree, walkWidgetTree;
 export 'src/composition/runtime/timeline_probe.dart';
 export 'src/composition/scene.dart';
 export 'src/composition/timeline.dart';
