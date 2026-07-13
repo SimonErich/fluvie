@@ -32,20 +32,27 @@ final class _ShellLayout extends ConsumerWidget {
           child: PreviewRenderHost(key: previewHostKey, video: video, plans: plans),
         ),
         ColoredBox(color: stageBackground),
-        Row(
+        Column(
           children: [
-            SlideSidebar(aspectRatio: aspect),
             Expanded(
-              child: Stack(
-                fit: StackFit.expand,
+              child: Row(
                 children: [
-                  Center(
-                    child: SlideView(video: video, clockFactory: clockFactory),
+                  SlideSidebar(aspectRatio: aspect),
+                  Expanded(
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Center(
+                          child: SlideView(video: video, clockFactory: clockFactory),
+                        ),
+                        const StageHud(),
+                      ],
+                    ),
                   ),
-                  const StageHud(),
                 ],
               ),
             ),
+            const NotesPanel(),
           ],
         ),
         OverviewGrid(aspectRatio: aspect),

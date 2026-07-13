@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie/fluvie.dart' show Video;
 import 'package:fluvie_presenter/src/controller/presentation_controller.dart';
+import 'package:fluvie_presenter/src/notes/notes_compiler.dart';
+import 'package:fluvie_presenter/src/notes/slide_notes.dart';
 import 'package:fluvie_presenter/src/shell/presenter_shell.dart';
 import 'package:fluvie_presenter/src/shell/presenter_theme.dart';
 import 'package:fluvie_presenter/src/shell/ui_state.dart';
@@ -51,12 +53,14 @@ final class FluvieSlides extends StatefulWidget {
 
 final class _FluvieSlidesState extends State<FluvieSlides> {
   late List<SlidePlan> _plans = compileSlidePlans(widget.video);
+  late List<List<SlideNotes>> _notes = compileNotes(widget.video, _plans);
 
   @override
   void didUpdateWidget(FluvieSlides oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.video, widget.video)) {
       _plans = compileSlidePlans(widget.video);
+      _notes = compileNotes(widget.video, _plans);
     }
   }
 
@@ -68,6 +72,7 @@ final class _FluvieSlidesState extends State<FluvieSlides> {
       key: ObjectKey(widget.video),
       overrides: [
         slidePlansProvider.overrideWithValue(_plans),
+        slideNotesProvider.overrideWithValue(_notes),
         if (widget.theme != null) presenterThemeProvider.overrideWithValue(widget.theme!),
         sidebarVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: widget.showSidebar)),
         notesVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: widget.showNotes)),

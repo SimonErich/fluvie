@@ -33,9 +33,9 @@ One checkbox per epic; decisions that the concept left open are recorded under
 
 ## Phase 5 — Speaker notes
 
-- [ ] 5.1 `SpeakerNotes` widget
-- [ ] 5.2 Notes compiler
-- [ ] 5.3 Notes panel
+- [x] 5.1 `SpeakerNotes` widget
+- [x] 5.2 Notes compiler
+- [x] 5.3 Notes panel
 
 ## Phase 6 — Speaker window
 

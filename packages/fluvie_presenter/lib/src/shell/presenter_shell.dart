@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie/fluvie.dart' show LivePlaybackController, Video;
 import 'package:fluvie_presenter/src/controller/presentation_controller.dart';
+import 'package:fluvie_presenter/src/notes/notes_panel.dart';
 import 'package:fluvie_presenter/src/shell/fullscreen/fullscreen_controller.dart';
 import 'package:fluvie_presenter/src/shell/presentation_shortcuts.dart';
 import 'package:fluvie_presenter/src/shell/presenter_theme.dart';
