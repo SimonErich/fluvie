@@ -10,12 +10,19 @@ environment:
 resolution: workspace
 
 dependencies:
+  file_picker: ^11.0.2
   flutter:
     sdk: flutter
   fluvie: ^0.2.0
   fluvie_presenter: ^0.2.0
+  obers_ui:
+    git:
+      url: https://github.com/SimonErich/obers_ui.git
+      ref: 990286c9ac4cebe74ee36ece6fac82c2599896c1
+  web: ^1.1.1
 
 dev_dependencies:
+  alchemist: ^0.14.0
   custom_lint: ^0.8.1
   flutter_test:
     sdk: flutter
