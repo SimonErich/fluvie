@@ -69,8 +69,8 @@ final class _FluvieSlidesState extends State<FluvieSlides> {
       overrides: [
         slidePlansProvider.overrideWithValue(_plans),
         if (widget.theme != null) presenterThemeProvider.overrideWithValue(widget.theme!),
-        sidebarVisibleProvider.overrideWith(() => UiToggle(widget.showSidebar)),
-        notesVisibleProvider.overrideWith(() => UiToggle(widget.showNotes)),
+        sidebarVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: widget.showSidebar)),
+        notesVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: widget.showNotes)),
       ],
       child: PresenterShell(video: widget.video),
     );
