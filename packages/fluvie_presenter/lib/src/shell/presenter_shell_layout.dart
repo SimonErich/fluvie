@@ -57,6 +57,7 @@ final class _ShellLayout extends ConsumerWidget {
         ),
         OverviewGrid(aspectRatio: aspect),
         const ScreenBlankOverlay(),
+        const SpeakerFallbackNotice(),
       ],
     );
   }

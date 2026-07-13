@@ -1,5 +1,6 @@
 import 'dart:async' show unawaited;
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie/fluvie.dart' show LivePlaybackController, Video;
@@ -15,6 +16,9 @@ import 'package:fluvie_presenter/src/sidebar/overview_grid.dart';
 import 'package:fluvie_presenter/src/sidebar/preview_render_host.dart';
 import 'package:fluvie_presenter/src/sidebar/slide_preview_service.dart';
 import 'package:fluvie_presenter/src/sidebar/slide_sidebar.dart';
+import 'package:fluvie_presenter/src/speaker/speaker_fallback.dart';
+import 'package:fluvie_presenter/src/speaker/speaker_sync_binding.dart';
+import 'package:fluvie_presenter/src/speaker/speaker_window_launcher.dart';
 import 'package:fluvie_presenter/src/stepping/slide_view.dart';
 import 'package:obers_ui/obers_ui.dart' show OiThemeScope;
 
@@ -82,12 +86,16 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
     super.dispose();
   }
 
-  /// Clears the topmost overlay (blank screen, then overview). Returns
-  /// whether anything was cleared — navigation and escape consume the input
-  /// when it was.
+  /// Clears the topmost overlay (blank screen, speaker fallback, then the
+  /// overview). Returns whether anything was cleared — navigation and escape
+  /// consume the input when it was.
   bool _clearOverlays() {
     if (ref.read(blankScreenProvider) != null) {
       ref.read(blankScreenProvider.notifier).clear();
+      return true;
+    }
+    if (ref.read(speakerFallbackProvider) != null) {
+      ref.read(speakerFallbackProvider.notifier).clear();
       return true;
     }
     if (ref.read(overviewVisibleProvider)) {
@@ -95,6 +103,23 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
       return true;
     }
     return false;
+  }
+
+  /// S: mobile has no second window, so the in-app notes panel is the
+  /// speaker surface; everywhere else the launcher tries, and a refusal
+  /// becomes the open-this-URL instruction.
+  Future<void> _openSpeakerWindow() async {
+    final mobile =
+        !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS);
+    if (mobile) {
+      ref.read(notesVisibleProvider.notifier).visible = true;
+      return;
+    }
+    final result = await ref.read(speakerWindowLauncherProvider).open();
+    if (result.opened || !mounted) return;
+    ref.read(speakerFallbackProvider.notifier).show(url: result.url);
   }
 
   PresenterHandlers _handlers() {
@@ -117,9 +142,7 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
         unawaited(ref.read(fullscreenControllerProvider).exit());
       },
       onOverview: () => ref.read(overviewVisibleProvider.notifier).toggle(),
-      // The speaker window arrives in Phase 6; until then S has nothing to
-      // open and the handler stays inert.
-      onSpeakerWindow: () {},
+      onSpeakerWindow: () => unawaited(_openSpeakerWindow()),
       onBlackScreen: () => ref.read(blankScreenProvider.notifier).toggle(BlankScreen.black),
       onWhiteScreen: () => ref.read(blankScreenProvider.notifier).toggle(BlankScreen.white),
       onToggleHud: () => ref.read(hudVisibleProvider.notifier).toggle(),
@@ -137,11 +160,13 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
         overrides: [slidePreviewServiceProvider.overrideWithValue(_previews)],
         child: PresentationShortcuts(
           handlers: _handlers(),
-          child: _ShellLayout(
-            video: widget.video,
-            stageBackground: theme.stageBackground,
-            previewHostKey: _previewHost,
-            clockFactory: widget.clockFactory,
+          child: SpeakerSyncBinding(
+            child: _ShellLayout(
+              video: widget.video,
+              stageBackground: theme.stageBackground,
+              previewHostKey: _previewHost,
+              clockFactory: widget.clockFactory,
+            ),
           ),
         ),
       ),
