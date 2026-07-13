@@ -27,9 +27,9 @@ One checkbox per epic; decisions that the concept left open are recorded under
 
 ## Phase 4 — Sidebar and slide previews
 
-- [ ] 4.1 Preview render and cache service
-- [ ] 4.2 Sidebar UI
-- [ ] 4.3 Overview grid
+- [x] 4.1 Preview render and cache service
+- [x] 4.2 Sidebar UI
+- [x] 4.3 Overview grid
 
 ## Phase 5 — Speaker notes
 
