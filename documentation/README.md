@@ -33,7 +33,7 @@ draft.
 | guides/ | [playground](guides/playground.md) | shipped |
 | guides/ | [example-apps](guides/example-apps.md) | shipped |
 | (root) | [cookbook](cookbook.md) | shipped |
-| advanced/ | custom-animations · [timeline-orchestration](advanced/timeline-orchestration.md) · [frame-builder](advanced/frame-builder.md) · [shaders-and-effects](advanced/shaders-and-effects.md) · [templates](advanced/templates.md) · [multi-aspect](advanced/multi-aspect.md) · [theming](advanced/theming.md) · [performance](advanced/performance.md) | shipped, except custom-animations (draft) |
+| advanced/ | custom-animations · [timeline-orchestration](advanced/timeline-orchestration.md) · [frame-builder](advanced/frame-builder.md) · [shaders-and-effects](advanced/shaders-and-effects.md) · [templates](advanced/templates.md) · [multi-aspect](advanced/multi-aspect.md) · [theming](advanced/theming.md) · [performance](advanced/performance.md) · [live-playback](advanced/live-playback.md) | shipped, except custom-animations (draft) |
 | reference/ | [cheatsheet](reference/cheatsheet.md) | shipped, living |
 | reference/ | [rendering-surface](reference/rendering-surface.md) | shipped |
 | reference/ | [migration](reference/migration.md) · [faq](reference/faq.md) | shipped |
@@ -78,6 +78,8 @@ code-excerpt directives, never hand-typed.
   parallax, and fragment shaders, all in one animate list.
 - [Animating elements](guides/animating-elements.md): the one motion list,
   the presets, triggers, and stagger.
+- [Live playback](advanced/live-playback.md): play a video in a running app
+  and read its resolved timeline statically.
 - [Performance](advanced/performance.md): the frame cache, content-hash media
   caching, and the habits that keep a render fast.
 - [Cheatsheet](reference/cheatsheet.md): the whole public surface on one page.

@@ -8,6 +8,5 @@
 /// ```
 library;
 
-/// The package name, exposed so the wiring smoke test has one honest symbol
-/// to assert on before the presenter grows its real surface.
-const String fluviePresenterPackageName = 'fluvie_presenter';
+export 'src/player/live_scene_player.dart' show LiveScenePlayer;
+export 'src/shell/fluvie_slides.dart' show FluvieSlides;

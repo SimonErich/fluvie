@@ -1,26 +1,19 @@
 import 'package:flutter/widgets.dart';
+import 'package:fluvie_presenter/fluvie_presenter.dart';
+import 'package:slides/demo/hello_presentation.dart';
 
 /// The Fluvie slides shell.
 ///
-/// A thin host for `FluvieSlides`: it loads a presentation (a bundled
-/// example, or on the web a local `.fluvie` file) and presents it. All the
-/// presentation logic lives in `package:fluvie_presenter`; this app only
-/// picks what to present.
+/// A thin host for [FluvieSlides]: it decides what to present (a bundled
+/// example, or on the web a local `.fluvie` file) and hands the `Video` to
+/// the presenter. All presentation logic lives in `package:fluvie_presenter`.
 final class SlidesApp extends StatelessWidget {
   /// Creates the shell.
   const SlidesApp({super.key});
 
   @override
-  Widget build(BuildContext context) => const Directionality(
+  Widget build(BuildContext context) => Directionality(
     textDirection: TextDirection.ltr,
-    child: ColoredBox(
-      color: Color(0xFF101014),
-      child: Center(
-        child: Text(
-          'fluvie slides',
-          style: TextStyle(color: Color(0xFFF2F2F7), fontSize: 24),
-        ),
-      ),
-    ),
+    child: FluvieSlides(helloPresentation()),
   );
 }

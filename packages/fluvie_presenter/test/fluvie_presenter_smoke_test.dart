@@ -1,11 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_presenter/fluvie_presenter.dart';
 
 void main() {
-  test('the barrel resolves and carries the package doc surface', () {
-    // The barrel is the package's single public entry. This smoke test exists
-    // so the workspace wiring epic has a red test before the package compiles:
-    // it fails to compile until lib/fluvie_presenter.dart exists.
-    expect(fluviePresenterPackageName, 'fluvie_presenter');
+  test('the barrel exposes the presenter surface', () {
+    // The barrel is the package's single public entry: the viewer and the
+    // playback wrapper are reachable from it alone.
+    final video = Video(scenes: const [Scene(duration: Time.seconds(1))]);
+    expect(FluvieSlides(video), isA<FluvieSlides>());
+    expect(LiveScenePlayer(video: video), isA<LiveScenePlayer>());
   });
 }

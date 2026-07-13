@@ -7,9 +7,9 @@ One checkbox per epic; decisions that the concept left open are recorded under
 ## Phase 1 — Foundation and fluvie live playback
 
 - [x] 1.1 Workspace wiring (`packages/fluvie_presenter`, `apps/slides`, obers_ui)
-- [ ] 1.2 fluvie: `LivePlayer` (clock-driven playback)
-- [ ] 1.3 fluvie: resolved-timeline introspection
-- [ ] 1.4 Presenter skeleton and smoke
+- [x] 1.2 fluvie: `LivePlayer` (clock-driven playback)
+- [x] 1.3 fluvie: resolved-timeline introspection
+- [x] 1.4 Presenter skeleton and smoke
 
 ## Phase 2 — Stepping engine
 
@@ -74,7 +74,11 @@ and the fluvie spec.
    test suite *and* the 97% coverage gate of every package the epic touched.
    Same bar, without re-running the untouched packages' coverage dozens of
    times.
-4. **Riverpod flavor.** The concept asks for MVVM with Riverpod in the
+4. **fluvie docs for the fluvie-side additions.** LivePlayer and
+   introspectTimeline are public fluvie API, so they shipped with a fluvie
+   docs page (`documentation/advanced/live-playback.md`) with compiled
+   snippets, alongside the presenter skeleton in Phase 1.
+5. **Riverpod flavor.** The concept asks for MVVM with Riverpod in the
    presenter UI; fluvie library packages use pure `riverpod` while only apps
    use `flutter_riverpod`. The presenter is a UI package (its views are
    widgets), so it takes `flutter_riverpod` — the first library package to do
