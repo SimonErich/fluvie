@@ -45,3 +45,11 @@ void whereThingsAre(Video video, Anchor logo) {
 }
 
 // #enddocregion introspection
+
+/// Dynamic live content: a subtree that mounts mid-playback and animates in
+/// from that moment, detached from the composition's resolved plan.
+// #docregion local-motion-scope
+Widget lateArrival({required bool revealed}) => LocalMotionScope(
+  child: revealed ? const Text('surprise!').animate([Animation.fadeIn()]) : const SizedBox.shrink(),
+);
+// #enddocregion local-motion-scope

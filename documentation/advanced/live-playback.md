@@ -81,6 +81,26 @@ way media pre-resolution does. An element created inside an opaque custom
 widget's `build()` is invisible to it. Keep `.animate()` calls in constructor
 data (scene children, plain layout widgets) and the walk sees everything.
 
+## Dynamic subtrees with LocalMotionScope
+
+A `Video` resolves its plan once, so its element set must stay stable across
+frames. Live consumers sometimes want the opposite: content that appears
+mid-playback and animates in right then. Wrap the dynamic part in a
+`LocalMotionScope`:
+
+<!-- code-excerpt "examples/gallery/lib/snippets/live_playback_snippets.dart (local-motion-scope)" -->
+```dart
+Widget lateArrival({required bool revealed}) => LocalMotionScope(
+  child: revealed ? const Text('surprise!').animate([Animation.fadeIn()]) : const SizedBox.shrink(),
+);
+```
+
+Below the scope, `.animate()` elements resolve immediately and locally
+against the nearest time scope. They can mount and unmount whenever they
+like. The trade: cross-element triggers (`Trigger.whenEnds`, `whenStarts`)
+and `Trigger.beat` need the composition plan, so they are unavailable
+inside. `Trigger.previous` chains on one element still work.
+
 ## Where to next
 
 - [The FrameBuilder escape hatch](frame-builder.md) reads the same frame

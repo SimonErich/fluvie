@@ -17,6 +17,7 @@ export 'src/animation/animation_effect.dart';
 export 'src/animation/effect_kind.dart';
 export 'src/animation/frame_builder.dart' show FrameBuilder;
 export 'src/animation/runtime/frame_context.dart' show FrameContext;
+export 'src/animation/runtime/local_motion_scope.dart' show LocalMotionScope;
 export 'src/audio/audio.dart';
 export 'src/audio/generative_audio.dart';
 export 'src/captions/caption_position.dart' show CaptionPosition;
