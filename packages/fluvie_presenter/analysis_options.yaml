@@ -1,0 +1,16 @@
+# The presenter package: root strictness + the custom_lint plugin, and docs
+# are mandatory on every public member (same bar as packages/fluvie).
+include: ../../analysis_options.yaml
+
+# Declared directly, not only via the root include, so the package formats at
+# width 100 on its own when resolved standalone.
+formatter:
+  page_width: 100
+
+analyzer:
+  plugins:
+    - custom_lint
+
+linter:
+  rules:
+    public_member_api_docs: true

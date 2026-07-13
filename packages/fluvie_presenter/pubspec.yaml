@@ -1,0 +1,48 @@
+name: fluvie_presenter
+description: "Present a Fluvie Video live: the same scenes and timing engine, played as slides and stepped by input like Keynote or reveal.js."
+version: 0.2.0
+# obers_ui resolves from GitHub (it is not on pub.dev yet), which pub.dev
+# rejects for published packages; unset this once obers_ui publishes.
+publish_to: none
+repository: https://github.com/SimonErich/fluvie/tree/main/packages/fluvie_presenter
+homepage: https://github.com/SimonErich/fluvie
+issue_tracker: https://github.com/SimonErich/fluvie/issues
+documentation: https://docs.fluvie.dev
+funding:
+  - https://github.com/sponsors/SimonErich
+topics:
+  - video
+  - presentation
+  - slides
+  - animation
+
+environment:
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.3.2
+  fluvie: ^0.2.0
+  meta: ^1.16.0
+  obers_ui:
+    git:
+      url: https://github.com/SimonErich/obers_ui.git
+      ref: 990286c9ac4cebe74ee36ece6fac82c2599896c1
+
+dev_dependencies:
+  alchemist: ^0.14.0
+  custom_lint: ^0.8.1
+  flutter_test:
+    sdk: flutter
+  fluvie_lints:
+    # A path (not hosted) constraint: the custom_lint plugin host replicates
+    # this dependency and must resolve it without pub.dev.
+    path: ../fluvie_lints
+  mocktail: ^1.0.5
+
+flutter:
+  uses-material-design: false

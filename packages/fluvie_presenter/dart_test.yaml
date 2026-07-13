@@ -1,0 +1,3 @@
+tags:
+  golden:
+    description: Pixel-golden tests via Alchemist; run with `melos run test:goldens`.
