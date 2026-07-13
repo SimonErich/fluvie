@@ -10,11 +10,18 @@ import 'package:fluvie_presenter/src/shell/presenter_theme.dart';
 import 'package:fluvie_presenter/src/shell/screen_blank.dart';
 import 'package:fluvie_presenter/src/shell/stage_hud.dart';
 import 'package:fluvie_presenter/src/shell/ui_state.dart';
+import 'package:fluvie_presenter/src/sidebar/overview_grid.dart';
+import 'package:fluvie_presenter/src/sidebar/preview_render_host.dart';
+import 'package:fluvie_presenter/src/sidebar/slide_preview_service.dart';
+import 'package:fluvie_presenter/src/sidebar/slide_sidebar.dart';
 import 'package:fluvie_presenter/src/stepping/slide_view.dart';
 import 'package:obers_ui/obers_ui.dart' show OiThemeScope;
 
+part 'presenter_shell_layout.dart';
+
 /// The stage everything presents on: the letterboxed slide under the input
-/// layer, with the HUD and the blanking overlay on top.
+/// layer, the sidebar beside it, and the HUD, overview, and blanking
+/// overlays on top.
 ///
 /// The shell wires input to the presentation controller and the chrome
 /// state — nothing more. It mounts its own obers_ui theme scope, so the
@@ -26,6 +33,7 @@ final class PresenterShell extends ConsumerStatefulWidget {
     required this.video,
     this.startFullscreen = false,
     this.clockFactory,
+    this.previewService,
     super.key,
   });
 
@@ -39,11 +47,23 @@ final class PresenterShell extends ConsumerStatefulWidget {
   /// frames. `null` (production) free-runs.
   final LivePlaybackController Function(int fps)? clockFactory;
 
+  /// A test seam replacing the host-bound preview service; the caller owns
+  /// its lifecycle. `null` (production) renders on the hidden host.
+  final SlidePreviewService? previewService;
+
   @override
   ConsumerState<PresenterShell> createState() => _PresenterShellState();
 }
 
 final class _PresenterShellState extends ConsumerState<PresenterShell> {
+  final GlobalKey<PreviewRenderHostState> _previewHost = GlobalKey();
+  late final SlidePreviewService _previews =
+      widget.previewService ??
+      SlidePreviewService(
+        concurrency: 1,
+        renderSlide: (slide) => _previewHost.currentState!.render(slide),
+      );
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +73,12 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
         unawaited(ref.read(fullscreenControllerProvider).enter());
       });
     }
+  }
+
+  @override
+  void dispose() {
+    if (widget.previewService == null) _previews.dispose();
+    super.dispose();
   }
 
   /// Clears the topmost overlay (blank screen, then overview). Returns
@@ -96,6 +122,8 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
       onBlackScreen: () => ref.read(blankScreenProvider.notifier).toggle(BlankScreen.black),
       onWhiteScreen: () => ref.read(blankScreenProvider.notifier).toggle(BlankScreen.white),
       onToggleHud: () => ref.read(hudVisibleProvider.notifier).toggle(),
+      onToggleSidebar: () => ref.read(sidebarVisibleProvider.notifier).toggle(),
+      onToggleNotes: () => ref.read(notesVisibleProvider.notifier).toggle(),
     );
   }
 
@@ -104,19 +132,15 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
     final theme = ref.watch(presenterThemeProvider);
     return OiThemeScope(
       data: theme.resolveTokens(),
-      child: PresentationShortcuts(
-        handlers: _handlers(),
-        child: ColoredBox(
-          color: theme.stageBackground,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Center(
-                child: SlideView(video: widget.video, clockFactory: widget.clockFactory),
-              ),
-              const StageHud(),
-              const ScreenBlankOverlay(),
-            ],
+      child: ProviderScope(
+        overrides: [slidePreviewServiceProvider.overrideWithValue(_previews)],
+        child: PresentationShortcuts(
+          handlers: _handlers(),
+          child: _ShellLayout(
+            video: widget.video,
+            stageBackground: theme.stageBackground,
+            previewHostKey: _previewHost,
+            clockFactory: widget.clockFactory,
           ),
         ),
       ),

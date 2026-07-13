@@ -10,7 +10,8 @@ part 'presenter_handlers.dart';
 /// PageUp/PageDown (remotes), Enter, Home/End, digits-then-Enter to jump,
 /// F/F5 for fullscreen (remotes send F5 to start), Esc, O for overview, S
 /// for the speaker window, B or period for black, W for white, H for the
-/// HUD. Tap advances; swiping left advances and swiping right goes back.
+/// HUD, T for the sidebar, N for the notes panel. Tap advances; swiping
+/// left advances and swiping right goes back.
 ///
 /// The widget grabs focus on mount so keys work immediately on load — on
 /// the web too, where focus otherwise sits on the page body.
@@ -99,6 +100,8 @@ final class _PresentationShortcutsState extends State<PresentationShortcuts> {
       LogicalKeyboardKey.keyB || LogicalKeyboardKey.period => handlers.onBlackScreen,
       LogicalKeyboardKey.keyW => handlers.onWhiteScreen,
       LogicalKeyboardKey.keyH => handlers.onToggleHud,
+      LogicalKeyboardKey.keyT => handlers.onToggleSidebar,
+      LogicalKeyboardKey.keyN => handlers.onToggleNotes,
       _ => null,
     };
     if (action == null) return KeyEventResult.ignored;

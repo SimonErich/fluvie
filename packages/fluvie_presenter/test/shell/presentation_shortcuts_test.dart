@@ -19,6 +19,8 @@ final class _Recorder {
     onBlackScreen: () => calls.add('black'),
     onWhiteScreen: () => calls.add('white'),
     onToggleHud: () => calls.add('hud'),
+    onToggleSidebar: () => calls.add('sidebar'),
+    onToggleNotes: () => calls.add('notes'),
   );
 }
 
@@ -105,6 +107,8 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.period);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyW);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyH);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyT);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
     expect(recorder.calls, [
       'fullscreen',
       'fullscreen',
@@ -114,6 +118,8 @@ void main() {
       'black',
       'white',
       'hud',
+      'sidebar',
+      'notes',
     ]);
   });
 

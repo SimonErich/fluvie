@@ -18,6 +18,8 @@ final class PresenterHandlers {
     required this.onBlackScreen,
     required this.onWhiteScreen,
     required this.onToggleHud,
+    required this.onToggleSidebar,
+    required this.onToggleNotes,
   });
 
   /// Advance one step (or onto the next slide).
@@ -55,4 +57,10 @@ final class PresenterHandlers {
 
   /// Toggle the slide counter and progress HUD.
   final VoidCallback onToggleHud;
+
+  /// Toggle the slide sidebar (T, for thumbnails).
+  final VoidCallback onToggleSidebar;
+
+  /// Toggle the speaker-notes panel (N).
+  final VoidCallback onToggleNotes;
 }
