@@ -46,10 +46,10 @@ One checkbox per epic; decisions that the concept left open are recorded under
 
 ## Phase 7 — Slides app, examples, docs, polish
 
-- [ ] 7.1 The slides app
-- [ ] 7.2 Example presentations
-- [ ] 7.3 Documentation
-- [ ] 7.4 CI and final verification
+- [x] 7.1 The slides app
+- [x] 7.2 Example presentations
+- [x] 7.3 Documentation
+- [x] 7.4 CI and final verification
 
 ## Decisions
 
@@ -100,7 +100,13 @@ and the fluvie spec.
    native plugin registration, which only an app can do). The slides app
    wires it in Phase 7; until then desktop S shows the fallback
    instruction.
-8. **Riverpod flavor.** The concept asks for MVVM with Riverpod in the
+8. **Chart reveals in decks.** `Chart`'s default reveal is a relative Time
+   and dissolves against the stretched presentation scene; the tutorial
+   decks spell reveals out absolutely and the FAQ documents the habit.
+9. **The speaker deck handoff on the web.** The popup resolves the deck the
+   main window recorded in localStorage (a bundled id, or the opened
+   .fluvie JSON) — the presenter itself stays deck-source-agnostic.
+10. **Riverpod flavor.** The concept asks for MVVM with Riverpod in the
    presenter UI; fluvie library packages use pure `riverpod` while only apps
    use `flutter_riverpod`. The presenter is a UI package (its views are
    widgets), so it takes `flutter_riverpod` — the first library package to do
