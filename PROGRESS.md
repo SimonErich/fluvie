@@ -13,10 +13,10 @@ One checkbox per epic; decisions that the concept left open are recorded under
 
 ## Phase 2 — Stepping engine
 
-- [ ] 2.1 `Stop` widget
-- [ ] 2.2 Step compiler
-- [ ] 2.3 `PresentationController`
-- [ ] 2.4 Slide rendering with steps
+- [x] 2.1 `Stop` widget
+- [x] 2.2 Step compiler
+- [x] 2.3 `PresentationController`
+- [x] 2.4 Slide rendering with steps
 
 ## Phase 3 — Presenter shell
 
@@ -78,7 +78,15 @@ and the fluvie spec.
    introspectTimeline are public fluvie API, so they shipped with a fluvie
    docs page (`documentation/advanced/live-playback.md`) with compiled
    snippets, alongside the presenter skeleton in Phase 1.
-5. **Riverpod flavor.** The concept asks for MVVM with Riverpod in the
+5. **The hold model.** A held step never pauses the clock: each slide is a
+   single-scene composition stretched to a huge horizon on a free-running
+   clock, revealed steps live on rebased subtree clocks (`FrameRebase` +
+   fluvie's `LocalMotionScope`), and exits never fire (they anchor to the
+   horizon; slides leave via presenter-level blends mapped from the authored
+   `Transition`). Consequences, documented for authors: relative `Time`s
+   resolve against the stretched scene, and elements inside a `Stop` cannot
+   use cross-element or beat triggers (the compiler reports both).
+6. **Riverpod flavor.** The concept asks for MVVM with Riverpod in the
    presenter UI; fluvie library packages use pure `riverpod` while only apps
    use `flutter_riverpod`. The presenter is a UI package (its views are
    widgets), so it takes `flutter_riverpod` — the first library package to do

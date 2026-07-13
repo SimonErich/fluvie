@@ -181,7 +181,14 @@ void main() {
 
       final bare = ProviderContainer();
       addTearDown(bare.dispose);
-      expect(() => bare.read(slidePlansProvider), throwsUnimplementedError);
+      // Riverpod surfaces the UnimplementedError wrapped in its own
+      // provider-in-error-state exception; assert on the guidance instead.
+      expect(
+        () => bare.read(slidePlansProvider),
+        throwsA(
+          predicate((error) => '$error'.contains('slidePlansProvider must be overridden')),
+        ),
+      );
     });
 
     test('derived counts read from the deck', () {
