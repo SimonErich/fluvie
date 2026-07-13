@@ -8,6 +8,11 @@
 /// ```
 library;
 
+export 'src/controller/navigation_kind.dart' show NavigationKind;
+export 'src/controller/presentation_controller.dart'
+    show PresentationController, presentationControllerProvider, slidePlansProvider;
+export 'src/controller/presentation_position.dart' show PresentationPosition;
+export 'src/controller/presentation_state.dart' show PresentationState;
 export 'src/player/live_scene_player.dart' show LiveScenePlayer;
 export 'src/shell/fluvie_slides.dart' show FluvieSlides;
 export 'src/stepping/slide_plan.dart' show SlidePlan, SlideStep;
