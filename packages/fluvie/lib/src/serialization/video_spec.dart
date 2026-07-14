@@ -38,6 +38,7 @@ final class VideoSpec {
     this.export,
     this.motionDefaults,
     this.transition,
+    this.editorData,
     AnchorTable? anchors,
   }) : anchors = anchors ?? AnchorTable();
 
@@ -71,9 +72,11 @@ final class VideoSpec {
     final export = json['export'];
     final motion = json['motionDefaults'];
     final transition = json['transition'];
+    final editor = json['editor'];
     return VideoSpec(
       scenes: scenes,
       anchors: anchors,
+      editorData: editor is Map<String, Object?> ? editor : null,
       size: size == null ? VideoSize.reels : decodeVideoSize(size, path: const ['size']),
       fps: fps is int ? fps : VideoDefaults.fps,
       poster: poster == null ? null : decodeTime(poster, path: const ['poster']),
@@ -102,6 +105,7 @@ final class VideoSpec {
     'motionDefaults',
     'transition',
     'scenes',
+    'editor',
   };
 
   /// The scenes, played back-to-back. Never empty.
@@ -128,6 +132,11 @@ final class VideoSpec {
   /// The anchor identity table shared across this document (see class docs).
   final AnchorTable anchors;
 
+  /// The editing tool's own block, preserved verbatim and never interpreted:
+  /// names, locks, guides, and whatever else an editor keeps. It is excluded
+  /// from [digest], so annotating a document never invalidates render caches.
+  final Map<String, Object?>? editorData;
+
   /// The JSON form, including the [schemaVersion] marker. Re-parsing this form
   /// is stable (the serialization is canonical).
   Map<String, Object?> toJson() => {
@@ -139,6 +148,7 @@ final class VideoSpec {
     if (motionDefaults != null) 'motionDefaults': encodeDefaults(motionDefaults!),
     if (transition != null) 'transition': encodeTransition(transition!),
     'scenes': [for (final scene in scenes) scene.toJson()],
+    if (editorData != null) 'editor': editorData,
   };
 
   /// Builds the real [Video] widget, reusing [anchors] so timing references
@@ -153,11 +163,17 @@ final class VideoSpec {
     scenes: [for (final scene in scenes) scene.build(anchors)],
   );
 
-  /// A stable content digest of this spec — a hash over its canonical JSON.
+  /// A stable content digest of this spec — a hash over its canonical JSON
+  /// with the `editor` block stripped, so only render-affecting content
+  /// moves it.
   ///
   /// Identical specs produce identical digests, so an AI-authored video keys
-  /// the frame cache and identifies its output reproducibly.
-  String digest() => fnv1a64Hex(utf8.encode(jsonEncode(toJson())));
+  /// the frame cache and identifies its output reproducibly, and an editor
+  /// annotating a document never invalidates those caches.
+  String digest() {
+    final json = toJson()..remove('editor');
+    return fnv1a64Hex(utf8.encode(jsonEncode(json)));
+  }
 }
 
 /// Builds a real [Video] from [spec] — a free-function alias for

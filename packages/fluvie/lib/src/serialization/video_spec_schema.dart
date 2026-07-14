@@ -38,6 +38,12 @@ final Map<String, Object?> videoSpecSchema = {
       'minItems': 1,
       'items': {r'$ref': r'#/$defs/scene'},
     },
+    'editor': {
+      'type': 'object',
+      'description':
+          "An editing tool's own block: preserved verbatim, never "
+          'interpreted by Fluvie, and excluded from the content digest.',
+    },
   },
   r'$defs': buildSpecDefs(),
 };
