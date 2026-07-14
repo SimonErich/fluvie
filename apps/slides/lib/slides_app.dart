@@ -2,9 +2,12 @@ import 'dart:async' show unawaited;
 
 import 'package:flutter/widgets.dart';
 import 'package:fluvie/fluvie.dart' show Video;
+import 'package:fluvie_editor/fluvie_editor.dart' show EditorDocument;
 import 'package:fluvie_presenter/fluvie_presenter.dart';
 import 'package:obers_ui/obers_ui.dart';
 import 'package:slides/deck/deck_registry.dart';
+import 'package:slides/editor/demo_spec.dart';
+import 'package:slides/editor/editor_screen.dart';
 import 'package:slides/loader/open_fluvie_file.dart';
 import 'package:slides/routing/speaker_route.dart';
 
@@ -27,7 +30,31 @@ final class SlidesApp extends StatefulWidget {
 
 final class _SlidesAppState extends State<SlidesApp> {
   Video? _presenting;
+  (EditorDocument, String)? _editing;
   String? _loadError;
+
+  void _editDocument(String title, Map<String, Object?> json) {
+    try {
+      final document = EditorDocument.fromJson(json);
+      setState(() {
+        _editing = (document, title);
+        _loadError = null;
+      });
+    } on Object catch (error) {
+      setState(() => _loadError = '$title: $error');
+    }
+  }
+
+  Future<void> _editFile() async {
+    final loaded = await widget.openFile();
+    if (loaded == null || !mounted) return;
+    final raw = loaded.rawJson;
+    if (raw == null) {
+      setState(() => _loadError = '${loaded.name}: ${loaded.error}');
+      return;
+    }
+    _editDocument(loaded.name, parseRawJson(raw));
+  }
 
   void _presentBundled(DeckEntry deck) {
     storeSpeakerDeck(kind: 'bundled', payload: deck.id);
@@ -58,6 +85,7 @@ final class _SlidesAppState extends State<SlidesApp> {
   @override
   Widget build(BuildContext context) {
     final presenting = _presenting;
+    final editing = _editing;
     return OiApp(
       title: 'fluvie slides',
       theme: OiThemeData.dark(),
@@ -65,6 +93,12 @@ final class _SlidesAppState extends State<SlidesApp> {
           ? _PresentingScreen(
               video: presenting,
               onClose: () => setState(() => _presenting = null),
+            )
+          : editing != null
+          ? EditorScreen(
+              document: editing.$1,
+              title: editing.$2,
+              onClose: () => setState(() => _editing = null),
             )
           : OiFileDropTarget(
               dropMessage: 'Drop a .fluvie file to present it',
@@ -78,6 +112,8 @@ final class _SlidesAppState extends State<SlidesApp> {
                 error: _loadError,
                 onPickBundled: _presentBundled,
                 onOpenFile: () => unawaited(_presentFile()),
+                onEditDemo: () => _editDocument('Demo deck', demoSpecJson),
+                onEditFile: () => unawaited(_editFile()),
               ),
             ),
     );
@@ -95,11 +131,19 @@ final class _PresentingScreen extends StatelessWidget {
 }
 
 final class _DeckPicker extends StatelessWidget {
-  const _DeckPicker({required this.error, required this.onPickBundled, required this.onOpenFile});
+  const _DeckPicker({
+    required this.error,
+    required this.onPickBundled,
+    required this.onOpenFile,
+    required this.onEditDemo,
+    required this.onEditFile,
+  });
 
   final String? error;
   final void Function(DeckEntry deck) onPickBundled;
   final VoidCallback onOpenFile;
+  final VoidCallback onEditDemo;
+  final VoidCallback onEditFile;
 
   @override
   Widget build(BuildContext context) {
@@ -131,6 +175,19 @@ final class _DeckPicker extends StatelessWidget {
                   ),
                 const SizedBox(height: 16),
                 OiButton.primary(label: 'Open a .fluvie file', onTap: onOpenFile),
+                const SizedBox(height: 24),
+                OiLabel.small('Edit', color: colors.textSubtle),
+                const SizedBox(height: 8),
+                OiListTile(
+                  title: 'Edit the demo deck',
+                  subtitle: 'The bundled spec, opened on the canvas',
+                  onTap: onEditDemo,
+                ),
+                OiListTile(
+                  title: 'Edit a .fluvie file',
+                  subtitle: 'Open your own document read-only',
+                  onTap: onEditFile,
+                ),
                 if (error != null) ...[
                   const SizedBox(height: 12),
                   OiLabel.small(error!, color: colors.error.base),

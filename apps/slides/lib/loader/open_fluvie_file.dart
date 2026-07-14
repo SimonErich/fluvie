@@ -26,6 +26,16 @@ final class LoadedDeck {
   final String? error;
 }
 
+/// Decodes `.fluvie` [text] into its JSON object (the editor's entry).
+/// Throws a [FormatException] when it is not a JSON object.
+Map<String, Object?> parseRawJson(String text) {
+  final json = jsonDecode(text);
+  if (json is! Map<String, Object?>) {
+    throw const FormatException('A .fluvie file holds one JSON object.');
+  }
+  return json;
+}
+
 /// Parses `.fluvie` JSON [text] into a deck — the pure half of the loader,
 /// shared by the file picker and the speaker-window handoff.
 LoadedDeck parseFluvieJson(String name, String text) {
