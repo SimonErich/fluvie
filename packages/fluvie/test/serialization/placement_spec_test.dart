@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart' hide Animation, Image;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fluvie/src/composition/introspection/timeline_introspection.dart';
 import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/errors/fluvie_spec_error.dart';
 import 'package:fluvie/src/core/placement.dart';
@@ -243,6 +244,20 @@ void main() {
         find.descendant(of: find.byType(Placed), matching: find.byType(Transform)),
         findsOneWidget,
       );
+    });
+  });
+
+  group('introspection through Placed', () {
+    test('a transformed element keeps its timeline visible to the walk', () {
+      final json = _positionedSpec();
+      final scene = (json['scenes']! as List).first as Map<String, Object?>;
+      final child = (scene['children']! as List).first as Map<String, Object?>;
+      child['animate'] = [
+        {'preset': 'fadeIn', 'duration': '30f'},
+      ];
+      final introspection = introspectTimeline(VideoSpec.fromJson(json).build());
+      expect(introspection.elements, hasLength(1));
+      expect(introspection.elements.single.enterSpan?.end, 30);
     });
   });
 

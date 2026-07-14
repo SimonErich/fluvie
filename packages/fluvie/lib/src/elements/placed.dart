@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import 'package:fluvie/src/composition/runtime/collectible_children.dart';
 import 'package:fluvie/src/core/placement.dart';
 
 /// Positions [child] on the scene canvas by a fractional [Placement] — the
@@ -19,7 +20,7 @@ import 'package:fluvie/src/core/placement.dart';
 ///   child: Chart.bar(data: revenue),
 /// )
 /// ```
-final class Placed extends StatelessWidget {
+final class Placed extends StatelessWidget implements CollectibleChildren {
   /// Lays [child] out at [placement] on the canvas.
   const Placed({required this.placement, required this.child, super.key});
 
@@ -28,6 +29,11 @@ final class Placed extends StatelessWidget {
 
   /// The element being placed.
   final Widget child;
+
+  /// The structural walk (media collectors, timeline introspection) sees
+  /// through the placement to the element itself.
+  @override
+  Iterable<Widget> get collectibleChildren => [child];
 
   @override
   Widget build(BuildContext context) {
