@@ -51,6 +51,33 @@ One checkbox per epic; decisions that the concept left open are recorded under
 - [x] 7.3 Documentation
 - [x] 7.4 CI and final verification
 
+## fluvie_editor build
+
+### Phase 1 — Spec geometry and editor foundations
+- [x] 1.1 fluvie: id, transform, and the Placed element
+- [x] 1.2 fluvie: the editor block and the conformance corpus
+- [x] 1.3 fluvie_editor: package skeleton and workspace wiring
+- [x] 1.4 fluvie_editor: EditorDocument (+ commands and history)
+- [x] 1.5 Read-only canvas and the Edit mode
+
+### Editor decisions
+
+E1. **The editor's viewport is its own widget, not OiPinchZoom.** OiPinchZoom
+   is gesture-only (no programmatic controller, no wheel zoom, no zoom-to-
+   point, internal transform inaccessible). The editor needs zoom commands
+   and one shared screen-to-canvas mapping for hit-testing, so
+   `CanvasViewport` + `CanvasViewportController` live under
+   `fluvie_editor/lib/src/widgets/` (obers_ui upstream candidate).
+E2. **EditorDocument is JSON-backed.** The document holds the canonical spec
+   JSON and mutates it through typed methods; `spec` parses lazily. No
+   fluvie-side copyWith surface, round-trip is identity, digests come free.
+E3. **Insert commands carry their id.** `InsertElementCommand` requires the
+   id up front (minted via `EditorDocument.nextId()`), keeping commands
+   immutable and redo deterministic.
+E4. **Ids stay out of fluvie's hands.** `VideoSpec` preserves `id` verbatim
+   and never mints; the editor mints on load. The render digest includes
+   ids (they never churn after minting); the `editor` block stays excluded.
+
 ## Decisions
 
 Concept corrections and choices the phase docs left open, in the order they
