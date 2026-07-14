@@ -3,7 +3,9 @@ import 'package:slides/decks/builds_deck.dart';
 import 'package:slides/decks/full_talk_deck.dart';
 import 'package:slides/decks/media_deck.dart';
 import 'package:slides/decks/notes_deck.dart';
+import 'package:slides/decks/video_deck.dart';
 import 'package:slides/decks/welcome_deck.dart';
+import 'package:slides/decks/what_is_fluvie_deck.dart';
 
 /// One bundled presentation: a stable [id] (the speaker window resolves the
 /// deck by it), what the picker shows, and the deck itself.
@@ -55,6 +57,18 @@ const List<DeckEntry> bundledDecks = [
     title: 'Media-heavy slides',
     subtitle: 'Charts, code, and live elements',
     build: mediaDeck,
+  ),
+  DeckEntry(
+    id: 'video',
+    title: 'Embedded video',
+    subtitle: 'Real players with sound, on the web',
+    build: videoDeck,
+  ),
+  DeckEntry(
+    id: 'what-is-fluvie',
+    title: 'What is fluvie',
+    subtitle: 'Fourteen slides, notes on every one',
+    build: whatIsFluvieDeck,
   ),
   DeckEntry(
     id: 'talk',

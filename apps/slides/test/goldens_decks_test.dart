@@ -31,6 +31,8 @@ Future<void> main() async {
         GoldenTestScenario(name: 'builds with Stop', child: _slide('builds')),
         GoldenTestScenario(name: 'speaker notes', child: _slide('notes')),
         GoldenTestScenario(name: 'media-heavy', child: _slide('media')),
+        GoldenTestScenario(name: 'embedded video', child: _slide('video', slide: 1)),
+        GoldenTestScenario(name: 'what is fluvie', child: _slide('what-is-fluvie', slide: 7)),
         GoldenTestScenario(name: 'the full talk', child: _slide('talk', slide: 1)),
       ],
     ),
