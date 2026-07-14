@@ -16,6 +16,12 @@ the versions follow [Semantic Versioning](https://semver.org/).
 - The HUD grew a small top-right control strip: sidebar, notes, overview,
   speaker window, and fullscreen as clickable buttons with the shortcut in
   the tooltip. H hides it with the rest of the HUD.
+- `FluvieSlides(onClose:)`: wire it and the strip shows a close button,
+  set apart on the right.
+- In fullscreen the strip gets out of the way: it fades after four
+  seconds, and hovering its corner brings it back for five.
+- Slide previews highlight under the mouse (accent border and a soft
+  tint), in the sidebar and the overview alike.
 
 - `FluvieSlides`: present a fluvie `Video` live — one scene per slide,
   letterboxed on a flat obers_ui stage, with the full keyboard/remote/touch

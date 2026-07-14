@@ -94,6 +94,7 @@ Widget configured(Video video) => FluvieSlides(
   showSidebar: true, // the slide list starts open (T toggles it)
   showNotes: true, // the notes panel starts open (N toggles it)
   startFullscreen: true, // request fullscreen once mounted
+  onClose: () {}, // shows a close button in the chrome; omit for none
   theme: PresenterTheme(
     tokens: OiThemeData.dark(), // obers_ui tokens for the chrome
     stageBackground: const Color(0xFF0B2027), // behind the letterboxed slide
