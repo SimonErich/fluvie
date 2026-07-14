@@ -178,6 +178,51 @@ void main() {
     expect(find.text('slide two'), findsOneWidget);
   });
 
+  testWidgets('a settling blend keeps the incoming slide mounted and its clock running', (
+    tester,
+  ) async {
+    // The double-entrance bug: when the blend completed, the incoming stage
+    // remounted, its fresh ticker restarted at zero elapsed, and the slide
+    // replayed its entrance. The stage must survive the swap, and the
+    // probe's frames must never rewind.
+    final frames = <int>[];
+    final video = _deck(
+      scenes: [
+        const Scene(
+          duration: Time.seconds(2),
+          exit: Transition.crossFade(Time.seconds(0.5)),
+          children: [Text('slide one', style: TextStyle(fontSize: 16))],
+        ),
+        Scene(duration: const Time.seconds(4), children: [_FrameProbe(frames)]),
+      ],
+    );
+    final (container, widget) = _present(video);
+    await tester.pumpWidget(widget);
+    await tester.pump();
+    container.read(presentationControllerProvider.notifier).next();
+    await tester.pump();
+    // Mid-blend: two players on stage; remember the incoming one's state.
+    final duringBlend = tester.stateList<State<LivePlayer>>(find.byType(LivePlayer)).toSet();
+    expect(duringBlend, hasLength(2));
+    // Let the blend complete and settle (the swap lands one frame later).
+    for (var i = 0; i < 12; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    final settled = tester.state<State<LivePlayer>>(find.byType(LivePlayer));
+    expect(
+      duringBlend.contains(settled),
+      isTrue,
+      reason: 'the incoming stage must survive the blend settling, not remount',
+    );
+    for (var i = 1; i < frames.length; i++) {
+      expect(
+        frames[i],
+        greaterThanOrEqualTo(frames[i - 1]),
+        reason: 'the slide clock must never rewind (saw ${frames[i - 1]} then ${frames[i]})',
+      );
+    }
+  });
+
   testWidgets('back across a slide boundary lands instantly on the last step', (tester) async {
     final (container, widget) = _present(_deck());
     await tester.pumpWidget(widget);

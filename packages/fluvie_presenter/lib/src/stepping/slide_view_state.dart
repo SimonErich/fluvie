@@ -10,6 +10,11 @@ final class _MountedSlide {
   final LivePlaybackController clock;
   final Map<Stop, StopState> states;
 
+  /// Anchors the stage subtree so it reparents (not remounts) when a blend
+  /// starts or settles — a remounted player restarts its ticker, and the
+  /// slide would replay its entrance.
+  final GlobalKey stageKey = GlobalKey();
+
   void dispose() => clock.dispose();
 }
 
@@ -169,15 +174,18 @@ final class _SlideViewState extends ConsumerState<SlideView> with TickerProvider
     return incoming.enter ?? outgoing.exit ?? widget.video.transition;
   }
 
-  Widget _stage(_MountedSlide slide) => StepScope(
-    states: Map.of(slide.states),
-    child: LivePlayer(
-      controller: slide.clock,
-      child: FittedBox(
-        child: SizedBox(
-          width: widget.video.width.toDouble(),
-          height: widget.video.height.toDouble(),
-          child: slide.video,
+  Widget _stage(_MountedSlide slide) => KeyedSubtree(
+    key: slide.stageKey,
+    child: StepScope(
+      states: Map.of(slide.states),
+      child: LivePlayer(
+        controller: slide.clock,
+        child: FittedBox(
+          child: SizedBox(
+            width: widget.video.width.toDouble(),
+            height: widget.video.height.toDouble(),
+            child: slide.video,
+          ),
         ),
       ),
     ),
