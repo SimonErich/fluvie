@@ -163,7 +163,7 @@ melos:
         dirExists: test
 
     coverage:check:
-      description: The coverage gate — fails under 97% line coverage on library packages.
+      description: The coverage gate — fails under 97% line coverage on library packages and the slides app.
       steps:
         - coverage
         - coverage:gate
@@ -173,7 +173,7 @@ melos:
         Evaluate lcov reports against the 97% threshold (generated files
         excluded, // coverage:ignore markers honored — see
         documentation/contributing/coverage.md).
-      run: dart tool/check_coverage.dart --min 97 packages/fluvie packages/fluvie_lints packages/fluvie_validate packages/fluvie_cli packages/fluvie_server packages/fluvie_mobile_encoder packages/fluvie_web_encoder packages/fluvie_ai packages/fluvie_presenter
+      run: dart tool/check_coverage.dart --min 97 packages/fluvie packages/fluvie_lints packages/fluvie_validate packages/fluvie_cli packages/fluvie_server packages/fluvie_mobile_encoder packages/fluvie_web_encoder packages/fluvie_ai packages/fluvie_presenter apps/slides
 
     test:tool:
       description: Root tool tests (coverage gate parser).
@@ -215,7 +215,7 @@ melos:
 
     docs:dartdoc:
       description: >
-        Run `dart doc` on fluvie and fail on any warning (validates links).
+        Run `dart doc` on fluvie and fluvie_presenter, failing on any warning (validates links).
         Used by CI and the fresh-clone script, not the fast pre-commit gate.
       run: bash tool/docs/check_dartdoc.sh
 
