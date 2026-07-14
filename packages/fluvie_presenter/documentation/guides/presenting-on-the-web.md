@@ -4,10 +4,10 @@ The web is the "just visit and present" path. One URL, no install, works on
 the podium machine you have never seen before.
 
 The bundled slides app (the same one behind slides.fluvie.dev) boots to a
-picker: choose a tutorial deck, or open a local `.fluvie` file. A `.fluvie`
-file is a fluvie `VideoSpec` as JSON; the app parses it, builds the `Video`,
-and presents it. Parse problems show up as a friendly message, not a stack
-trace.
+picker: choose a tutorial deck, open a local `.fluvie` file, or drop one
+straight onto the window. A `.fluvie` file is a fluvie `VideoSpec` as JSON;
+the app parses it, builds the `Video`, and presents it. Parse problems show
+up as a friendly message, not a stack trace.
 
 Everything you have read works here: keyboard and remotes fire immediately
 (the presenter grabs focus on load), F drives the browser's fullscreen, and

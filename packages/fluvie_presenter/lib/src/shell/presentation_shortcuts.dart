@@ -15,6 +15,12 @@ part 'presenter_handlers.dart';
 ///
 /// The widget grabs focus on mount so keys work immediately on load — on
 /// the web too, where focus otherwise sits on the page body.
+///
+/// Deliberately one `Focus.onKeyEvent` switch rather than Flutter's
+/// `Shortcuts`/`Actions` tables: the digit-then-Enter jump buffer and the
+/// Shift+Space chord are stateful across key events, which an intent table
+/// cannot express without a side channel. One switch keeps the whole map
+/// readable in one place.
 final class PresentationShortcuts extends StatefulWidget {
   /// Wires the input surface around [child].
   const PresentationShortcuts({required this.handlers, required this.child, super.key});
