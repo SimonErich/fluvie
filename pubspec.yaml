@@ -15,6 +15,7 @@ workspace:
   - packages/fluvie_validate
   - packages/fluvie_server
   - packages/fluvie_mobile_encoder
+  - packages/fluvie_editor
   - packages/fluvie_presenter
   - packages/fluvie_web_encoder
   - packages/fluvie_web_encoder/example
@@ -121,6 +122,7 @@ melos:
       packageFilters:
         scope:
           - fluvie
+          - fluvie_editor
           - fluvie_presenter
           - kitten_kit
           - slides
@@ -173,7 +175,7 @@ melos:
         Evaluate lcov reports against the 97% threshold (generated files
         excluded, // coverage:ignore markers honored — see
         documentation/contributing/coverage.md).
-      run: dart tool/check_coverage.dart --min 97 packages/fluvie packages/fluvie_lints packages/fluvie_validate packages/fluvie_cli packages/fluvie_server packages/fluvie_mobile_encoder packages/fluvie_web_encoder packages/fluvie_ai packages/fluvie_presenter apps/slides
+      run: dart tool/check_coverage.dart --min 97 packages/fluvie packages/fluvie_lints packages/fluvie_validate packages/fluvie_cli packages/fluvie_server packages/fluvie_mobile_encoder packages/fluvie_web_encoder packages/fluvie_ai packages/fluvie_presenter packages/fluvie_editor apps/slides
 
     test:tool:
       description: Root tool tests (coverage gate parser).
