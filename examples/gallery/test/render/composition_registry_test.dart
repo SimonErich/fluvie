@@ -50,26 +50,30 @@ void main() {
       expect(compositionForKey('does_not_exist'), isNull);
     });
 
-    test('the known keys are exactly demo, multi_scene, starter, and the lessons (WI-35)', () {
-      expect(knownCompositionKeys, [
-        'demo',
-        'multi_scene',
-        'starter',
-        '01_hello_video',
-        '02_text_and_motion',
-        '03_timing_and_triggers',
-        '04_scenes_and_transitions',
-        '05_images_and_clips',
-        '06_collage',
-        '07_charts',
-        '08_code_doc_intro',
-        '09_diagrams_and_webviews',
-        '10_audio_and_captions',
-        '11_templates_and_aspects',
-        '12_the_kitchen_sink',
-        '13_generative_content',
-      ]);
-    });
+    test(
+      'the known keys are exactly demo, multi_scene, starter, days_recap, and the lessons (WI-35)',
+      () {
+        expect(knownCompositionKeys, [
+          'demo',
+          'multi_scene',
+          'starter',
+          'days_recap',
+          '01_hello_video',
+          '02_text_and_motion',
+          '03_timing_and_triggers',
+          '04_scenes_and_transitions',
+          '05_images_and_clips',
+          '06_collage',
+          '07_charts',
+          '08_code_doc_intro',
+          '09_diagrams_and_webviews',
+          '10_audio_and_captions',
+          '11_templates_and_aspects',
+          '12_the_kitchen_sink',
+          '13_generative_content',
+        ]);
+      },
+    );
 
     test('every lesson key resolves to an entry matching its Video geometry (WI-35)', () {
       for (final lesson in lessons) {

@@ -42,6 +42,7 @@ flutter:
   assets:
     - assets/fixtures/
     - assets/audio/
+    - assets/days_recap/
   fonts:
     - family: Sora
       fonts:

@@ -244,7 +244,7 @@ melos:
         key list is static; add a key here when you register a new composition.
       run: |
         mkdir -p build
-        for key in demo multi_scene 01_hello_video 02_text_and_motion 03_timing_and_triggers 04_scenes_and_transitions 05_images_and_clips 06_collage 07_charts 08_code_doc_intro 09_diagrams_and_webviews 10_audio_and_captions 11_templates_and_aspects 12_the_kitchen_sink; do
+        for key in demo multi_scene days_recap 01_hello_video 02_text_and_motion 03_timing_and_triggers 04_scenes_and_transitions 05_images_and_clips 06_collage 07_charts 08_code_doc_intro 09_diagrams_and_webviews 10_audio_and_captions 11_templates_and_aspects 12_the_kitchen_sink; do
           echo "Rendering $key…"
           dart run packages/fluvie_cli/bin/fluvie.dart render "$key" --out "build/$key.mp4" || exit 1
         done
