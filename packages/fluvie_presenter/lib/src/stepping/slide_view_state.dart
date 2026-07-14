@@ -32,10 +32,19 @@ final class _SlideViewState extends ConsumerState<SlideView> with TickerProvider
 
   @override
   void dispose() {
-    _clearBlend();
+    _blend?.dispose();
+    _blend = null;
+    _outgoing?.dispose();
+    _outgoing = null;
     _current.dispose();
     super.dispose();
   }
+
+  /// Disposes a replaced slide's clock only after the frame that unmounts
+  /// its player: the vsync delivers tick callbacks before that rebuild, so
+  /// a synchronous dispose here would let one last tick hit a dead clock.
+  void _retire(_MountedSlide slide) =>
+      WidgetsBinding.instance.addPostFrameCallback((_) => slide.dispose());
 
   /// Mounts the slide at [position] with steps up to `position.step`
   /// settled — the held state slide entries and jumps land on. A fresh
@@ -115,7 +124,7 @@ final class _SlideViewState extends ConsumerState<SlideView> with TickerProvider
         authored.kind != TransitionKind.cut;
     _clearBlend();
     if (!blends) {
-      _current.dispose();
+      _retire(_current);
       _current = _mount(position);
       return;
     }
@@ -145,7 +154,8 @@ final class _SlideViewState extends ConsumerState<SlideView> with TickerProvider
   void _clearBlend() {
     _blend?.dispose();
     _blend = null;
-    _outgoing?.dispose();
+    final outgoing = _outgoing;
+    if (outgoing != null) _retire(outgoing);
     _outgoing = null;
     _transition = null;
   }

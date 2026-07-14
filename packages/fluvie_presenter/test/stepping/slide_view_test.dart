@@ -194,6 +194,22 @@ void main() {
     expect(find.text('slide two'), findsNothing);
   });
 
+  testWidgets('an instant slide change never ticks the retired clock', (tester) async {
+    // Real clocks on real tickers: the retired slide's player delivers one
+    // more tick before the rebuild unmounts it, and that tick must not land
+    // on a disposed controller.
+    final (container, widget) = _present(_deck(), playTransitions: false);
+    await tester.pumpWidget(widget);
+    await tester.pump();
+    final controller = container.read(presentationControllerProvider.notifier);
+    for (var move = 0; move < 3; move++) {
+      controller.next(); // two reveals, then the slide change
+      await tester.pump(const Duration(milliseconds: 40));
+    }
+    expect(tester.takeException(), isNull);
+    expect(find.text('slide two'), findsOneWidget);
+  });
+
   testWidgets('an injected clock factory drives every slide mount', (tester) async {
     final clocks = <LivePlaybackController>[];
     final (container, widget) = _present(
