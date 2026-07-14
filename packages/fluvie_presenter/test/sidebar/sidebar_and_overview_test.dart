@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' hide Animation;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -95,6 +97,35 @@ void main() {
       container.read(presentationControllerProvider).position,
       const PresentationPosition(2, 0),
     );
+  });
+
+  testWidgets('a preview tile highlights while hovered', (tester) async {
+    final (container, _, widget) = _present(_deck());
+    await tester.pumpWidget(widget);
+    await tester.pump();
+    container.read(sidebarVisibleProvider.notifier).visible = true;
+    await tester.pump();
+
+    final tile = find.byWidgetPredicate((w) => w is SlidePreviewTile && w.slide == 1);
+    Color borderColor() {
+      final box = tester.widget<DecoratedBox>(
+        find.descendant(of: tile, matching: find.byType(DecoratedBox)).first,
+      );
+      return ((box.decoration as BoxDecoration).border! as Border).top.color;
+    }
+
+    final idle = borderColor();
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: Offset.zero);
+    addTearDown(mouse.removePointer);
+    await tester.pump();
+    await mouse.moveTo(tester.getCenter(tile));
+    await tester.pump();
+    expect(borderColor(), isNot(idle));
+
+    await mouse.moveTo(Offset.zero);
+    await tester.pump();
+    expect(borderColor(), idle);
   });
 
   testWidgets('the sidebar toggles with T, lists tiles, and jumps on tap', (tester) async {
