@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fluvie/fluvie.dart' show LivePlaybackController, LivePlayer;
 import 'package:fluvie_editor/src/canvas/slide_deriver.dart';
 import 'package:fluvie_editor/src/document/editor_document.dart';
+import 'package:fluvie_editor/src/selection/canvas_interaction.dart';
 import 'package:fluvie_editor/src/widgets/canvas_viewport.dart';
 import 'package:obers_ui/obers_ui.dart' show OiBuildContextThemeExt;
 
@@ -15,6 +16,7 @@ final class EditorCanvas extends StatefulWidget {
     required this.slide,
     this.viewportController,
     this.fitMargin = 48,
+    this.interactive = false,
     super.key,
   });
 
@@ -30,6 +32,10 @@ final class EditorCanvas extends StatefulWidget {
 
   /// Breathing room around the slide when it first fits the viewport.
   final double fitMargin;
+
+  /// Whether the selection input layer mounts over the slide (Phase 2's
+  /// editing surface; false keeps the canvas a pure viewer).
+  final bool interactive;
 
   @override
   State<EditorCanvas> createState() => _EditorCanvasState();
@@ -90,7 +96,7 @@ final class _EditorCanvasState extends State<EditorCanvas> {
               if (mounted) _viewport.fit(_canvasSize, viewportSize, margin: widget.fitMargin);
             });
           }
-          return CanvasViewport(
+          final stage = CanvasViewport(
             controller: _viewport,
             canvasSize: _canvasSize,
             child: DecoratedBox(
@@ -108,6 +114,18 @@ final class _EditorCanvasState extends State<EditorCanvas> {
                 child: LivePlayer(controller: _heldClock(derived), child: derived.video),
               ),
             ),
+          );
+          if (!widget.interactive) return stage;
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              stage,
+              CanvasInteraction(
+                document: widget.document,
+                slide: widget.slide,
+                viewport: _viewport,
+              ),
+            ],
           );
         },
       ),

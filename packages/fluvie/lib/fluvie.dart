@@ -128,6 +128,7 @@ export 'src/serialization/anchor_table.dart' show AnchorTable;
 export 'src/serialization/animation_spec.dart' show AnimationSpec, knownAnimationPresets;
 export 'src/serialization/background_spec.dart'
     show BackgroundSpec, knownBackgroundKinds, knownBackgroundProps;
+export 'src/serialization/codecs/placement_codec.dart' show decodePlacement, encodePlacement;
 export 'src/serialization/element_spec.dart' show ElementSpec, knownElementProps, knownElementTypes;
 export 'src/serialization/scene_spec.dart' show SceneLayout, SceneSpec;
 export 'src/serialization/spec_validation.dart'

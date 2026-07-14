@@ -22,4 +22,6 @@ export 'src/document/editor_command.dart'
         SetElementMetaCommand,
         SetTransformCommand;
 export 'src/document/editor_document.dart' show EditorDocument, EditorDocumentMutations;
+export 'src/selection/scene_geometry.dart' show ElementGeometry, SceneGeometry;
+export 'src/selection/selection_controller.dart' show SelectionController, selectionProvider;
 export 'src/widgets/canvas_viewport.dart' show CanvasViewport, CanvasViewportController;
