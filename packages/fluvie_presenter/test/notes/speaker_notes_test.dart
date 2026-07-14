@@ -34,6 +34,23 @@ void main() {
     expect(tester.getSize(find.byType(SpeakerNotes)), Size.zero);
   });
 
+  testWidgets('does not move its siblings', (tester) async {
+    Widget row({required bool withNotes}) => Directionality(
+      textDirection: TextDirection.ltr,
+      child: Row(
+        children: [
+          const Text('left', style: TextStyle(fontSize: 16)),
+          if (withNotes) const SpeakerNotes(text: 'invisible'),
+          const Text('right', style: TextStyle(fontSize: 16)),
+        ],
+      ),
+    );
+    await tester.pumpWidget(row(withNotes: false));
+    final without = tester.getTopLeft(find.text('right'));
+    await tester.pumpWidget(row(withNotes: true));
+    expect(tester.getTopLeft(find.text('right')), without);
+  });
+
   test('carries its authored fields', () {
     const notes = SpeakerNotes(text: 'the why', highlights: ['a', 'b']);
     expect(notes.text, 'the why');
