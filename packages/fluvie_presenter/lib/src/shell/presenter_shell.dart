@@ -81,6 +81,13 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
   }
 
   @override
+  void didUpdateWidget(PresenterShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A new deck means every cached thumbnail shows stale content.
+    if (!identical(widget.video, oldWidget.video)) _previews.invalidate();
+  }
+
+  @override
   void dispose() {
     if (widget.previewService == null) _previews.dispose();
     super.dispose();

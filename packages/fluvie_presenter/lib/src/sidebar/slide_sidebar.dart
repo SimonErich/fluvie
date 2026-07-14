@@ -30,18 +30,24 @@ final class SlideSidebar extends ConsumerStatefulWidget {
 final class _SlideSidebarState extends ConsumerState<SlideSidebar> {
   final ScrollController _scroll = ScrollController();
 
+  /// Rides on the current slide's tile, so keyboard focus follows
+  /// navigation. Skips tab traversal: the input map owns the keys.
+  final FocusNode _focus = FocusNode(debugLabel: 'current slide tile', skipTraversal: true);
+
   @override
   void initState() {
     super.initState();
     ref.listenManual(presentationControllerProvider, (previous, next) {
       if (previous?.position.slide == next.position.slide) return;
       _keepInView(next.position.slide);
+      if (ref.read(sidebarVisibleProvider)) _focus.requestFocus();
     });
   }
 
   @override
   void dispose() {
     _scroll.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -80,15 +86,16 @@ final class _SlideSidebarState extends ConsumerState<SlideSidebar> {
             // Lazy and off the critical path: request when the tile builds,
             // paint whenever it lands.
             unawaited(service.preview(slide).then((_) {}, onError: (_) {}));
+            final tile = SlidePreviewTile(
+              slide: slide,
+              service: service,
+              selected: slide == current,
+              aspectRatio: widget.aspectRatio,
+              onTap: () => ref.read(presentationControllerProvider.notifier).jumpToSlide(slide),
+            );
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: SlidePreviewTile(
-                slide: slide,
-                service: service,
-                selected: slide == current,
-                aspectRatio: widget.aspectRatio,
-                onTap: () => ref.read(presentationControllerProvider.notifier).jumpToSlide(slide),
-              ),
+              child: slide == current ? Focus(focusNode: _focus, child: tile) : tile,
             );
           },
         ),

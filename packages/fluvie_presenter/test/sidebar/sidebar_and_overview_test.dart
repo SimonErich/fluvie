@@ -51,6 +51,52 @@ Video _deck({int scenes = 3}) => Video(
 }
 
 void main() {
+  testWidgets('a swapped deck invalidates the preview cache', (tester) async {
+    final service = SlidePreviewService(renderSlide: _pixel);
+    addTearDown(service.dispose);
+    final video = _deck();
+    final container = ProviderContainer(
+      overrides: [slidePlansProvider.overrideWithValue(compileSlidePlans(video))],
+    );
+    addTearDown(container.dispose);
+    Widget host(Video deck) => UncontrolledProviderScope(
+      container: container,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: PresenterShell(video: deck, previewService: service),
+      ),
+    );
+    await tester.pumpWidget(host(video));
+    await tester.runAsync(() => service.preview(0));
+    expect(service.peek(0), isNotNull);
+
+    // A new deck instance means every cached thumbnail is stale.
+    await tester.pumpWidget(host(_deck()));
+    expect(service.peek(0), isNull);
+  });
+
+  testWidgets('keyboard focus follows the current slide, keys keep working', (tester) async {
+    final (container, _, widget) = _present(_deck());
+    await tester.pumpWidget(widget);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyT);
+    await tester.pump();
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(tester.binding.focusManager.primaryFocus?.debugLabel, 'current slide tile');
+
+    // The followed focus sits under the shell's key handler, so input
+    // still drives navigation.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(
+      container.read(presentationControllerProvider).position,
+      const PresentationPosition(2, 0),
+    );
+  });
+
   testWidgets('the sidebar toggles with T, lists tiles, and jumps on tap', (tester) async {
     final (container, _, widget) = _present(_deck());
     await tester.pumpWidget(widget);
