@@ -47,7 +47,7 @@ void main() {
 
   test('the embedded demo spec parses and mirrors the repo demo', () {
     expect(demoSpecJson['fluvieSpec'], 1);
-    expect((demoSpecJson['scenes']! as List), hasLength(5));
+    expect(demoSpecJson['scenes']! as List, hasLength(5));
   });
 
   test('parseRawJson rejects non-object documents', () {
