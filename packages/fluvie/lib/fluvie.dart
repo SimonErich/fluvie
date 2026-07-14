@@ -69,6 +69,7 @@ export 'src/core/media/generative_source.dart';
 export 'src/core/media/media_source.dart';
 export 'src/core/noise/noise_source.dart';
 export 'src/core/particles/particles.dart';
+export 'src/core/placement.dart';
 export 'src/core/quality.dart';
 export 'src/core/repeat.dart';
 export 'src/core/snapshot/snapshot_viewport.dart' show SnapshotViewport;
@@ -107,6 +108,7 @@ export 'src/elements/markdown/render/markdown_style.dart' show MarkdownStyle;
 // here too would be an ambiguous_export.
 export 'src/elements/mermaid/mermaid.dart' show Mermaid;
 export 'src/elements/mermaid/mermaid_reveal.dart' show MermaidReveal;
+export 'src/elements/placed.dart' show Placed;
 export 'src/elements/snapshot/device_frame.dart' show DeviceFrame;
 export 'src/elements/snapshot/snapshot.dart' show Snapshot;
 export 'src/elements/terminal/terminal.dart' show Terminal;
@@ -127,7 +129,7 @@ export 'src/serialization/animation_spec.dart' show AnimationSpec, knownAnimatio
 export 'src/serialization/background_spec.dart'
     show BackgroundSpec, knownBackgroundKinds, knownBackgroundProps;
 export 'src/serialization/element_spec.dart' show ElementSpec, knownElementProps, knownElementTypes;
-export 'src/serialization/scene_spec.dart' show SceneSpec;
+export 'src/serialization/scene_spec.dart' show SceneLayout, SceneSpec;
 export 'src/serialization/spec_validation.dart'
     show FluvieSpecWarning, assertNoUnknownSpecProps, unknownSpecProps;
 export 'src/serialization/video_spec.dart' show VideoSpec, buildVideo;

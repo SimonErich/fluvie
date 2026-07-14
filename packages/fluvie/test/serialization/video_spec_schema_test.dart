@@ -31,7 +31,7 @@ void main() {
     });
 
     test('every element type is a closed variant over its known props', () {
-      const reserved = {'type', 'anchor', 'animate'};
+      const reserved = ElementSpec.reservedElementKeys;
       for (final type in knownElementTypes) {
         final def = _variant('element', 'type', type);
         expect(def['additionalProperties'], isFalse, reason: '$type must be closed');

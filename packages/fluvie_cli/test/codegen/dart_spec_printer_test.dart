@@ -35,6 +35,37 @@ Matcher containsCode(String fragment) => predicate<String>(
 );
 
 void main() {
+  group('placement', () {
+    test('a transform prints as Placed wrapping the element', () {
+      final code = printVideoSpecJson(
+        _spec([
+          {
+            'id': 'el-1',
+            'type': 'Text',
+            'text': 'hi',
+            'transform': {'x': 0.25, 'y': 0.5, 'w': 0.5, 'h': 0.25, 'rotation': 15},
+          },
+        ]),
+      );
+      expect(
+        code,
+        containsCode(
+          'Placed(placement: Placement(x: 0.25, y: 0.5, width: 0.5, height: 0.25, '
+          "rotation: 15), child: Text('hi'))",
+        ),
+      );
+      expect(
+        () => DartFormatter(languageVersion: DartFormatter.latestLanguageVersion).format(code),
+        returnsNormally,
+      );
+    });
+
+    test('a canvas scene keeps stacked children unwrapped', () {
+      final code = printVideoSpecJson(_spec([_text('plain')]));
+      expect(code, isNot(contains('Placed(')));
+    });
+  });
+
   const preamble =
       "import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;\n"
       "import 'package:fluvie/fluvie.dart';\n"

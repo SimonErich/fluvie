@@ -10,14 +10,27 @@ import 'package:fluvie/src/serialization/codecs/time_codec.dart';
 import 'package:fluvie/src/serialization/codecs/transition_codec.dart';
 import 'package:fluvie/src/serialization/element_spec.dart';
 
+/// How a scene arranges its children: today's centered stack, or a free
+/// canvas where children position themselves through their `transform`.
+/// Rendering is identical either way (a `Placed` child self-positions in
+/// both); the mode declares authoring intent for tools and validation.
+enum SceneLayout {
+  /// Children stack centered on the canvas (the default; version 1 files).
+  stack,
+
+  /// Children place themselves freely by their `transform`.
+  canvas,
+}
+
 /// The data form of a [Scene]: its `duration`, optional `background`, the
-/// `children`, optional `enter`/`exit` transitions, and optional
-/// `motionDefaults`.
+/// `layout` mode, the `children`, optional `enter`/`exit` transitions, and
+/// optional `motionDefaults`.
 final class SceneSpec {
   /// Creates a scene spec lasting [duration] with the given parts.
   SceneSpec({
     required this.duration,
     this.background,
+    this.layout = SceneLayout.stack,
     this.children = const [],
     this.enter,
     this.exit,
@@ -54,8 +67,21 @@ final class SceneSpec {
     final enter = json['enter'];
     final exit = json['exit'];
     final motion = json['motionDefaults'];
+    final layoutRaw = json['layout'];
+    var layout = SceneLayout.stack;
+    if (layoutRaw != null) {
+      layout = switch (layoutRaw) {
+        'stack' => SceneLayout.stack,
+        'canvas' => SceneLayout.canvas,
+        _ => throw FluvieSpecError(
+          'Unknown layout "$layoutRaw"; expected "canvas" or "stack"',
+          path: [...path, 'layout'],
+        ),
+      };
+    }
     return SceneSpec(
       duration: decodeTime(durationRaw, path: [...path, 'duration']),
+      layout: layout,
       background: background == null
           ? null
           : BackgroundSpec.fromJson(
@@ -77,6 +103,7 @@ final class SceneSpec {
   static const Set<String> knownKeys = {
     'duration',
     'background',
+    'layout',
     'children',
     'enter',
     'exit',
@@ -88,6 +115,9 @@ final class SceneSpec {
 
   /// The static backdrop, or null for none.
   final BackgroundSpec? background;
+
+  /// How children arrange themselves; [SceneLayout.stack] unless declared.
+  final SceneLayout layout;
 
   /// The scene's children.
   final List<ElementSpec> children;
@@ -105,6 +135,7 @@ final class SceneSpec {
   Map<String, Object?> toJson() => {
     'duration': encodeTime(duration),
     if (background != null) 'background': background!.toJson(),
+    if (layout != SceneLayout.stack) 'layout': layout.name,
     if (children.isNotEmpty) 'children': [for (final child in children) child.toJson()],
     if (enter != null) 'enter': encodeTransition(enter!),
     if (exit != null) 'exit': encodeTransition(exit!),

@@ -1,7 +1,9 @@
 part of 'dart_spec_printer.dart';
 
-/// One scene child: the base element constructor, wrapped in `.animate(...)` when
-/// it carries animations or an anchor (mirroring `buildElement`).
+/// One scene child: the base element constructor, wrapped in `.animate(...)`
+/// when it carries animations or an anchor, and in `Placed` when it carries a
+/// `transform` (mirroring `buildElement`). The spec-only `id` has no Dart
+/// form; identity lives in the JSON document.
 String _element(Map<String, Object?> element, _Anchors anchors) {
   final base = _elementBase(element);
   final animate = element['animate'];
@@ -10,13 +12,30 @@ String _element(Map<String, Object?> element, _Anchors anchors) {
       : const <String>[];
   final anchorId = element['anchor'];
   final anchorVar = anchorId is String ? anchors.variableFor(anchorId) : null;
-  if (animations.isEmpty && anchorVar == null) return base;
-  final args = _args([
-    '[${animations.join(', ')}]',
-    if (anchorVar != null) 'anchor: $anchorVar',
-  ]);
-  return '$base.animate($args)';
+  var code = base;
+  if (animations.isNotEmpty || anchorVar != null) {
+    final args = _args([
+      '[${animations.join(', ')}]',
+      if (anchorVar != null) 'anchor: $anchorVar',
+    ]);
+    code = '$base.animate($args)';
+  }
+  final transform = element['transform'];
+  if (transform == null) return code;
+  return 'Placed(${_args(['placement: ${_placement(_map(transform))}', 'child: $code'])})';
 }
+
+/// A `Placement(...)` constructor from a `transform` object, emitting only
+/// the fields the JSON carries.
+String _placement(Map<String, Object?> transform) =>
+    'Placement(${_args([
+      'x: ${_num(transform['x'])}',
+      'y: ${_num(transform['y'])}',
+      if (transform['w'] != null) 'width: ${_num(transform['w'])}',
+      if (transform['h'] != null) 'height: ${_num(transform['h'])}',
+      if (transform['rotation'] != null) 'rotation: ${_num(transform['rotation'])}',
+      if (transform['anchor'] != null) 'anchor: Alignment.${transform['anchor']}',
+    ])})';
 
 String _elementBase(Map<String, Object?> element) {
   final type = element['type'];

@@ -106,6 +106,11 @@ Map<String, Object?> buildSpecDefs() => {
     'properties': {
       'duration': {r'$ref': r'#/$defs/time'},
       'background': {r'$ref': r'#/$defs/background'},
+      'layout': {
+        'type': 'string',
+        'enum': ['stack', 'canvas'],
+        'description': 'How children arrange: the centered stack (default) or a free canvas.',
+      },
       'enter': {r'$ref': r'#/$defs/transition'},
       'exit': {r'$ref': r'#/$defs/transition'},
       'motionDefaults': {r'$ref': r'#/$defs/defaults'},
@@ -118,6 +123,23 @@ Map<String, Object?> buildSpecDefs() => {
   'element': {
     'description': 'One scene child. The allowed fields depend on its "type".',
     'oneOf': elementVariants(),
+  },
+  'transform': {
+    'type': 'object',
+    'description':
+        'Fractional placement on the canvas: the anchor point of the element '
+        'lands at (x, y); w/h size it (omit for intrinsic); rotation is in '
+        'degrees around the element center.',
+    'required': ['x', 'y'],
+    'additionalProperties': false,
+    'properties': {
+      'x': {'type': 'number'},
+      'y': {'type': 'number'},
+      'w': {'type': 'number', 'exclusiveMinimum': 0},
+      'h': {'type': 'number', 'exclusiveMinimum': 0},
+      'rotation': {'type': 'number'},
+      'anchor': {'type': 'string'},
+    },
   },
   'animation': {
     'type': 'object',
