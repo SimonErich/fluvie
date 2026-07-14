@@ -44,11 +44,11 @@ Video videoDeck() => Video(
       children: [
         const SpeakerNotes(
           text:
-              'A video player fills the middle of the slide: the birthday '
-              'clip. The caption above reads "a home video, with sound". '
-              'Click play in the player controls; the audio should come '
-              'through.',
-          highlights: ['click play in the controls', 'sound comes through'],
+              'A video player fills the middle of the slide: the rendered '
+              'birthday video, music included. It starts by itself where '
+              'the browser allows sounding autoplay; if it sits still, '
+              'allow autoplay for this site or click play in the controls.',
+          highlights: ['autoplay where the browser allows', 'music comes through'],
         ),
         Align(
           alignment: const Alignment(0, -0.85),
@@ -63,7 +63,9 @@ Video videoDeck() => Video(
             width: 1280,
             height: 720,
             child: const VideoClipView(
-              assetPath: 'assets/videos/lukas_birthday_celebrate.mp4',
+              // The RENDERED video: fluvie mixed the music in at encode
+              // time, so this file carries the audio track.
+              assetPath: 'assets/videos/lukas_birthday.mp4',
               label: 'the birthday clip',
             ).animate([Animation.fadeIn(duration: const Time.seconds(0.5))]),
           ),
@@ -77,8 +79,8 @@ Video videoDeck() => Video(
         const SpeakerNotes(
           text:
               'Same layout, second clip: the kitten mittens product video '
-              'in the centered player, captioned "and a product clip". '
-              'Verify seeking and volume work here too.',
+              'in the centered player, captioned "and a product clip". It '
+              'autoplays too; verify seeking and volume work here.',
           highlights: ['second player, same pattern', 'check seeking and volume'],
         ),
         Align(

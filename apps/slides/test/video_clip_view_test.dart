@@ -8,7 +8,7 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: VideoClipView(
-          assetPath: 'assets/videos/lukas_birthday_celebrate.mp4',
+          assetPath: 'assets/videos/lukas_birthday.mp4',
           label: 'the birthday clip',
         ),
       ),
