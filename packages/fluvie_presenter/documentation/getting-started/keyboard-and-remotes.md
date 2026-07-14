@@ -20,8 +20,9 @@ The chrome keys:
   navigation or Esc brings the slides back exactly where they were.
 - **O** opens the overview grid; pick a slide or Esc out.
 - **S** opens the speaker window.
-- **T** toggles the slide sidebar, **N** the notes panel, **H** the counter
-  and progress line.
+- **T** toggles the slide sidebar, **N** the notes panel, **H** the whole
+  HUD. Prefer the mouse? The same actions sit as small buttons in the
+  top-right corner of the stage.
 
 Esc is polite: it closes the topmost thing first (a blank screen, a notice,
 the overview) and only then leaves fullscreen.

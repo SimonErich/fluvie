@@ -5,7 +5,17 @@ the versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Slides no longer replay their entrance after a boundary transition: the
+  incoming stage now survives the blend settling (it reparents instead of
+  remounting), so its clock never restarts.
+
 ### Added
+
+- The HUD grew a small top-right control strip: sidebar, notes, overview,
+  speaker window, and fullscreen as clickable buttons with the shortcut in
+  the tooltip. H hides it with the rest of the HUD.
 
 - `FluvieSlides`: present a fluvie `Video` live — one scene per slide,
   letterboxed on a flat obers_ui stage, with the full keyboard/remote/touch

@@ -20,7 +20,7 @@ import 'package:fluvie_presenter/src/speaker/speaker_fallback.dart';
 import 'package:fluvie_presenter/src/speaker/speaker_sync_binding.dart';
 import 'package:fluvie_presenter/src/speaker/speaker_window_launcher.dart';
 import 'package:fluvie_presenter/src/stepping/slide_view.dart';
-import 'package:obers_ui/obers_ui.dart' show OiThemeScope;
+import 'package:obers_ui/obers_ui.dart' show OiDensity, OiDensityScope, OiThemeScope;
 
 part 'presenter_shell_layout.dart';
 
@@ -161,22 +161,34 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
   @override
   Widget build(BuildContext context) {
     final theme = ref.watch(presenterThemeProvider);
-    return OiThemeScope(
+    final handlers = _handlers();
+    Widget shell = OiThemeScope(
       data: theme.resolveTokens(),
       child: ProviderScope(
         overrides: [slidePreviewServiceProvider.overrideWithValue(_previews)],
         child: PresentationShortcuts(
-          handlers: _handlers(),
+          handlers: handlers,
           child: SpeakerSyncBinding(
-            child: _ShellLayout(
-              video: widget.video,
-              stageBackground: theme.stageBackground,
-              previewHostKey: _previewHost,
-              clockFactory: widget.clockFactory,
+            // The shell brings its own Overlay (like its own theme scope),
+            // so tooltips work without an OiApp or Navigator above.
+            child: Overlay.wrap(
+              child: _ShellLayout(
+                video: widget.video,
+                stageBackground: theme.stageBackground,
+                previewHostKey: _previewHost,
+                clockFactory: widget.clockFactory,
+                handlers: handlers,
+              ),
             ),
           ),
         ),
       ),
     );
+    // The chrome's buttons read the ambient density; standalone shells
+    // (no OiApp above) get a sensible default without shadowing a host's.
+    if (context.dependOnInheritedWidgetOfExactType<OiDensityScope>() == null) {
+      shell = OiDensityScope(density: OiDensity.compact, child: shell);
+    }
+    return shell;
   }
 }

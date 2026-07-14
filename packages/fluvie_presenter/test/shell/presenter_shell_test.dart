@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' hide Animation;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,6 +6,7 @@ import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_presenter/fluvie_presenter.dart';
 import 'package:fluvie_presenter/src/shell/presenter_shell.dart';
 import 'package:fluvie_presenter/src/shell/ui_state.dart';
+import 'package:obers_ui/obers_ui.dart' show OiIconButton, OiIcons;
 
 Video _deck({int scenes = 2}) => Video(
   width: 320,
@@ -22,8 +24,12 @@ Video _deck({int scenes = 2}) => Video(
 );
 
 (ProviderContainer, Widget) _present(Video video, {Size viewport = const Size(800, 600)}) {
+  final plans = compileSlidePlans(video);
   final container = ProviderContainer(
-    overrides: [slidePlansProvider.overrideWithValue(compileSlidePlans(video))],
+    overrides: [
+      slidePlansProvider.overrideWithValue(plans),
+      slideNotesProvider.overrideWithValue(compileNotes(video, plans)),
+    ],
   );
   addTearDown(container.dispose);
   final widget = UncontrolledProviderScope(
@@ -78,5 +84,45 @@ void main() {
     final videoBox = tester.getRect(find.byType(Video));
     expect(videoBox.width / videoBox.height, closeTo(16 / 9, 0.01));
     expect(videoBox.width, closeTo(300, 0.01));
+  });
+
+  testWidgets('the HUD buttons drive the chrome without the keyboard', (tester) async {
+    final (container, widget) = _present(_deck());
+    await tester.pumpWidget(widget);
+    await tester.pump();
+
+    Future<void> tapButton(IconData icon) async {
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is OiIconButton && w.icon == icon),
+        warnIfMissed: false,
+      );
+      await tester.pump();
+    }
+
+    expect(container.read(sidebarVisibleProvider), isFalse);
+    await tapButton(OiIcons.panelLeft);
+    expect(container.read(sidebarVisibleProvider), isTrue);
+
+    expect(container.read(notesVisibleProvider), isFalse);
+    await tapButton(OiIcons.notepadText);
+    expect(container.read(notesVisibleProvider), isTrue);
+
+    await tapButton(OiIcons.layoutGrid);
+    expect(container.read(overviewVisibleProvider), isTrue);
+    // The overview covers the strip; Esc closes it again.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(container.read(overviewVisibleProvider), isFalse);
+
+    // On mobile (the test default platform) the speaker surface is the
+    // notes panel; the speaker button routes there.
+    container.read(notesVisibleProvider.notifier).visible = false;
+    await tapButton(OiIcons.presentation);
+    expect(container.read(notesVisibleProvider), isTrue);
+
+    // H hides the whole HUD, buttons included.
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyH);
+    await tester.pump();
+    expect(find.byType(OiIconButton), findsNothing);
   });
 }

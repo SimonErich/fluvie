@@ -34,7 +34,10 @@ While digits are pending, Esc clears them instead of escaping.
 | S | Open the speaker window |
 | T | Toggle the slide sidebar |
 | N | Toggle the notes panel |
-| H | Toggle the counter and progress line |
+| H | Toggle the HUD: counter, progress line, and buttons |
+
+The same five chrome actions sit as small buttons in the top-right corner
+of the stage, so a mouse works too. H hides them with the rest of the HUD.
 
 Navigation clears an active black or white screen (and the speaker-window
 notice) before it moves, so one key press always brings the slides back.

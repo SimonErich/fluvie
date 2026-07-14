@@ -10,12 +10,14 @@ final class _ShellLayout extends ConsumerWidget {
     required this.stageBackground,
     required this.previewHostKey,
     required this.clockFactory,
+    required this.handlers,
   });
 
   final Video video;
   final Color stageBackground;
   final GlobalKey<PreviewRenderHostState> previewHostKey;
   final LivePlaybackController Function(int fps)? clockFactory;
+  final PresenterHandlers handlers;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,7 +47,7 @@ final class _ShellLayout extends ConsumerWidget {
                         Center(
                           child: SlideView(video: video, clockFactory: clockFactory),
                         ),
-                        const StageHud(),
+                        StageHud(handlers: handlers),
                       ],
                     ),
                   ),
