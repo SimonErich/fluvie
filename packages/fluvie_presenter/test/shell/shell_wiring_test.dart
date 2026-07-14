@@ -132,6 +132,21 @@ void main() {
     expect(container.read(blankScreenProvider), isNull);
   });
 
+  testWidgets('the tracked fullscreen state follows the toggle and Esc', (tester) async {
+    final (container, _, widget) = _present(_deck());
+    await tester.pumpWidget(widget);
+    await tester.pump();
+    expect(container.read(fullscreenActiveProvider), isFalse);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+    await tester.pump();
+    expect(container.read(fullscreenActiveProvider), isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(container.read(fullscreenActiveProvider), isFalse);
+  });
+
   testWidgets('F toggles fullscreen; Esc clears overlays before it exits', (tester) async {
     final (container, fullscreen, widget) = _present(_deck());
     await tester.pumpWidget(widget);

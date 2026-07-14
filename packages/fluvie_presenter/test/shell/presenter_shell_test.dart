@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' hide Animation;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,7 +24,11 @@ Video _deck({int scenes = 2}) => Video(
   ],
 );
 
-(ProviderContainer, Widget) _present(Video video, {Size viewport = const Size(800, 600)}) {
+(ProviderContainer, Widget) _present(
+  Video video, {
+  Size viewport = const Size(800, 600),
+  VoidCallback? onClose,
+}) {
   final plans = compileSlidePlans(video);
   final container = ProviderContainer(
     overrides: [
@@ -40,7 +45,7 @@ Video _deck({int scenes = 2}) => Video(
         child: SizedBox(
           width: viewport.width,
           height: viewport.height,
-          child: PresenterShell(video: video),
+          child: PresenterShell(video: video, onClose: onClose),
         ),
       ),
     ),
@@ -124,5 +129,71 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.keyH);
     await tester.pump();
     expect(find.byType(OiIconButton), findsNothing);
+  });
+
+  testWidgets('a close intention gets its own button, set apart on the right', (tester) async {
+    var closed = 0;
+    final (_, widget) = _present(_deck(), onClose: () => closed++);
+    await tester.pumpWidget(widget);
+    await tester.pump();
+
+    final close = find.byWidgetPredicate((w) => w is OiIconButton && w.icon == OiIcons.x);
+    expect(close, findsOneWidget);
+    // Set apart: a clear gap between the strip and the close button.
+    final fullscreen = find.byWidgetPredicate(
+      (w) => w is OiIconButton && w.icon == OiIcons.maximize,
+    );
+    final gap = tester.getTopLeft(close).dx - tester.getTopRight(fullscreen).dx;
+    expect(gap, greaterThanOrEqualTo(12));
+
+    await tester.tap(close, warnIfMissed: false);
+    await tester.pump();
+    expect(closed, 1);
+  });
+
+  testWidgets('no close intention, no close button', (tester) async {
+    final (_, widget) = _present(_deck());
+    await tester.pumpWidget(widget);
+    await tester.pump();
+    expect(find.byWidgetPredicate((w) => w is OiIconButton && w.icon == OiIcons.x), findsNothing);
+  });
+
+  testWidgets('fullscreen hides the strip after 4s; hovering revives it for 5s', (tester) async {
+    final (container, widget) = _present(_deck());
+    await tester.pumpWidget(widget);
+    await tester.pump();
+
+    double stripOpacity() => tester
+        .widget<AnimatedOpacity>(
+          find.ancestor(
+            of: find.byType(OiIconButton).first,
+            matching: find.byType(AnimatedOpacity),
+          ),
+        )
+        .opacity;
+
+    expect(stripOpacity(), 1);
+    container.read(fullscreenActiveProvider.notifier).visible = true;
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+    expect(stripOpacity(), 1, reason: 'still within the 4s grace');
+    await tester.pump(const Duration(milliseconds: 1100));
+    expect(stripOpacity(), 0, reason: 'hidden 4s after entering fullscreen');
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: Offset.zero);
+    addTearDown(mouse.removePointer);
+    await tester.pump();
+    await mouse.moveTo(tester.getCenter(find.byType(OiIconButton).first));
+    await tester.pump();
+    expect(stripOpacity(), 1, reason: 'hovering the corner reveals the strip');
+    await mouse.moveTo(Offset.zero);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 5100));
+    expect(stripOpacity(), 0, reason: 'hidden again 5s after the reveal');
+
+    container.read(fullscreenActiveProvider.notifier).visible = false;
+    await tester.pump();
+    expect(stripOpacity(), 1, reason: 'leaving fullscreen restores the strip');
   });
 }

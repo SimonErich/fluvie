@@ -41,3 +41,10 @@ final notesVisibleProvider = NotifierProvider<UiToggle, bool>(
 final overviewVisibleProvider = NotifierProvider<UiToggle, bool>(
   () => UiToggle(initiallyVisible: false),
 );
+
+/// Whether the presenter believes it is fullscreen — tracked from its own
+/// enter/exit transitions (a native escape the page never sees can lag it).
+/// The HUD strip auto-hides while this is on.
+final fullscreenActiveProvider = NotifierProvider<UiToggle, bool>(
+  () => UiToggle(initiallyVisible: false),
+);

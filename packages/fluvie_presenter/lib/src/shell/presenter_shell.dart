@@ -37,6 +37,7 @@ final class PresenterShell extends ConsumerStatefulWidget {
   const PresenterShell({
     required this.video,
     this.startFullscreen = false,
+    this.onClose,
     this.clockFactory,
     this.previewService,
     super.key,
@@ -47,6 +48,9 @@ final class PresenterShell extends ConsumerStatefulWidget {
 
   /// Whether the shell requests fullscreen once mounted.
   final bool startFullscreen;
+
+  /// Ends the presentation; when set, the HUD strip shows a close button.
+  final VoidCallback? onClose;
 
   /// A test seam forwarded to the slide view, so goldens hold deterministic
   /// frames. `null` (production) free-runs.
@@ -75,7 +79,7 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
     if (widget.startFullscreen) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        unawaited(ref.read(fullscreenControllerProvider).enter());
+        unawaited(_enterFullscreen());
       });
     }
   }
@@ -112,6 +116,28 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
     return false;
   }
 
+  Future<void> _enterFullscreen() async {
+    await ref.read(fullscreenControllerProvider).enter();
+    await _trackFullscreen();
+  }
+
+  Future<void> _toggleFullscreen() async {
+    await ref.read(fullscreenControllerProvider).toggle();
+    await _trackFullscreen();
+  }
+
+  Future<void> _exitFullscreen() async {
+    await ref.read(fullscreenControllerProvider).exit();
+    await _trackFullscreen();
+  }
+
+  /// Re-reads the platform truth after a transition, so the tracked state
+  /// stays honest even when a request was refused (web needs a gesture).
+  Future<void> _trackFullscreen() async {
+    final active = await ref.read(fullscreenControllerProvider).isFullscreen;
+    if (mounted) ref.read(fullscreenActiveProvider.notifier).visible = active;
+  }
+
   /// S: mobile has no second window, so the in-app notes panel is the
   /// speaker surface; everywhere else the launcher tries, and a refusal
   /// becomes the open-this-URL instruction.
@@ -143,10 +169,10 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
       onFirst: () => controller.jumpToSlide(0),
       onLast: () => controller.jumpToSlide(controller.totalSlides - 1),
       onJump: controller.jumpToSlide,
-      onToggleFullscreen: () => unawaited(ref.read(fullscreenControllerProvider).toggle()),
+      onToggleFullscreen: () => unawaited(_toggleFullscreen()),
       onEscape: () {
         if (_clearOverlays()) return;
-        unawaited(ref.read(fullscreenControllerProvider).exit());
+        unawaited(_exitFullscreen());
       },
       onOverview: () => ref.read(overviewVisibleProvider.notifier).toggle(),
       onSpeakerWindow: () => unawaited(_openSpeakerWindow()),
@@ -155,6 +181,7 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
       onToggleHud: () => ref.read(hudVisibleProvider.notifier).toggle(),
       onToggleSidebar: () => ref.read(sidebarVisibleProvider.notifier).toggle(),
       onToggleNotes: () => ref.read(notesVisibleProvider.notifier).toggle(),
+      onClose: widget.onClose,
     );
   }
 

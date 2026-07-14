@@ -29,6 +29,7 @@ final class FluvieSlides extends StatefulWidget {
     this.showSidebar = false,
     this.showNotes = false,
     this.startFullscreen = false,
+    this.onClose,
     this.theme,
     super.key,
   });
@@ -44,6 +45,10 @@ final class FluvieSlides extends StatefulWidget {
 
   /// Whether presenting starts in fullscreen.
   final bool startFullscreen;
+
+  /// Called when the presenter's close button is pressed; omit it and the
+  /// chrome shows none (a kiosk deck has nowhere to go back to).
+  final VoidCallback? onClose;
 
   /// The presenter's look, or `null` for the flat dark default.
   final PresenterTheme? theme;
@@ -80,12 +85,17 @@ final class _FluvieSlidesState extends State<FluvieSlides> {
         presentationControllerProvider.overrideWith(PresentationController.new),
         hudVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: true)),
         overviewVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: false)),
+        fullscreenActiveProvider.overrideWith(() => UiToggle(initiallyVisible: false)),
         blankScreenProvider.overrideWith(BlankScreenNotifier.new),
         if (widget.theme != null) presenterThemeProvider.overrideWithValue(widget.theme!),
         sidebarVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: widget.showSidebar)),
         notesVisibleProvider.overrideWith(() => UiToggle(initiallyVisible: widget.showNotes)),
       ],
-      child: PresenterShell(video: widget.video, startFullscreen: widget.startFullscreen),
+      child: PresenterShell(
+        video: widget.video,
+        startFullscreen: widget.startFullscreen,
+        onClose: widget.onClose,
+      ),
     );
     return _withAmbientScopes(context, scoped);
   }

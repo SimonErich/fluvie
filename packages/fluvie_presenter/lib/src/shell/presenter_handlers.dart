@@ -20,6 +20,7 @@ final class PresenterHandlers {
     required this.onToggleHud,
     required this.onToggleSidebar,
     required this.onToggleNotes,
+    this.onClose,
   });
 
   /// Advance one step (or onto the next slide).
@@ -63,4 +64,8 @@ final class PresenterHandlers {
 
   /// Toggle the speaker-notes panel (N).
   final VoidCallback onToggleNotes;
+
+  /// Ends the presentation (the host app's intention, so it is the one
+  /// optional entry: without it the chrome shows no close button).
+  final VoidCallback? onClose;
 }
