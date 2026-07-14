@@ -27,14 +27,12 @@ final class SlidesApp extends StatefulWidget {
 
 final class _SlidesAppState extends State<SlidesApp> {
   Video? _presenting;
-  String? _presentingTitle;
   String? _loadError;
 
   void _presentBundled(DeckEntry deck) {
     storeSpeakerDeck(kind: 'bundled', payload: deck.id);
     setState(() {
       _presenting = deck.build();
-      _presentingTitle = deck.title;
       _loadError = null;
     });
   }
@@ -53,7 +51,6 @@ final class _SlidesAppState extends State<SlidesApp> {
     storeSpeakerDeck(kind: 'file', payload: loaded.rawJson!);
     setState(() {
       _presenting = loaded.video;
-      _presentingTitle = loaded.name;
       _loadError = null;
     });
   }
@@ -67,7 +64,6 @@ final class _SlidesAppState extends State<SlidesApp> {
       home: presenting != null
           ? _PresentingScreen(
               video: presenting,
-              title: _presentingTitle ?? 'presentation',
               onClose: () => setState(() => _presenting = null),
             )
           : OiFileDropTarget(
@@ -89,30 +85,13 @@ final class _SlidesAppState extends State<SlidesApp> {
 }
 
 final class _PresentingScreen extends StatelessWidget {
-  const _PresentingScreen({required this.video, required this.title, required this.onClose});
+  const _PresentingScreen({required this.video, required this.onClose});
 
   final Video video;
-  final String title;
   final VoidCallback onClose;
 
   @override
-  Widget build(BuildContext context) => Stack(
-    fit: StackFit.expand,
-    children: [
-      FluvieSlides(video),
-      Align(
-        alignment: Alignment.topLeft,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: OiIconButton(
-            icon: OiIcons.x,
-            semanticLabel: 'Back to $title picker',
-            onTap: onClose,
-          ),
-        ),
-      ),
-    ],
-  );
+  Widget build(BuildContext context) => FluvieSlides(video, onClose: onClose);
 }
 
 final class _DeckPicker extends StatelessWidget {
@@ -128,33 +107,36 @@ final class _DeckPicker extends StatelessWidget {
     return ColoredBox(
       color: colors.background,
       child: Center(
-        child: SizedBox(
-          width: 520,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const OiLabel.h1('fluvie slides', textAlign: TextAlign.center),
-              const SizedBox(height: 8),
-              OiLabel.body(
-                'Pick a tutorial deck, open a .fluvie file, or drop one anywhere here.',
-                color: colors.textSubtle,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              for (final deck in bundledDecks)
-                OiListTile(
-                  title: deck.title,
-                  subtitle: deck.subtitle,
-                  onTap: () => onPickBundled(deck),
+        // Scrolls when the deck list outgrows a small window.
+        child: SingleChildScrollView(
+          child: SizedBox(
+            width: 520,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const OiLabel.h1('fluvie slides', textAlign: TextAlign.center),
+                const SizedBox(height: 8),
+                OiLabel.body(
+                  'Pick a tutorial deck, open a .fluvie file, or drop one anywhere here.',
+                  color: colors.textSubtle,
+                  textAlign: TextAlign.center,
                 ),
-              const SizedBox(height: 16),
-              OiButton.primary(label: 'Open a .fluvie file', onTap: onOpenFile),
-              if (error != null) ...[
-                const SizedBox(height: 12),
-                OiLabel.small(error!, color: colors.error.base),
+                const SizedBox(height: 24),
+                for (final deck in bundledDecks)
+                  OiListTile(
+                    title: deck.title,
+                    subtitle: deck.subtitle,
+                    onTap: () => onPickBundled(deck),
+                  ),
+                const SizedBox(height: 16),
+                OiButton.primary(label: 'Open a .fluvie file', onTap: onOpenFile),
+                if (error != null) ...[
+                  const SizedBox(height: 12),
+                  OiLabel.small(error!, color: colors.error.base),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie_presenter/fluvie_presenter.dart';
-import 'package:obers_ui/obers_ui.dart' show OiFileDropTarget;
+import 'package:obers_ui/obers_ui.dart' show OiFileDropTarget, OiIconButton, OiIcons;
 import 'package:slides/loader/open_fluvie_file.dart';
 import 'package:slides/routing/speaker_route.dart';
 import 'package:slides/slides_app.dart';
@@ -30,7 +30,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('fluvie slides'), findsWidgets);
 
-    await tester.tap(find.bySemanticsLabel(RegExp('Back to .*picker')), warnIfMissed: false);
+    await tester.tap(
+      find.byWidgetPredicate((w) => w is OiIconButton && w.icon == OiIcons.x),
+      warnIfMissed: false,
+    );
     await tester.pump();
     expect(find.byType(FluvieSlides), findsNothing);
     expect(find.text('Plain slides'), findsOneWidget);
@@ -44,15 +47,20 @@ void main() {
     var next = parseFluvieJson('good.fluvie', good);
     await tester.pumpWidget(SlidesApp(openFile: () async => next));
     await tester.pump();
+    await tester.ensureVisible(find.text('Open a .fluvie file'));
     await tester.tap(find.text('Open a .fluvie file'));
     await tester.pump();
     await tester.pump();
     expect(find.byType(FluvieSlides), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 400));
 
-    await tester.tap(find.bySemanticsLabel(RegExp('Back to .*picker')), warnIfMissed: false);
+    await tester.tap(
+      find.byWidgetPredicate((w) => w is OiIconButton && w.icon == OiIcons.x),
+      warnIfMissed: false,
+    );
     await tester.pump();
     next = parseFluvieJson('broken.fluvie', '{not json');
+    await tester.ensureVisible(find.text('Open a .fluvie file'));
     await tester.tap(find.text('Open a .fluvie file'));
     await tester.pump();
     expect(find.byType(FluvieSlides), findsNothing);
