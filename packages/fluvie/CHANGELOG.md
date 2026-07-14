@@ -3,6 +3,25 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- `LivePlayer` and `LivePlaybackController`: clock-driven live playback of
+  a composition (play, pause, seek, hold, playRange, rate) on the same
+  frame pipeline capture uses.
+- `introspectTimeline`: the resolved timeline as data, with per-element
+  windows and lookups by anchor, key, or widget.
+- `LocalMotionScope`: mount animated content under a `Video` after the
+  composition resolved, on its own frame base.
+
+### Fixed
+
+- `LivePlaybackController` survives a ticker restart: when a remounted
+  `LivePlayer` hands it a fresh ticker (elapsed starts over at zero), the
+  clock rebases at the current frame and carries on instead of rewinding
+  to frame 0 and replaying.
+
 ## [0.2.0] - 2026-07-06
 
 The API restructuring release. Old names are gone, not deprecated; every

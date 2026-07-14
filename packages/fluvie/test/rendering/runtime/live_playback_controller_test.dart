@@ -29,6 +29,20 @@ void main() {
       controller.dispose();
     });
 
+    test('a ticker restart continues from the current frame, never rewinds', () {
+      // A remounted LivePlayer creates a fresh ticker whose elapsed starts
+      // over at zero; the clock must carry on, not replay from frame 0.
+      final controller = LivePlaybackController(fps: 30)
+        ..play()
+        ..handleTick(const Duration(seconds: 1));
+      expect(controller.frame, 30);
+      controller.handleTick(const Duration(milliseconds: 16));
+      expect(controller.frame, 30);
+      controller.handleTick(const Duration(milliseconds: 1016));
+      expect(controller.frame, 60);
+      controller.dispose();
+    });
+
     test('plays from the current frame, not from zero', () {
       final controller = LivePlaybackController(fps: 30, initialFrame: 60)
         ..play()

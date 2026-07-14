@@ -174,9 +174,16 @@ final class LivePlaybackController extends ChangeNotifier {
   /// here, and tests drive it directly for deterministic playback.
   ///
   /// Ignored while paused. [elapsed] is the ticker's total elapsed time
-  /// since it started, monotonically non-decreasing between rebases.
+  /// since it started, monotonically non-decreasing between rebases. When
+  /// it jumps backward, a fresh ticker took over (the player remounted);
+  /// the clock rebases at the current frame and carries on — it never
+  /// rewinds.
   void handleTick(Duration elapsed) {
     if (_state == LivePlaybackState.paused) return;
+    if (elapsed < _lastElapsed) {
+      _baseFrame = frame;
+      _baseElapsed = elapsed;
+    }
     _lastElapsed = elapsed;
     final seconds = (elapsed - _baseElapsed).inMicroseconds / Duration.microsecondsPerSecond;
     var target = _baseFrame + (seconds * fps * _rate).floor();
