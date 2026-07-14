@@ -111,3 +111,42 @@ and the fluvie spec.
    use `flutter_riverpod`. The presenter is a UI package (its views are
    widgets), so it takes `flutter_riverpod` — the first library package to do
    so, per the concept's explicit instruction.
+
+11. **One key switch instead of `Shortcuts`/`Actions`.** Phase 3 names
+   Flutter's intent tables; the input map ships as a single
+   `Focus.onKeyEvent` switch instead. The digit-then-Enter jump buffer and
+   the Shift+Space chord are stateful across key events, which an intent
+   table cannot express without a side channel. Behavior and tests match
+   the phase exactly; only the mechanism differs (documented in
+   `presentation_shortcuts.dart`).
+12. **No playback-state sync message.** Phase 6 lists "playback state" in
+   the channel payload. Under the hold model (decision 5) a presentation
+   has no play/pause state to sync: clocks free-run per window and only the
+   `(slide, step)` position is shared truth. The channel carries position
+   updates and navigation requests; a playback flag would have nothing to
+   describe.
+13. **Previews are keyed by slide index, invalidated on deck swap.** Phase 4
+   asks for content-hash keys. A mounted deck is immutable (the shell keys
+   its scope by the `Video` instance), so "content changed" collapses to
+   "the deck instance changed": the shell invalidates the whole cache in
+   `didUpdateWidget`, tested. Hashing widget subtrees (closures) has no
+   reliable content identity to offer beyond that.
+
+## Performance pass (7.4)
+
+Measured by the tagged harness (`flutter test --tags render
+packages/fluvie_presenter/test/perf/perf_harness_test.dart`, software
+rendering, Linux):
+
+- `compileSlidePlans` on 60 slides x 4 stops: 10ms; `compileNotes`: 2ms.
+- Preview generation through the hidden host: 20 previews in 62ms
+  (3.1ms each at thumbnail width).
+- Stepping a heavy 24-slide deck: 80 advances averaged 1.5ms
+  (worst 5.2ms) per two-frame pump.
+- Preview cache with 100 slides: exactly 32 retained (the cap), rss delta
+  ~0MB.
+
+The harness also caught a real race: an instant slide change disposed the
+retired clock synchronously while its player had one tick left in flight.
+`SlideView` now retires replaced clocks in a post-frame callback
+(regression test: "an instant slide change never ticks the retired clock").
