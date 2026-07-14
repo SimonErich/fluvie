@@ -42,8 +42,19 @@ LoadedDeck parseFluvieJson(String name, String text) {
   }
 }
 
+/// Parses a file dropped onto the app. The drop payload's bytes are loosely
+/// typed upstream, so anything that is not a byte list (or is empty) becomes
+/// a friendly error instead of a crash.
+LoadedDeck parseDroppedFluvie(String name, Object? bytes) {
+  if (bytes is! List<int> || bytes.isEmpty) {
+    return LoadedDeck.failed(name, 'The dropped file arrived without content.');
+  }
+  return parseFluvieJson(name, utf8.decode(bytes));
+}
+
 /// Opens the system picker for a `.fluvie` (or `.json`) file and parses it.
 /// Returns `null` when the user cancels.
+// coverage:ignore-start the real picker needs a live platform channel
 Future<LoadedDeck?> openFluvieFile() async {
   final result = await FilePicker.pickFiles(
     type: FileType.custom,
@@ -55,3 +66,5 @@ Future<LoadedDeck?> openFluvieFile() async {
   if (file == null || bytes == null) return null;
   return parseFluvieJson(file.name, utf8.decode(bytes));
 }
+
+// coverage:ignore-end

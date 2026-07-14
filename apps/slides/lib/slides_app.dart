@@ -16,7 +16,10 @@ import 'package:slides/routing/speaker_route.dart';
 /// speaker popup through local storage).
 final class SlidesApp extends StatefulWidget {
   /// Creates the shell.
-  const SlidesApp({super.key});
+  const SlidesApp({this.openFile = openFluvieFile, super.key});
+
+  /// How "Open a .fluvie file" obtains one; tests inject a fake picker.
+  final Future<LoadedDeck?> Function() openFile;
 
   @override
   State<SlidesApp> createState() => _SlidesAppState();
@@ -37,8 +40,12 @@ final class _SlidesAppState extends State<SlidesApp> {
   }
 
   Future<void> _presentFile() async {
-    final loaded = await openFluvieFile();
+    final loaded = await widget.openFile();
     if (loaded == null || !mounted) return;
+    _presentLoaded(loaded);
+  }
+
+  void _presentLoaded(LoadedDeck loaded) {
     if (loaded.video == null) {
       setState(() => _loadError = '${loaded.name}: ${loaded.error}');
       return;
@@ -63,10 +70,19 @@ final class _SlidesAppState extends State<SlidesApp> {
               title: _presentingTitle ?? 'presentation',
               onClose: () => setState(() => _presenting = null),
             )
-          : _DeckPicker(
-              error: _loadError,
-              onPickBundled: _presentBundled,
-              onOpenFile: () => unawaited(_presentFile()),
+          : OiFileDropTarget(
+              dropMessage: 'Drop a .fluvie file to present it',
+              onInternalDrop: (_, _) {},
+              // The barrel hides the drop payload type; inference names it.
+              onExternalDrop: (files) {
+                if (files.isEmpty) return;
+                _presentLoaded(parseDroppedFluvie(files.first.name, files.first.bytes));
+              },
+              child: _DeckPicker(
+                error: _loadError,
+                onPickBundled: _presentBundled,
+                onOpenFile: () => unawaited(_presentFile()),
+              ),
             ),
     );
   }
@@ -121,7 +137,7 @@ final class _DeckPicker extends StatelessWidget {
               const OiLabel.h1('fluvie slides', textAlign: TextAlign.center),
               const SizedBox(height: 8),
               OiLabel.body(
-                'Pick a tutorial deck, or open a .fluvie file.',
+                'Pick a tutorial deck, open a .fluvie file, or drop one anywhere here.',
                 color: colors.textSubtle,
                 textAlign: TextAlign.center,
               ),

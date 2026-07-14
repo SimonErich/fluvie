@@ -12,11 +12,14 @@ import 'package:slides/routing/speaker_route.dart';
 /// only answers "which deck".
 final class SpeakerApp extends StatelessWidget {
   /// Creates the speaker shell.
-  const SpeakerApp({super.key});
+  const SpeakerApp({this.readDeck = readSpeakerDeck, super.key});
+
+  /// How the shell resolves the handed-off deck; tests inject a fake store.
+  final ({String kind, String payload})? Function() readDeck;
 
   @override
   Widget build(BuildContext context) {
-    final stored = readSpeakerDeck();
+    final stored = readDeck();
     Widget body;
     if (stored == null) {
       body = const _SpeakerMessage(

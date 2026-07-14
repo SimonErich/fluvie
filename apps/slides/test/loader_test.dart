@@ -44,6 +44,19 @@ void main() {
     expect(loaded.error, 'A .fluvie file holds one JSON object.');
   });
 
+  test('a dropped file parses from bytes, and empty drops fail friendly', () {
+    final ok = parseDroppedFluvie('drop.fluvie', utf8.encode(jsonEncode(_spec)));
+    expect(ok.video, isNotNull);
+    expect(
+      parseDroppedFluvie('drop.fluvie', null).error,
+      'The dropped file arrived without content.',
+    );
+    expect(
+      parseDroppedFluvie('drop.fluvie', const <int>[]).error,
+      'The dropped file arrived without content.',
+    );
+  });
+
   test('a spec problem surfaces the resolver message', () {
     final loaded = parseFluvieJson('demo.fluvie', '{"scenes": []}');
     expect(loaded.video, isNull);
