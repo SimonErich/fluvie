@@ -18,6 +18,21 @@ Widget playLive(Video video) {
 }
 // #enddocregion live-player
 
+/// The same player with the composition's media pre-decoded, so a `Clip` paints
+/// real frames through the capture painter instead of its placeholder.
+// #docregion preview-media
+Widget playLiveWithMedia(Video video) {
+  final playback = LivePlaybackController(fps: video.fps, totalFrames: video.totalFrames);
+  playback.play();
+  return LivePlayer(
+    controller: playback,
+    // Clips decode at a 720px proxy resolution to bound memory; pass
+    // `maxClipEdge: null` for full source resolution.
+    child: PreviewMediaScope(composition: video),
+  );
+}
+// #enddocregion preview-media
+
 /// The playback surface: exact seeks, held states, and a segment that stops
 /// on its end frame.
 // #docregion playback-controls

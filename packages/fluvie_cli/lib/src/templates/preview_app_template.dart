@@ -23,6 +23,10 @@ const String _preview = r'''
 //
 // `Video` is driven by a frame index, not a wall clock, so this app owns a
 // `RenderController` and advances it from a `Ticker`. Drag the slider to scrub.
+//
+// `PreviewMediaScope` pre-decodes the composition's media so clips play here
+// exactly as they render. On web it also needs `fluvie_web_encoder`'s decoder
+// passed as `clipDecoder:`; on desktop it uses ffmpeg and needs nothing.
 
 import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
@@ -110,7 +114,13 @@ class _VideoPreviewState extends State<VideoPreview> with SingleTickerProviderSt
                           child: SizedBox(
                             width: _video.width.toDouble(),
                             height: _video.height.toDouble(),
-                            child: _video,
+                            // Decodes the composition's media up front, then
+                            // paints it through the same painters the render
+                            // uses, so a `Clip` plays here instead of showing
+                            // its placeholder. Clips decode at a proxy
+                            // resolution to bound memory; drop the scope (or
+                            // pass maxClipEdge: null) to preview full-res.
+                            child: PreviewMediaScope(composition: _video),
                           ),
                         ),
                       ),

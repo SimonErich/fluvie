@@ -37,13 +37,23 @@ final class WebImageMediaResolver
     implements MediaResolver, DisposableResolver {
   /// Creates a resolver over the byte [loader], optionally with a [clipDecoder]
   /// for in-browser clip support.
-  WebImageMediaResolver({required this.loader, this.clipDecoder});
+  ///
+  /// Pass [maxClipDecodeEdge] to decode clips at a bounded long edge. The
+  /// browser path is decode-all (no disk store), so an unbounded full-HD clip
+  /// holds every planned frame at ~8.3 MB each — a live preview sets a bound; a
+  /// render leaves it null.
+  WebImageMediaResolver({required this.loader, this.clipDecoder, this.maxClipDecodeEdge});
 
   @override
   final MediaBytesLoader loader;
 
   /// Decodes clip frames from bytes (WebCodecs), or `null` for images only.
   final WebClipDecoder? clipDecoder;
+
+  /// The longest side clips decode at, or null for full source resolution
+  /// (overrides the cache's null default).
+  @override
+  final int? maxClipDecodeEdge;
 
   @override
   void dispose() {

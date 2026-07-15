@@ -6,8 +6,12 @@ import 'package:fluvie/src/core/contracts/media_resolver.dart';
 /// `Image`, `Clip`, and the media backgrounds read their pre-resolved bytes
 /// and decoded images from this scope: the render shell mounts one (from
 /// `mediaResolverProvider`) above the composition before the frame loop, so
-/// paint is a synchronous lookup. In a live preview app there is no scope and
-/// elements fall back to Flutter's async image path.
+/// paint is a synchronous lookup.
+///
+/// A live preview mounts one only if it opts in with a `PreviewMediaScope`
+/// (which runs the same pre-pass first). With no scope, an `Image` falls back to
+/// Flutter's async image path and a `Clip` — which has no async equivalent to
+/// fall back to — paints its placeholder.
 final class ImageResolverScope extends InheritedWidget {
   /// Provides [resolver] to every descendant of [child].
   const ImageResolverScope({required this.resolver, required super.child, super.key});

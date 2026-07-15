@@ -14,14 +14,22 @@ typedef ResolverScope = ({MediaResolver resolver, Future<void> Function() dispos
 /// `dispose` is a no-op (the renderer never disposes a resolver it does not own).
 /// Otherwise a fresh resolver is built from `mediaResolverProvider` over an owned
 /// `ProviderContainer` — with [networkAllowlist] applied when given (so network
-/// image media works without a Riverpod override) and [clipDecoder] applied when
-/// given (so an in-browser `Clip` renders through WebCodecs) — and `dispose`
-/// releases that resolver's native resources (if it is a [DisposableResolver])
-/// and the container.
+/// image media works without a Riverpod override), [clipDecoder] applied when
+/// given (so an in-browser `Clip` renders through WebCodecs), and
+/// [clipDecodeMaxEdge] applied when given (so a live preview decodes clips at a
+/// proxy resolution instead of holding full-resolution frames in memory) — and
+/// `dispose` releases that resolver's native resources (if it is a
+/// [DisposableResolver]) and the container.
+///
+/// Pass `streamClipFrames: false` when nothing will drive the capture loop's
+/// `prepareClipFrames` (a live preview): the resolver then decodes every planned
+/// clip frame up front instead of streaming a window that would never be filled.
 ResolverScope resolverScope(
   MediaResolver? injected, {
   NetworkAllowlist? networkAllowlist,
   WebClipDecoder? clipDecoder,
+  int? clipDecodeMaxEdge,
+  bool streamClipFrames = true,
 }) {
   if (injected != null) {
     return (resolver: injected, dispose: () async {});
@@ -30,6 +38,8 @@ ResolverScope resolverScope(
     overrides: [
       if (networkAllowlist != null) networkAllowlistProvider.overrideWithValue(networkAllowlist),
       if (clipDecoder != null) webClipDecoderProvider.overrideWithValue(clipDecoder),
+      if (clipDecodeMaxEdge != null) clipDecodeMaxEdgeProvider.overrideWithValue(clipDecodeMaxEdge),
+      if (!streamClipFrames) clipFrameStreamingProvider.overrideWithValue(false),
     ],
   );
   final resolver = container.read(mediaResolverProvider);

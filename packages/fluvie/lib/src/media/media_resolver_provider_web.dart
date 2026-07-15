@@ -16,5 +16,6 @@ final mediaResolverProvider = Provider<MediaResolver>(
   (ref) => WebImageMediaResolver(
     loader: ref.watch(mediaBytesLoaderProvider),
     clipDecoder: ref.watch(webClipDecoderProvider),
+    maxClipDecodeEdge: ref.watch(clipDecodeMaxEdgeProvider),
   ),
 );

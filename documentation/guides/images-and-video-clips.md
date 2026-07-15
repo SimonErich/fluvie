@@ -109,6 +109,8 @@ That is what makes a render reproducible. Same sources in, same frames out.
 
 ## Where to next
 
+- [Live playback](../advanced/live-playback.md): `PreviewMediaScope`, which runs
+  that same pre-pass in a preview so your clips play while you author them.
 - [Text and typography](text-and-typography.md): `Text`, `Typewriter`, and
   `Counter`, the other elements you compose with media.
 - [Scenes and transitions](scenes-and-transitions.md): the scene-level shared

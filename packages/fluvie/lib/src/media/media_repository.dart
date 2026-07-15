@@ -55,12 +55,15 @@ final class MediaRepository
   /// Pass a [clipFrameStore] to stream clip frames through it (decoding only a
   /// bounded window during the loop); leave it null to decode every clip frame
   /// up front. The capture loop drives the streaming window through
-  /// [prepareClipFrames]; a null store makes that a no-op.
+  /// [prepareClipFrames]; a null store makes that a no-op. Pass
+  /// [maxClipDecodeEdge] to decode clips at a bounded long edge (a live
+  /// preview); leave it null to decode at full source resolution (a render).
   MediaRepository({
     required this.loader,
     this.probeService,
     this.frameExtractor,
     this.clipFrameStore,
+    this.maxClipDecodeEdge,
   });
 
   /// The per-kind byte source feeding the cache.
@@ -71,6 +74,11 @@ final class MediaRepository
   /// frame up front (overrides the cache's null default).
   @override
   final ClipFrameStore? clipFrameStore;
+
+  /// The longest side clips decode at, or null for full source resolution
+  /// (overrides the cache's null default).
+  @override
+  final int? maxClipDecodeEdge;
 
   @override
   Future<void> prepareClipFrames(int compFrame) => prepareClipFramesForComposition(compFrame);
