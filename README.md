@@ -33,6 +33,9 @@ This is lesson 01, in full: about 16 lines of widgets become a 4 second clip.
 
 <table>
 <tr>
+<td align="center" width="330">
+<img src="documentation/media/quickstart.gif" alt="The Hello, Fluvie clip Fluvie renders from this code" width="300">
+</td>
 <td>
 
 ```dart
@@ -59,9 +62,6 @@ Video helloVideo() => Video(
 );
 ```
 
-</td>
-<td align="center" width="330">
-<img src="documentation/media/quickstart.gif" alt="The Hello, Fluvie clip Fluvie renders from this code" width="300">
 </td>
 </tr>
 </table>
@@ -94,6 +94,9 @@ runnable lesson. The clips beside them were rendered by Fluvie.
 
 <table>
 <tr>
+<td align="center" width="330">
+<img src="documentation/media/charts.gif" alt="A counter, then a bar, line, and donut chart animating in" width="300">
+</td>
 <td>
 
 ```dart
@@ -120,9 +123,6 @@ Video chartsVideo() => Video(
 ```
 
 </td>
-<td align="center" width="330">
-<img src="documentation/media/charts.gif" alt="A counter, then a bar, line, and donut chart animating in" width="300">
-</td>
 </tr>
 </table>
 
@@ -136,6 +136,9 @@ beat, captions over the top.
 
 <table>
 <tr>
+<td align="center" width="330">
+<img src="documentation/media/kitchensink.gif" alt="A vertical reel: layered scenes, a beat-synced pop, captions, an outro" width="220">
+</td>
 <td>
 
 ```dart
@@ -160,9 +163,6 @@ Video reel() => Video(
 );
 ```
 
-</td>
-<td align="center" width="330">
-<img src="documentation/media/kitchensink.gif" alt="A vertical reel: layered scenes, a beat-synced pop, captions, an outro" width="220">
 </td>
 </tr>
 </table>
