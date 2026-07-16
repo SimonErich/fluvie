@@ -25,6 +25,7 @@ import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/core/media/snapshot_source.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/media/media_bytes_loader.dart';
+import 'package:fluvie/src/media/runtime/clip_frame_cache.dart';
 import 'package:fluvie/src/media/runtime/clip_resolve_cache.dart';
 import 'package:fluvie/src/media/runtime/image_resolve_cache.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
@@ -58,11 +59,16 @@ final class MediaRepository
   /// [prepareClipFrames]; a null store makes that a no-op. Pass
   /// [maxClipDecodeEdge] to decode clips at a bounded long edge (a live
   /// preview); leave it null to decode at full source resolution (a render).
+  ///
+  /// Pass a [clipFrameCache] to serve extracted clip frames from a persistent,
+  /// content-addressed cache across runs (both modes go through it); leave it
+  /// null to extract every frame afresh on every run.
   MediaRepository({
     required this.loader,
     this.probeService,
     this.frameExtractor,
     this.clipFrameStore,
+    this.clipFrameCache,
     this.maxClipDecodeEdge,
   });
 
@@ -74,6 +80,10 @@ final class MediaRepository
   /// frame up front (overrides the cache's null default).
   @override
   final ClipFrameStore? clipFrameStore;
+
+  /// The persistent across-runs cache extracted clip frames are served from and
+  /// stored in, or null to extract afresh every run.
+  final ClipFrameCache? clipFrameCache;
 
   /// The longest side clips decode at, or null for full source resolution
   /// (overrides the cache's null default).

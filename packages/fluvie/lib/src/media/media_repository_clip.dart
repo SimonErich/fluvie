@@ -30,7 +30,13 @@ extension _ClipResolution on MediaRepository {
   }
 
   /// Extracts the [sourceFrames] of the already-materialized [source] at the clip
-  /// [meta] dimensions through the ffmpeg [FrameExtractionService].
+  /// [meta] dimensions through the ffmpeg [FrameExtractionService], serving
+  /// whatever the persistent [MediaRepository.clipFrameCache] already holds.
+  ///
+  /// This is the one choke point both resolve modes reach (decode-all and
+  /// streaming both call `extractClipFrames`), so the cache is consulted here
+  /// once and a preview and a render both benefit. ffmpeg spawns a process per
+  /// frame, so a hit is worth several orders of magnitude here.
   Future<Map<int, RawFrame>> _extractClipFrames(
     MediaSource source,
     List<int> sourceFrames,
@@ -43,13 +49,81 @@ extension _ClipResolution on MediaRepository {
         'FrameExtractionService. Wire it through the providers.',
       );
     }
-    return extractor.extractFrames(
+    final cache = clipFrameCache;
+    final key = _clipCacheKey(source, meta);
+    final cached = cache == null || key == null
+        ? const <int, RawFrame>{}
+        : await _cachedClipFrames(cache, key, sourceFrames, meta);
+    final missing = [
+      for (final index in sourceFrames)
+        if (!cached.containsKey(index)) index,
+    ];
+    if (missing.isEmpty) {
+      if (cache != null && key != null) await cache.markUsed(key);
+      return cached;
+    }
+    final extracted = await extractor.extractFrames(
       Uri.file(_clipPaths[source]!),
-      sourceFrames,
+      missing,
       width: meta.width,
       height: meta.height,
       decoder: _clipDecoders[source],
     );
+    if (cache != null && key != null) await _storeClipFrames(cache, key, extracted);
+    return {...cached, ...extracted};
+  }
+
+  /// The cache key for [source] decoded at the [meta] dimensions, or null when
+  /// the source has not been content-hashed.
+  ///
+  /// The hash comes from the image pre-pass ([MediaRepository.preResolveAll]
+  /// content-hashes clip sources without decoding them), which always runs
+  /// before the clip pre-pass. A caller that skips it simply runs uncached
+  /// rather than keying on the materialized path, which is a fresh temp path
+  /// every run and would never hit.
+  String? _clipCacheKey(MediaSource source, ClipMetadata meta) {
+    final cache = clipFrameCache;
+    final contentHash = resolved[source]?.contentHash;
+    if (cache == null || contentHash == null) return null;
+    return cache.clipKey(
+      contentHash: contentHash,
+      width: meta.width,
+      height: meta.height,
+      decoder: _clipDecoders[source],
+    );
+  }
+
+  /// The subset of [sourceFrames] [cache] already holds under [key], rebuilt as
+  /// [RawFrame]s at the [meta] decode dimensions the key names.
+  Future<Map<int, RawFrame>> _cachedClipFrames(
+    ClipFrameCache cache,
+    String key,
+    List<int> sourceFrames,
+    ClipMetadata meta,
+  ) async {
+    final byteLength = meta.width * meta.height * 4;
+    final hits = <int, RawFrame>{};
+    for (final index in sourceFrames) {
+      final rgba = await cache.get(key, index, byteLength: byteLength);
+      if (rgba == null) continue;
+      hits[index] = RawFrame(
+        frameIndex: index,
+        width: meta.width,
+        height: meta.height,
+        rgba: rgba,
+      );
+    }
+    return hits;
+  }
+
+  /// Stores every freshly extracted frame of [frames] under [key], then bounds
+  /// the cache. Sweeping here (after a write) and not on reads keeps the hit
+  /// path free of directory walks.
+  Future<void> _storeClipFrames(ClipFrameCache cache, String key, Map<int, RawFrame> frames) async {
+    for (final entry in frames.entries) {
+      await cache.put(key, entry.key, entry.value.rgba);
+    }
+    await cache.sweep();
   }
 
   /// The decoder [result]'s source must be extracted with, or null for the
