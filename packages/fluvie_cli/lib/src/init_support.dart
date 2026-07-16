@@ -6,8 +6,8 @@ import 'package:yaml_edit/yaml_edit.dart';
 /// The pinned `fluvie` dependency `fluvie init` adds to a project.
 const String fluvieDependencyVersion = '^0.3.0';
 
-/// The pinned `alchemist` dev dependency the render harness needs (it loads the
-/// real bundled fonts so captured text is not Ahem boxes).
+/// The pinned `alchemist` dev dependency the generated capture harness needs (it
+/// loads the real bundled fonts so captured text is not Ahem boxes).
 const String alchemistDependencyVersion = '^0.14.0';
 
 /// The pinned `fluvie_lints` dev dependency `fluvie init` wires up: the rules
@@ -19,28 +19,17 @@ const String fluvieLintsDependencyVersion = '^0.3.0';
 /// in the analyzer.
 const String customLintDependencyVersion = '^0.8.0';
 
-/// The names `fluvie init` derives from a composition name: the render `key`,
-/// the Dart builder `functionName`, and the `fileName` under `lib/`.
-typedef ScaffoldNames = ({String key, String functionName, String fileName});
-
-/// Derives the [ScaffoldNames] for a composition [name].
+/// The file-name slug `fluvie init` derives from a composition [name].
 ///
-/// `"Intro Clip"` becomes key `intro_clip`, function `introClipVideo`, file
-/// `intro_clip.dart`. A leading digit is prefixed so the identifier is valid.
-ScaffoldNames namesFor(String name) {
-  final words = name
-      .split(RegExp('[^A-Za-z0-9]+'))
-      .where((w) => w.isNotEmpty)
-      .toList(growable: false);
-  final safe = words.isEmpty ? ['starter'] : words;
-  final key = safe.map((w) => w.toLowerCase()).join('_');
-  final camel = safe.first.toLowerCase() + safe.skip(1).map(_capitalize).join();
-  final base = RegExp('^[0-9]').hasMatch(camel) ? 'v$camel' : camel;
-  return (key: key, functionName: '${base}Video', fileName: '$key.dart');
+/// `"Intro Clip"` becomes `intro_clip`. An empty name falls back to
+/// `example_video`, and a leading digit is prefixed, because the slug names a
+/// library file that other Dart may import.
+String compositionSlug(String name) {
+  final words = name.split(RegExp('[^A-Za-z0-9]+')).where((w) => w.isNotEmpty);
+  final slug = words.map((w) => w.toLowerCase()).join('_');
+  if (slug.isEmpty) return 'example_video';
+  return RegExp('^[0-9]').hasMatch(slug) ? 'v$slug' : slug;
 }
-
-String _capitalize(String word) =>
-    word.isEmpty ? word : word[0].toUpperCase() + word.substring(1).toLowerCase();
 
 /// Writes [content] to [file], creating parent directories.
 ///
@@ -53,37 +42,12 @@ bool writeFileIfAbsent(File file, String content, {required bool force}) {
   return true;
 }
 
-/// Ensures [pubspec] lists [name] under [section] (`dependencies` or
-/// `dev_dependencies`) at [version]; a no-op when it is already present.
-///
-/// Returns `true` when the dependency was added.
-bool ensureDependency(
-  File pubspec, {
-  required String section,
-  required String name,
-  required String version,
-}) {
-  final content = pubspec.readAsStringSync();
-  final doc = loadYaml(content);
-  final existing = doc is YamlMap ? doc[section] : null;
-  if (existing is YamlMap && existing.containsKey(name)) return false;
-  final editor = YamlEditor(content);
-  if (existing is YamlMap) {
-    editor.update([section, name], version);
-  } else {
-    editor.update([section], {name: version});
-  }
-  pubspec.writeAsStringSync(editor.toString());
-  return true;
-}
-
 /// Wires the `custom_lint` analyzer plugin into [analysisOptions] so the
 /// fluvie_lints rules run in the IDE and via `dart run custom_lint`.
 ///
-/// Creates the file (on the `flutter_lints` base `flutter create` would write)
-/// when absent; otherwise appends the `analyzer: plugins:` block, preserving
-/// the existing content. Idempotent: returns `false` when the plugin is
-/// already wired.
+/// Creates the file (on the `flutter_lints` base) when absent; otherwise appends
+/// the `analyzer: plugins:` block, preserving the existing content. Idempotent:
+/// returns `false` when the plugin is already wired.
 bool ensureCustomLintPlugin(File analysisOptions) {
   if (!analysisOptions.existsSync()) {
     analysisOptions

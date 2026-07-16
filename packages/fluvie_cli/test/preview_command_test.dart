@@ -194,5 +194,31 @@ dependencies:
       expect(await execute([composition]), 1);
       expect(err.toString(), contains('stopped before flutter run'));
     });
+
+    test('a missing flutter binary is exit 1 with an install hint, not a stack trace', () async {
+      // What a user without Flutter on PATH actually hits, so it has to read as
+      // an instruction rather than an unhandled ProcessException.
+      final code = await PreviewCommand(
+        ensureApp:
+            ({
+              required runner,
+              required target,
+              required platforms,
+              required cliVersion,
+              required out,
+              environment,
+            }) async => throw const ProcessException(
+              'flutter',
+              ['create'],
+              'No such file or directory',
+              2,
+            ),
+      ).execute(PreviewCommand.buildParser().parse([composition]), out: out, err: err);
+
+      expect(code, 1);
+      expect(err.toString(), contains('Could not run "flutter"'));
+      expect(err.toString(), contains('No such file or directory'));
+      expect(err.toString(), contains('https://docs.flutter.dev/get-started/install'));
+    });
   });
 }

@@ -45,7 +45,7 @@ final class InitCommand {
       out.writeln('Scaffolding a Fluvie project in ${dir.path}');
       return await initProject(
         dir: dir,
-        fileName: '${namesFor(name).key}.dart',
+        fileName: '${compositionSlug(name)}.dart',
         force: force,
         out: out,
         err: err,

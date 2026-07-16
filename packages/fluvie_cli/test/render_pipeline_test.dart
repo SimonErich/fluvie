@@ -161,6 +161,76 @@ void main() {
     expect(captured, {'FLUVIE_PROGRESS_FILE': '/tmp/p', 'ANTHROPIC_API_KEY': 'sk'});
   });
 
+  test(
+    'a resolved ffmpeg off PATH is prepended to the capture PATH, keeping the run env',
+    () async {
+      // The capture extracts a clip's frames itself, in the test subprocess, so it
+      // needs the gate-resolved ffmpeg on PATH too, not just the encode the CLI
+      // spawns directly. Without this a cache-only ffmpeg encodes fine while every
+      // Clip fails to decode.
+      stubHappyPath();
+      const binary = '/opt/ffmpeg/bin/ffmpeg';
+      when(
+        () => runner.run(binary, const ['-version']),
+      ).thenAnswer((_) async => const ProcessRunResult(exitCode: 0, stdout: _banner8, stderr: ''));
+      when(
+        () => runner.run(binary, _encodeArgs, workingDirectory: any(named: 'workingDirectory')),
+      ).thenAnswer((_) async {
+        File('${sandbox.path}/out.mp4').writeAsBytesSync(const [0, 0, 0, 1]);
+        return const ProcessRunResult(exitCode: 0, stdout: '', stderr: '');
+      });
+
+      final code = await run(
+        options: (
+          ffmpegBinary: binary,
+          projectDir: 'example',
+          noCache: false,
+          noDownload: false,
+          enableImpeller: false,
+          verbose: false,
+          keepTemp: false,
+        ),
+        environment: const {'FLUVIE_PROGRESS_FILE': '/tmp/p'},
+      );
+
+      expect(code, 0, reason: err.toString());
+      final captured =
+          verify(
+                () => runner.run(
+                  'flutter',
+                  any(),
+                  workingDirectory: any(named: 'workingDirectory'),
+                  environment: captureAny(named: 'environment'),
+                ),
+              ).captured.single
+              as Map<String, String>;
+      expect(
+        captured['FLUVIE_PROGRESS_FILE'],
+        '/tmp/p',
+        reason: 'prepending PATH must not drop the per-run environment',
+      );
+      expect(captured['PATH'], startsWith('/opt/ffmpeg/bin'));
+    },
+  );
+
+  test('a bare ffmpeg already on PATH needs no PATH entry', () async {
+    stubHappyPath();
+
+    await run(environment: const {'FLUVIE_PROGRESS_FILE': '/tmp/p'});
+
+    final captured =
+        verify(
+              () => runner.run(
+                'flutter',
+                any(),
+                workingDirectory: any(named: 'workingDirectory'),
+                environment: captureAny(named: 'environment'),
+              ),
+            ).captured.single
+            as Map<String, String>;
+    expect(captured, isNot(contains('PATH')));
+  });
+
   test('keepTemp preserves the sandbox and reports where it is', () async {
     stubHappyPath();
 
