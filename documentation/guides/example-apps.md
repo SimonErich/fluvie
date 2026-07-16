@@ -1,10 +1,17 @@
 # Example apps
 
 Fluvie ships a set of small, kitten-themed example apps under `examples/`. Each
-one exercises a different way to turn a Fluvie composition into a real MP4, so
-together they cover every rendering path. They share one cohesive look through
-the `examples/kitten_kit` package (theme, sample media, and reusable composition
-builders), so each app stays tiny.
+one exercises a different way to turn a Fluvie composition into a real MP4: the
+encoder backends, the server, and the in-process render. They share one cohesive
+look through the `examples/kitten_kit` package (theme, sample media, and reusable
+composition builders), so each app stays tiny.
+
+These are **apps that host a render**, so each keeps a composition registry and a
+committed capture harness. That is not the shape of a project you write. If you
+just want a video, you need no app at all: `fluvie init` scaffolds a composition
+file, `fluvie preview ./lib/my_video.dart` runs it live, and
+`fluvie render ./lib/my_video.dart --out out.mp4` writes the file. See
+[Start a project](../getting-started/start-a-project.md).
 
 | App | What it shows | Renders with |
 |---|---|---|

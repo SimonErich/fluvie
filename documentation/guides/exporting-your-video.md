@@ -104,26 +104,30 @@ example 1.5 seconds into a 3 second card.
 
 ## The command-line renderer
 
-`fluvie render` captures a registered composition and encodes it without opening
-the example app. The minimal call names a composition key and an output file:
+`fluvie render` captures a composition and encodes it, with no app to open. Point
+it at the file and name an output:
 
 ```sh
-fluvie render 01_hello_video --out hello.mp4
+fluvie render ./lib/my_video.dart --out hello.mp4
 ```
 
-The flags map onto the export modes above:
+It calls the file's top-level `Video build()`, generates a capture harness under
+`<project>/.fluvie/`, and encodes the frames. The flags map onto the export modes
+above:
 
 ```sh
-fluvie render 01_hello_video --out reel.mp4 --aspect reels --quality high
-fluvie render 01_hello_video --out clip.gif --format gif
-fluvie render 01_hello_video --out frames/ --format imageSequence
-fluvie render 01_hello_video --out overlay.webm --format transparent
-fluvie render 01_hello_video --out hero.mp4 --poster 1.5s
+fluvie render ./lib/my_video.dart --out reel.mp4 --aspect reels --quality high
+fluvie render ./lib/my_video.dart --out clip.gif --format gif
+fluvie render ./lib/my_video.dart --out frames/ --format imageSequence
+fluvie render ./lib/my_video.dart --out overlay.webm --format transparent
+fluvie render ./lib/my_video.dart --out hero.mp4 --poster 1.5s
 ```
 
 The flags:
 
 - `--out <file>` sets the output path. It is required.
+- `--entry <name>` names the top-level function returning the `Video`. It
+  defaults to `build`.
 - `--aspect <name>` picks the aspect: `reels`, `square`, `landscape`, or
   `portrait45`. With no `--aspect` the composition renders at its declared
   size; pass an aspect to re-frame it.
@@ -134,17 +138,41 @@ The flags:
   `1.5s`, `30f`, or `500ms`.
 
 A bad enum value exits with code 64 and names the valid set, so a typo fails
-fast rather than rendering the wrong thing. The other flags from earlier phases
-stay: `--frames N` for a draft render, `--project <dir>`, `--ffmpeg <path>`,
-`--no-cache`, `--keep-temp`, and `--verbose`.
+fast rather than rendering the wrong thing. The rest: `--frames N` for a draft
+render, `--project <dir>`, `--ffmpeg <path>`, `--keep-temp`, and `--verbose`.
 
-To see every composition key you can render, run:
+## The frame cache
+
+Rendering a `.dart` file captures every frame fresh. Pass `--cache` to reuse
+cached frames instead:
+
+```sh
+fluvie render ./lib/my_video.dart --out hello.mp4 --cache
+```
+
+It is off by default for a reason. The render digest keys on the config and the
+composition key, never on the composition itself, so an edited file with the same
+size and frame count would replay its old frames and you would render yesterday's
+video. Reach for `--cache` when you are re-rendering an unchanged file at a
+different quality or format, and leave it off while you are editing.
+
+## Rendering by key
+
+A project that still keeps a registry-based capture harness renders by key:
+
+```sh
+fluvie render 01_hello_video --out hello.mp4
+```
+
+That path is unchanged, and `--no-cache` still bypasses the cache for it. To see
+every key such a project can render:
 
 ```sh
 fluvie list
 ```
 
-It prints one key per line.
+It prints one key per line. A file-based project needs no keys, so it needs no
+`list`.
 
 ## Where to next
 

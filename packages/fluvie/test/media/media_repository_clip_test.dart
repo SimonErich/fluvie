@@ -46,19 +46,23 @@ class _FakeProbe implements VideoProbeService {
   }
 }
 
-/// An extractor that serves canned 2x2 frames per index; counts calls.
+/// An extractor that serves canned 2x2 frames per index; counts calls and
+/// records the decoder each extraction was asked for.
 class _FakeExtractor implements FrameExtractionService {
   int calls = 0;
   final extracted = <int>[];
+  final decoders = <String?>[];
   @override
   Future<RawFrame> extractFrame(
     Uri source,
     int frameIndex, {
     required int width,
     required int height,
+    String? decoder,
   }) async {
     calls++;
     extracted.add(frameIndex);
+    decoders.add(decoder);
     return RawFrame(
       frameIndex: frameIndex,
       width: width,
@@ -73,9 +77,10 @@ class _FakeExtractor implements FrameExtractionService {
     Iterable<int> frameIndices, {
     required int width,
     required int height,
+    String? decoder,
   }) async => {
     for (final index in frameIndices)
-      index: await extractFrame(source, index, width: width, height: height),
+      index: await extractFrame(source, index, width: width, height: height, decoder: decoder),
   };
 }
 
@@ -224,6 +229,110 @@ void main() {
     );
 
     await expectLater(() => repo.probeClip(_clip), throwsA(isA<FluvieRenderException>()));
+  });
+
+  // The clip's fps drives the resampler (which source frame each composition
+  // frame paints), so the metadata must carry the probe's rate verbatim.
+  group('the clip fps follows the probe', () {
+    Future<double> fpsFor(VideoProbeResult probed) async {
+      final repo = _repo(
+        assets: {'clip_1s.mp4': Uint8List(16)},
+        probe: _FakeProbe(probed),
+        extractor: _FakeExtractor(),
+      );
+      final meta = await repo.probeClip(_clip);
+      return meta.fps;
+    }
+
+    test('a declared rate beats the rate derived from the duration', () async {
+      // A webm's container duration spans its audio tail: 106 frames over
+      // 3.55s derives 29.86 for a clip that declares, and really runs at, 30.
+      expect(
+        await fpsFor(
+          const VideoProbeResult(
+            codec: 'vp9',
+            width: 2,
+            height: 2,
+            nbFrames: 106,
+            durationSeconds: 3.55,
+            declaredFps: 30,
+          ),
+        ),
+        30,
+      );
+    });
+
+    test('an NTSC declared rate reaches the metadata unrounded', () async {
+      expect(
+        await fpsFor(
+          const VideoProbeResult(
+            codec: 'h264',
+            width: 2,
+            height: 2,
+            nbFrames: 300,
+            durationSeconds: 10.01,
+            declaredFps: 30000 / 1001,
+          ),
+        ),
+        closeTo(29.97002997, 1e-6),
+      );
+    });
+
+    test('a probe with no declared rate still derives frames over duration', () async {
+      expect(await fpsFor(_probeResult), 30, reason: '30 frames over 1s');
+    });
+  });
+
+  // VP9 codes alpha as a separate layer that only libvpx-vp9 reads; the native
+  // vp9 decoder drops it (a transparent clip renders over black) but is far
+  // faster, so it stays the choice for everything else.
+  group('the extraction decoder follows the probe', () {
+    Future<List<String?>> decodersFor(VideoProbeResult probed) async {
+      final extractor = _FakeExtractor();
+      final repo = _repo(
+        assets: {'clip_1s.mp4': Uint8List(16)},
+        probe: _FakeProbe(probed),
+        extractor: extractor,
+      );
+      await repo.preResolveClip(_clip, [0]);
+      return extractor.decoders;
+    }
+
+    test('a vp9 source with alpha extracts with libvpx-vp9', () async {
+      expect(
+        await decodersFor(
+          const VideoProbeResult(
+            codec: 'vp9',
+            width: 2,
+            height: 2,
+            nbFrames: 30,
+            durationSeconds: 1,
+            hasAlpha: true,
+          ),
+        ),
+        ['libvpx-vp9'],
+      );
+    });
+
+    test('a vp9 source without alpha keeps the default decoder', () async {
+      expect(
+        await decodersFor(
+          const VideoProbeResult(
+            codec: 'vp9',
+            width: 2,
+            height: 2,
+            nbFrames: 30,
+            durationSeconds: 1,
+          ),
+        ),
+        [null],
+        reason: 'the native vp9 decoder is much faster and loses nothing here',
+      );
+    });
+
+    test('an h264 source keeps the default decoder', () async {
+      expect(await decodersFor(_probeResult), [null]);
+    });
   });
 
   test('dispose releases extracted clip frames and is idempotent', () async {

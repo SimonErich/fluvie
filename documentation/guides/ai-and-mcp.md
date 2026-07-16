@@ -67,7 +67,10 @@ Sometimes you want real Flutter widget code in your repo, not a JSON spec. Ask
 for it in those words: "make me a Fluvie video in Flutter style" or "give me the
 real Dart code." The assistant reaches for the `init_project` tool, which returns
 the starter composition, the dependencies, and the `fluvie init` command to
-scaffold a runnable project. See [Start a project](../getting-started/start-a-project.md).
+scaffold a project. What you get back is a composition file exposing a top-level
+`Video build()`; preview it with `fluvie preview ./<file>.dart` and render it with
+`fluvie render ./<file>.dart --out out.mp4`. See
+[Start a project](../getting-started/start-a-project.md).
 
 Before rendering generated code, the assistant can check it with `validate_code`.
 That runs static analysis only (it never executes the code) and returns the

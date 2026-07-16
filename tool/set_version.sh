@@ -41,8 +41,14 @@ stamp_changelog() {
   ' "$changelog" > "$changelog.tmp" && mv "$changelog.tmp" "$changelog"
 }
 
-# Every in-repo package name, as an alternation for the constraint rewrite.
-packages_alt="$(for d in packages/*/; do basename "$d"; done | paste -sd'|')"
+# Every in-repo package name, as an alternation for the constraint rewrite. Only
+# directories that actually hold a pubspec count: a leftover artifact directory
+# under packages/ (a stale .dart_tool or coverage dir from a package that was
+# removed) shares its name with a real pub.dev dependency, and treating it as
+# ours would rewrite that third-party constraint to our release version.
+packages_alt="$(for d in packages/*/; do
+  [[ -f "$d/pubspec.yaml" ]] && basename "$d"
+done | paste -sd'|')"
 
 changed=()
 for pubspec in packages/*/pubspec.yaml; do
@@ -56,9 +62,12 @@ for pubspec in packages/*/pubspec.yaml; do
   changed+=("$(basename "$(dirname "$pubspec")")")
 done
 
-# Example apps carry the same constraints so a minor or major bump still
-# resolves; they are not published, so only the constraint line moves.
-for pubspec in examples/*/pubspec.yaml packages/*/example/pubspec.yaml; do
+# Example and in-repo apps carry the same constraints so a minor or major bump
+# still resolves; they are not published, so only the constraint line moves.
+# Every workspace member must be listed here: a member left pinned to the old
+# version makes the whole workspace unresolvable, so `dart pub get` and
+# `dart test` fail repo-wide rather than just in that app.
+for pubspec in examples/*/pubspec.yaml apps/*/pubspec.yaml packages/*/example/pubspec.yaml; do
   [[ -f "$pubspec" ]] || continue
   sed -i -E "s/^(  (${packages_alt}): )\^?[0-9][0-9A-Za-z.+-]*$/\1^${version}/" "$pubspec"
 done

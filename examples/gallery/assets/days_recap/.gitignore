@@ -1,0 +1,5 @@
+# Personal recap media stays out of the public repo; drop your own
+# photos and clips here and point days_recap_composition at them.
+*
+!.gitignore
+!.gitkeep

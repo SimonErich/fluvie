@@ -2,33 +2,23 @@ import 'package:flutter/widgets.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_example/render/composition_entry.dart';
 
-/// The acceptance composition: 320x240 @ 30 fps, 48 frames, one
-/// scene whose background color derives from the current frame with integer
-/// math only — bit-stable by construction.
-final demoComposition = CompositionEntry(
-  key: 'demo',
-  width: 320,
-  height: 240,
-  fps: 30,
-  frameCount: 48,
-  build: () => const DemoComposition(),
-);
+/// The acceptance composition: 320x240 @ 30 fps, 48 frames, one scene whose
+/// background color derives from the current frame with integer math only —
+/// bit-stable by construction.
+const demoComposition = CompositionEntry(key: 'demo', video: demoVideo);
 
-/// The widget tree behind the `demo` key: `VideoScope` → `SceneScope` →
-/// frame-derived background.
-class DemoComposition extends StatelessWidget {
-  /// Creates the demo composition.
-  const DemoComposition({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const VideoScope(
-      fps: 30,
+/// Builds the `demo` composition. The fps is the `Video` default (30).
+Video demoVideo() => Video(
+  size: const VideoSize(320, 240),
+  scenes: const [
+    Scene(
       duration: Time.frames(48),
-      child: SceneScope(duration: Time.frames(48), child: _FrameBackground()),
-    );
-  }
-}
+      // A scene lays its children out in a Stack, and a childless ColoredBox
+      // under loose constraints would collapse to zero, so fill the canvas.
+      children: [Positioned.fill(child: _FrameBackground())],
+    ),
+  ],
+);
 
 /// A solid background whose RGB channels are pure integer functions of the
 /// current frame index.

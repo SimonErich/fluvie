@@ -51,6 +51,10 @@ void main() {
         _anim({'preset': 'scaleIn', 'from': 0.9}),
         containsCode('Animation.scaleIn(from: 0.9)'),
       );
+      expect(
+        _anim({'preset': 'scaleOut', 'to': 1.2}),
+        containsCode('Animation.scaleOut(to: 1.2)'),
+      );
       expect(_anim({'preset': 'blurIn', 'sigma': 8}), containsCode('Animation.blurIn(sigma: 8)'));
       expect(_anim({'preset': 'blurOut', 'sigma': 6}), containsCode('Animation.blurOut(sigma: 6)'));
     });

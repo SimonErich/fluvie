@@ -81,6 +81,23 @@ done
 cmp -s "${WORK}/demo_a.gif" "${WORK}/demo_b.gif" \
   || fail "two gif renders are not byte-identical (determinism regression)"
 
+step "slides app web build + headless boot smoke (main and speaker routes)"
+( cd apps/slides && flutter build web --release ) || fail "slides web build"
+CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+if [ -n "${CHROME}" ]; then
+  ( cd apps/slides/build/web && python3 -m http.server 8199 >/dev/null 2>&1 & echo $! >"${WORK}/http.pid" )
+  sleep 1
+  for route in "" "#/speaker"; do
+    "${CHROME}" --headless=new --disable-gpu --no-sandbox --virtual-time-budget=20000 \
+      --dump-dom "http://localhost:8199/${route}" >"${WORK}/dom.html" 2>/dev/null || true
+    grep -q "flutter-view\|flt-" "${WORK}/dom.html" \
+      || { kill "$(cat "${WORK}/http.pid")" 2>/dev/null; fail "slides app did not boot at /${route}"; }
+  done
+  kill "$(cat "${WORK}/http.pid")" 2>/dev/null || true
+else
+  printf 'no Chrome found; skipping the headless boot smoke (build still verified)\n'
+fi
+
 step "voice spot-check (three docs pages must be em-dash free)"
 for page in getting-started/your-first-video.md guides/animating-elements.md reference/faq.md; do
   if grep -qP '[\x{2013}\x{2014}]' "documentation/${page}"; then

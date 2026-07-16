@@ -145,12 +145,14 @@ Future<List<RawFrame>> _captureFrames({
 
   final controller = RenderController();
   final boundaryKey = GlobalKey();
-  // Match the harness: unstyled text falls back to a real bundled family so the
-  // capture shows real glyphs (both paths share it, so it cancels out, but this
-  // keeps the comparison on the same pixels the renderer produces).
+  // Match `renderVideo`, wrapper for wrapper: the LTR Directionality a bare
+  // RichText needs on the capture canvas, then the real bundled family unstyled
+  // text falls back to so the capture shows real glyphs (both paths share both,
+  // so they cancel out, but this keeps the comparison on the same pixels the
+  // renderer produces).
   final composition = DefaultTextStyle.merge(
     style: const TextStyle(fontFamily: 'Roboto'),
-    child: build(),
+    child: Directionality(textDirection: TextDirection.ltr, child: build()),
   );
   final shell = buildCaptureShell(
     composition: composition,
@@ -230,16 +232,17 @@ void main() {
 
       final specFrames = await _captureFrames(
         tester: tester,
-        build: compositionFromSpec(spec).build,
+        build: compositionFromSpec(spec).video,
         size: size,
         sampledFrames: sampled,
       );
       final printedFrames = await _captureFrames(
         tester: tester,
         // The checked-in fixture's top-level `Video build()` is byte-identical to
-        // the printer output (asserted above); wrap it in the LTR Directionality
-        // the capture canvas needs, exactly like compositionFromVideo does.
-        build: () => Directionality(textDirection: TextDirection.ltr, child: printed.build()),
+        // the printer output (asserted above). Both paths hand a bare `Video` to
+        // _captureFrames, which supplies the render wrappers, exactly like
+        // renderVideo does for the entry.
+        build: printed.build,
         size: size,
         sampledFrames: sampled,
       );

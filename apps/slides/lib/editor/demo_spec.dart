@@ -1,0 +1,161 @@
+import 'dart:convert';
+
+/// The demo presentation as an embedded spec: the bundled deck the editor
+/// opens without touching the file system. It mirrors
+/// `demo_presentation.fluvie` at the repo root.
+final Map<String, Object?> demoSpecJson = jsonDecode(_demoSpec) as Map<String, Object?>;
+
+const String _demoSpec = r'''
+{
+  "fluvieSpec": 1,
+  "size": "hd",
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "6s",
+      "background": {
+        "colors": [
+          "#0B2027",
+          "#2D1B69"
+        ],
+        "kind": "gradient"
+      },
+      "children": [
+        {
+          "type": "Text",
+          "text": "Hello from a .fluvie file",
+          "style": {
+            "color": "#FFFFFF",
+            "fontSize": 88,
+            "fontWeight": "w700"
+          },
+          "animate": [
+            {
+              "preset": "pop",
+              "duration": "0.6s"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "duration": "6s",
+      "enter": {
+        "kind": "crossFade",
+        "duration": "0.5s"
+      },
+      "background": {
+        "color": "#10222B",
+        "kind": "color"
+      },
+      "children": [
+        {
+          "type": "Text",
+          "text": "Every scene is a slide.\nArrows step through the deck,\nO opens the overview,\nS opens the speaker window.",
+          "style": {
+            "color": "#D7E3EA",
+            "fontSize": 52,
+            "height": 1.5
+          },
+          "animate": [
+            {
+              "preset": "slideFadeIn",
+              "duration": "0.7s"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "duration": "6s",
+      "enter": {
+        "kind": "slide",
+        "duration": "0.5s"
+      },
+      "background": {
+        "colors": [
+          "#1D3A4A",
+          "#0B2027"
+        ],
+        "kind": "radial"
+      },
+      "children": [
+        {
+          "type": "Counter",
+          "to": 98,
+          "from": 0,
+          "reveal": "2s",
+          "style": {
+            "color": "#7FDBCA",
+            "fontSize": 200,
+            "fontWeight": "w700"
+          }
+        }
+      ]
+    },
+    {
+      "duration": "6s",
+      "enter": {
+        "kind": "zoom",
+        "duration": "0.5s"
+      },
+      "background": {
+        "colors": [
+          "#2D1B69",
+          "#0B2027"
+        ],
+        "kind": "gradient"
+      },
+      "children": [
+        {
+          "type": "Box",
+          "color": "#F2A950",
+          "size": {
+            "width": 220,
+            "height": 220
+          },
+          "animate": [
+            {
+              "preset": "pop",
+              "duration": "0.5s"
+            },
+            {
+              "preset": "spin",
+              "period": "5s",
+              "delay": "0.5s"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "duration": "6s",
+      "enter": {
+        "kind": "wipe",
+        "duration": "0.5s"
+      },
+      "background": {
+        "color": "#0B2027",
+        "kind": "color"
+      },
+      "children": [
+        {
+          "type": "Text",
+          "text": "F goes fullscreen.\nB blanks the screen.\nEnjoy!",
+          "style": {
+            "color": "#FFFFFF",
+            "fontSize": 60,
+            "height": 1.5
+          },
+          "animate": [
+            {
+              "preset": "blurIn",
+              "duration": "0.8s"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+''';

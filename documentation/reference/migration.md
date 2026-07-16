@@ -5,6 +5,95 @@ surface consolidates them. There is now one motion type (`Animation`), one
 attachment (`.animate([...])`), and plain Flutter layout. This page maps each
 old name to its replacement.
 
+## 0.2.x to 0.3.0
+
+Nothing in the authoring surface changed. A `Video` you wrote for 0.2 builds
+unchanged in 0.3. What changed is the shape of a project around it.
+
+A Fluvie project is now a directory holding a composition file, an `assets/`
+folder, and a `pubspec.yaml`. There is no app, no `lib/main.dart`, no capture
+harness, and no registry. `fluvie render` and `fluvie preview` take the `.dart`
+file directly and generate whatever they need, per invocation.
+
+### Your existing project still works
+
+Nothing breaks on upgrade. `resolveProjectDir` still finds a project by its
+pubspec, and `fluvie render <key> --out <file>` is unchanged, so your committed
+harness and registry keep rendering exactly as they did. `fluvie list` still
+prints your keys. You can stop here.
+
+### The recommended path
+
+Delete the machinery and render the file. For a project that looks like the 0.2
+scaffold:
+
+1. **Move the composition to the project root** (or anywhere you like) and rename
+   its builder to `build`:
+
+   <!-- code-excerpt-ignore: a before/after of one signature, not a runnable composition -->
+   ```dart
+   // lib/videos/intro.dart  ->  intro.dart
+   Video intro() { ... }     // before
+   Video build() { ... }     // after
+   ```
+
+   Keep the old name if you prefer, and pass `--entry intro` on every render and
+   preview instead.
+
+2. **Delete the three files you no longer own:**
+
+   ```sh
+   rm test/render/capture_harness_test.dart   # the CLI generates one per render
+   rm lib/main.dart                           # `fluvie preview` replaces the app
+   rm lib/videos/compositions.dart            # or wherever your registry lives
+   ```
+
+   Delete the widget test that pumped the app, too, if it only existed to prove
+   the app booted.
+
+3. **Render the file:**
+
+   ```sh
+   fluvie render ./lib/intro.dart --out intro.mp4
+   fluvie preview ./lib/intro.dart
+   ```
+
+4. **Move your media under `assets/`** and drop the `flutter: assets:` block from
+   your pubspec. The CLI re-derives it from the asset tree on every render and
+   preview. It enumerates every subdirectory that holds files, which a
+   hand-written `assets/` entry does not: Flutter bundles a declared asset
+   directory non-recursively, so `assets/images/logo.png` was silently missing at
+   runtime unless you declared `assets/images/` yourself.
+
+5. **Drop the platform directories** (`android/`, `ios/`, `linux/`, `macos/`,
+   `windows/`, `web/`) if the project existed only to render. `fluvie preview`
+   generates and caches its own app in `~/.cache/fluvie/preview/`, outside your
+   project.
+
+### What to know afterwards
+
+- **The frame cache is off by default for a file target.** The render digest keys
+  on the config and the composition key, never on the composition itself, so an
+  edited file with the same size and frame count would replay stale frames. Pass
+  `--cache` to opt in. On the key path the cache is still on, and `--no-cache`
+  still bypasses it.
+- **`fluvie init` takes only `--name`, `--dir`, and `--force`.** `--path`,
+  `--render` / `--no-render`, and `--yes` / `-y` are gone. It is no longer
+  interactive and it no longer runs `flutter create`, so there is nothing to say
+  yes to.
+- **`fluvie preview` defaults to your desktop, not the browser.** A desktop
+  preview decodes any clip through FFmpeg; a browser is limited to what WebCodecs
+  supports, and ProRes is not on that list. Pass `-d chrome` for the browser.
+- **`renderVideo` is the entry point if you host renders yourself.** It replaces
+  hand-assembling the capture shell, the media pre-pass, and the audio staging.
+  See [the rendering surface](rendering-surface.md).
+- **`RENDER_PROJECT` now means a Fluvie project**, a pubspec that depends on
+  `fluvie`, rather than a project containing `test/render/capture_harness_test.dart`.
+  See [Rendering on a server](../guides/rendering-on-a-server.md).
+
+New in 0.3.0, not a rename: WebM/VP9 clips work, including alpha. See
+[Images and video clips](../guides/images-and-video-clips.md).
+
 ## 0.1.x to 0.2.0
 
 Version 0.2.0 renames hard: the old names are gone, not deprecated. Every

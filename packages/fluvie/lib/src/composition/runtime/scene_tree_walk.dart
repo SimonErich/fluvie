@@ -30,20 +30,20 @@ void walkSceneTree(List<Scene> scenes, void Function(Widget widget) visit) {
 /// are leaves to the walk: it never mounts or builds anything.
 void walkWidgetTree(Widget widget, void Function(Widget widget) visit) {
   visit(widget);
-  switch (widget) {
-    case CollectibleChildren(:final collectibleChildren):
-      for (final child in collectibleChildren) {
-        walkWidgetTree(child, visit);
-      }
-    case MotionTarget(:final child):
-      walkWidgetTree(child, visit);
-    case MultiChildRenderObjectWidget(:final children):
-      for (final child in children) {
-        walkWidgetTree(child, visit);
-      }
-    case SingleChildRenderObjectWidget(:final child?):
-      walkWidgetTree(child, visit);
-    case ProxyWidget(:final child):
-      walkWidgetTree(child, visit);
+  for (final child in declaredChildren(widget)) {
+    walkWidgetTree(child, visit);
   }
 }
+
+/// The children [walkWidgetTree] descends into, in build order — one source
+/// of truth for what the structural walk can see, shared by every collector
+/// and by the timeline introspector's scoped walk. Widgets outside the
+/// walkable shapes return an empty list: they are leaves.
+List<Widget> declaredChildren(Widget widget) => switch (widget) {
+  CollectibleChildren(:final collectibleChildren) => List.unmodifiable(collectibleChildren),
+  MotionTarget(:final child) => [child],
+  MultiChildRenderObjectWidget(:final children) => children,
+  SingleChildRenderObjectWidget(:final child?) => [child],
+  ProxyWidget(:final child) => [child],
+  _ => const [],
+};

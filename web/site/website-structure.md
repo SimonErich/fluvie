@@ -68,7 +68,7 @@ right door.
 2  The one idea: what, not when
 3  The clever bit: triggers, not timecodes
 4  The payoff: write one, render a thousand
-5  From `flutter create` to `fluvie render`   (the getting-started)
+5  From `fluvie init` to `fluvie render`      (the getting-started)
 6  The reel wall: twelve examples
 7  The crew: seven packages
 8  Open source, on purpose
@@ -229,7 +229,7 @@ accessibility note.
   labels carry their value as text, never color-coded only. Reduced motion: the
   cards appear in their final state at once.
 
-### 5. From `flutter create` to `fluvie render`
+### 5. From `fluvie init` to `fluvie render`
 
 This is the getting-started the page must include. See the
 [full content below](#getting-started-the-full-walkthrough).
@@ -240,9 +240,10 @@ This is the getting-started the page must include. See the
   (docs.fluvie.dev/getting-started/installation) and your-first-video. Secondary:
   "Skip setup, scrub it live" to the demo.
 - **Special treatment:** A vertical numbered "call sheet" with a perforation rail
-  down one side. Each step is its own card with its own copy button. Step 4
-  expands to the code, and the `hide Animation` line carries an inline note. The
-  final card shows a small "change the data, render again" badge.
+  down one side. Each step is its own card with its own copy button. Step 3
+  expands to the code, and the `hide Animation` line carries an inline note, as
+  does the `Video build()` signature (it is the one contract the CLI looks for).
+  The final card shows a small "change the data, render again" badge.
 - **Motion:** Steps reveal with a gentle stagger. The perforation line threads
   downward as you progress. Each successful copy ticks that step's number (an
   allowed pop moment). The render command gets a tiny clapper-snap on copy. The
@@ -468,53 +469,45 @@ This is the open-source section the page must include. See the
 This is the content for section 5. Render it as the numbered call sheet. Each step
 is one short line plus one copyable command or code block.
 
-> Honesty note for the build: steps 1 to 4 are exactly right for any fresh project.
-> The render in step 5 uses Fluvie's capture harness, which is a small one-time
-> setup in a project. Keep the step, and link "Read the full guide" to
-> installation so nobody hits a wall. Do not imply that a bare `flutter create`
-> renders with no further setup.
+> Honesty note for the build: every step below is exactly right for a fresh
+> project. There is no hidden setup left. A Fluvie project is a composition file,
+> an `assets/` folder, and a pubspec; the CLI generates the capture harness and
+> the preview app per invocation, so there is nothing to wire and nothing to
+> commit. Link "Read the full guide" to installation anyway, for the reader who
+> wants the why.
 
-**Prereqs (a collapsible note at the top).** You need Flutter 3.44 or newer and
-FFmpeg on your PATH. Preview needs no FFmpeg. Rendering does.
+**Prereqs (a collapsible note at the top).** You need Flutter 3.44 or newer. That
+is the list. You do not need FFmpeg: the first render downloads a pinned,
+checksum-verified build and caches it.
 
 ```sh
 flutter --version
-ffmpeg -version
 ```
 
-**Step 1. Make a Flutter app.** Any fresh project works.
-
-```sh
-flutter create my_promo
-cd my_promo
-```
-
-**Step 2. Add Fluvie.** Drop it into your dependencies and pull it down.
-
-```yaml
-# pubspec.yaml
-dependencies:
-  fluvie: ^1.0.0
-```
-
-```sh
-flutter pub get
-```
-
-**Step 3. Install the renderer.** This is the headless CLI that writes the file.
+**Step 1. Install the renderer.** The CLI that scaffolds, previews, and writes the
+file.
 
 ```sh
 dart pub global activate fluvie_cli
 ```
 
-**Step 4. Write the video.** One scene, a gradient, a title that fades in and pops.
-Hide Flutter's own `Animation` so Fluvie's wins. (This is lesson 01, verbatim.)
+**Step 2. Scaffold the project.** A composition, an assets folder, a pubspec. No
+app, no harness, no registry, no platform directories.
+
+```sh
+fluvie init --dir my_promo
+cd my_promo && flutter pub get
+```
+
+**Step 3. Write the video.** One scene, a gradient, a title that fades in and pops.
+Hide Flutter's own `Animation` so Fluvie's wins. The file exposes a top-level
+`Video build()`: that is the one contract `preview` and `render` look for.
 
 ```dart
 import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
-Video lesson01Video() {
+Video build() {
   return Video(
     size: VideoSize.square,
     poster: 1.seconds,
@@ -534,15 +527,21 @@ Video lesson01Video() {
 }
 ```
 
-**Step 5. Preview, then render.** Run the app and scrub it live. When it looks
-right, render the MP4.
+**Step 4. Watch it live.** Hot reload. Edit the file, save, watch it redraw. There
+is no app to run.
 
 ```sh
-fluvie render hello --out build/hello.mp4
+fluvie preview ./lib/example_video.dart
 ```
 
-**The payoff (final card).** Change the data and render again. The cache reuses the
-rest. That is the whole point.
+**Step 5. Render it.** When it looks right, write the MP4. No display needed.
+
+```sh
+fluvie render ./lib/example_video.dart --out promo.mp4
+```
+
+**The payoff (final card).** Change the data, run the render, ship the file. Your
+video is a build artifact now. That is the whole point.
 
 CTAs under the call sheet: "Read the full guide" to installation, "Your first
 video" to your-first-video, and a quiet "Skip setup, scrub it live" to the demo.

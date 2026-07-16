@@ -97,6 +97,35 @@ Fluvie maps the composition frame to a source frame by flooring, so a slow
 source under a fast composition holds frames instead of skipping. The trim
 bounds are exact: a clip never reads past its window.
 
+### Transparent clips
+
+A WebM/VP9 clip with an alpha channel composites over whatever is behind it, so
+you can drop a cut-out subject straight onto a background. Point `Clip.asset` at
+the `.webm` the way you would at an `.mp4`; nothing else changes.
+
+Two facts about the format are handled for you.
+
+WebM stores no frame count and no per-stream duration, so a plain probe reports
+neither. Fluvie runs a second `-count_frames` pass to get the exact count, and
+falls back to duration times frame rate if that pass reports nothing. The extra
+pass decodes every video packet, so it runs only for a container that stored no
+count of its own. An MP4 never pays it.
+
+VP9 stores alpha as a second coded layer that only the `libvpx-vp9` decoder
+reads. FFmpeg's native `vp9` decoder silently drops it, and the clip composites
+over black. Fluvie selects `libvpx-vp9` for a VP9 stream tagged `ALPHA_MODE=1`;
+an opaque VP9 clip stays on the native decoder, which is much faster.
+
+Export a transparent clip with alpha intact, or the layer will not be there to
+read:
+
+```sh
+ffmpeg -i in.mov -c:v libvpx-vp9 -pix_fmt yuva420p out.webm
+```
+
+For a transparent clip, use VP9/WebM or ProRes. H.264 cannot carry alpha, so an
+`.mp4` never composites over what is behind it.
+
 ## Pre-resolution
 
 The reason media never pops in is the pre-resolve pass. Before frame 0, Fluvie
@@ -109,6 +138,8 @@ That is what makes a render reproducible. Same sources in, same frames out.
 
 ## Where to next
 
+- [Live playback](../advanced/live-playback.md): `PreviewMediaScope`, which runs
+  that same pre-pass in a preview so your clips play while you author them.
 - [Text and typography](text-and-typography.md): `Text`, `Typewriter`, and
   `Counter`, the other elements you compose with media.
 - [Scenes and transitions](scenes-and-transitions.md): the scene-level shared

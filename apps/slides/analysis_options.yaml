@@ -1,0 +1,7 @@
+# The slides app: root strictness + the custom_lint plugin. The app is a thin
+# shell around fluvie_presenter, so the library-grade rules cost nothing.
+include: ../../analysis_options.yaml
+
+analyzer:
+  plugins:
+    - custom_lint

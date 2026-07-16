@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:fluvie_cli/src/init_new_project.dart' show packageNameFor;
 import 'package:fluvie_cli/src/init_support.dart';
 import 'package:test/test.dart';
 
@@ -17,53 +16,30 @@ void main() {
     });
   });
 
-  group('namesFor', () {
-    test('default starter name', () {
-      expect(namesFor('starter'), (
-        key: 'starter',
-        functionName: 'starterVideo',
-        fileName: 'starter.dart',
-      ));
+  group('compositionSlug', () {
+    test('a single lowercase word is already a slug', () {
+      expect(compositionSlug('starter'), 'starter');
     });
 
-    test('multi-word name becomes snake key and camel function', () {
-      expect(namesFor('Intro Clip'), (
-        key: 'intro_clip',
-        functionName: 'introClipVideo',
-        fileName: 'intro_clip.dart',
-      ));
+    test('a multi-word name folds to a snake_case slug', () {
+      expect(compositionSlug('Intro Clip'), 'intro_clip');
     });
 
-    test('a leading digit is prefixed so the identifier is valid', () {
-      final names = namesFor('123 go');
-      expect(names.functionName, 'v123GoVideo');
-      expect(names.key, '123_go');
+    test('every non-alphanumeric run folds to one underscore', () {
+      expect(compositionSlug('Hero  --  Shot!'), 'hero_shot');
+      expect(compositionSlug(r'a/b\c.d'), 'a_b_c_d');
     });
 
-    test('an empty name falls back to starter', () {
-      expect(namesFor('  '), (
-        key: 'starter',
-        functionName: 'starterVideo',
-        fileName: 'starter.dart',
-      ));
-    });
-  });
-
-  group('packageNameFor', () {
-    test('passes through a valid name', () {
-      expect(packageNameFor('my_fluvie_video'), 'my_fluvie_video');
+    test('a leading digit is prefixed so the slug names an importable library', () {
+      // The slug names a file under lib/, which other Dart imports by its
+      // package URI, and a library name cannot start with a digit.
+      expect(compositionSlug('123 go'), 'v123_go');
     });
 
-    test('sanitizes punctuation and case', () {
-      expect(packageNameFor('My-Cool.App'), 'my_cool_app');
-    });
-
-    test('prefixes a leading digit', () {
-      expect(packageNameFor('123app'), 'app_123app');
-    });
-
-    test('uses the last path segment', () {
-      expect(packageNameFor('/tmp/some/cool_clip'), 'cool_clip');
+    test('an empty name falls back to example_video', () {
+      expect(compositionSlug(''), 'example_video');
+      expect(compositionSlug('  '), 'example_video');
+      expect(compositionSlug('---'), 'example_video');
     });
   });
 
@@ -84,67 +60,6 @@ void main() {
       expect(file.readAsStringSync(), 'old');
       expect(writeFileIfAbsent(file, 'new', force: true), isTrue);
       expect(file.readAsStringSync(), 'new');
-    });
-  });
-
-  group('ensureDependency', () {
-    late File pubspec;
-    setUp(() {
-      final dir = Directory.systemTemp.createTempSync('fluvie_pub_');
-      addTearDown(() => dir.deleteSync(recursive: true));
-      pubspec = File('${dir.path}/pubspec.yaml')
-        ..writeAsStringSync('''
-name: demo
-dependencies:
-  flutter:
-    sdk: flutter
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-''');
-    });
-
-    test('adds a missing dependency and reports it', () {
-      expect(
-        ensureDependency(pubspec, section: 'dependencies', name: 'fluvie', version: '^0.1.0'),
-        isTrue,
-      );
-      expect(pubspec.readAsStringSync(), contains('fluvie: ^0.1.0'));
-    });
-
-    test('is a no-op when already present', () {
-      ensureDependency(pubspec, section: 'dependencies', name: 'fluvie', version: '^0.1.0');
-      expect(
-        ensureDependency(pubspec, section: 'dependencies', name: 'fluvie', version: '^0.2.0'),
-        isFalse,
-      );
-      expect(pubspec.readAsStringSync(), contains('fluvie: ^0.1.0'));
-      expect(pubspec.readAsStringSync(), isNot(contains('^0.2.0')));
-    });
-
-    test('adds a dev dependency', () {
-      expect(
-        ensureDependency(
-          pubspec,
-          section: 'dev_dependencies',
-          name: 'alchemist',
-          version: '^0.14.0',
-        ),
-        isTrue,
-      );
-      expect(pubspec.readAsStringSync(), contains('alchemist: ^0.14.0'));
-    });
-
-    test('creates the section when it does not exist', () {
-      final dir = Directory.systemTemp.createTempSync('fluvie_pub_nosection_');
-      addTearDown(() => dir.deleteSync(recursive: true));
-      final minimal = File('${dir.path}/pubspec.yaml')..writeAsStringSync('name: demo\n');
-
-      expect(
-        ensureDependency(minimal, section: 'dependencies', name: 'fluvie', version: '^0.1.0'),
-        isTrue,
-      );
-      expect(minimal.readAsStringSync(), contains('fluvie: ^0.1.0'));
     });
   });
 
@@ -179,6 +94,24 @@ dev_dependencies:
         'analyzer:\n  plugins:\n    - custom_lint\n',
       );
       expect(ensureCustomLintPlugin(options), isFalse);
+    });
+
+    test('adds a plugins list to an analyzer block that has none, keeping its keys', () {
+      options.writeAsStringSync('analyzer:\n  exclude:\n    - build/**\n');
+
+      expect(ensureCustomLintPlugin(options), isTrue);
+      final content = options.readAsStringSync();
+      expect(content, contains('custom_lint'));
+      expect(content, contains('build/**'), reason: 'the existing analyzer keys must survive');
+    });
+
+    test('appends to an existing plugins list rather than replacing it', () {
+      options.writeAsStringSync('analyzer:\n  plugins:\n    - other_lint\n');
+
+      expect(ensureCustomLintPlugin(options), isTrue);
+      final content = options.readAsStringSync();
+      expect(content, contains('custom_lint'));
+      expect(content, contains('other_lint'), reason: 'another plugin must not be dropped');
     });
   });
 }

@@ -7,6 +7,7 @@ import 'package:fluvie_cli/src/export_flags.dart';
 import 'package:fluvie_cli/src/ffmpeg/ffmpeg_provisioner.dart' show ProvisionLog;
 import 'package:fluvie_cli/src/ffmpeg_gate.dart';
 import 'package:fluvie_cli/src/process_runner.dart';
+import 'package:fluvie_cli/src/stage_harness.dart';
 
 /// Adds the options shared by `render`, `generate`, and `edit` to [parser].
 void addSharedRenderOptions(ArgParser parser) => parser
@@ -99,6 +100,7 @@ Future<int> runRenderPipeline({
   required StringSink out,
   required StringSink err,
   String harnessPath = 'test/render/capture_harness_test.dart',
+  StagedHarness Function(String projectDir)? stage,
   Map<String, String>? environment,
   void Function(StringSink out) report = _noReport,
   FfmpegResolver resolveFfmpeg = ensureFfmpeg,
@@ -113,6 +115,7 @@ Future<int> runRenderPipeline({
     log: out.writeln,
   );
   final projectDir = resolveProjectDir(project: options.projectDir);
+  final staged = stage?.call(projectDir);
   final sandbox = await createSandbox();
   try {
     await runCapture(
@@ -128,9 +131,13 @@ Future<int> runRenderPipeline({
       quality: flags.quality,
       format: flags.format,
       poster: flags.poster,
-      harnessPath: harnessPath,
+      harnessPath: staged?.harnessPath ?? harnessPath,
       extraDefines: extraDefines,
-      environment: environment,
+      // The capture extracts a clip's frames itself, in the test subprocess, so
+      // it needs the gate-resolved ffmpeg on PATH too — not just the encode,
+      // which the CLI spawns directly. Without this a downloaded (cache-only)
+      // ffmpeg encodes fine while every Clip fails to decode.
+      environment: _withFfmpegOnPath(environment, ffmpeg),
       err: err,
     );
     final output = await runEncode(
@@ -143,12 +150,28 @@ Future<int> runRenderPipeline({
     report(out);
     return 0;
   } finally {
+    staged?.cleanup();
     if (options.keepTemp) {
       err.writeln('Keeping render sandbox at ${sandbox.path}');
     } else if (sandbox.existsSync()) {
       await sandbox.delete(recursive: true);
     }
   }
+}
+
+/// [environment] with [ffmpeg]'s directory prepended to `PATH`, so the capture
+/// subprocess resolves the same binary the gate did.
+///
+/// A bare `ffmpeg` (already on PATH) needs no entry, and prepending rather than
+/// replacing keeps the rest of the user's PATH intact.
+Map<String, String>? _withFfmpegOnPath(Map<String, String>? environment, String ffmpeg) {
+  if (!ffmpeg.contains(Platform.pathSeparator)) return environment;
+  final dir = File(ffmpeg).parent.path;
+  final path = Platform.environment['PATH'] ?? '';
+  return {
+    ...?environment,
+    'PATH': path.isEmpty ? dir : '$dir${Platform.isWindows ? ';' : ':'}$path',
+  };
 }
 
 /// The [ArgResults]-driven adapter the CLI commands call: reads the pipeline
@@ -164,6 +187,9 @@ Future<int> captureThenEncode({
   required Map<String, String> extraDefines,
   required StringSink out,
   required StringSink err,
+  String? projectDirOverride,
+  bool? noCacheOverride,
+  StagedHarness Function(String projectDir)? stage,
   void Function(StringSink out) report = _noReport,
   FfmpegResolver resolveFfmpeg = ensureFfmpeg,
 }) => runRenderPipeline(
@@ -171,8 +197,8 @@ Future<int> captureThenEncode({
   createSandbox: createSandbox,
   options: (
     ffmpegBinary: args.option('ffmpeg'),
-    projectDir: args.option('project'),
-    noCache: args.flag('no-cache'),
+    projectDir: projectDirOverride ?? args.option('project'),
+    noCache: noCacheOverride ?? args.flag('no-cache'),
     noDownload: args.flag('no-download'),
     enableImpeller: args.flag('enable-impeller'),
     verbose: args.flag('verbose'),
@@ -183,6 +209,7 @@ Future<int> captureThenEncode({
   frames: frames,
   flags: flags,
   extraDefines: extraDefines,
+  stage: stage,
   out: out,
   err: err,
   report: report,

@@ -12,14 +12,16 @@ abstract interface class FrameExtractionService {
   ///
   /// The caller pins the output size (from a prior probe) so the returned
   /// [RawFrame] always holds `width * height * 4` bytes — deterministic and
-  /// directly compositable. Throws a `FluvieRenderException` (or its
-  /// `FluvieEncodeException` subtype) when the source or frame cannot be
-  /// extracted.
+  /// directly compositable. Pass [decoder] to name the decoder the source needs
+  /// (`libvpx-vp9` for VP9 with alpha); leave it null to let the backend pick.
+  /// Throws a `FluvieRenderException` (or its `FluvieEncodeException` subtype)
+  /// when the source or frame cannot be extracted.
   Future<RawFrame> extractFrame(
     Uri source,
     int frameIndex, {
     required int width,
     required int height,
+    String? decoder,
   });
 
   /// The decoded pixels of [source] at each index in [frameIndices], keyed by
@@ -28,10 +30,13 @@ abstract interface class FrameExtractionService {
   /// The ffmpeg service extracts each via [extractFrame]; a platform decoder
   /// (WebCodecs, `MediaCodec`, AVFoundation) overrides this with a single
   /// forward-decode pass, because seeking to a keyframe per frame is far slower.
+  /// [decoder] carries the same meaning as on [extractFrame]; a backend that
+  /// does not choose its decoder by name ignores it.
   Future<Map<int, RawFrame>> extractFrames(
     Uri source,
     Iterable<int> frameIndices, {
     required int width,
     required int height,
+    String? decoder,
   });
 }

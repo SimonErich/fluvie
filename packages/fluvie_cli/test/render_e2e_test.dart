@@ -19,6 +19,26 @@ const String _lesson05Path = '/tmp/fluvie_demo_test/05_images_and_clips.mp4';
 const String _lesson12Path = '/tmp/fluvie_demo_test/12_the_kitchen_sink.mp4';
 const String _gifPath = '/tmp/fluvie_demo_test/demo.gif';
 const String _sequenceDir = '/tmp/fluvie_demo_test/frames';
+const String _fileTargetProject = '/tmp/fluvie_demo_test/file_target';
+
+/// The whole of a single-file Fluvie project: one composition, no registry.
+const String _fileComposition = '''
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
+import 'package:fluvie/fluvie.dart';
+
+Video build() => Video(
+  width: 64,
+  height: 64,
+  fps: 12,
+  scenes: [
+    Scene(
+      duration: Time.frames(6),
+      background: Background.color(const Color(0xFF102030)),
+      children: const [Text('hi', style: TextStyle(color: Colors.white, fontSize: 12))],
+    ),
+  ],
+);
+''';
 
 Future<ProcessResult> _renderKey(String key, String outPath, List<String> extra) =>
     Process.run('dart', [
@@ -26,6 +46,19 @@ Future<ProcessResult> _renderKey(String key, String outPath, List<String> extra)
       'bin/fluvie.dart',
       'render',
       key,
+      '--out',
+      outPath,
+      '--verbose',
+      ...extra,
+    ]);
+
+/// Renders a composition FILE (the single-file flow), rather than a registry key.
+Future<ProcessResult> _renderFile(String path, String outPath, List<String> extra) =>
+    Process.run('dart', [
+      'run',
+      'bin/fluvie.dart',
+      'render',
+      path,
       '--out',
       outPath,
       '--verbose',
@@ -67,6 +100,78 @@ void main() {
     final outDir = Directory('/tmp/fluvie_demo_test');
     if (outDir.existsSync()) outDir.deleteSync(recursive: true);
     outDir.createSync(recursive: true);
+  });
+
+  test('fluvie render <file.dart>: the single-file flow, no registry (SINGLE-FILE)', () async {
+    // The headline of the single-file CLI: a project is a composition file, an
+    // assets/ folder and a pubspec. There is no registry, no committed harness
+    // and no app. The CLI stages a harness that statically imports the
+    // composition and drives the same capture the keyed path does.
+    final project = Directory(_fileTargetProject)..createSync(recursive: true);
+    File('${project.path}/pubspec.yaml').writeAsStringSync('''
+name: e2e_clip
+publish_to: none
+version: 1.0.0
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fluvie:
+    path: ${Directory.current.parent.path}/fluvie
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  alchemist: ^0.14.0
+''');
+    File('${project.path}/lib/example_video.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(_fileComposition);
+
+    final got = await Process.run('flutter', const [
+      'pub',
+      'get',
+    ], workingDirectory: project.path);
+    expect(got.exitCode, 0, reason: '${got.stdout}\n${got.stderr}');
+
+    const outPath = '$_fileTargetProject/clip.mp4';
+    final result = await _renderFile(
+      '$_fileTargetProject/lib/example_video.dart',
+      outPath,
+      const ['--no-cache'],
+    );
+    expect(result.exitCode, 0, reason: _combined(result));
+
+    // ffprobe verifies the composition really reached an encoded file.
+    final report = await _probe(outPath);
+    final stream = (report['streams']! as List<Object?>).single! as Map<String, Object?>;
+    expect(stream['codec_name'], 'h264');
+    expect(stream['width'], 64);
+    expect(stream['height'], 64);
+    expect(stream['nb_frames'], '6');
+
+    // The harness is generated per render and never committed, so it cannot
+    // drift from the CLI that writes it. It survives the render so `flutter
+    // test`'s kernel cache hits on a re-render of the same target.
+    final harness = File('$_fileTargetProject/.fluvie/lib_example_video_dart/harness_test.dart');
+    expect(harness.existsSync(), isTrue);
+    // Imported by its package URI: a relative import would give the same file a
+    // second library identity, so its Video would not be the harness's Video.
+    expect(
+      harness.readAsStringSync(),
+      contains("import 'package:e2e_clip/example_video.dart' as target;"),
+    );
+
+    // A re-render works against the surviving staging directory.
+    final again = await _renderFile(
+      '$_fileTargetProject/lib/example_video.dart',
+      '$_fileTargetProject/clip2.mp4',
+      const ['--no-cache'],
+    );
+    expect(again.exitCode, 0, reason: _combined(again));
   });
 
   test('fluvie render demo: encode, probe, cache hits, --no-cache', () async {

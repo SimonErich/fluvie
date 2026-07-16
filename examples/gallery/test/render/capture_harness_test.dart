@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:alchemist/alchemist.dart' show loadFonts;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_example/render/ai_authoring.dart';
 import 'package:fluvie_example/render/composition_entry.dart';
 import 'package:fluvie_example/render/composition_registry.dart';

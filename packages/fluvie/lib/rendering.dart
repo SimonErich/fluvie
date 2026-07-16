@@ -60,10 +60,14 @@ export 'src/rendering/render_aspect.dart'
 export 'src/rendering/render_cleanup.dart' show runGuarded;
 export 'src/rendering/render_config.dart';
 export 'src/rendering/render_duration.dart' show frameCountFor;
+export 'src/rendering/render_options.dart'
+    show parseAspect, parseExportFormat, parsePosterTime, parseQuality, writeRenderProgress;
 export 'src/rendering/render_progress.dart' show RenderProgress, RenderProgressCallback;
 export 'src/rendering/render_service.dart';
 export 'src/rendering/render_stage.dart' show runStage;
 export 'src/rendering/render_template.dart' show renderTemplate;
 export 'src/rendering/render_to_sandbox.dart'
     show FrameEncoder, SandboxFramePump, SandboxMount, renderToSandbox;
+export 'src/rendering/render_video.dart'
+    show SetViewSize, ShellRunAsync, renderVideo, runAsyncDirectly;
 export 'src/rendering/video_renderer.dart' show VideoRenderer;

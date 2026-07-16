@@ -8,43 +8,87 @@ import 'package:fluvie_cli/src/process_runner.dart';
 /// CLI can surface a friendly error instead of the raw flutter-test tail.
 const String runCaptureUnknownKeyMarker = 'fluvie-unknown-key:';
 
-/// Locates the Flutter project hosting the capture harness.
+/// Locates the Flutter project a render runs inside.
 ///
-/// An explicit [project] is used verbatim. Otherwise the harness is
+/// An explicit [project] is used verbatim. Otherwise the project is
 /// auto-discovered by walking up from [cwd] (default: [Directory.current]),
-/// checking two layouts at each level:
+/// checking three layouts at each level:
 ///
-/// 1. a standalone project (for example one scaffolded by `fluvie init`) whose
-///    harness sits directly under its own `test/render/`,
+/// 1. a Fluvie project (its own `pubspec.yaml` depending on `fluvie`), which is
+///    what `fluvie init` scaffolds,
 /// 2. a sibling `example/` project (a package's bundled example), and
 /// 3. the Fluvie monorepo's gallery example under `examples/gallery`.
+///
+/// The probe is the pubspec, not a harness file: `flutter test` needs only a
+/// `pubspec.yaml` in its working directory, and the harness a render runs is
+/// generated per render rather than committed.
 ///
 /// So the CLI works from a scaffolded project root, from the repo root, and from
 /// inside `packages/fluvie_cli` alike.
 String resolveProjectDir({String? project, Directory? cwd}) {
   if (project != null) return project;
-  const harness = 'test/render/capture_harness_test.dart';
   var dir = (cwd ?? Directory.current).absolute;
   while (true) {
-    if (File('${dir.path}/$harness').existsSync()) return dir.path;
+    if (isFluvieProject(dir.path)) return dir.path;
     final example = '${dir.path}/example';
-    if (File('$example/$harness').existsSync()) return example;
+    if (isFluvieProject(example)) return example;
     // The Fluvie monorepo's gallery example lives one level deeper (the
     // examples/ restructure), so a render from the repo root finds it here.
     final gallery = '${dir.path}/examples/gallery';
-    if (File('$gallery/$harness').existsSync()) return gallery;
+    if (isFluvieProject(gallery)) return gallery;
     final parent = dir.parent;
     if (parent.path == dir.path) {
       throw const CliFailure(
-        'Could not find a Fluvie capture harness '
-        '(test/render/capture_harness_test.dart) in the working directory, a '
-        'nested "example" or "examples/gallery" project, or any parent. Run '
-        '`fluvie init` to scaffold a project, or pass --project pointing at the '
-        'Flutter project to capture from.',
+        'Could not find a Fluvie project (a pubspec.yaml depending on fluvie) '
+        'in the working directory, a nested "example" or "examples/gallery" '
+        'project, or any parent. Run `fluvie init` to scaffold one, or pass '
+        '--project pointing at the Flutter project to render from.',
       );
     }
     dir = parent;
   }
+}
+
+/// The top-level pubspec sections a `fluvie` dependency can be declared in.
+const Set<String> _dependencySections = {
+  'dependencies',
+  'dev_dependencies',
+  'dependency_overrides',
+};
+
+/// A top-level pubspec key (`dependencies:`, `executables:`, `name:`), which is
+/// what closes the previous section and opens the next.
+final RegExp _topLevelKey = RegExp(r'^([A-Za-z_][A-Za-z0-9_]*)\s*:');
+
+/// An indented `fluvie:` entry, the shape a dependency on `fluvie` takes.
+final RegExp _fluvieEntry = RegExp(r'^\s+fluvie\s*:');
+
+/// Whether [dir] holds a `pubspec.yaml` that depends on `fluvie`.
+///
+/// Read as text rather than parsed: this runs once per directory while walking
+/// up to the filesystem root, and a malformed pubspec somewhere above the
+/// project must not fail the walk before it reaches the real one.
+///
+/// The section is what makes an indented `fluvie:` a dependency, not the indent
+/// alone. The fluvie package's own `name: fluvie` sits at column 0 so the indent
+/// rules it out, but `fluvie_cli` declares an `executables:` entry that is also
+/// a bare indented `fluvie:`, and matching that would resolve every render run
+/// from `packages/fluvie_cli` to the pure-Dart CLI package itself instead of the
+/// gallery. Only a `dependencies`/`dev_dependencies`/`dependency_overrides`
+/// entry counts.
+bool isFluvieProject(String dir) {
+  final pubspec = File('$dir/pubspec.yaml');
+  if (!pubspec.existsSync()) return false;
+  var inDependencies = false;
+  for (final line in const LineSplitter().convert(pubspec.readAsStringSync())) {
+    final key = _topLevelKey.firstMatch(line);
+    if (key != null) {
+      inDependencies = _dependencySections.contains(key.group(1));
+      continue;
+    }
+    if (inDependencies && _fluvieEntry.hasMatch(line)) return true;
+  }
+  return false;
 }
 
 /// The exact `flutter` argument array driving one capture: the permanent
@@ -167,7 +211,7 @@ Future<void> runCapture({
     }
     throw CliFailure(
       'The capture step (flutter test in "$projectDir") failed with exit code '
-      '${result.exitCode}.\n${_tail(result.stdout)}\n${_tail(result.stderr)}',
+      '${result.exitCode}.\n${excerpt(result.stdout)}\n${excerpt(result.stderr)}',
     );
   }
 }
@@ -185,6 +229,20 @@ String? _unknownKeyMessage(String output) {
   return null;
 }
 
-/// Keeps the last 4 KiB of [output] for diagnostics.
-String _tail(String output) =>
-    output.length <= 4096 ? output : output.substring(output.length - 4096);
+/// Keeps the first and last 4 KiB of [output] for diagnostics, eliding the
+/// middle.
+///
+/// Both ends matter and for different reasons: a Dart compile error in the
+/// user's composition is printed FIRST and a tail-only excerpt would discard it
+/// (leaving the reader a stack trace for an exception they cannot see), while
+/// the test runner's verdict is printed LAST. Anything long enough to be cut is
+/// a stack trace, which is the least useful part.
+String excerpt(String output) {
+  const head = 4096;
+  const tail = 4096;
+  if (output.length <= head + tail) return output;
+  final elided = output.length - head - tail;
+  return '${output.substring(0, head)}\n'
+      '... [$elided characters elided] ...\n'
+      '${output.substring(output.length - tail)}';
+}

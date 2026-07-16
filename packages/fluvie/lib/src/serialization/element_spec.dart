@@ -1,7 +1,9 @@
 import 'package:flutter/widgets.dart' show Widget;
 import 'package:fluvie/src/core/errors/fluvie_spec_error.dart';
+import 'package:fluvie/src/core/placement.dart';
 import 'package:fluvie/src/serialization/anchor_table.dart';
 import 'package:fluvie/src/serialization/animation_spec.dart';
+import 'package:fluvie/src/serialization/codecs/placement_codec.dart';
 import 'package:fluvie/src/serialization/element_builder.dart';
 
 /// The element types the spec can build.
@@ -18,16 +20,20 @@ const Map<String, Set<String>> knownElementProps = {
   'Counter': {'to', 'from', 'reveal', 'style'},
 };
 
-/// The data form of one scene child: a `type`, its content `props`, an optional
+/// The data form of one scene child: a `type`, its content `props`, an
+/// optional stable `id`, an optional `transform` placement, an optional
 /// `anchor` id, and the `animate` list applied through `.animate(...)`.
 ///
 /// [buildElement] turns it into a real widget.
 final class ElementSpec {
-  /// Creates an element spec of [type] with [props], an optional [anchor] id,
-  /// and an [animate] list.
+  /// Creates an element spec of [type] with [props], an optional stable
+  /// [id], an optional [placement], an optional [anchor] id, and an
+  /// [animate] list.
   ElementSpec({
     required this.type,
     this.props = const {},
+    this.id,
+    this.placement,
     this.anchor,
     this.animate = const [],
   });
@@ -63,22 +69,39 @@ final class ElementSpec {
       throw FluvieSpecError('Expected "animate" to be a list', path: [...path, 'animate']);
     }
     final anchorId = json['anchor'];
+    final id = json['id'];
+    final transform = json['transform'];
     final props = <String, Object?>{
       for (final entry in json.entries)
-        if (!_reserved.contains(entry.key)) entry.key: entry.value,
+        if (!reservedElementKeys.contains(entry.key)) entry.key: entry.value,
     };
     return ElementSpec(
       type: type,
       props: props,
+      id: id is String ? id : null,
+      placement: transform == null
+          ? null
+          : decodePlacement(transform, path: [...path, 'transform']),
       anchor: anchorId is String ? anchorId : null,
       animate: animate,
     );
   }
 
-  static const Set<String> _reserved = {'type', 'anchor', 'animate'};
+  /// The keys every element reads regardless of its type; everything else is
+  /// a content property owned by the type.
+  static const Set<String> reservedElementKeys = {'type', 'id', 'transform', 'anchor', 'animate'};
 
   /// The element type (`Text`, `Box`, `Image`, `Counter`).
   final String type;
+
+  /// A stable identity for tools (selection, timelines, shared elements), or
+  /// null when the document does not carry one. Fluvie preserves it verbatim
+  /// and never mints one — identity policy belongs to the editing tool.
+  final String? id;
+
+  /// Where the element sits on the canvas, or null for the scene's stack
+  /// placement (centered).
+  final Placement? placement;
 
   /// The element's content properties, stored verbatim.
   final Map<String, Object?> props;
@@ -89,9 +112,12 @@ final class ElementSpec {
   /// The animations applied to this element through `.animate(...)`.
   final List<AnimationSpec> animate;
 
-  /// The JSON form: the `type`, [props], the optional `anchor`, and `animate`.
+  /// The JSON form: the `type`, the optional `id` and `transform`, [props],
+  /// the optional `anchor`, and `animate`.
   Map<String, Object?> toJson() => {
     'type': type,
+    if (id != null) 'id': id,
+    if (placement != null) 'transform': encodePlacement(placement!),
     ...props,
     if (anchor != null) 'anchor': anchor,
     if (animate.isNotEmpty) 'animate': [for (final spec in animate) spec.toJson()],

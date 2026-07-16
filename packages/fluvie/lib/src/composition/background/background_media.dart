@@ -31,8 +31,9 @@ final class _ImageBackdrop extends _BackgroundSpec {
 /// `preResolveClip`, not decoded as an image), and per composition frame the
 /// painter resamples to a source frame and paints the cached `ui.Image`
 /// synchronously. A capture with no resolution is a typed failure naming the
-/// source; a live preview paints a placeholder. The backdrop fills the canvas
-/// with [BoxFit.cover] and plays the whole source (no trim).
+/// source; a live preview paints a placeholder unless the composition is wrapped
+/// in a `PreviewMediaScope`. The backdrop fills the canvas with [BoxFit.cover]
+/// and plays the whole source (no trim).
 final class _VideoBackdrop extends _BackgroundSpec {
   const _VideoBackdrop(this.source);
 

@@ -6,6 +6,8 @@ import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/rendering/platform/process_runner.dart';
 import 'package:riverpod/riverpod.dart';
 
+part 'video_probe_service_parse.dart';
+
 /// Reads the stream facts of an encoded video file (codec, size, frame
 /// count, duration) — what the determinism tests assert against.
 // ignore: one_member_abstracts — new-service seam; ffprobe is mocked behind its provider.
@@ -21,13 +23,18 @@ abstract interface class VideoProbeService {
 /// The probed facts of one video stream.
 final class VideoProbeResult {
   /// Creates a result from the probed stream and container facts.
+  ///
+  /// Pass [declaredFps] when the container declares a frame rate of its own; a
+  /// probe that cannot read one leaves it null and [fps] derives the rate.
   const VideoProbeResult({
     required this.codec,
     required this.width,
     required this.height,
     required this.nbFrames,
     required this.durationSeconds,
+    this.declaredFps,
     this.hasAudio = false,
+    this.hasAlpha = false,
   });
 
   /// The codec name of the first video stream (for example `h264`).
@@ -39,14 +46,44 @@ final class VideoProbeResult {
   /// Stream height in pixels.
   final int height;
 
-  /// The container-reported frame count of the video stream.
+  /// The frame count of the video stream.
+  ///
+  /// Containers that store no frame count (Matroska/WebM never do) have it
+  /// counted or derived by the probe, so this is always a real count.
   final int nbFrames;
 
-  /// The container-reported duration in seconds.
+  /// The duration in seconds.
   final double durationSeconds;
+
+  /// The frame rate the container declares, or null when it declares none or
+  /// declares it unknown (`0/0`). Read [fps] instead of this: it falls back to
+  /// the derived rate.
+  final double? declaredFps;
+
+  /// The stream's frame rate: the declared rate when there is one, else the
+  /// frame count over the duration.
+  ///
+  /// Declared wins because the derived rate inherits every inaccuracy in the
+  /// duration. A WebM's duration is the container's (it stores no per-stream
+  /// one), which spans the audio tail: a true-30fps clip whose audio runs
+  /// 17ms past its video derives as 29.86fps and resamples to the wrong source
+  /// frames. The rate is a rational for the same reason, so NTSC's 30000/1001
+  /// stays 29.97 rather than rounding to 30.
+  double get fps {
+    final declared = declaredFps;
+    if (declared != null && declared > 0) return declared;
+    return durationSeconds > 0 ? nbFrames / durationSeconds : nbFrames.toDouble();
+  }
 
   /// Whether the file carries at least one audio stream.
   final bool hasAudio;
+
+  /// Whether the video stream carries a coded alpha layer.
+  ///
+  /// Matroska/WebM flags this with the `ALPHA_MODE` stream tag. VP9 codes alpha
+  /// as a second layer that only the `libvpx-vp9` decoder reads, so the clip
+  /// path selects that decoder when this is true.
+  final bool hasAlpha;
 }
 
 /// The real [VideoProbeService]: spawns `ffprobe` through a [ProcessRunner]
@@ -84,76 +121,6 @@ final class FfprobeVideoProbeService implements VideoProbeService {
       );
     }
     return _parse(result.stdout, filePath);
-  }
-
-  static VideoProbeResult _parse(String stdout, String filePath) {
-    final Object? decoded;
-    try {
-      decoded = jsonDecode(stdout);
-    } on FormatException catch (error) {
-      throw FluvieRenderException(
-        'ffprobe produced unparsable JSON for "$filePath": ${error.message}',
-      );
-    }
-    if (decoded is! Map<String, Object?>) {
-      throw FluvieRenderException('ffprobe produced no JSON object for "$filePath".');
-    }
-    final streams = decoded['streams'];
-    final video = streams is List<Object?>
-        ? streams.whereType<Map<String, Object?>>().firstWhere(
-            (s) => s['codec_type'] == 'video',
-            orElse: () => const {},
-          )
-        : const <String, Object?>{};
-    final hasAudio =
-        streams is List<Object?> &&
-        streams.whereType<Map<String, Object?>>().any((s) => s['codec_type'] == 'audio');
-    final format = decoded['format'];
-    final duration = format is Map<String, Object?> ? format['duration'] : null;
-    final codec = video['codec_name'];
-    final width = video['width'];
-    final height = video['height'];
-    final nbFrames = video['nb_frames'];
-    if (codec is! String ||
-        width is! int ||
-        height is! int ||
-        nbFrames is! String ||
-        duration is! String) {
-      throw FluvieRenderException(
-        'ffprobe report for "$filePath" is missing video-stream fields '
-        '(codec_name/width/height/nb_frames/duration).',
-      );
-    }
-    return VideoProbeResult(
-      codec: codec,
-      width: width,
-      height: height,
-      nbFrames: _parseNumeric(nbFrames, field: 'nb_frames', parse: int.parse, filePath: filePath),
-      durationSeconds: _parseNumeric(
-        duration,
-        field: 'duration',
-        parse: double.parse,
-        filePath: filePath,
-      ),
-      hasAudio: hasAudio,
-    );
-  }
-
-  /// Parses a numeric ffprobe string field, surfacing garbage as a
-  /// [FluvieRenderException] naming [field] instead of a raw [FormatException].
-  static T _parseNumeric<T>(
-    String raw, {
-    required String field,
-    required T Function(String) parse,
-    required String filePath,
-  }) {
-    try {
-      return parse(raw);
-    } on FormatException {
-      throw FluvieRenderException(
-        'ffprobe reported a non-numeric $field ("$raw") for "$filePath".',
-      );
-    }
   }
 }
 

@@ -6,6 +6,7 @@ import 'package:fluvie/src/core/errors/fluvie_spec_error.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/elements/counter.dart';
 import 'package:fluvie/src/elements/image.dart';
+import 'package:fluvie/src/elements/placed.dart';
 import 'package:fluvie/src/serialization/anchor_table.dart';
 import 'package:fluvie/src/serialization/animation_builder.dart';
 import 'package:fluvie/src/serialization/codecs/color_codec.dart';
@@ -15,14 +16,19 @@ import 'package:fluvie/src/serialization/codecs/time_codec.dart';
 import 'package:fluvie/src/serialization/element_spec.dart';
 
 /// Builds a real widget from an [ElementSpec], wrapping it in `.animate(...)`
-/// when it has animations or an anchor.
+/// when it has animations or an anchor, and in [Placed] when it carries a
+/// `transform` — so animations play relative to the element's placed home.
 Widget buildElement(ElementSpec spec, AnchorTable anchors) {
   final base = _base(spec);
   final animations = <Animation>[for (final animation in spec.animate) buildAnimation(animation)];
   final anchorId = spec.anchor;
   final anchor = anchorId == null ? null : anchors.resolve(anchorId);
-  if (animations.isEmpty && anchor == null) return base;
-  return base.animate(animations, anchor: anchor);
+  final animated = animations.isEmpty && anchor == null
+      ? base
+      : base.animate(animations, anchor: anchor);
+  final placement = spec.placement;
+  if (placement == null) return animated;
+  return Placed(placement: placement, child: animated);
 }
 
 Widget _base(ElementSpec spec) {

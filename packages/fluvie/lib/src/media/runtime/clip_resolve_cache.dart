@@ -56,6 +56,18 @@ mixin ClipResolveCache on ImageResolveCache {
   /// default covers dense collages with room to spare.
   int get clipWindowCapacity => 16;
 
+  /// The longest side a clip's raster is decoded at in **decode-all mode**, or
+  /// null (the default) to decode at the source's own resolution.
+  ///
+  /// Decode-all holds every planned frame at once (~8.3 MB per full-HD frame),
+  /// so a live preview sets a bound and a render leaves it null;
+  /// `fluvie_mobile_encoder`'s probe caps the same way for the same reason. It
+  /// never touches the cached [ClipMetadata], which keeps the source's own facts
+  /// so paint can recover the clip's true layout size. Streaming mode ignores it
+  /// (its window already bounds memory, and its store's rasters must match the
+  /// metadata to decode back).
+  int? get maxClipDecodeEdge => null;
+
   /// Frames extracted per store round-trip in streaming mode — small, so the
   /// extraction never holds a whole clip's frames in memory at once.
   static const int _extractChunk = 8;
@@ -74,15 +86,51 @@ mixin ClipResolveCache on ImageResolveCache {
 
   /// Returns the [ClipMetadata] for [source], probing and caching it on the
   /// first call. Safe to call repeatedly: the probe runs once.
+  ///
+  /// The cached metadata is always the source's own, never the decode bound's:
+  /// paint reads these dimensions to recover the clip's true layout size.
   Future<ClipMetadata> resolveClipMeta(MediaSource source) async {
     final cached = clipMeta[source];
     if (cached != null) return cached;
     return clipMeta[source] = await probeClipSource(source);
   }
 
+  /// [meta] with its dimensions scaled down to fit [maxClipDecodeEdge] (keeping
+  /// aspect, rounding each side to an even number decoders accept, never
+  /// upscaling) — what the extractor decodes at. Unchanged when there is no
+  /// bound or the source already fits.
+  ///
+  /// Only the dimensions move: fps, frame count, and the audio flag are probed
+  /// facts the resampler, trim bounds, and audio collector read.
+  ClipMetadata _boundedForDecode(ClipMetadata meta) {
+    final bound = maxClipDecodeEdge;
+    assert(bound == null || bound > 0, 'maxClipDecodeEdge must be positive; use null for no bound');
+    if (bound == null || bound <= 0 || meta.width <= 0 || meta.height <= 0) return meta;
+    final longEdge = math.max(meta.width, meta.height);
+    if (longEdge <= bound) return meta;
+    final scale = bound / longEdge;
+    int even(int value) {
+      final scaled = (value * scale).round();
+      return scaled.isOdd ? scaled - 1 : scaled;
+    }
+
+    return (
+      fps: meta.fps,
+      frameCount: meta.frameCount,
+      width: math.max(2, even(meta.width)),
+      height: math.max(2, even(meta.height)),
+      hasAudio: meta.hasAudio,
+    );
+  }
+
   /// Resolves [sourceFrames] of [source]: probes if needed, then in streaming
   /// mode extracts the missing frames in small chunks into the store, or in
-  /// decode-all mode decodes them up front.
+  /// decode-all mode decodes them up front at the [maxClipDecodeEdge] bound.
+  ///
+  /// The bound applies to decode-all only. Streaming's window already bounds its
+  /// memory, and its store keeps raw bytes whose dimensions are read back from
+  /// the metadata — so a bound there would decode the stored rasters at the
+  /// wrong size.
   Future<void> resolveClipFrames(MediaSource source, Iterable<int> sourceFrames) async {
     final meta = await resolveClipMeta(source);
     final store = clipFrameStore;
@@ -93,7 +141,7 @@ mixin ClipResolveCache on ImageResolveCache {
           if (!frames.containsKey(i)) i,
       ];
       if (missing.isEmpty) return;
-      final extracted = await extractClipFrames(source, missing, meta);
+      final extracted = await extractClipFrames(source, missing, _boundedForDecode(meta));
       for (final entry in extracted.entries) {
         frames[entry.key] = await _decodeRawFrame(source, entry.value);
       }

@@ -1,6 +1,6 @@
 name: fluvie_web_encoder
 description: "Render Fluvie videos to MP4 fully in the browser with ffmpeg.wasm. Opt-in, so apps that only use the render API or mobile encoders stay light."
-version: 0.2.0
+version: 0.3.0
 repository: https://github.com/SimonErich/fluvie/tree/main/packages/fluvie_web_encoder
 homepage: https://github.com/SimonErich/fluvie
 issue_tracker: https://github.com/SimonErich/fluvie/issues
@@ -24,7 +24,7 @@ dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
-  fluvie: ^0.2.0
+  fluvie: ^0.3.0
   http: ^1.5.0
   web: ^1.1.0
 

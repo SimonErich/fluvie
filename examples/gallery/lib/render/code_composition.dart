@@ -1,30 +1,9 @@
-import 'package:flutter/widgets.dart' show Directionality, TextDirection;
 import 'package:fluvie/fluvie.dart';
-import 'package:fluvie/rendering.dart';
 import 'package:fluvie_example/render/composition_entry.dart';
 
 /// Builds a [CompositionEntry] from a user-supplied `Video build()` [builder].
-///
-/// The geometry and fps are read off a built [Video] (`width`/`height`/`fps`),
-/// the frame count from `totalFrames`, and the media sources from a static walk
-/// of its scenes — so a Playground snippet pre-resolves `Image`/`Clip` like any
-/// other composition. [builder] is stored as [CompositionEntry.build], so the
-/// capture loop rebuilds a fresh [Video] each frame (the frame is the clock).
-CompositionEntry compositionFromVideo(Video Function() builder) {
-  final video = builder();
-  return CompositionEntry(
-    key: 'code',
-    width: video.width,
-    height: video.height,
-    fps: video.fps,
-    frameCount: video.totalFrames,
-    // The capture harness mounts no app, so supply a left-to-right Directionality
-    // (Text throws debugCheckHasDirectionality without one) — like every other
-    // composition entry.
-    build: () => Directionality(textDirection: TextDirection.ltr, child: builder()),
-    mediaSources: collectMediaSources(video.scenes),
-  );
-}
+CompositionEntry compositionFromVideo(Video Function() builder) =>
+    CompositionEntry(key: 'code', video: builder);
 
 /// The Dart source of a generated, per-render Playground capture harness.
 ///
@@ -55,6 +34,7 @@ import 'dart:io';
 
 import 'package:alchemist/alchemist.dart' show loadFonts;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_example/render/code_composition.dart';
 
 import '$harnessHelperDir/render_harness.dart';

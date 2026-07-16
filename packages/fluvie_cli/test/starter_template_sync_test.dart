@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fluvie_cli/src/templates/starter_composition_template.dart';
+import 'package:fluvie_cli/src/templates/project_scaffold_template.dart';
 import 'package:test/test.dart';
 
 /// The starter the CLI scaffolds must stay in step with the compiled,

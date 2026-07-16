@@ -3,15 +3,15 @@
 Fluvie turns a Flutter widget tree into a real MP4. You write the video as
 code, preview it like an app, and render it with the Fluvie CLI and FFmpeg.
 
-In a hurry? `fluvie init` scaffolds a runnable starter for you, in a new project
-or alongside an existing one. See [Start a project](start-a-project.md). To set
-it up by hand, read on.
+In a hurry? `fluvie init` scaffolds a project for you: a composition file, an
+`assets/` folder, and a pubspec. See [Start a project](start-a-project.md). To
+set it up by hand, read on.
 
 Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  fluvie: ^0.2.0
+  fluvie: ^0.3.0
 ```
 
 Then fetch it:
@@ -47,21 +47,24 @@ from the repo root so its render button can find the CLI.
 
 ## Previewing on the desktop
 
-You preview a video by running it like a normal Flutter app. Use Impeller,
-Flutter's current renderer, so shaders, grain, and blends look the way the
-rendered video does:
+`fluvie preview` runs a composition live, with hot reload:
 
 ```sh
-flutter run --enable-impeller
+fluvie preview ./lib/my_video.dart
 ```
 
-Rendering to a file does not need this. The headless render pipeline (the CLI,
-the API, and the Docker image) produces the final frames correctly on its own,
-including loading the real fonts so text never falls back to the boxy test font.
+It runs on your desktop by default, not the browser: a desktop preview decodes
+any clip through FFmpeg, while a browser can only decode what WebCodecs supports.
+Pass `-d chrome` for the browser, or `-d <device>` for a phone or an emulator.
+
+Rendering to a file does not need a preview. The headless render pipeline (the
+CLI, the API, and the Docker image) produces the final frames correctly on its
+own, including loading the real fonts so text never falls back to the boxy test
+font.
 
 ## Where to next
 
-- [Start a project](start-a-project.md): scaffold a runnable starter with `fluvie init`.
+- [Start a project](start-a-project.md): scaffold a project with `fluvie init`.
 - [Your first video](your-first-video.md): build and render lesson 01.
 - [Core concepts](core-concepts.md): the ideas behind every Fluvie video.
 - [Managing FFmpeg](../guides/managing-ffmpeg.md): how Fluvie finds, downloads, and pins FFmpeg.

@@ -68,12 +68,16 @@ Video helloVideo() => Video(
 
 ```sh
 dart pub global activate fluvie_cli
-fluvie init                            # scaffold a runnable starter (or add one to your app)
-fluvie render starter --out starter.mp4
+fluvie init --dir my_reel                          # a composition, an assets/ folder, a pubspec
+cd my_reel && flutter pub get
+fluvie preview ./lib/example_video.dart                # live, hot-reloading
+fluvie render ./lib/example_video.dart --out reel.mp4  # the file
 ```
 
-`fluvie init` writes a starter video in real Flutter code and wires everything to
-preview, render, and test it. You do not need to install FFmpeg: the first render
+A Fluvie project is a composition file, an `assets/` folder, and a pubspec. There
+is no app, no harness, and no registry: `preview` and `render` take the `.dart`
+file and generate whatever they need. The file exposes a top-level `Video build()`.
+You do not need to install FFmpeg: the first render
 downloads a pinned, checksum-verified build and caches it (run
 `fluvie ffmpeg install` to fetch it ahead of time, or point `--ffmpeg` /
 `FLUVIE_FFMPEG` at your own). The
@@ -293,20 +297,20 @@ Everything you can paint with Flutter, plus the things a video needs:
 **Text renders as solid white boxes.** That is Flutter's `Ahem` test font, which
 draws every glyph as a filled box, so each word looks like a bar. It means the
 real fonts were not loaded before the frames were captured. Fluvie's own render
-pipeline (the CLI, the API, and the Docker image) loads them for you. If you
-write your own capture harness, load the app fonts and set a real default font
-family before rendering (see `examples/gallery/test/render/`).
+pipeline (the CLI, the API, and the Docker image) loads them for you, including
+the harness it generates for each render. If you host `renderVideo` yourself,
+load the app fonts and pass `defaultFontFamily` before rendering.
 
-**Shaders, grain, or blends look off when you preview on the desktop.** Run with
+**Shaders, grain, or blends look off in the rendered file.** Capture with
 Impeller, Flutter's current renderer:
 
 ```sh
-flutter run --enable-impeller
+fluvie render ./lib/my_video.dart --out out.mp4 --enable-impeller
 ```
 
-Impeller draws fragment shaders and effects the way the encoded video does; the
-software preview can differ. This is about the live desktop preview only. The
-headless render pipeline produces the final frames correctly.
+The flag passes `--enable-impeller` to `flutter test`, so the capture rasterizes
+with Impeller instead of the default tester backend. An ordinary render does not
+need it; reach for it when a shader or a blend mode looks wrong.
 
 ## Contributing
 

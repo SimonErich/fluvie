@@ -41,6 +41,16 @@ void main() {
       expect(const Counter(to: 10), isA<Counter>());
     });
 
+    test('LivePlayer and LivePlaybackController are exported from the barrel', () {
+      final playback = LivePlaybackController(fps: 30);
+      addTearDown(playback.dispose);
+      expect(playback.state, LivePlaybackState.paused);
+      expect(
+        LivePlayer(controller: playback, child: const flutter.SizedBox.shrink()),
+        isA<LivePlayer>(),
+      );
+    });
+
     test('Timeline, LabelRef, and the String.label sugar are exported', () {
       final timeline = Timeline();
       expect(timeline, isA<TimelineSchedule>());

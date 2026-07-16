@@ -6,6 +6,72 @@ All notable changes to the Fluvie workspace. The format follows
 
 Per-package changelogs live next to each package.
 
+## [0.3.0] - 2026-07-15
+
+The single-file release. A Fluvie project is a composition file, an `assets/`
+folder, and a `pubspec.yaml`. Nothing else: no app, no `lib/main.dart`, no
+capture harness, no registry, no platform directories. The CLI takes the `.dart`
+file and generates whatever a render or a preview needs, per invocation. The
+authoring surface is untouched, so a `Video` written for 0.2 builds unchanged.
+The upgrade path lives in the
+[migration guide](documentation/reference/migration.md).
+
+### Added
+
+- **`fluvie preview <file.dart>`.** A live, hot-reloading preview. `-d <device>`
+  picks the device; the default is the host desktop, not the browser, because a
+  desktop preview decodes any clip through FFmpeg while a browser is limited to
+  what WebCodecs supports (no ProRes). The app is generated and cached in
+  `~/.cache/fluvie/preview/<hash>/`, outside the project.
+- **`fluvie render <file.dart> --out <file>`.** Renders a composition file
+  directly, generating the capture harness under `<project>/.fluvie/` per render.
+  `--entry <name>` names a function other than `build`; `--cache` opts into the
+  frame cache.
+- **`renderVideo()` on `package:fluvie/rendering.dart`.** The one capture entry a
+  host drives. It takes a `Video` and derives geometry, media, audio, captions,
+  and reactive audio from it; the host supplies only `pumpWidget`, `pumpFrame`,
+  `setViewSize`, and `runAsync`. `parseAspect`, `parseQuality`,
+  `parseExportFormat`, `parsePosterTime`, and `writeRenderProgress` are public
+  there too.
+
+### Changed
+
+- **BREAKING. `fluvie init` scaffolds a project, not an app.** It writes exactly
+  `pubspec.yaml`, `.gitignore`, `<name>.dart`, `assets/.gitkeep`, and
+  `analysis_options.yaml`; it no longer runs `flutter create`, no longer
+  scaffolds a harness or a registry, and is no longer interactive. Its flags are
+  now `--name`, `--dir`, and `--force`: `--path`, `--render` / `--no-render`, and
+  `--yes` / `-y` are gone.
+- **BREAKING. A composition file exposes a top-level `Video build()`.** That is
+  the contract `render` and `preview` call; `--entry` names another.
+- **The frame cache is off by default for a `.dart` target.** The render digest
+  keys on the config and the composition key, never on the composition itself, so
+  an edited file with the same size and frame count would replay stale frames.
+  Pass `--cache` to opt in. The key path is unchanged: the cache is on, and
+  `--no-cache` bypasses it.
+- **The `flutter: assets:` pubspec block is CLI-managed**, re-derived on every
+  render and preview. Flutter enumerates a declared asset directory
+  non-recursively, so an `assets/` entry alone silently misses
+  `assets/images/foo.png`; the CLI writes an entry for every subdirectory that
+  holds files.
+- `RENDER_PROJECT` now means a Fluvie project (a pubspec depending on `fluvie`)
+  rather than a project containing `test/render/capture_harness_test.dart`.
+
+### Fixed
+
+- **WebM/VP9 clips work, including alpha.** A `.webm` failed the probe because
+  Matroska stores no `nb_frames`; the count is now derived. VP9 alpha was silently
+  dropped because ffmpeg's default `vp9` decoder ignores the separate alpha layer;
+  `libvpx-vp9` is now selected for VP9 with alpha.
+- `fluvie_server`'s Playground no longer requires `examples/gallery` to exist on
+  the render host.
+
+### Compatibility
+
+An existing 0.2 project keeps working: `fluvie render <key>` is unchanged, and
+`resolveProjectDir` still finds a project by its pubspec, so a committed harness
+and registry render exactly as before.
+
 ## [0.2.0] - 2026-07-06
 
 The API restructuring release. One authoring barrel, one rendering barrel, one

@@ -1,0 +1,20 @@
+{
+  "fluvieSpec": 1,
+  "size": "square",
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "60f",
+      "children": [
+        {
+          "type": "Text",
+          "text": "hello",
+          "style": {
+            "color": "#FFFFFF",
+            "fontSize": 48
+          }
+        }
+      ]
+    }
+  ]
+}

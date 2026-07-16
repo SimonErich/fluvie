@@ -39,19 +39,27 @@ final class _MemoryClipFrameStore implements ClipFrameStore {
 /// metadata and 2x2 frames, counting probe and extract calls. Pass a `store`
 /// (and optional `windowCapacity`) to exercise the streaming decode-ahead path.
 final class _FakeClipCache with ImageResolveCache, ClipResolveCache {
-  _FakeClipCache(this._meta, {ClipFrameStore? store, int windowCapacity = 16})
+  _FakeClipCache(this._meta, {ClipFrameStore? store, int windowCapacity = 16, int? maxEdge})
     : clipFrameStore = store,
-      clipWindowCapacity = windowCapacity;
+      clipWindowCapacity = windowCapacity,
+      maxClipDecodeEdge = maxEdge;
 
   final ClipMetadata _meta;
   int probeCalls = 0;
   final extracted = <int>[];
+
+  /// The metadata the last `extractClipFrames` was asked to decode at, so a test
+  /// can prove the proxy bound reaches the extractor.
+  ClipMetadata? extractMeta;
 
   @override
   final ClipFrameStore? clipFrameStore;
 
   @override
   final int clipWindowCapacity;
+
+  @override
+  final int? maxClipDecodeEdge;
 
   // The clip path never touches the byte loader, so the image-cache seam can
   // stay unimplemented in this harness.
@@ -71,6 +79,7 @@ final class _FakeClipCache with ImageResolveCache, ClipResolveCache {
     ClipMetadata meta,
   ) async {
     extracted.addAll(sourceFrames);
+    extractMeta = meta;
     return {
       for (final i in sourceFrames)
         i: RawFrame(
@@ -87,7 +96,98 @@ final class _FakeClipCache with ImageResolveCache, ClipResolveCache {
 const _clip = MediaSource.asset('clip.mp4');
 const ClipMetadata _meta = (fps: 30.0, frameCount: 30, width: 2, height: 2, hasAudio: false);
 
+/// A full-HD source, the shape a proxy-bounded preview actually has to survive:
+/// decoded whole, 1920x1080 costs ~8.3 MB per frame.
+const ClipMetadata _hdMeta = (
+  fps: 30.0,
+  frameCount: 106,
+  width: 1920,
+  height: 1080,
+  hasAudio: true,
+);
+
 void main() {
+  group('proxy decode bound (maxClipDecodeEdge)', () {
+    test('the cached metadata keeps the source dimensions, bound or not', () async {
+      final bounded = _FakeClipCache(_hdMeta, maxEdge: 720);
+      final unbounded = _FakeClipCache(_hdMeta);
+
+      // Paint divides the raster's width by these to recover the clip's true
+      // layout size, so a bound must never reach them.
+      expect(await bounded.resolveClipMeta(_clip), _hdMeta);
+      expect(await unbounded.resolveClipMeta(_clip), _hdMeta);
+    });
+
+    test('the extractor decodes at the bounded size, keeping aspect and evenness', () async {
+      final cache = _FakeClipCache(_hdMeta, maxEdge: 720);
+
+      await cache.resolveClipFrames(_clip, [0]);
+
+      // 1920x1080 * (720/1920) = 720x405; 405 is odd, so it rounds down to 404.
+      expect(cache.extractMeta?.width, 720, reason: 'the bound is what saves the memory');
+      expect(cache.extractMeta?.height, 404);
+    });
+
+    test('bounds the portrait long edge too', () async {
+      final cache = _FakeClipCache(
+        (fps: 30.0, frameCount: 10, width: 1080, height: 1920, hasAudio: false),
+        maxEdge: 720,
+      );
+
+      await cache.resolveClipFrames(_clip, [0]);
+
+      expect(cache.extractMeta?.height, 720);
+      expect(cache.extractMeta?.width, 404);
+    });
+
+    test('no bound decodes at the source size — the render path', () async {
+      final cache = _FakeClipCache(_hdMeta);
+
+      await cache.resolveClipFrames(_clip, [0]);
+
+      expect(cache.extractMeta?.width, 1920);
+      expect(cache.extractMeta?.height, 1080);
+    });
+
+    test('never upscales a source already within the bound', () async {
+      final cache = _FakeClipCache(_meta, maxEdge: 720);
+
+      await cache.resolveClipFrames(_clip, [0]);
+
+      expect(cache.extractMeta?.width, 2);
+      expect(cache.extractMeta?.height, 2);
+    });
+
+    test('leaves fps, frameCount and hasAudio untouched when decoding bounded', () async {
+      final cache = _FakeClipCache(_hdMeta, maxEdge: 720);
+
+      await cache.resolveClipFrames(_clip, [0]);
+
+      expect(
+        cache.extractMeta?.fps,
+        30.0,
+        reason: 'the resampler reads fps; a proxy must not retime the clip',
+      );
+      expect(cache.extractMeta?.frameCount, 106, reason: 'trim bounds read frameCount');
+      expect(cache.extractMeta?.hasAudio, isTrue, reason: 'the audio collector reads hasAudio');
+    });
+
+    test('streaming mode ignores the bound: its store rasters must match the meta', () async {
+      final store = _MemoryClipFrameStore();
+      final cache = _FakeClipCache(_hdMeta, store: store, maxEdge: 720);
+
+      await cache.resolveClipFrames(_clip, [0]);
+
+      expect(
+        cache.extractMeta?.width,
+        1920,
+        reason:
+            'the streaming window is already memory-bounded; a bound here would '
+            'decode stored rasters at the wrong size',
+      );
+    });
+  });
+
   test('resolveClipMeta probes once and caches', () async {
     final cache = _FakeClipCache(_meta);
 

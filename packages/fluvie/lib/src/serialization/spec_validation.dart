@@ -1,5 +1,6 @@
 import 'package:fluvie/src/core/errors/fluvie_spec_error.dart';
 import 'package:fluvie/src/serialization/background_spec.dart';
+import 'package:fluvie/src/serialization/codecs/placement_codec.dart';
 import 'package:fluvie/src/serialization/element_spec.dart';
 import 'package:fluvie/src/serialization/scene_spec.dart';
 import 'package:fluvie/src/serialization/video_spec.dart';
@@ -28,7 +29,7 @@ final class FluvieSpecWarning {
 }
 
 /// The element keys [ElementSpec.fromJson] reserves; mirror of its private set.
-const Set<String> _reservedElementKeys = {'type', 'anchor', 'animate'};
+Set<String> get _reservedElementKeys => ElementSpec.reservedElementKeys;
 
 /// Text-style fields (the `decodeTextStyle` subset): the contents of a `"style"`
 /// object, also used to hint when one is mistakenly placed at the top level of a
@@ -59,6 +60,8 @@ const Set<String> _sourceFields = {'kind', 'value'};
 List<FluvieSpecWarning> unknownSpecProps(Map<String, Object?> json) {
   final warnings = <FluvieSpecWarning>[];
   _checkKeys(json, VideoSpec.knownKeys, 'the video', const [], warnings);
+  // The `editor` block is tool-owned and deliberately open; nothing inside
+  // it is Fluvie's to second-guess (and the digest ignores it anyway).
   final scenes = json['scenes'];
   if (scenes is! List) return warnings;
   for (var i = 0; i < scenes.length; i++) {
@@ -109,6 +112,7 @@ void _checkElement(Map<String, Object?> json, List<String> path, List<FluvieSpec
   }
   // The curated nested objects are closed shapes too: a typo inside style/size/
   // source is dropped by the codec, so check one level deeper.
+  _checkNested(json, 'transform', knownPlacementKeys, 'a transform', path, out);
   if (type == 'Text' || type == 'Counter') {
     _checkNested(json, 'style', _styleFields, 'a text style', path, out);
   } else if (type == 'Box') {

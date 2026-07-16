@@ -33,6 +33,8 @@ Map<String, Object?> _elementDef(String type) => {
   'required': ['type', ..._requiredElementProps[type] ?? const <String>{}],
   'properties': {
     'type': {'const': type},
+    'id': {'type': 'string'},
+    'transform': {r'$ref': r'#/$defs/transform'},
     'anchor': {'type': 'string'},
     'animate': {
       'type': 'array',

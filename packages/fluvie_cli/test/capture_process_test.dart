@@ -297,17 +297,91 @@ void main() {
     });
   });
 
+  group('isFluvieProject', () {
+    test('a pubspec whose dependencies include fluvie is a project', () {
+      final dir = tempDir('fluvie_cli_is_project_');
+      writeFluviePubspec(dir.path);
+
+      expect(isFluvieProject(dir.path), isTrue);
+    });
+
+    test('a directory without a pubspec is not a project', () {
+      expect(isFluvieProject(tempDir('fluvie_cli_no_pubspec_').path), isFalse);
+    });
+
+    test('a pubspec that does not depend on fluvie is not a project', () {
+      final dir = tempDir('fluvie_cli_no_dep_');
+      writePubspec(dir.path, '''
+name: some_app
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.0
+''');
+
+      expect(isFluvieProject(dir.path), isFalse);
+    });
+
+    test('the fluvie package itself is not a project (its name: sits at column 0)', () {
+      // The indent is what tells a `fluvie` dependency apart from the package
+      // that IS fluvie; without it the walk would stop at packages/fluvie.
+      final dir = tempDir('fluvie_cli_is_fluvie_');
+      writePubspec(dir.path, '''
+name: fluvie
+description: The library itself.
+dependencies:
+  flutter:
+    sdk: flutter
+''');
+
+      expect(isFluvieProject(dir.path), isFalse);
+    });
+
+    test('an indented fluvie: outside a dependency section is not a dependency', () {
+      // fluvie_cli's own pubspec declares `executables:\n  fluvie:`, which is an
+      // indented `fluvie:` that is not a dependency. Matching it would resolve
+      // every render run from packages/fluvie_cli to the CLI package itself, a
+      // pure-Dart package `flutter test` cannot run in.
+      final dir = tempDir('fluvie_cli_executables_');
+      writePubspec(dir.path, '''
+name: fluvie_cli
+executables:
+  fluvie:
+dependencies:
+  args: ^2.7.0
+''');
+
+      expect(isFluvieProject(dir.path), isFalse);
+    });
+
+    test('a fluvie dev_dependency or dependency_override counts', () {
+      final dev = tempDir('fluvie_cli_dev_dep_');
+      writePubspec(dev.path, '''
+name: some_app
+dev_dependencies:
+  fluvie: ^0.2.0
+''');
+      final override = tempDir('fluvie_cli_override_dep_');
+      writePubspec(override.path, '''
+name: some_app
+dependency_overrides:
+  fluvie:
+    path: ../fluvie
+''');
+
+      expect(isFluvieProject(dev.path), isTrue);
+      expect(isFluvieProject(override.path), isTrue);
+    });
+  });
+
   group('resolveProjectDir', () {
     test('an explicit --project is used verbatim', () {
       expect(resolveProjectDir(project: '/somewhere/app'), '/somewhere/app');
     });
 
     test('auto-discovers the example project walking up from cwd', () {
-      final root = Directory.systemTemp.createTempSync('fluvie_cli_project_');
-      addTearDown(() => root.deleteSync(recursive: true));
-      File(
-        '${root.path}/example/test/render/capture_harness_test.dart',
-      ).createSync(recursive: true);
+      final root = tempDir('fluvie_cli_project_');
+      writeFluviePubspec('${root.path}/example');
       final nested = Directory('${root.path}/packages/fluvie_cli')..createSync(recursive: true);
 
       expect(resolveProjectDir(cwd: nested), '${root.absolute.path}/example');
@@ -315,48 +389,96 @@ void main() {
     });
 
     test('auto-discovers the monorepo gallery under examples/gallery', () {
-      final root = Directory.systemTemp.createTempSync('fluvie_cli_gallery_');
-      addTearDown(() => root.deleteSync(recursive: true));
-      File(
-        '${root.path}/examples/gallery/test/render/capture_harness_test.dart',
-      ).createSync(recursive: true);
+      final root = tempDir('fluvie_cli_gallery_');
+      writeFluviePubspec('${root.path}/examples/gallery');
       final nested = Directory('${root.path}/packages/fluvie_cli')..createSync(recursive: true);
 
       expect(resolveProjectDir(cwd: nested), '${root.absolute.path}/examples/gallery');
       expect(resolveProjectDir(cwd: root), '${root.absolute.path}/examples/gallery');
     });
 
-    test('resolves a standalone project whose harness sits directly in it', () {
-      final root = Directory.systemTemp.createTempSync('fluvie_cli_standalone_');
-      addTearDown(() => root.deleteSync(recursive: true));
-      File(
-        '${root.path}/test/render/capture_harness_test.dart',
-      ).createSync(recursive: true);
+    test('resolves a project whose own pubspec depends on fluvie', () {
+      final root = tempDir('fluvie_cli_standalone_');
+      writeFluviePubspec(root.path);
       final lib = Directory('${root.path}/lib/videos')..createSync(recursive: true);
 
       expect(resolveProjectDir(cwd: root), root.absolute.path);
       expect(resolveProjectDir(cwd: lib), root.absolute.path);
     });
 
-    test('prefers a standalone harness over an "example" subproject in the same dir', () {
-      final root = Directory.systemTemp.createTempSync('fluvie_cli_both_');
-      addTearDown(() => root.deleteSync(recursive: true));
-      File('${root.path}/test/render/capture_harness_test.dart').createSync(recursive: true);
-      File(
-        '${root.path}/example/test/render/capture_harness_test.dart',
-      ).createSync(recursive: true);
+    test('prefers the project itself over an "example" subproject in the same dir', () {
+      final root = tempDir('fluvie_cli_both_');
+      writeFluviePubspec(root.path);
+      writeFluviePubspec('${root.path}/example');
 
       expect(resolveProjectDir(cwd: root), root.absolute.path);
     });
 
-    test('fails with a --project hint when no harness is found', () {
-      final empty = Directory.systemTemp.createTempSync('fluvie_cli_no_project_');
-      addTearDown(() => empty.deleteSync(recursive: true));
+    test('a pubspec without a fluvie dependency does not stop the walk', () {
+      // A plain package between the composition and the project (the shape of
+      // the fluvie monorepo, whose packages/ sit above examples/gallery) must be
+      // walked through, not resolved to.
+      final root = tempDir('fluvie_cli_walk_through_');
+      writeFluviePubspec('${root.path}/examples/gallery');
+      final plain = Directory('${root.path}/packages/some_pkg')..createSync(recursive: true);
+      writePubspec(plain.path, 'name: some_pkg\ndependencies:\n  args: ^2.7.0\n');
+
+      expect(resolveProjectDir(cwd: plain), '${root.absolute.path}/examples/gallery');
+    });
+
+    test('fails with a --project hint when no Fluvie project is found', () {
+      final empty = tempDir('fluvie_cli_no_project_');
 
       expect(
         () => resolveProjectDir(cwd: empty),
-        throwsA(isA<CliFailure>().having((e) => e.message, 'message', contains('--project'))),
+        throwsA(
+          isA<CliFailure>()
+              .having((e) => e.message, 'message', contains('--project'))
+              .having((e) => e.message, 'message', contains('pubspec.yaml depending on fluvie'))
+              .having((e) => e.message, 'message', contains('fluvie init')),
+        ),
       );
+    });
+  });
+
+  group('excerpt', () {
+    test('output that fits in the two 4 KiB ends passes through unchanged', () {
+      const short = 'a compile error\nand a verdict';
+      expect(excerpt(short), short);
+    });
+
+    test('output exactly at the 8 KiB budget is not elided', () {
+      final exact = 'x' * 8192;
+      expect(excerpt(exact), exact);
+    });
+
+    test('a long output keeps the head, where the Dart compile error is printed', () {
+      // The bug this fixes: a tail-only excerpt discarded the compile error in
+      // the user's composition and left the reader a stack trace for an
+      // exception they could not see.
+      final output = 'COMPILE ERROR: line 3\n${'stack frame\n' * 2000}';
+      final kept = excerpt(output);
+
+      expect(kept, startsWith('COMPILE ERROR: line 3'));
+      expect(kept, contains('characters elided'));
+    });
+
+    test('a long output keeps the tail, where the test runner verdict is printed', () {
+      final output = '${'stack frame\n' * 2000}VERDICT: Some tests failed.';
+      final kept = excerpt(output);
+
+      expect(kept, endsWith('VERDICT: Some tests failed.'));
+    });
+
+    test('keeps both ends and names how many characters it dropped', () {
+      final output = '${'H' * 5000}${'T' * 5000}';
+      final kept = excerpt(output);
+
+      expect(kept, startsWith('H' * 4096));
+      expect(kept, endsWith('T' * 4096));
+      expect(kept, contains('... [1808 characters elided] ...'));
+      // 4096 head + 4096 tail + the marker line, never the whole 10000.
+      expect(kept.length, lessThan(output.length));
     });
   });
 
@@ -364,3 +486,29 @@ void main() {
     registerFallbackValue(<String>[]);
   });
 }
+
+/// A real temp directory, removed when the test ends.
+Directory tempDir(String prefix) {
+  final dir = Directory.systemTemp.createTempSync(prefix);
+  addTearDown(() {
+    if (dir.existsSync()) dir.deleteSync(recursive: true);
+  });
+  return dir;
+}
+
+/// Writes [body] as [dir]'s pubspec, creating [dir].
+void writePubspec(String dir, String body) => File('$dir/pubspec.yaml')
+  ..createSync(recursive: true)
+  ..writeAsStringSync(body);
+
+/// Writes the pubspec of a Fluvie project: a `fluvie:` entry indented under
+/// `dependencies:`, which is what [isFluvieProject] probes for.
+void writeFluviePubspec(String dir, {String name = 'demo_video'}) => writePubspec(dir, '''
+name: $name
+environment:
+  sdk: ^3.12.0
+dependencies:
+  flutter:
+    sdk: flutter
+  fluvie: ^0.2.0
+''');

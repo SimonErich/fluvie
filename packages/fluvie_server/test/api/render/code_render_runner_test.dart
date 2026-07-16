@@ -11,6 +11,15 @@ import 'package:test/test.dart';
 class _MockProcessRunner extends Mock implements ProcessRunner {}
 
 const _banner8 = 'ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers';
+
+/// A Fluvie project's pubspec: what `resolveProjectDir` probes for.
+const _fluviePubspec = '''
+name: fluvie_example
+dependencies:
+  flutter:
+    sdk: flutter
+  fluvie: ^0.2.0
+''';
 const _encodeArgs = ['-f', 'rawvideo', '-i', 'frames.rgba', 'out.mp4'];
 const ExportOptions _noOpts = (format: null, aspect: null, quality: null, poster: null);
 const String _goodCode = '''
@@ -42,12 +51,10 @@ void main() {
   setUp(() {
     runner = _MockProcessRunner();
     project = Directory.systemTemp.createTempSync('fluvie_code_project_');
-    // The harness helper the generated test imports must exist for a real run;
-    // resolveProjectDir also needs the marker file. Stub both.
-    File(
-      '${project.path}/test/render/capture_harness_test.dart',
-    ).createSync(recursive: true);
-    File('${project.path}/test/render/render_harness.dart').createSync(recursive: true);
+    // The generated harness is self-contained (it drives fluvie's renderVideo
+    // directly), so the project needs nothing but the pubspec resolveProjectDir
+    // probes for.
+    File('${project.path}/pubspec.yaml').writeAsStringSync(_fluviePubspec);
     sandbox = Directory.systemTemp.createTempSync('fluvie_code_sandbox_');
     workDir = Directory.systemTemp.createTempSync('fluvie_code_work_');
     addTearDown(() {
@@ -118,8 +125,8 @@ void main() {
     );
 
     expect(inputAtSpawn, _goodCode);
-    expect(harnessAtSpawn, contains("import 'input.dart' as user;"));
-    expect(harnessAtSpawn, contains('compositionFromVideo(user.build)'));
+    expect(harnessAtSpawn, contains("import 'input.dart' as target;"));
+    expect(harnessAtSpawn, contains('video: target.build(),'));
     expect(outcome.videoContentType, 'video/mp4');
     expect(File(outcome.videoPath).existsSync(), isTrue);
     expect(outcome.specPath, isNull);

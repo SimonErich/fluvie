@@ -1,4 +1,5 @@
 import 'package:fluvie_example/render/composition_entry.dart';
+import 'package:fluvie_example/render/days_recap_composition.dart';
 import 'package:fluvie_example/render/demo_composition.dart';
 import 'package:fluvie_example/render/lesson_entries.dart';
 import 'package:fluvie_example/render/multi_scene_composition.dart';
@@ -11,6 +12,7 @@ final List<CompositionEntry> _entries = [
   demoComposition,
   multiSceneComposition,
   starterComposition,
+  daysRecapComposition,
   ...lessonEntries,
 ];
 

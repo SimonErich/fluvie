@@ -18,7 +18,9 @@ import 'package:fluvie/src/elements/runtime/element_shared.dart';
 /// floor-resampling rule, so a slow source under a fast composition holds frames
 /// instead of skipping. A capture with no pre-resolution throws a
 /// `FluvieRenderException` naming the source; a live preview paints a
-/// placeholder, where determinism does not bind.
+/// placeholder, where determinism does not bind — wrap the composition in a
+/// `PreviewMediaScope` to run the same pre-pass and play the real frames there
+/// too.
 ///
 /// ```dart
 /// Clip.asset('intro.mp4', trim: 2.seconds.to(7.seconds),

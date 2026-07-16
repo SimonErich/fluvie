@@ -1,0 +1,81 @@
+{
+  "fluvieSpec": 1,
+  "size": "hd",
+  "fps": 30,
+  "poster": "1s",
+  "motionDefaults": {
+    "duration": "0.4s",
+    "ease": "smooth"
+  },
+  "transition": {
+    "kind": "crossFade",
+    "duration": "0.5s"
+  },
+  "scenes": [
+    {
+      "duration": "3s",
+      "background": {
+        "kind": "gradient",
+        "colors": [
+          "#1A2980",
+          "#26D0CE"
+        ]
+      },
+      "children": [
+        {
+          "type": "Text",
+          "text": "Title",
+          "anchor": "intro",
+          "style": {
+            "color": "#FFFFFF",
+            "fontSize": 72,
+            "fontWeight": "w700"
+          },
+          "animate": [
+            {
+              "preset": "fadeIn",
+              "duration": "30f",
+              "ease": "linear"
+            }
+          ]
+        },
+        {
+          "type": "Counter",
+          "to": 42,
+          "reveal": "1s",
+          "animate": [
+            {
+              "preset": "pop",
+              "at": {
+                "kind": "whenEnds",
+                "anchor": "intro"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "duration": "2s",
+      "enter": {
+        "kind": "slide",
+        "duration": "0.4s"
+      },
+      "children": [
+        {
+          "type": "Box",
+          "color": "#2ECC8F",
+          "size": {
+            "width": 0.3,
+            "height": 0.2
+          },
+          "animate": [
+            {
+              "preset": "slideFadeIn"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

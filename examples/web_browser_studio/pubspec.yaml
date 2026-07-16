@@ -13,8 +13,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_riverpod: ^3.3.2
-  fluvie: ^0.2.0
-  fluvie_web_encoder: ^0.2.0
+  fluvie: ^0.3.0
+  fluvie_web_encoder: ^0.3.0
   kitten_kit:
     path: ../kitten_kit
 

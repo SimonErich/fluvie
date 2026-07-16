@@ -15,8 +15,11 @@ workspace:
   - packages/fluvie_validate
   - packages/fluvie_server
   - packages/fluvie_mobile_encoder
+  - packages/fluvie_editor
+  - packages/fluvie_presenter
   - packages/fluvie_web_encoder
   - packages/fluvie_web_encoder/example
+  - apps/slides
   - examples/gallery
   - examples/kitten_kit
   - examples/cli_quickstart
@@ -119,7 +122,10 @@ melos:
       packageFilters:
         scope:
           - fluvie
+          - fluvie_editor
+          - fluvie_presenter
           - kitten_kit
+          - slides
 
     test:
       description: Run all package tests (Dart then Flutter).
@@ -159,7 +165,7 @@ melos:
         dirExists: test
 
     coverage:check:
-      description: The coverage gate — fails under 97% line coverage on library packages.
+      description: The coverage gate — fails under 97% line coverage on library packages and the slides app.
       steps:
         - coverage
         - coverage:gate
@@ -169,7 +175,7 @@ melos:
         Evaluate lcov reports against the 97% threshold (generated files
         excluded, // coverage:ignore markers honored — see
         documentation/contributing/coverage.md).
-      run: dart tool/check_coverage.dart --min 97 packages/fluvie packages/fluvie_lints packages/fluvie_validate packages/fluvie_cli packages/fluvie_server packages/fluvie_mobile_encoder packages/fluvie_web_encoder packages/fluvie_ai
+      run: dart tool/check_coverage.dart --min 97 packages/fluvie packages/fluvie_lints packages/fluvie_validate packages/fluvie_cli packages/fluvie_server packages/fluvie_mobile_encoder packages/fluvie_web_encoder packages/fluvie_ai packages/fluvie_presenter packages/fluvie_editor apps/slides
 
     test:tool:
       description: Root tool tests (coverage gate parser).
@@ -186,25 +192,32 @@ melos:
     docs:snippets:
       description: >
         Populate every documentation code fence from its compiled
-        `// #docregion` source (see documentation/README.md).
-      run: dart run tool/docs/sync_snippets.dart
+        `// #docregion` source (see documentation/README.md); covers the
+        root docs and the presenter package docs.
+      run: >
+        dart run tool/docs/sync_snippets.dart &&
+        (cd packages/fluvie_presenter && dart run ../../tool/docs/sync_snippets.dart)
 
     docs:snippets:check:
       description: >
         Fail if any documentation code fence has drifted from its source
         (CI and the fresh-clone run; changes nothing).
-      run: dart run tool/docs/sync_snippets.dart --check
+      run: >
+        dart run tool/docs/sync_snippets.dart --check &&
+        (cd packages/fluvie_presenter && dart run ../../tool/docs/sync_snippets.dart --check)
 
     docs:lint:
       description: >
         Fail if any ```dart fence under documentation/ lacks a preceding
         code-excerpt directive (the naked-fence gate; mirrors the pre-commit
         hook over the whole tree).
-      run: bash tool/docs/check_naked_fences.sh documentation
+      run: >
+        bash tool/docs/check_naked_fences.sh documentation &&
+        bash tool/docs/check_naked_fences.sh packages/fluvie_presenter/documentation
 
     docs:dartdoc:
       description: >
-        Run `dart doc` on fluvie and fail on any warning (validates links).
+        Run `dart doc` on fluvie and fluvie_presenter, failing on any warning (validates links).
         Used by CI and the fresh-clone script, not the fast pre-commit gate.
       run: bash tool/docs/check_dartdoc.sh
 
@@ -231,7 +244,7 @@ melos:
         key list is static; add a key here when you register a new composition.
       run: |
         mkdir -p build
-        for key in demo multi_scene 01_hello_video 02_text_and_motion 03_timing_and_triggers 04_scenes_and_transitions 05_images_and_clips 06_collage 07_charts 08_code_doc_intro 09_diagrams_and_webviews 10_audio_and_captions 11_templates_and_aspects 12_the_kitchen_sink; do
+        for key in demo multi_scene days_recap 01_hello_video 02_text_and_motion 03_timing_and_triggers 04_scenes_and_transitions 05_images_and_clips 06_collage 07_charts 08_code_doc_intro 09_diagrams_and_webviews 10_audio_and_captions 11_templates_and_aspects 12_the_kitchen_sink; do
           echo "Rendering $key…"
           dart run packages/fluvie_cli/bin/fluvie.dart render "$key" --out "build/$key.mp4" || exit 1
         done

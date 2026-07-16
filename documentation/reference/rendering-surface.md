@@ -20,8 +20,9 @@ declarative; the pipeline machinery lives here.
 | Group | Surface |
 | --- | --- |
 | Renderers | `VideoRenderer<T>` (the contract), `DesktopVideoRenderer` (local FFmpeg; mobile and web arms live in their encoder packages) |
-| Entry points | `render`, `renderToSandbox`, `renderTemplate`, `RenderService`, `RenderConfig` |
-| Host seams | `ShellMount`, `ShellFramePump`, `SandboxMount`, `SandboxFramePump`, `FrameEncoder` |
+| Entry points | `renderVideo`, `render`, `renderToSandbox`, `renderTemplate`, `RenderService`, `RenderConfig` |
+| Host seams | `ShellMount`, `ShellFramePump`, `SetViewSize`, `ShellRunAsync`, `runAsyncDirectly`, `SandboxMount`, `SandboxFramePump`, `FrameEncoder` |
+| Option parsing | `parseAspect`, `parseQuality`, `parseExportFormat`, `parsePosterTime`, `writeRenderProgress` |
 | Capture | `FrameCaptureService`, `RepaintBoundaryCaptureService`, `RawFrame`, `RenderManifest`, `FrameCache` |
 | Progress | `RenderProgress`, `RenderPhase`, `RenderProgressCallback`, `frameCountFor`, `runStage`, `runGuarded` |
 | Sandboxes | `RenderSandbox`, `FileRenderSandbox`, `MemoryRenderSandbox`, `CaptureSink` |
@@ -32,9 +33,34 @@ declarative; the pipeline machinery lives here.
 | Audio staging | `resolveAudioMix`, `ResolvedAudioMix`, `ResolvedAudioTrack`, `stageResolvedAudioToSandbox` |
 | Collectors | `collectMediaSources`, `collectSnapshotSources`, `collectSnapshots`, `FadeBox` |
 
+## `renderVideo`, the one capture entry
+
+`renderVideo` is the whole render, in order: it resolves media, rasterizes any
+`Snapshot` subtree, parses captions, analyses reactive audio, mounts the capture
+shell, and loops the frames into `frames.rgba` plus a `manifest.json`. Everything
+it needs is derived from the `Video` you hand it, so you pass no registry, no
+media list, and no geometry.
+
+A host supplies only the mechanics it alone can provide:
+
+- `pumpWidget` mounts a tree.
+- `pumpFrame` advances one frame.
+- `setViewSize` points the view at the canvas.
+- `runAsync` escapes fake async for real IO. It defaults to `runAsyncDirectly`
+  for a host that already has a real event loop; a `flutter_test` host passes
+  `tester.runAsync`.
+
+Encoding is not part of it. The returned `RenderManifest` carries the complete
+FFmpeg argument array for the caller to run.
+
+The `parse*` helpers turn CLI define strings (`--aspect`, `--quality`,
+`--format`, `--poster`) into the typed arguments `renderVideo` takes, and
+`writeRenderProgress` writes the progress file a supervising process polls.
+
 ## Who imports it
 
-- The capture harness `fluvie init` scaffolds (and every example app's copy).
+- The capture harness the CLI generates for every render. It is regenerated per
+  render and never committed, so it cannot drift from the CLI that writes it.
 - `fluvie_mobile_encoder` and `fluvie_web_encoder`, which build on the shared
   capture loop and swap the encode edge.
 - `fluvie_server`, which hosts renders behind an HTTP API.

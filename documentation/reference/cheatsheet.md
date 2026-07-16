@@ -1,7 +1,15 @@
 # Cheatsheet
 
-The whole public surface on one page. Everything here works today. Render any
-registered composition from the repo root:
+The whole public surface on one page. Everything here works today. Preview and
+render a composition file:
+
+```sh
+fluvie preview ./lib/my_video.dart                      # live, hot-reloading
+fluvie render ./lib/my_video.dart --out my_video.mp4    # the file
+```
+
+From a clone of this repo, render a lesson by its key, because the gallery keeps
+a registry:
 
 ```sh
 dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/01_hello_video.mp4
@@ -147,6 +155,29 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 | `Export.gif(fps:)` | animated GIF |
 | `Export.imageSequence()` | one PNG per frame |
 | `Export.transparent()` | WebM with an alpha channel |
+
+## The CLI
+
+| Command | Notes |
+| --- | --- |
+| `fluvie init [--name] [--dir] [--force]` | scaffold a project: a composition file, `assets/`, a pubspec |
+| `fluvie preview <file.dart> [-d <device>]` | live preview with hot reload; defaults to this desktop |
+| `fluvie render <file.dart> --out <file>` | capture and encode; `--entry`, `--cache`, `--aspect`, `--quality`, `--format`, `--poster`, `--frames` |
+| `fluvie render <key> --out <file>` | the legacy registry path; `--no-cache` bypasses the cache |
+| `fluvie list` | the render keys of a project that still uses a registry |
+| `fluvie ffmpeg <install\|path\|status\|uninstall>` | manage the FFmpeg build Fluvie downloads |
+
+A composition file exposes a top-level `Video build()`; `--entry <name>` names
+another.
+
+## Hosting a render
+
+| Surface | Notes |
+| --- | --- |
+| `renderVideo(video:, outDir:, pumpWidget:, pumpFrame:, setViewSize:)` (`package:fluvie/rendering.dart`) | the one capture entry a host drives; derives geometry, media, audio, captions from the `Video` |
+| `runAsyncDirectly`, `SetViewSize`, `ShellRunAsync` | the host seams `renderVideo` takes |
+| `parseAspect / parseQuality / parseExportFormat / parsePosterTime` | CLI define strings to typed arguments |
+| `writeRenderProgress(file, completed, total)` | the progress file a supervising process polls |
 
 ## Escape hatches and diagnostics
 

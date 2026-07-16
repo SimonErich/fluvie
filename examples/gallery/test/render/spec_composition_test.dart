@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:flutter/widgets.dart' show Directionality, TextDirection;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_example/render/spec_composition.dart';
+
+import 'render_harness.dart';
 
 Map<String, Object?> _specJson() => {
   'fluvieSpec': 1,
@@ -28,22 +31,38 @@ Map<String, Object?> _specJson() => {
 void main() {
   test('compositionFromSpec derives geometry, fps, and frame count', () {
     final entry = compositionFromSpec(VideoSpec.fromJson(_specJson()));
-    expect(entry.width, 1080);
-    expect(entry.height, 1080);
-    expect(entry.fps, 30);
-    expect(entry.frameCount, 60); // 2s at 30fps
-    expect(entry.mediaSources, isEmpty);
-    expect(entry.build, returnsNormally);
+    final video = entry.video();
+    expect(video.width, 1080);
+    expect(video.height, 1080);
+    expect(video.fps, 30);
+    expect(video.totalFrames, 60); // 2s at 30fps
+    expect(collectMediaSources(video.scenes), isEmpty);
+    expect(entry.video, returnsNormally);
   });
 
-  test('compositionFromSpec wraps the composition in an LTR Directionality', () {
+  testWidgets('the capture path gives a spec-built Text an LTR Directionality', (tester) async {
     // The capture canvas has no ambient locale, so a spec-built Text (a bare
     // RichText) needs a Directionality ancestor the way the hand-written lessons
     // and renderTemplate supply one; without it the render throws at mount.
-    final built = compositionFromSpec(VideoSpec.fromJson(_specJson())).build();
+    // `renderVideo` supplies it, so the entry carries no wrapper of its own and
+    // the proof is that the spec renders at all.
+    final outDir = Directory.systemTemp.createTempSync('fluvie_spec_ltr_');
+    addTearDown(() => outDir.deleteSync(recursive: true));
 
-    expect(built, isA<Directionality>());
-    expect((built as Directionality).textDirection, TextDirection.ltr);
+    final manifest = await runCaptureHarness(
+      tester: tester,
+      entry: compositionFromSpec(VideoSpec.fromJson(_specJson())),
+      outDir: outDir,
+      frameCountOverride: 2,
+      cacheEnabled: false,
+    );
+
+    expect(manifest.frameCount, 2);
+    expect(tester.takeException(), isNull);
+    final ltr = tester.widget<Directionality>(
+      find.ancestor(of: find.byType(Video), matching: find.byType(Directionality)).first,
+    );
+    expect(ltr.textDirection, TextDirection.ltr);
   });
 
   test('compositionFromSpecFile reads and builds from disk', () {
@@ -52,7 +71,7 @@ void main() {
     final path = '${dir.path}/v.fluvie.json';
     writeSpecToFile(VideoSpec.fromJson(_specJson()), path);
 
-    expect(compositionFromSpecFile(path).frameCount, 60);
+    expect(compositionFromSpecFile(path).video().totalFrames, 60);
   });
 
   test('videoSpecFromFile surfaces an unknown property through onWarn', () {

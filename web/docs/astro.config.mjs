@@ -52,6 +52,7 @@ export default defineConfig({
             { label: 'On-device mobile rendering', slug: 'guides/on-device-mobile-rendering' },
             { label: 'On-device web rendering', slug: 'guides/on-device-web-rendering' },
             { label: 'Exporting your video', slug: 'guides/exporting-your-video' },
+            { label: 'Managing FFmpeg', slug: 'guides/managing-ffmpeg' },
           ],
         },
         { label: 'Cookbook', slug: 'cookbook' },
@@ -71,6 +72,7 @@ export default defineConfig({
           label: 'Reference',
           items: [
             { label: 'Cheatsheet', slug: 'reference/cheatsheet' },
+            { label: 'The rendering surface', slug: 'reference/rendering-surface' },
             { label: 'Migration', slug: 'reference/migration' },
             { label: 'FAQ', slug: 'reference/faq' },
           ],

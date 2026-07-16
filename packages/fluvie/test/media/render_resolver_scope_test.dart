@@ -59,5 +59,39 @@ void main() {
       expect(scope.resolver, isA<MediaResolver>());
       await expectLater(scope.dispose(), completes);
     });
+
+    test('applies a clip decode bound to the owned resolver', () async {
+      final scope = resolverScope(null, clipDecodeMaxEdge: 720);
+
+      expect((scope.resolver as MediaRepository).maxClipDecodeEdge, 720);
+      await expectLater(scope.dispose(), completes);
+    });
+
+    test(
+      'leaves the clip decode bound null by default, so a render stays full resolution',
+      () async {
+        final scope = resolverScope(null);
+
+        expect((scope.resolver as MediaRepository).maxClipDecodeEdge, isNull);
+        await expectLater(scope.dispose(), completes);
+      },
+    );
+
+    test('streams clip frames through a store by default, for the capture loop', () async {
+      final scope = resolverScope(null);
+
+      expect((scope.resolver as MediaRepository).clipFrameStore, isNotNull);
+      await expectLater(scope.dispose(), completes);
+    });
+
+    test('streamClipFrames: false drops the store, so every frame decodes up front', () async {
+      // The streaming window is only ever filled by the capture loop's
+      // prepareClipFrames. A caller with no loop (a live preview) must decode
+      // all, or paint's synchronous lookup misses on every frame.
+      final scope = resolverScope(null, streamClipFrames: false);
+
+      expect((scope.resolver as MediaRepository).clipFrameStore, isNull);
+      await expectLater(scope.dispose(), completes);
+    });
   });
 }

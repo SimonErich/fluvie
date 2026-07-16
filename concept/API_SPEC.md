@@ -1672,10 +1672,51 @@ Its three symmetric arms are `DesktopVideoRenderer` (local FFmpeg → `File`), `
 (`fluvie_mobile_encoder`, hardware encoder → `File`), and `WebVideoRenderer` (`fluvie_web_encoder`,
 ffmpeg.wasm → bytes). All three run the same deterministic capture loop; only the encode edge differs.
 
-Underneath, three free functions drive offline capture — the primitives the renderers (and the CLI)
-share. All return manifests encoding the ffmpeg arguments to materialize the output; an
-`FfmpegRunner` executes them. A capture failure surfaces as a `FluvieRenderException`; an encode
-failure as a `FluvieEncodeException`.
+Underneath, `renderVideo` is the one capture entry a host drives, over free functions that are the
+primitives the renderers (and the CLI) share. All return manifests encoding the ffmpeg arguments to
+materialize the output; an `FfmpegRunner` executes them. A capture failure surfaces as a
+`FluvieRenderException`; an encode failure as a `FluvieEncodeException`.
+
+#### `renderVideo(...)` — the one capture entry
+
+Captures a `Video` into `outDir` (`frames.rgba` + `manifest.json`, manifest last). It is the whole
+render, in order: resolve media (images, then clip frames), rasterize any `Snapshot` subtree
+(P12-SNAP), parse captions, analyse reactive audio, mount the capture shell (D-CaptureShell), then
+loop the frames. Everything is derived from the `Video` itself, so the caller passes no registry, no
+media list, and no geometry. The host supplies only what it alone can: a pump, a view, and a real
+event loop. This is what the CLI's generated harness calls (decision 29).
+
+```dart
+Future<RenderManifest> renderVideo({
+  required Video video,
+  required Directory outDir,
+  required ShellMount pumpWidget,      // host supplies its pump: flutter_test's tester.pumpWidget
+  required ShellFramePump pumpFrame,
+  required SetViewSize setViewSize,    // point the view at the canvas
+  ShellRunAsync runAsync = runAsyncDirectly,  // flutter_test hosts pass tester.runAsync
+  String compositionKey = 'render',
+  int? frameCountOverride,
+  bool cacheEnabled = false,
+  Directory? cacheRoot,
+  Aspect? aspect,                      // null: the Video's declared size wins
+  Quality? quality,
+  Export? export,
+  Time? posterTime,
+  MediaResolver? resolver,             // null: build (and dispose) one, but only if the Video declares media
+  SnapshotService? snapshotService,
+  BeatDetectionService? beatDetector,
+  FrequencyAnalyzer? analyzer,
+  String? defaultFontFamily,
+  FrameCaptureService capture = const RepaintBoundaryCaptureService(),
+  void Function(int completed, int total)? onProgress,
+  void Function(int hits, int total)? onCacheReport,
+}) → RenderManifest;
+```
+
+Encoding is not part of it: the returned manifest carries the complete ffmpeg argument array for the
+caller to run. `parseAspect`/`parseQuality`/`parseExportFormat`/`parsePosterTime` turn the CLI's
+define strings into the typed arguments above; `writeRenderProgress` writes the progress file a
+supervising process polls.
 
 #### `render(...)` — multi-aspect canonical
 
@@ -1785,7 +1826,7 @@ final class RenderService {
 }
 ```
 
-All three entry points run the same capture pipeline, so the same composition renders the same frames for a given aspect.
+Every entry point runs the same capture pipeline, so the same composition renders the same frames for a given aspect.
 
 ---
 
@@ -1948,6 +1989,13 @@ grain over the result — regardless of list order between the two classes.
 
 `Image`/`Clip` sources are pre-resolved and cached by content hash before capture; randomness is seeded
 (§22). The frame is the only clock, so a render is reproducible enough to cache and to golden-test. Fluvie does not guarantee byte-identical output across machines or encoders.
+
+The **frame cache is advisory**. Its digest covers the render config, the composition key, and the
+fluvie version, but never the composition's own code, so editing a composition under an unchanged key
+serves stale frames until the digest moves. Hence `cacheEnabled` defaults to `false` on `renderVideo`,
+and `fluvie render <file.dart>` leaves it off unless `--cache` is passed: a file target has no
+registry key, so its path stands in, and an edited file with the same size and frame count would
+otherwise replay its old frames. A key render keeps the cache on with `--no-cache` to bypass it.
 
 ### 27.8 Shared frame capture loop
 
@@ -2277,6 +2325,24 @@ The design choices behind the API:
 | 26 | Rendering backends                    | One deterministic capture loop + pluggable encoders: FFmpeg process, mobile hardware, web wasm |
 | 27 | Design tokens                         | `FluvieTokens` + `FluvieTokensScope` carry every token; `FluvieTheme` is brand-group sugar |
 | 28 | New element families                  | Code/terminal, diagrams/web, and annotation elements added as intrinsic, frame-driven elements |
+| 29 | The project is a file                 | A Fluvie project is a composition file, an `assets/` folder, and a pubspec. The file exposes a top-level `Video build()` (`--entry` names another); `fluvie render <file>` and `fluvie preview <file>` generate the harness and the preview app per invocation. Supersedes **D-CLI**: no app, no `main.dart`, no committed harness, no registry, no platform directories |
+
+### Named decisions the code cites
+
+These are referenced by ID in source comments. Each is one line here so the
+reference resolves.
+
+| ID | Decision | Choice |
+| -- | -------- | ------ |
+| **D-CLI** | How the CLI finds a composition | *Superseded by 29.* A render named a **registry key**; the project committed a `test/render/capture_harness_test.dart` that mapped keys to builders, and the export flags reached it as `FLUVIE_RENDER_*` dart-defines. The key path still resolves for a project that keeps a registry; the defines are unchanged |
+| **D-CaptureShell** | One capture path | `buildCaptureShell` is the single mount every render composes: the composition, the boundary key, the render controller, the resolver scope, the snapshot scope, and the reactive tracks. A harness is a thin caller, never a second assembly of the same parts |
+| **D-Audio** | Audio reaches the encoder as filter nodes | A composition's declared `Audio` tracks and any clip's embedded audio are staged to the sandbox and emitted as encoder lanes, never mixed in Dart. A silent composition stages nothing and keeps the encoder's `-an` path |
+| **D-Mix** | Multiple tracks mix in FFmpeg | Layered tracks become one `-filter_complex` `amix` graph built from typed nodes. Growing the audio path must not perturb the video argument array, which is pinned by a regression test |
+| **D-Reactive** | Audio-reactive data is precomputed | Beat and band analysis runs once in the pre-resolve pass, against the render fps and frame count, and the frame loop reads the resolved series. No analysis happens in a frame |
+| **D-CaptionsRender** | Captions mount in the `Video` shell | The caption layer is the top overlay of the composition, above every scene, driven by the active cue for the frame. Captions are collected in a pre-pass (§17), not resolved per element |
+| **D-Snapshot** | `Snapshot` subtrees rasterize once | Every `Snapshot` child (`Mermaid`, `WebView`, `Html`) is rasterized in an in-process pre-pass and mounted as a still above the composition. Without it a `Snapshot` re-rasterizes every frame; with it the frame loop stays a pure function of the index |
+| **P12-SNAP** | The `Snapshot` wiring pass | The collect-then-rasterize-then-mount sequence that implements D-Snapshot: `collectSnapshots` gathers the children, the pre-pass rasterizes them under the resolver, and the mounted scope serves them by key or by order index (the cursor resets each frame, so the n-th unkeyed `Snapshot` reads index n) |
+| **AUDMIX-WIRE** | The production path stages the mix | The capture path that renders to a file must stage the audio mix, not just accept one. Pinned end to end: a composition with a music bed must reach the encoded file with audio in it |
 
 ### Micro-defaults I chose for you (easy to change)
 
