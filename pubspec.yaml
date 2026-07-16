@@ -44,7 +44,25 @@ melos:
   scripts:
     analyze:
       description: Static analysis across the workspace; infos & warnings are fatal.
+      steps:
+        - analyze:packages
+        - analyze:tool
+
+    analyze:packages:
+      description: >
+        Analyze each package in its own process. One `dart analyze .` over the
+        whole workspace analyzed every package in a single process, which grew
+        with the workspace until CI's runner was killed part way through it. The
+        coverage is the same; only the peak per process changes.
       run: dart analyze --fatal-infos --fatal-warnings .
+      exec:
+        concurrency: 1
+
+    analyze:tool:
+      description: >
+        Analyze the root `tool/` scripts, which belong to no package and so are
+        not reached by analyze:packages.
+      run: dart analyze --fatal-infos --fatal-warnings tool
 
     format:
       description: Verify formatting (CI). Use `melos run format:fix` to apply.
