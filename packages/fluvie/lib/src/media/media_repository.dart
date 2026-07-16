@@ -257,9 +257,11 @@ final class MediaRepository
   void dispose() {
     disposeCachedImages();
     disposeClipFrames();
-    // Delete the on-disk clip-frame store in the background (it can hold many
-    // frame files); the staged source dirs hold one small file each, so delete
-    // them synchronously and tolerate a dir that is already gone.
+    // The store deletes itself synchronously before returning this future, so
+    // ignoring the future is safe here. It has to: a render's process exits the
+    // moment it finishes, so a delete left pending is abandoned and the whole
+    // store leaks. The staged source dirs below delete synchronously for the
+    // same reason.
     unawaited(clipFrameStore?.dispose() ?? Future<void>.value());
     for (final dir in _stagedDirs) {
       try {

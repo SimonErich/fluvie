@@ -159,10 +159,23 @@ extension _ClipResolution on MediaRepository {
 /// the resolver's opaque per-clip key plus the source-frame index; the keys are
 /// generated, never attacker-controlled, so the paths are safe.
 final class FileClipFrameStore implements ClipFrameStore {
+  /// Creates the store; [parent] overrides where its directory is made.
+  FileClipFrameStore({this.parent});
+
+  /// Where the store's directory is made, or null for the system temp dir. A
+  /// test passes a temp root so it never writes the machine's real one.
+  final Directory? parent;
+
   Directory? _dir;
 
+  /// The store's directory once [put] has made one, or null before that.
+  ///
+  /// Exposed so a test can assert [dispose] really removed it: a store whose
+  /// directory outlives it is the leak this store used to have.
+  Directory? get directory => _dir;
+
   Future<Directory> _ensureDir() async =>
-      _dir ??= await Directory.systemTemp.createTemp('fluvie_clip_frames_');
+      _dir ??= await (parent ?? Directory.systemTemp).createTemp('fluvie_clip_frames_');
 
   @override
   Future<void> put(String clipKey, int frame, Uint8List rgba) async {
@@ -185,8 +198,17 @@ final class FileClipFrameStore implements ClipFrameStore {
   Future<void> dispose() async {
     final dir = _dir;
     _dir = null;
-    if (dir != null && dir.existsSync()) {
-      await dir.delete(recursive: true);
+    if (dir == null || !dir.existsSync()) return;
+    // Synchronous, before this returns its future, and deliberately so: the
+    // caller is a `void dispose()` that cannot await, and a render's process
+    // exits the moment it finishes. An asynchronous delete is simply abandoned
+    // there, which leaked the whole store (hundreds of megabytes of frames) on
+    // every run.
+    try {
+      dir.deleteSync(recursive: true);
+    } on FileSystemException {
+      // Best effort: an already-removed or locked temp dir is not fatal, and the
+      // stale sweep collects whatever a hard kill leaves behind.
     }
   }
 }
