@@ -2,7 +2,7 @@
 // captured -> encoded -> ffprobed through the real production render path (the
 // same capture shell + manifest + ffmpeg arg array the CLI drives), and the
 // encoded file's video frame count is asserted to equal the lesson's
-// `video.totalFrames` (== the registry entry's `frameCount`).
+// `video.totalFrames` (the frame count the render itself derives from the entry).
 //
 // Tagged `ffmpeg` so it stays OUT of the default `melos run test`/`gate`: it
 // spawns a real ffmpeg/ffprobe (>= 6.0) and renders full-resolution lessons, so
@@ -105,6 +105,9 @@ void main() {
       testWidgets('$key renders end-to-end and ffprobe counts video.totalFrames', (tester) async {
         final entry = compositionForKey(key)!;
         expect(entry.key, key);
+        // The render derives its geometry and frame count from the built Video,
+        // so the expectations below read them from the same place it does.
+        final video = entry.video();
 
         final sandbox = Directory.systemTemp.createTempSync('fluvie_smoke_${key}_');
         addTearDown(() {
@@ -132,7 +135,7 @@ void main() {
         expect(framesFile.existsSync(), isTrue, reason: '$key wrote no frames file');
         expect(
           framesFile.lengthSync(),
-          entry.frameCount * entry.width * entry.height * 4,
+          video.totalFrames * video.width * video.height * 4,
           reason: '$key raw frames file size != frameCount * w * h * 4',
         );
 
@@ -156,13 +159,13 @@ void main() {
           // The encoded file has exactly the lesson's frame count.
           final frames = await _probeFrameCount(output.path);
           stdout.writeln(
-            'fluvie-smoke: $key ${entry.width}x${entry.height}@${entry.fps} '
-            'frames=$frames expected=${entry.frameCount}',
+            'fluvie-smoke: $key ${video.width}x${video.height}@${video.fps} '
+            'frames=$frames expected=${video.totalFrames}',
           );
           expect(
             frames,
-            entry.frameCount,
-            reason: '$key encoded frame count != video.totalFrames (${entry.frameCount})',
+            video.totalFrames,
+            reason: '$key encoded frame count != video.totalFrames (${video.totalFrames})',
           );
         });
       });

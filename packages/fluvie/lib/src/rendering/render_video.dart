@@ -254,34 +254,39 @@ Future<RenderManifest> renderVideo({
     // Real IO — ffmpeg probes and extracts, the bundle reads, `toImage` reads back
     // — needs a real event loop, which fake async never pumps.
     await runAsync(() async {
-      if (active == null) return null;
-      // Images first: a clip source is content-hashed here before it is probed.
-      await active.preResolveAll(mediaSources);
-      await preResolveCompositionClips(
-        composition: video,
-        resolver: active,
-        totalFrames: frameCount,
-      );
-      if (snapshotSources.isNotEmpty) {
-        await active.preResolveSnapshots(
-          snapshotSources,
-          snapshotService ?? _missingSnapshotService(),
-        );
-      }
-      if (captionSource != null) await active.preResolveCaptions(captionSource);
-      if (reactiveTracks.allSources.isNotEmpty) {
-        await active.preResolveReactive(
-          reactiveTracks.allSources,
-          beatDetector: beatDetector ?? SpectralBeatDetectionService(),
-          analyzer: analyzer ?? SpectralFrequencyAnalyzer(),
-          fps: config.fps,
+      if (active != null) {
+        // Images first: a clip source is content-hashed here before it is probed.
+        await active.preResolveAll(mediaSources);
+        await preResolveCompositionClips(
+          composition: video,
+          resolver: active,
           totalFrames: frameCount,
         );
+        if (snapshotSources.isNotEmpty) {
+          await active.preResolveSnapshots(
+            snapshotSources,
+            snapshotService ?? _missingSnapshotService(),
+          );
+        }
+        if (captionSource != null) await active.preResolveCaptions(captionSource);
+        if (reactiveTracks.allSources.isNotEmpty) {
+          await active.preResolveReactive(
+            reactiveTracks.allSources,
+            beatDetector: beatDetector ?? SpectralBeatDetectionService(),
+            analyzer: analyzer ?? SpectralFrequencyAnalyzer(),
+            fps: config.fps,
+            totalFrames: frameCount,
+          );
+        }
       }
       // The in-process Snapshot subtree-capture pre-pass: rasterize every Snapshot
       // child once under the resolver (so an inner Image/Clip paints from the
       // decoded cache), then mount the result above the composition. Without it a
       // Snapshot in capture finds no scope and re-rasterizes every frame.
+      //
+      // Outside the resolver branch deliberately: a `Snapshot` over plain widgets
+      // declares no MediaSource and no SnapshotSource, so it needs no resolver at
+      // all, but it still needs its raster before frame 0.
       snapshotScope = await _captureSnapshotScope(
         scenes: video.scenes,
         resolver: active,

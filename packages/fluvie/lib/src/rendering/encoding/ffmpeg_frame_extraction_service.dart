@@ -41,17 +41,26 @@ final class FfmpegFrameExtractionService implements FrameExtractionService {
     int frameIndex, {
     required int width,
     required int height,
+    String? decoder,
   }) async {
     if (frameIndex < 0) {
       throw ArgumentError.value(frameIndex, 'frameIndex', 'must not be negative');
     }
     final path = _validatedPath(source);
+    final validatedDecoder = _validatedDecoder(decoder);
     final sandbox = await Directory.systemTemp.createTemp('fluvie_clip_frame_');
     try {
       const outputName = 'frame.rgba';
       final result = await _runner.run(
         binaryPath,
-        _args(path: path, frameIndex: frameIndex, width: width, height: height, output: outputName),
+        _args(
+          path: path,
+          frameIndex: frameIndex,
+          width: width,
+          height: height,
+          output: outputName,
+          decoder: validatedDecoder,
+        ),
         workingDirectory: sandbox.path,
       );
       if (result.exitCode != 0) {
@@ -81,26 +90,38 @@ final class FfmpegFrameExtractionService implements FrameExtractionService {
     Iterable<int> frameIndices, {
     required int width,
     required int height,
+    String? decoder,
   }) async {
     final frames = <int, RawFrame>{};
     for (final index in frameIndices) {
-      frames[index] = await extractFrame(source, index, width: width, height: height);
+      frames[index] = await extractFrame(
+        source,
+        index,
+        width: width,
+        height: height,
+        decoder: decoder,
+      );
     }
     return frames;
   }
 
   /// The typed extraction argument array — a frame select + scale filter, one
   /// rawvideo frame, written to the sandbox-relative [output] file.
+  ///
+  /// `-c:v` selects the decoder for the input that *follows* it, so it must
+  /// precede `-i` to apply to the source rather than to the output.
   static List<String> _args({
     required String path,
     required int frameIndex,
     required int width,
     required int height,
     required String output,
+    String? decoder,
   }) => [
     '-v',
     'error',
     '-nostdin',
+    if (decoder != null) ...['-c:v', decoder],
     '-i',
     path,
     '-vf',
@@ -135,6 +156,20 @@ final class FfmpegFrameExtractionService implements FrameExtractionService {
       throw ArgumentError.value(path, 'source', 'must not start with "-" (flag injection)');
     }
     return path;
+  }
+
+  /// Rejects a decoder name that could be parsed as a flag or is empty — the
+  /// same guard [_validatedPath] applies, because the decoder reaches this
+  /// service as a public parameter too.
+  static String? _validatedDecoder(String? decoder) {
+    if (decoder == null) return null;
+    if (decoder.isEmpty) {
+      throw ArgumentError.value(decoder, 'decoder', 'must not be empty');
+    }
+    if (decoder.startsWith('-')) {
+      throw ArgumentError.value(decoder, 'decoder', 'must not start with "-" (flag injection)');
+    }
+    return decoder;
   }
 
   static String _tail(String stderr) => stderr.length <= stderrTailLength

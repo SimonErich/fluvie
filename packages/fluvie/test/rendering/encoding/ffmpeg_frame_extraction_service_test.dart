@@ -72,6 +72,103 @@ void main() {
     expect(args.last, isNot(startsWith('-')));
   });
 
+  group('the decoder flag', () {
+    test('is absent from the arg array when no decoder is named', () async {
+      stubRunWriting(Uint8List(2 * 1 * 4));
+
+      await service.extractFrame(Uri.file('/clips/intro.mp4'), 7, width: 2, height: 1);
+
+      final args =
+          verify(
+                () => runner.run(
+                  any(),
+                  captureAny(),
+                  workingDirectory: any(named: 'workingDirectory'),
+                ),
+              ).captured.single
+              as List<String>;
+      expect(args, isNot(contains('-c:v')));
+    });
+
+    test('is injected as -c:v before -i, so it decodes the input', () async {
+      stubRunWriting(Uint8List(2 * 1 * 4));
+
+      await service.extractFrame(
+        Uri.file('/clips/cat.webm'),
+        7,
+        width: 2,
+        height: 1,
+        decoder: 'libvpx-vp9',
+      );
+
+      final args =
+          verify(
+                () => runner.run(
+                  any(),
+                  captureAny(),
+                  workingDirectory: any(named: 'workingDirectory'),
+                ),
+              ).captured.single
+              as List<String>;
+      expect(args.sublist(0, 7), [
+        '-v',
+        'error',
+        '-nostdin',
+        '-c:v',
+        'libvpx-vp9',
+        '-i',
+        '/clips/cat.webm',
+      ]);
+      expect(args.indexOf('-c:v'), lessThan(args.indexOf('-i')));
+    });
+
+    test('reaches every frame of a batch extraction', () async {
+      stubRunWriting(Uint8List(2 * 1 * 4));
+
+      await service.extractFrames(
+        Uri.file('/clips/cat.webm'),
+        const [0, 5],
+        width: 2,
+        height: 1,
+        decoder: 'libvpx-vp9',
+      );
+
+      final calls = verify(
+        () => runner.run(any(), captureAny(), workingDirectory: any(named: 'workingDirectory')),
+      ).captured.cast<List<String>>();
+      expect(calls, hasLength(2));
+      for (final args in calls) {
+        expect(args, containsAllInOrder(const ['-c:v', 'libvpx-vp9', '-i']));
+      }
+    });
+
+    test('a decoder that looks like a flag is rejected before any run', () async {
+      await expectLater(
+        () => service.extractFrame(
+          Uri.file('/clips/a.mp4'),
+          0,
+          width: 2,
+          height: 1,
+          decoder: '-evil',
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+      verifyNever(
+        () => runner.run(any(), any(), workingDirectory: any(named: 'workingDirectory')),
+      );
+    });
+
+    test('an empty decoder is rejected before any run', () async {
+      await expectLater(
+        () => service.extractFrame(Uri.file('/clips/a.mp4'), 0, width: 2, height: 1, decoder: ''),
+        throwsA(isA<ArgumentError>()),
+      );
+      verifyNever(
+        () => runner.run(any(), any(), workingDirectory: any(named: 'workingDirectory')),
+      );
+    });
+  });
+
   test('parses the rawvideo file into a RawFrame of the requested size', () async {
     final bytes = Uint8List.fromList(List<int>.generate(2 * 2 * 4, (i) => i % 256));
     stubRunWriting(bytes);

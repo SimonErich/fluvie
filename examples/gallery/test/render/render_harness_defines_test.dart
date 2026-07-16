@@ -8,6 +8,11 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
+// The untrusted-render bound is `@visibleForTesting` on `renderVideo`'s own
+// library rather than on the public barrel, so it is reached under `src/` the
+// way the rest of the harness reaches render infrastructure.
+import 'package:fluvie/src/rendering/render_video.dart' show assertRenderWithinBounds;
 import 'package:fluvie_example/render/demo_composition.dart';
 
 import 'render_harness.dart';

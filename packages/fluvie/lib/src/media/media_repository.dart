@@ -94,6 +94,12 @@ final class MediaRepository
   /// the shared [ClipResolveCache].
   final Map<MediaSource, String> _clipPaths = {};
 
+  /// The decoder each clip source must be extracted with (absent: the
+  /// extractor's own default), decided by the probe and read back by the
+  /// extraction. [ClipResolveCache] always resolves a clip's metadata before it
+  /// extracts a frame, so an entry is in place by the time extraction reads it.
+  final Map<MediaSource, String> _clipDecoders = {};
+
   /// Temp directories staged for materialized audio and clip source files, so
   /// [dispose] can delete them (each holds one written media file).
   final Set<Directory> _stagedDirs = {};

@@ -26,7 +26,6 @@ import 'package:fluvie/src/media/net/media_http_client.dart';
 import 'package:fluvie/src/media/runtime/image_resolver_scope.dart';
 import 'package:fluvie_example/render/composition_entry.dart';
 
-import 'harness_snapshot.dart';
 import 'render_harness.dart';
 
 const _swatch = MediaSource.asset('assets/fixtures/swatch.png');
@@ -160,23 +159,37 @@ void main() {
     // The headline regression guard: a composition with a Snapshot rendered
     // through the real harness mounts the scope, so no FluvieRenderException is
     // raised mid-render and the live Image child is never re-rasterized.
-    _setView(tester);
-    final scope = await captureSnapshotScopeForScenes(
+    //
+    // `renderVideo` owns the pre-pass, so the scope is not handed back; the proof
+    // is the render itself. Without a mounted scope, Snapshot.build throws on the
+    // determinism violation rather than re-rasterizing the live child, so every
+    // frame completing IS the scope being mounted — and the live Image element is
+    // absent from the tree the last frame left standing.
+    final outDir = Directory.systemTemp.createTempSync('fluvie_snap_prepass_');
+    addTearDown(() => outDir.deleteSync(recursive: true));
+
+    final manifest = await runCaptureHarness(
       tester: tester,
-      scenes: [
-        Scene(duration: const Time.seconds(1), children: [_snapshotWithImage()]),
-      ],
-      resolver: await _resolved(tester),
-      width: 32,
-      height: 32,
+      entry: CompositionEntry(
+        key: 'snapshot_with_image',
+        video: () => Video(
+          width: 32,
+          height: 32,
+          scenes: [
+            Scene(duration: const Time.frames(3), children: [_snapshotWithImage()]),
+          ],
+        ),
+      ),
+      outDir: outDir,
+      cacheEnabled: false,
+      prepareMedia: (_) async => _repository(),
     );
-    expect(scope, isNotNull);
-    expect(scope!.imageFor(const SnapshotCaptureKey.index(0)), isA<ui.Image>());
-    addTearDown(() {
-      for (final image in scope.images.values) {
-        image.dispose();
-      }
-    });
+
+    expect(manifest.frameCount, 3);
+    expect(tester.takeException(), isNull);
+    // The cached still is what paints: a RawImage, never the live Image child.
+    expect(find.byType(flutter.RawImage), findsOneWidget);
+    expect(find.byType(Image), findsNothing, reason: 'the live child must not mount in capture');
   });
 
   testWidgets('runCaptureHarness renders a Snapshot over many frames without drift', (
@@ -189,14 +202,7 @@ void main() {
     final outDir = Directory.systemTemp.createTempSync('fluvie_snap_e2e_');
     addTearDown(() => outDir.deleteSync(recursive: true));
 
-    const entry = CompositionEntry(
-      key: 'snapshot_probe',
-      width: 32,
-      height: 32,
-      fps: 30,
-      frameCount: 6,
-      build: _buildSnapshotComposition,
-    );
+    const entry = CompositionEntry(key: 'snapshot_probe', video: _snapshotProbeVideo);
 
     // No FluvieRenderException is thrown across the 6-frame loop: the scope is
     // mounted and the cursor restarts at 0 every frame (drift would throw).
@@ -206,7 +212,6 @@ void main() {
       outDir: outDir,
       cacheEnabled: false,
       prepareMedia: (_) async => null,
-      snapshotScenes: (_) => _snapshotProbeScenes(),
     );
     expect(manifest.frameCount, 6);
     expect(File('${outDir.path}/frames.rgba').lengthSync(), 6 * 32 * 32 * 4);
@@ -244,20 +249,9 @@ List<Scene> _snapshotProbeScenes() => [
   ),
 ];
 
-/// The renderable composition mirroring [_snapshotProbeScenes]; the harness
-/// mounts this every frame, and the pre-pass froze each Snapshot child.
-Widget _buildSnapshotComposition() {
-  final video = Video(width: 32, height: 32, scenes: _snapshotProbeScenes());
-  return Directionality(textDirection: TextDirection.ltr, child: video);
-}
-
-Future<MediaResolver> _resolved(WidgetTester tester) async {
-  final repo = _repository();
-  await tester.runAsync(() async {
-    await repo.preResolveAll({_swatch});
-  });
-  return repo;
-}
+/// The renderable composition over [_snapshotProbeScenes]; the render mounts it
+/// every frame, and its own pre-pass froze each Snapshot child first.
+Video _snapshotProbeVideo() => Video(width: 32, height: 32, scenes: _snapshotProbeScenes());
 
 /// A [SnapshotPump] that mounts each captured child under the [ImageResolverScope]
 /// so the inner Image paints from the decoded cache during the toImage read-back.

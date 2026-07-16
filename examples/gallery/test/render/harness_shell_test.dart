@@ -1,10 +1,11 @@
 // WI-25 (D-CaptureShell): the example render harness is a THIN caller of the
 // production capture shell (rendering/capture/capture_shell.dart). This test
 // drives a Trigger.beat composition through the harness offline, injecting the
-// example's offline fakes through the shell's injection points (the resolver,
-// the reactive tracks). The BeatGridScope the shell mounts resolves the beat, so
-// a Trigger.beat composition renders through the same path the lesson posters
-// use — deterministically, with no ffmpeg and no host.
+// example's offline fake through the one remaining injection point (the
+// resolver); the reactive tracks are collected from the composition itself. The
+// BeatGridScope the shell mounts resolves the beat, so a Trigger.beat
+// composition renders through the same path the lesson posters use —
+// deterministically, with no ffmpeg and no host.
 
 import 'dart:io';
 import 'dart:typed_data';
@@ -34,41 +35,37 @@ final _track = Anchor('beat-track');
 /// A composition with a Trigger.beat fade. The grid the injected resolver serves
 /// fires at frame 6, so the fade window is 6..16 — the wiring this exercises
 /// through the shell.
-final _entry = CompositionEntry(
-  key: 'beat_through_shell',
+const _entry = CompositionEntry(key: 'beat_through_shell', video: _beatVideo);
+
+/// The beat composition itself: the render reads its geometry, its fps (the
+/// default 30, == [_fps]), its frame count and its reactive track off this.
+Video _beatVideo() => Video(
   width: _width,
   height: _height,
-  fps: _fps,
-  frameCount: _frames,
-  build: () => Video(
-    // fps is the default 30 (== _fps), so the entry and the Video agree.
-    width: _width,
-    height: _height,
-    audio: [Audio.music('audio/beat.wav', track: _track)],
-    scenes: [
-      Scene(
-        duration: const Time.frames(_frames),
-        children: [
-          const ColoredBox(
-            color: Color(0xFF101010),
-            child: SizedBox.expand(),
+  audio: [Audio.music('audio/beat.wav', track: _track)],
+  scenes: [
+    Scene(
+      duration: const Time.frames(_frames),
+      children: [
+        const ColoredBox(
+          color: Color(0xFF101010),
+          child: SizedBox.expand(),
+        ),
+        const Center(
+          child: ColoredBox(
+            color: Color(0xFFE74C3C),
+            child: SizedBox(width: 80, height: 80),
           ),
-          const Center(
-            child: ColoredBox(
-              color: Color(0xFFE74C3C),
-              child: SizedBox(width: 80, height: 80),
-            ),
-          ).animate([
-            Animation.fadeIn(
-              at: Trigger.beat(track: _track),
-              duration: const Time.frames(10),
-              ease: Ease.linear,
-            ),
-          ]),
-        ],
-      ),
-    ],
-  ),
+        ).animate([
+          Animation.fadeIn(
+            at: Trigger.beat(track: _track),
+            duration: const Time.frames(10),
+            ease: Ease.linear,
+          ),
+        ]),
+      ],
+    ),
+  ],
 );
 
 /// An in-house grid that fires on the listed frames — no ffmpeg, no DSP.
@@ -88,6 +85,14 @@ class _FixedGrid implements BeatGrid {
 /// one declared track — the shell reads both synchronously after the pre-pass.
 final class _OfflineBeatResolver implements MediaResolver {
   bool _ready = false;
+
+  /// The render stages the composition's declared `Audio` into the encode plan,
+  /// so a track-bearing composition materializes even when the test only cares
+  /// about the beat grid. `audio/beat.wav` is this fake's own name for a track it
+  /// mints a grid for; point the staging copy at the committed WAV so it lands
+  /// real bytes with no ffmpeg and no bundle read.
+  @override
+  String materializedAudioPathFor(AudioSource source) => 'assets/audio/beat_loop.wav';
 
   @override
   Future<void> preResolveReactive(
@@ -139,12 +144,10 @@ final class _OfflineBeatResolver implements MediaResolver {
   @override
   ui.Image decodedSnapshotFor(SnapshotSource source) => throw UnimplementedError();
   @override
-  String materializedAudioPathFor(AudioSource source) => throw UnimplementedError();
-  @override
   List<CaptionCue> cuesFor(CaptionSource source) => throw UnimplementedError();
 }
 
-Future<MediaResolver?> _prepare(CompositionEntry entry) async {
+Future<MediaResolver?> _prepare(Video video) async {
   // The example normally runs the real spectral DSP over the committed WAV in
   // the pre-pass; here the offline resolver mints the grid/table directly, so
   // the pre-pass just flips it ready (no ffmpeg, no DSP).
@@ -153,9 +156,6 @@ Future<MediaResolver?> _prepare(CompositionEntry entry) async {
   return resolver;
 }
 
-ReactiveTracks _tracks(CompositionEntry entry) =>
-    ReactiveTracks(byAnchor: {_track: _song}, defaultSource: _song, allSources: {_song});
-
 Directory _tempDir(String label) {
   final dir = Directory.systemTemp.createTempSync('fluvie_beat_shell_${label}_');
   addTearDown(() => dir.deleteSync(recursive: true));
@@ -163,6 +163,21 @@ Directory _tempDir(String label) {
 }
 
 void main() {
+  test('the shell reads the geometry, the fps, and the one reactive track off the Video', () {
+    // Everything the render used to be told is derived from the composition now,
+    // so the constants this suite reasons about must be the Video's own.
+    final video = _entry.video();
+    expect(video.width, _width);
+    expect(video.height, _height);
+    expect(video.fps, _fps);
+    expect(video.totalFrames, _frames);
+    // The track the shell mounts a BeatGridScope for, and the source the
+    // offline resolver mints the fixed grid for.
+    final tracks = collectReactiveTracks(video);
+    expect(tracks.allSources, {_song});
+    expect(tracks.byAnchor, {_track: _song});
+  });
+
   testWidgets('a Trigger.beat composition renders through the shell offline', (tester) async {
     final outDir = _tempDir('one');
     final manifest = await runCaptureHarness(
@@ -171,8 +186,6 @@ void main() {
       outDir: outDir,
       cacheEnabled: false,
       prepareMedia: _prepare,
-      snapshotScenes: (_) => const [],
-      reactiveTracks: _tracks,
     );
     expect(manifest.frameCount, _frames);
     final frames = File('${outDir.path}/frames.rgba').readAsBytesSync();
@@ -189,8 +202,6 @@ void main() {
         outDir: outDir,
         cacheEnabled: false,
         prepareMedia: _prepare,
-        snapshotScenes: (_) => const [],
-        reactiveTracks: _tracks,
       );
     }
     expect(
@@ -207,8 +218,6 @@ void main() {
       outDir: outDir,
       cacheEnabled: false,
       prepareMedia: _prepare,
-      snapshotScenes: (_) => const [],
-      reactiveTracks: _tracks,
     );
     final frames = File('${outDir.path}/frames.rgba').readAsBytesSync();
     const frameBytes = _width * _height * 4;

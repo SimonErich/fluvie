@@ -4,7 +4,11 @@
 // byte copy — no ffmpeg) and asserts the manifest's ffmpegArgs carry the mix
 // (`-filter_complex` + the `[aout]` map label, never `-an`), and that an
 // `Audio.sfx(at:)` lands an `adelay` in those args. Mirrors harness_shell_test:
-// a thin caller of the production shell, fakes injected at the harness seams.
+// a thin caller of the production shell over the composition's own declarations.
+//
+// `renderVideo` derives the mix from the Video, so nothing is injected here: the
+// entries below declare their `Audio` and the render stages it, which is exactly
+// what the fix has to guarantee for a real lesson.
 
 import 'dart:io';
 
@@ -12,12 +16,8 @@ import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie/rendering.dart';
-import 'package:fluvie/src/composition/runtime/audio_collector.dart';
-import 'package:fluvie/src/composition/runtime/reactive_collector.dart';
 import 'package:fluvie_example/render/composition_entry.dart';
 
-import 'harness_audio.dart';
-import 'harness_media.dart';
 import 'render_harness.dart';
 
 const int _width = 160;
@@ -50,13 +50,12 @@ final CompositionEntry _fadeEntry = _entry(
 /// A silent composition: no audio, no media — the encoder's `-an` path.
 final CompositionEntry _silentEntry = _entry(key: 'audio_mix_silent', audio: const []);
 
+/// Builds a [key]ed entry over a [_width]x[_height], [_frames]-frame Video
+/// declaring [audio]. The fps is the `Video` default (30, == [_fps]), which the
+/// sfx `adelay` and the fade `st=` below are computed against.
 CompositionEntry _entry({required String key, required List<Audio> audio}) => CompositionEntry(
   key: key,
-  width: _width,
-  height: _height,
-  fps: _fps,
-  frameCount: _frames,
-  build: () => Video(
+  video: () => Video(
     width: _width,
     height: _height,
     audio: audio,
@@ -69,44 +68,22 @@ CompositionEntry _entry({required String key, required List<Audio> audio}) => Co
   ),
 );
 
-/// Builds the offline audio-staging seam for [entry] by reading the entry's own
-/// `Video` (the test's synthetic key is not a lesson, so the default lesson
-/// lookup would find nothing — this injects the same staging the default does,
-/// over a real `MediaRepository`).
-PrepareAudioStaging _stagingFor(CompositionEntry entry) => (e, resolver) {
-  final video = e.build() as Video;
-  return audioStagingFor(video, resolver: resolver, fps: e.fps, totalFrames: e.frameCount);
-};
-
-/// Prepares a real, offline media repository so `materializedAudioPathFor`
-/// answers during staging — the WAV is a bundled asset, so this needs no ffmpeg.
-Future<MediaResolver?> _prepareAudio(CompositionEntry entry) async {
-  final video = entry.build() as Video;
-  final sources = collectAudioSources(video);
-  if (sources.isEmpty) return null;
-  return offlineAudioRepository();
-}
-
 Directory _tempDir(String label) {
   final dir = Directory.systemTemp.createTempSync('fluvie_audio_mix_${label}_');
   addTearDown(() => dir.deleteSync(recursive: true));
   return dir;
 }
 
+/// Renders [entry] through the default harness wiring: `prepareEntryMedia` mints
+/// a real, offline `MediaRepository` over the asset bundle for an entry that
+/// declares audio (a plain bundle read plus a byte copy, so no ffmpeg), and
+/// `null` for the silent one — which is the `-an` path under test.
 Future<RenderManifest> _render(WidgetTester tester, CompositionEntry entry, String label) async {
   return runCaptureHarness(
     tester: tester,
     entry: entry,
     outDir: _tempDir(label),
     cacheEnabled: false,
-    prepareMedia: _prepareAudio,
-    snapshotScenes: (_) => const [],
-    reactiveTracks: (_) => const ReactiveTracks(
-      byAnchor: <Anchor, AudioSource>{},
-      defaultSource: null,
-      allSources: <AudioSource>{},
-    ),
-    audioStaging: _stagingFor(entry),
   );
 }
 
@@ -126,7 +103,11 @@ void main() {
 
   testWidgets('a music fade-out is end-anchored, never st=0 (the silent bug)', (tester) async {
     // 30 frames @ 30 fps = a 1 s window; a 15-frame (0.5 s) fade-out must begin
-    // at st=0.5 so the bed plays and only the last half-second ramps down.
+    // at st=0.5 so the bed plays and only the last half-second ramps down. The
+    // render reads both off the Video, so the st= literals below hold only while
+    // it declares them.
+    expect(_fadeEntry.video().fps, _fps);
+    expect(_fadeEntry.video().totalFrames, _frames);
     final manifest = await _render(tester, _fadeEntry, 'fade');
     final graph = _filterComplex(manifest.ffmpegArgs);
     expect(graph, contains('afade=t=out:st=0.5:d=0.5'));

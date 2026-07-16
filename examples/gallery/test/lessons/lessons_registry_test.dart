@@ -251,7 +251,13 @@ Future<_BeatGrids?> _beatGridsFor(Video video) async {
       allowlist: NetworkAllowlist.allowAny(),
     ),
   );
-  await preResolveReactiveFor(repository, video, fps: video.fps, totalFrames: video.totalFrames);
+  await repository.preResolveReactive(
+    tracks.allSources,
+    beatDetector: offlineBeatDetector(),
+    analyzer: offlineFrequencyAnalyzer(),
+    fps: video.fps,
+    totalFrames: video.totalFrames,
+  );
   final defaultSource = tracks.defaultSource;
   return (
     defaultBeatGrid: defaultSource == null ? null : repository.beatGridFor(defaultSource),

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
+import 'package:fluvie/rendering.dart';
 import 'package:fluvie_example/render/composition_registry.dart';
 import 'package:fluvie_example/render/days_recap_composition.dart';
 
@@ -10,12 +11,13 @@ void main() {
   test('the days_recap entry is registered with its declared geometry', () {
     final entry = compositionForKey('days_recap');
     expect(entry, isNotNull);
-    expect(entry!.width, 1280);
-    expect(entry.height, 720);
-    expect(entry.fps, 30);
-    expect(entry.frameCount, daysRecapVideo().totalFrames);
+    final video = entry!.video();
+    expect(video.width, 1280);
+    expect(video.height, 720);
+    expect(video.fps, 30);
+    expect(video.totalFrames, daysRecapVideo().totalFrames);
     // Every photo and clip is declared so the harness pre-resolves it.
-    expect(entry.mediaSources, isNotEmpty);
+    expect(collectMediaSources(video.scenes), isNotEmpty);
   });
 
   test('the recap spans an intro, one scene per day, and an outro', () {

@@ -5,9 +5,9 @@ part of 'media_repository.dart';
 /// diffing, decode, and lookups live in the shared [ClipResolveCache] mixin;
 /// `probeClipSource` and `extractClipFrames` (in the main class) call this.
 extension _ClipResolution on MediaRepository {
-  /// Materializes [source], probes it for [ClipMetadata], and converts the
-  /// probe result (ffprobe fps from frames over duration). The [ClipResolveCache]
-  /// caches the result, so this runs once per source.
+  /// Materializes [source], probes it for [ClipMetadata], and records the
+  /// decoder its frames must be extracted with. The [ClipResolveCache] caches
+  /// the result, so this runs once per source.
   Future<ClipMetadata> _probeClipSource(MediaSource source) async {
     final probe = probeService;
     if (probe == null) {
@@ -18,11 +18,10 @@ extension _ClipResolution on MediaRepository {
     }
     final path = await _materializeClip(source);
     final result = await probe.probe(path);
-    final fps = result.durationSeconds > 0
-        ? result.nbFrames / result.durationSeconds
-        : result.nbFrames.toDouble();
+    final decoder = _decoderFor(result);
+    if (decoder != null) _clipDecoders[source] = decoder;
     return (
-      fps: fps,
+      fps: result.fps,
       frameCount: result.nbFrames,
       width: result.width,
       height: result.height,
@@ -49,8 +48,18 @@ extension _ClipResolution on MediaRepository {
       sourceFrames,
       width: meta.width,
       height: meta.height,
+      decoder: _clipDecoders[source],
     );
   }
+
+  /// The decoder [result]'s source must be extracted with, or null for the
+  /// extractor's default.
+  ///
+  /// VP9 codes alpha as a second layer that only `libvpx-vp9` reads: ffmpeg's
+  /// native `vp9` decoder silently drops it and the clip composites over black.
+  /// VP9 without alpha stays on the native decoder, which is much faster.
+  String? _decoderFor(VideoProbeResult result) =>
+      result.codec == 'vp9' && result.hasAlpha ? 'libvpx-vp9' : null;
 
   /// Loads the clip bytes once and writes them to a temp file the probe and
   /// extractor can read by path; cached per source.

@@ -22,6 +22,7 @@ final class FakeFrameExtractionService implements FrameExtractionService {
     int frameIndex, {
     required int width,
     required int height,
+    String? decoder,
   }) async {
     final frame = _canned[source]?[frameIndex];
     if (frame == null) {
@@ -38,8 +39,9 @@ final class FakeFrameExtractionService implements FrameExtractionService {
     Iterable<int> frameIndices, {
     required int width,
     required int height,
+    String? decoder,
   }) async => {
     for (final index in frameIndices)
-      index: await extractFrame(source, index, width: width, height: height),
+      index: await extractFrame(source, index, width: width, height: height, decoder: decoder),
   };
 }

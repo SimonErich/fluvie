@@ -18,6 +18,7 @@ import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/aspect.dart';
 import 'package:fluvie/src/core/time_extensions.dart';
 import 'package:fluvie/src/core/video_size.dart';
+import 'package:fluvie/src/elements/snapshot/snapshot.dart';
 import 'package:fluvie/src/rendering/capture/render_manifest.dart';
 import 'package:fluvie/src/rendering/render_video.dart';
 
@@ -126,6 +127,31 @@ void main() {
       final a = await _render(tester, video: _swatch());
       final b = await _render(tester, video: _swatch());
       expect(a.frames, equals(b.frames));
+    });
+  });
+
+  group('snapshots', () {
+    testWidgets('a Snapshot over plain widgets rasterizes with no resolver', (tester) async {
+      // The pre-pass must not be gated on the resolver: a Snapshot whose child is
+      // plain widgets declares no MediaSource and no SnapshotSource, so nothing
+      // builds a resolver for it, but it still needs its raster before frame 0 or
+      // Snapshot.build throws "cannot render in capture without a
+      // SnapshotCaptureScope".
+      final video = Video(
+        size: const VideoSize(16, 16),
+        scenes: [
+          Scene(
+            duration: 2.frames,
+            children: const [
+              Positioned.fill(
+                child: Snapshot(child: ColoredBox(color: Color(0xFF00FF00))),
+              ),
+            ],
+          ),
+        ],
+      );
+      final r = await _render(tester, video: video);
+      expect(r.frames.length, 16 * 16 * 4 * 2);
     });
   });
 

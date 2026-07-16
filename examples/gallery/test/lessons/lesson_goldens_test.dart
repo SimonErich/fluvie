@@ -32,6 +32,7 @@ import 'package:fluvie/src/composition/runtime/caption_collector.dart';
 import 'package:fluvie/src/composition/runtime/generative_collector.dart';
 import 'package:fluvie/src/composition/runtime/reactive_collector.dart';
 import 'package:fluvie/src/core/contracts/beat_grid.dart';
+import 'package:fluvie/src/core/media/snapshot_source.dart';
 import 'package:fluvie/src/media/media_bytes_loader.dart';
 import 'package:fluvie/src/media/media_repository.dart';
 import 'package:fluvie/src/media/net/media_http_client.dart';
@@ -92,7 +93,7 @@ Future<void> main() async {
 Future<MediaResolver?> _resolverFor(Video probe) async {
   final snapshotSources = collectSnapshotSources(probe.scenes);
   if (snapshotSources.isNotEmpty) {
-    return prepareSnapshotMedia(snapshotSources);
+    return _snapshotResolver(snapshotSources);
   }
   if (collectAudioSources(probe).isNotEmpty || collectCaptionSource(probe) != null) {
     return _reactiveResolver(probe);
@@ -104,24 +105,47 @@ Future<MediaResolver?> _resolverFor(Video probe) async {
   return resolver;
 }
 
+/// Builds a real [MediaRepository] for the snapshot lesson and rasterizes every
+/// declared source through the offline fake backend, so the poster golden shows
+/// the diagram and the framed page instead of the preview placeholder — the
+/// pre-pass `renderVideo` runs, at the one frame a golden mounts.
+Future<MediaResolver> _snapshotResolver(Set<SnapshotSource> sources) async {
+  final repository = _bundleRepository();
+  await repository.preResolveSnapshots(sources, const OfflineFakeSnapshotService());
+  return repository;
+}
+
 /// Builds a real [MediaRepository] for the audio lesson and runs its offline
 /// pre-passes: the real spectral beat/band DSP over the committed WAV (via the
 /// in-house WAV decoder, no ffmpeg) and the SRT parse, so the poster golden
 /// shows the bars and the badge at their true band energy and the active caption
 /// cue (decision D-Lesson).
 Future<MediaResolver> _reactiveResolver(Video probe) async {
-  final repository = MediaRepository(
-    loader: MediaBytesLoader(
-      bundle: rootBundle,
-      httpClient: const _UnusedHttpClient(),
-      allowlist: NetworkAllowlist.allowAny(),
-    ),
-  );
+  final repository = _bundleRepository();
   final captions = collectCaptionSource(probe);
   if (captions != null) await repository.preResolveCaptions(captions);
-  await preResolveReactiveFor(repository, probe, fps: probe.fps, totalFrames: probe.totalFrames);
+  final tracks = collectReactiveTracks(probe);
+  if (tracks.allSources.isNotEmpty) {
+    await repository.preResolveReactive(
+      tracks.allSources,
+      beatDetector: offlineBeatDetector(),
+      analyzer: offlineFrequencyAnalyzer(),
+      fps: probe.fps,
+      totalFrames: probe.totalFrames,
+    );
+  }
   return repository;
 }
+
+/// A repository over the example asset bundle: every lesson fixture is a bundled
+/// asset, so it reads bytes and never reaches ffmpeg or the network.
+MediaRepository _bundleRepository() => MediaRepository(
+  loader: MediaBytesLoader(
+    bundle: rootBundle,
+    httpClient: const _UnusedHttpClient(),
+    allowlist: NetworkAllowlist.allowAny(),
+  ),
+);
 
 /// Wraps [child] so a lesson paints its pre-resolved sources: an
 /// [ImageResolverScope] for media / snapshots / captions, a `ReactiveScope`

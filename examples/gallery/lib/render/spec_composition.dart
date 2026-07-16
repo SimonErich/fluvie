@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/widgets.dart' show Directionality, TextDirection;
 import 'package:fluvie/fluvie.dart';
-import 'package:fluvie/rendering.dart';
 import 'package:fluvie_example/render/composition_entry.dart';
 
 /// Reads a [VideoSpec] from a JSON file at [path].
@@ -27,27 +25,10 @@ VideoSpec videoSpecFromFile(String path, {void Function(FluvieSpecWarning warnin
 
 void _warnToStderr(FluvieSpecWarning warning) => stderr.writeln('fluvie: spec warning: $warning');
 
-/// Builds a [CompositionEntry] from [spec]: geometry and fps come from the spec,
-/// the frame count from the built video, and the media sources from a static
-/// walk of its scenes (so `Image`/`Clip` pre-resolve like any composition).
-///
-/// The built tree is wrapped in a left-to-right [Directionality]: the capture
-/// canvas has no ambient locale, so a spec-built `Text` (a bare `RichText`)
-/// needs the LTR default the way the hand-written lessons and `renderTemplate`
-/// supply one. Without it the render throws "No Directionality widget found" at
-/// mount.
-CompositionEntry compositionFromSpec(VideoSpec spec) {
-  final video = spec.build();
-  return CompositionEntry(
-    key: 'spec',
-    width: spec.size.width,
-    height: spec.size.height,
-    fps: spec.fps,
-    frameCount: video.totalFrames,
-    build: () => Directionality(textDirection: TextDirection.ltr, child: spec.build()),
-    mediaSources: collectMediaSources(video.scenes),
-  );
-}
+/// Builds a [CompositionEntry] from [spec]; everything a render needs is derived
+/// from the built `Video`.
+CompositionEntry compositionFromSpec(VideoSpec spec) =>
+    CompositionEntry(key: 'spec', video: spec.build);
 
 /// Builds a [CompositionEntry] from the spec JSON file at [path].
 CompositionEntry compositionFromSpecFile(String path) =>

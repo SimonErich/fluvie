@@ -18,16 +18,7 @@ const Color _white = Color(0xFFFFFFFF);
 /// 84 frames (24 + 36 + 24), exercising the whole composition pipeline —
 /// scene gating, the build-time registrar, a cross-element trigger, and a
 /// staggered multi-child container.
-final multiSceneComposition = CompositionEntry(
-  key: 'multi_scene',
-  width: 320,
-  height: 240,
-  fps: 30,
-  frameCount: 84,
-  // The harness mounts no WidgetsApp, so the composition carries its own
-  // text direction for the scene 2 Text.
-  build: () => Directionality(textDirection: TextDirection.ltr, child: multiSceneVideo()),
-);
+const multiSceneComposition = CompositionEntry(key: 'multi_scene', video: multiSceneVideo);
 
 /// The `multi_scene` [Video]: a solid color card, then a gradient that
 /// shifts under an [Anchor] with an `after`-gated title, then three boxes

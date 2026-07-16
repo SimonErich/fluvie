@@ -40,10 +40,13 @@ void main() {
 
       expect(entry, isNotNull);
       expect(entry!.key, 'demo');
-      expect(entry.width, 320);
-      expect(entry.height, 240);
-      expect(entry.fps, 30);
-      expect(entry.frameCount, 48);
+      // Geometry, fps and frame count live on the built Video; the entry derives
+      // every one of them from it.
+      final video = entry.video();
+      expect(video.width, 320);
+      expect(video.height, 240);
+      expect(video.fps, 30);
+      expect(video.totalFrames, 48);
     });
 
     test('an unknown key resolves to null', () {
@@ -82,10 +85,11 @@ void main() {
 
         expect(entry, isNotNull, reason: lesson.id);
         expect(entry!.key, lesson.id);
-        expect(entry.width, video.width, reason: lesson.id);
-        expect(entry.height, video.height, reason: lesson.id);
-        expect(entry.fps, video.fps, reason: lesson.id);
-        expect(entry.frameCount, video.totalFrames, reason: lesson.id);
+        final built = entry.video();
+        expect(built.width, video.width, reason: lesson.id);
+        expect(built.height, video.height, reason: lesson.id);
+        expect(built.fps, video.fps, reason: lesson.id);
+        expect(built.totalFrames, video.totalFrames, reason: lesson.id);
       }
     });
 
@@ -101,7 +105,7 @@ void main() {
       await tester.pumpWidget(
         RenderControllerScope(
           controller: controller,
-          child: RepaintBoundary(key: boundaryKey, child: entry.build()),
+          child: RepaintBoundary(key: boundaryKey, child: entry.video()),
         ),
       );
 

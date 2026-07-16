@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
-import 'package:fluvie/rendering.dart' show collectMediaSources;
 import 'package:fluvie_example/render/composition_entry.dart';
 
 // The bundled fixtures the committed recap is built from — offline and
@@ -185,12 +184,4 @@ Widget _tile(_Media item) => SizedBox(
 );
 
 /// The renderable entry: `fluvie render days_recap`.
-final daysRecapComposition = CompositionEntry(
-  key: 'days_recap',
-  width: 1280,
-  height: 720,
-  fps: 30,
-  frameCount: daysRecapVideo().totalFrames,
-  mediaSources: collectMediaSources(daysRecapVideo().scenes),
-  build: () => Directionality(textDirection: TextDirection.ltr, child: daysRecapVideo()),
-);
+const daysRecapComposition = CompositionEntry(key: 'days_recap', video: daysRecapVideo);
