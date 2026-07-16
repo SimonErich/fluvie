@@ -38,6 +38,9 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 
 ## Motion
 
+Every preset, with exactly what it does and its defaults, is in
+[Animation presets](animation-presets.md).
+
 | Surface | Notes |
 | --- | --- |
 | `widget.animate([...], anchor:, window:, defaults:)` | attach animations to any widget |
@@ -196,4 +199,6 @@ another.
   tables above.
 - [Animating elements](../guides/animating-elements.md): the motion list in
   depth.
+- [Animation presets](animation-presets.md): every preset, with exactly what
+  each one does.
 - [Migration](migration.md): old names mapped to the surface above.

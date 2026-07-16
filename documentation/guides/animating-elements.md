@@ -29,17 +29,22 @@ Animation.blurIn(sigma: 16), // sharpen from a 16 px blur
 Animation.float(amplitude: 0.05), // bob forever, ambient
 ```
 
-The presets fall into three groups:
+The presets fall into groups by when they play:
 
 - **Enter** plays at the start of the window: `fadeIn`, `slideIn`, `slideFadeIn`,
-  `pop`, `scaleIn`, `blurIn`, `maskWipeIn`.
+  `pop`, `scaleIn`, `blurIn`, `maskWipeIn`, and `gradientShift`.
 - **Exit** plays at the end of the window: `fadeOut`, `slideOut`, `slideFadeOut`,
-  `scaleOut`, `blurOut`, `maskWipeOut`, `color`.
-- **Ambient** plays the whole window, on a loop: `float`, `pulse`, `drift`,
-  `spin`, `kenBurns`.
+  `scaleOut`, `blurOut`, `maskWipeOut`, and `color`.
+- **Ambient** plays the whole window, usually on a loop: `float`, `pulse`,
+  `drift`, `spin`, `kenBurns`, and `parallax`. `scaleY` and `pulse(on:)` follow
+  an audio band instead.
+- **Pixel post-effects** post-process the finished frame and always apply last:
+  `grain`, `vignette`, `scanlines`, `chromatic`, `bloom`, `glitchIn`,
+  `glitchOut`, `particles`, and `shader`. They sit in the same list. See
+  [Shaders and effects](../advanced/shaders-and-effects.md).
 
-There are pixel post-effects too (`grain`, `vignette`, `particles`, and more).
-They sit in the same list. See [Shaders and effects](../advanced/shaders-and-effects.md).
+For the complete list, with exactly what each preset does and its defaults, see
+[Animation presets](../reference/animation-presets.md).
 
 ## Compose enter and exit
 
