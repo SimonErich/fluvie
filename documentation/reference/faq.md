@@ -4,6 +4,13 @@ The questions a new user asks first. Each answer is short and links to the page
 that goes deeper. If you just want to render something, start here:
 
 ```sh
+fluvie render ./lib/my_video.dart --out out.mp4
+```
+
+From a clone of this repo, render a lesson by its key instead, because the
+gallery keeps a registry:
+
+```sh
 dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/01.mp4
 ```
 
@@ -39,22 +46,34 @@ the bytes can differ even when the picture looks the same. See
 That is Flutter's Ahem test font, which draws every glyph as a filled box, so a
 word looks like one bar. It means the real fonts were not loaded before the
 frames were captured. Fluvie's render pipeline (the CLI, the API, and the Docker
-image) loads the app fonts for you, so a normal render shows real text. If you
-build your own capture harness on top of `flutter test`, load the app fonts and
-set a real default font family before you render.
+image) loads the app fonts for you, so a normal render shows real text. The
+harness the CLI generates for each render does this itself, so you never wire it.
+If you host `renderVideo` yourself, load the app fonts and pass
+`defaultFontFamily` before you render.
 
-## Should I run with Impeller?
+## Should I render with Impeller?
 
-Yes, when you preview or run a video on the desktop. Impeller is Flutter's
-current renderer, and it draws shaders, grain, and blend modes the way the
-encoded video does:
+Only when an effect needs it. Impeller is Flutter's current renderer, and it
+draws shaders, grain, and blend modes differently from the default tester
+backend. An ordinary render does not use it:
 
 ```sh
-flutter run --enable-impeller
+fluvie render ./lib/my_video.dart --out out.mp4 --enable-impeller
 ```
 
-Rendering to a file does not need it: the headless pipeline produces the final
-frames on its own. Impeller affects the live desktop preview only.
+The flag passes `--enable-impeller` to `flutter test`, so the capture rasterizes
+with Impeller. Reach for it when a shader or a blend mode looks wrong in the
+encoded file, and leave it off otherwise.
+
+## How do I watch it while I work?
+
+```sh
+fluvie preview ./lib/my_video.dart
+```
+
+Edit the file, save, and the preview redraws. It runs on your desktop by default,
+because a desktop preview decodes any clip through FFmpeg while a browser is
+limited to what WebCodecs supports. Pass `-d chrome` for the browser.
 
 ## What can I render today?
 
@@ -131,8 +150,8 @@ import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 ```
 
-The four-name `hide` list resolves the shadow once; `fluvie init` writes it
-for you. If you need a hidden Flutter type, import it with a prefix
+The four-name `hide` list resolves the shadow once; the composition `fluvie init`
+scaffolds opens with it. If you need a hidden Flutter type, import it with a prefix
 (`import 'package:flutter/widgets.dart' as flutter;`). `src/` stays private,
 so you never import an internal path. The `no_src_import` lint enforces this.
 

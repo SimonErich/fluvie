@@ -31,12 +31,14 @@ final class NativeFrameExtractionService implements FrameExtractionService {
     int frameIndex, {
     required int width,
     required int height,
+    String? decoder,
   }) async {
     final frames = await extractFrames(
       source,
       [frameIndex],
       width: width,
       height: height,
+      decoder: decoder,
     );
     final frame = frames[frameIndex];
     if (frame == null) {
@@ -53,12 +55,15 @@ final class NativeFrameExtractionService implements FrameExtractionService {
   /// heap, so the work is chunked.
   static const int _batch = 8;
 
+  /// The `decoder` name is ignored: `MediaMetadataRetriever` picks the decoder
+  /// for a track itself, and its VP9 decode already carries alpha through.
   @override
   Future<Map<int, RawFrame>> extractFrames(
     Uri source,
     Iterable<int> frameIndices, {
     required int width,
     required int height,
+    String? decoder,
   }) async {
     final indices = frameIndices.toList();
     if (indices.isEmpty) return const {};

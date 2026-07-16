@@ -10,7 +10,9 @@ you direct, Fluvie keeps continuity, and FFmpeg runs the projector.
 ## Pick your seat
 
 - **New here?** Install Fluvie, render your first video, and learn the core ideas.
-  Start with [Installation](getting-started/installation.md).
+  Start with [Installation](getting-started/installation.md), then
+  [Start a project](getting-started/start-a-project.md): `fluvie init` scaffolds
+  one, `fluvie preview` runs it live, `fluvie render` writes the file.
 - **Building something?** Reach for the task [guides](guides/animating-elements.md):
   animation, audio, charts, code scenes, theming, and export.
 - **Just need a recipe?** The [cookbook](cookbook.md) has short answers to one task each.
@@ -26,8 +28,8 @@ you direct, Fluvie keeps continuity, and FFmpeg runs the projector.
 - **Declarative.** Compose scenes and elements like any Flutter screen.
 - **On-device or server.** Render in the browser, on a phone, from the command
   line, an HTTP API, or an MCP server. No display required.
-- **Cacheable.** The same input re-renders from cache, so golden tests and batch
-  rendering stay fast.
+- **Cacheable.** An unchanged composition re-renders from cache, so golden tests
+  and batch rendering stay fast.
 - **Conversational.** Ask for a video in plain language and get a spec back.
 
 ## The rest of the ecosystem

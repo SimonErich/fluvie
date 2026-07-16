@@ -5,12 +5,12 @@ file. This page explains what each costs, where the caches help, and the small
 habits that keep a render fast. Start with the biggest lever, the frame cache:
 
 ```sh
-# second run of an unchanged composition: every frame is a cache hit
-dart run packages/fluvie_cli/bin/fluvie.dart render 12_the_kitchen_sink --out build/12.mp4
+# an unchanged composition, re-rendered: every frame is a cache hit
+fluvie render ./lib/my_video.dart --out out.mp4 --cache
 ```
 
 Run that twice and the second run reads frames from disk instead of pumping the
-widget tree. The rest of this page covers why.
+widget tree. The rest of this page covers why, and why you have to ask for it.
 
 ## Capture and encode are two phases
 
@@ -28,15 +28,34 @@ each frame pumps a full tree. The encode is one FFmpeg pass over those frames.
 
 ## The frame cache skips repeated work
 
-Captured frames are stored on disk, keyed by a render digest. The digest
-combines the composition key, the render config, and the Fluvie version. On the
-next run, a frame whose digest and index are already on disk replays from the
-cache without pumping the tree at all.
+Captured frames are stored on disk, keyed by a render digest. The digest combines
+the composition key, the render config, and the Fluvie version. On the next run, a
+frame whose digest and index are already on disk replays from the cache without
+pumping the tree at all. For a file target there is no registry key, so the file's
+path stands in.
 
-The cache is advisory. The digest does not cover the composition's source code,
-so editing a composition under an unchanged key can serve stale frames. Bypass
-the cache with `--no-cache` while you iterate. A Fluvie version bump invalidates
-every cached frame on its own.
+The cache is advisory: the digest does not cover the composition's source code. An
+edited composition with the same size and frame count keeps the same digest, so it
+would replay its old frames and you would render yesterday's video. A Fluvie
+version bump invalidates every cached frame on its own.
+
+That is why the cache is **off by default** when you render a `.dart` file. You
+edit a file far more often than you re-render an unchanged one, so the safe
+default is to capture fresh. Pass `--cache` when you know the composition has not
+changed:
+
+```sh
+fluvie render ./lib/my_video.dart --out out.mp4                       # fresh capture
+fluvie render ./lib/my_video.dart --out out.gif --format gif --cache  # reuse the frames
+```
+
+The second call hits the cache because `--format` changes only the encode, not
+the capture. `--quality` and `--aspect` are part of the render config and so part
+of the digest, so changing either one re-captures whether or not you pass
+`--cache`.
+
+A key render is the other way round: the cache is on, and `--no-cache` bypasses it
+for one run.
 
 ## Content-hash caching loads media once
 

@@ -120,11 +120,17 @@ curl -s -X POST http://localhost:8080/v1/maintenance/cleanup \
 
 ## Rendering your own videos
 
-By default the server renders against the bundled example app. To render your
-own compositions, point `RENDER_PROJECT` at a Flutter project that contains the
-capture harness (`test/render/capture_harness_test.dart`). Spec and prompt
-renders work against any harness; a `key` render needs that key registered in
-the project.
+To render your own compositions, point `RENDER_PROJECT` at a Fluvie project: a
+directory whose `pubspec.yaml` depends on `fluvie`. That is the whole
+requirement. The server generates the capture harness it needs per render, so the
+project holds no harness file and no registry.
+
+With no `RENDER_PROJECT` the server discovers a project by walking up from its
+working directory, the same way the CLI does.
+
+Spec, prompt, and code renders work against any Fluvie project. A `key` render is
+the exception: it needs a project that still keeps a registry-based harness, with
+that key registered in it.
 
 Specs that reference remote `Image`/`Clip` URLs need a render project whose media
 client is allowed to fetch them. The bundled example uses an offline client for

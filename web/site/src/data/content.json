@@ -12,7 +12,7 @@
     {
       "key": "fluvie_cli",
       "role": "the projectionist",
-      "line": "fluvie render <key> --out file.mp4. Headless, scriptable, no editor in sight.",
+      "line": "fluvie render ./lib/video.dart --out file.mp4. Headless, scriptable, no editor in sight.",
       "icon": "&#9654;"
     },
     {

@@ -5,8 +5,25 @@ the versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-15
+
+The single-file release. A composition is a file with a top-level
+`Video build()`, and `renderVideo` is the one capture entry a host drives.
+See the [migration guide](https://docs.fluvie.dev/reference/migration/).
+
 ### Added
 
+- **`renderVideo`** on `package:fluvie/rendering.dart`: the one capture entry a
+  host drives. It takes a `Video` and derives geometry, media, audio, captions,
+  and reactive audio from it; the host supplies only `pumpWidget`, `pumpFrame`,
+  `setViewSize`, and `runAsync`. Encoding stays out of it: the returned
+  `RenderManifest` carries the complete ffmpeg argument array.
+- `SetViewSize`, `ShellRunAsync`, and `runAsyncDirectly` on the rendering
+  barrel: the host seams `renderVideo` takes.
+- `parseAspect`, `parseQuality`, `parseExportFormat`, `parsePosterTime`, and
+  `writeRenderProgress` are now public on `package:fluvie/rendering.dart`, so a
+  generated harness turns CLI defines into typed arguments without reaching into
+  `src/`.
 - `LivePlayer` and `LivePlaybackController`: clock-driven live playback of
   a composition (play, pause, seek, hold, playRange, rate) on the same
   frame pipeline capture uses.
@@ -17,6 +34,16 @@ the versions follow [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **WebM/VP9 clips work, including alpha.** A `.webm` failed the probe because
+  Matroska stores no `nb_frames` and no per-stream duration; the frame count is
+  now counted with a `-count_frames` pass, falling back to duration times frame
+  rate. The pass runs only for a container that stored no count, so an MP4 never
+  pays it.
+- **VP9 alpha is no longer silently dropped.** VP9 codes alpha as a second layer
+  that only `libvpx-vp9` reads; ffmpeg's native `vp9` decoder ignored it and the
+  clip composited over black. A VP9 stream tagged `ALPHA_MODE=1` now selects
+  `libvpx-vp9`. An opaque VP9 clip stays on the native decoder, which is much
+  faster.
 - `LivePlaybackController` survives a ticker restart: when a remounted
   `LivePlayer` hands it a fresh ticker (elapsed starts over at zero), the
   clock rebases at the current frame and carries on instead of rewinding

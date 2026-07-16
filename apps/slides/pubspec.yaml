@@ -14,9 +14,9 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_riverpod: ^3.3.2
-  fluvie: ^0.2.0
-  fluvie_editor: ^0.2.0
-  fluvie_presenter: ^0.2.0
+  fluvie: ^0.3.0
+  fluvie_editor: ^0.3.0
+  fluvie_presenter: ^0.3.0
   obers_ui:
     git:
       url: https://github.com/SimonErich/obers_ui.git

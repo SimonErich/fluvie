@@ -47,25 +47,40 @@ Video lesson01Video() {
 - `.animate([...])` attaches motion to any widget. The fade and the pop both
   start when the scene starts; you never type a frame number.
 
+In your own project the builder is named `build`: a composition file exposes a
+top-level `Video build()`, and that is what the CLI calls. The gallery names each
+lesson so thirteen of them can live side by side.
+
 ## Render it
 
-From the repo root:
+Point the CLI at the file and name an output:
+
+```sh
+fluvie render ./lib/my_video.dart --out hello.mp4
+```
+
+The CLI captures every frame, then FFmpeg encodes the MP4. From this repo, render
+the lesson by its key instead, because the gallery keeps a registry:
 
 ```sh
 dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/01_hello_video.mp4
 ```
 
-The CLI captures every frame, then FFmpeg encodes the MP4.
-
 ## Preview it
 
-Open the example app and pick "Hello, video" in the lesson list. Scrub the
-slider to step through frames; the timeline pane shows when each animation
-plays.
+Watch it live, with hot reload:
+
+```sh
+fluvie preview ./lib/my_video.dart
+```
+
+Edit the file, save, and the preview redraws. In this repo you can also open the
+gallery app and pick "Hello, video" in the lesson list: scrub the slider to step
+through frames, and the timeline pane shows when each animation plays.
 
 ## Where to next
 
-- [Start a project](start-a-project.md): scaffold this as a runnable project with
+- [Start a project](start-a-project.md): scaffold this as a project with
   `fluvie init`.
 - [Core concepts](core-concepts.md): Video, Scene, Time, animate, Defaults.
 - [Timing and triggers](../guides/timing-and-triggers.md): make elements

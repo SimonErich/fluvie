@@ -64,9 +64,16 @@ Future<void> renderForAspects({
 `render` ignores any size the composition declares for itself and uses the
 aspect's size instead. It mounts the aspect over the tree, so every `Adaptive`
 branch and every `AspectScope.of` read picks the variant for the render in progress.
-The `service`, `pumpWidget`, and `pumpFrame` are the host's render wiring; the
-example app and the CLI supply them. From the command line, the same job is
-`fluvie render <key> --out <file> --aspect landscape`.
+The `service`, `pumpWidget`, and `pumpFrame` are the host's render wiring. A host
+that already has a `Video` should reach for `renderVideo(video:, aspect:)`
+instead: it takes the same aspect and derives everything else from the video. See
+[the rendering surface](../reference/rendering-surface.md).
+
+From the command line, the same job is one flag:
+
+```sh
+fluvie render ./lib/my_video.dart --out landscape.mp4 --aspect landscape
+```
 
 ## Branching at build time
 

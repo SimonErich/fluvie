@@ -270,7 +270,7 @@
   // ---- seats ----
   var SEATS: Record<string, { forL: string; snip: string; cta: string; href: string; glyph: string }> = {
     live: { forL: "For the cold visitor", snip: "open https://demo.fluvie.dev", cta: "Open the live demo", href: "https://demo.fluvie.dev", glyph: "▶" },
-    cli:  { forL: "For your terminal", snip: "fluvie render hello --out hello.mp4", cta: "Read the CLI docs", href: "https://pub.dev/packages/fluvie_cli", glyph: "⎘" },
+    cli:  { forL: "For your terminal", snip: "fluvie render ./lib/hello.dart --out hello.mp4", cta: "Read the CLI docs", href: "https://pub.dev/packages/fluvie_cli", glyph: "⎘" },
     http: { forL: "Render from anywhere", snip: 'POST /render\n{ "video": "hello" }\n\n200 OK  →  hello.mp4', cta: "Self-host the API", href: "https://docs.fluvie.dev/guides/rendering-on-a-server", glyph: "⛁" },
     mcp:  { forL: "Let an assistant shoot it", snip: 'tool: fluvie.render\n{ "key": "hello" }', cta: "Read the MCP guide", href: "https://docs.fluvie.dev/guides/ai-and-mcp", glyph: "⌘" }
   };

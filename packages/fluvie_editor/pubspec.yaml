@@ -1,6 +1,6 @@
 name: fluvie_editor
 description: "A visual editor for Fluvie presentations: a direct-manipulation canvas, an inspector, and a timeline over the .fluvie document."
-version: 0.2.0
+version: 0.3.0
 # obers_ui resolves from GitHub (it is not on pub.dev yet), which pub.dev
 # rejects for published packages; unset this once obers_ui publishes.
 publish_to: none
@@ -26,8 +26,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_riverpod: ^3.3.2
-  fluvie: ^0.2.0
-  fluvie_presenter: ^0.2.0
+  fluvie: ^0.3.0
+  fluvie_presenter: ^0.3.0
   meta: ^1.16.0
   obers_ui:
     git:

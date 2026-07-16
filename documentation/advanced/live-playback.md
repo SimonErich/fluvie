@@ -25,6 +25,9 @@ picture lands, no drift between what plays and what renders.
 
 ## Playing clips in a preview
 
+`fluvie preview ./lib/my_video.dart` wires this for you. Reach for the rest of this
+section only when you host a `LivePlayer` yourself, in an app of your own.
+
 A player alone gives a `Clip` no frames to paint. A render decodes its media in
 a pre-pass before frame 0, and paint reads that cache synchronously. A plain
 preview runs no pre-pass, so a clip shows a labelled placeholder instead.
