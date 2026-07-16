@@ -120,9 +120,12 @@ melos:
       exec:
         concurrency: 1
       packageFilters:
+        # Only packages that actually own golden tests. `flutter test --tags
+        # golden` exits non-zero with "No tests match the requested tag
+        # selectors" in a package that has none, which fails the whole script.
+        # Add a package here in the same change that gives it its first golden.
         scope:
           - fluvie
-          - fluvie_editor
           - fluvie_presenter
           - kitten_kit
           - slides
