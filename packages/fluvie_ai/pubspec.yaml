@@ -1,6 +1,6 @@
 name: fluvie_ai
 description: "Author Fluvie videos from natural language: a provider-agnostic LLM client that emits a deterministic VideoSpec."
-version: 0.3.0
+version: 0.3.1
 repository: https://github.com/SimonErich/fluvie/tree/main/packages/fluvie_ai
 homepage: https://github.com/SimonErich/fluvie
 issue_tracker: https://github.com/SimonErich/fluvie/issues
@@ -22,7 +22,7 @@ dependencies:
   ai_abstracted: ^0.1.0
   flutter:
     sdk: flutter
-  fluvie: ^0.3.0
+  fluvie: ^0.3.1
   http: ^1.5.0
   meta: ^1.16.0
   riverpod: ^3.3.2

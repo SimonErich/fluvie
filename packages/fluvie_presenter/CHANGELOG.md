@@ -3,10 +3,13 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.3.1] - 2026-07-16
+
+Lockstep release with the rest of the Fluvie workspace.
+
 ## [0.3.0] - 2026-07-16
 
-Lockstep release with the rest of the workspace; replace this note with
-the package changes, or leave it if there are none.
+Lockstep release with the rest of the Fluvie workspace.
 
 ## [Unreleased]
 

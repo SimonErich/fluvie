@@ -4,7 +4,7 @@ import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
 /// The pinned `fluvie` dependency `fluvie init` adds to a project.
-const String fluvieDependencyVersion = '^0.3.0';
+const String fluvieDependencyVersion = '^0.3.1';
 
 /// The pinned `alchemist` dev dependency the generated capture harness needs (it
 /// loads the real bundled fonts so captured text is not Ahem boxes).
@@ -13,7 +13,7 @@ const String alchemistDependencyVersion = '^0.14.0';
 /// The pinned `fluvie_lints` dev dependency `fluvie init` wires up: the rules
 /// that catch timing mistakes (dangling anchors, cyclic triggers, animations
 /// past their window) as you type.
-const String fluvieLintsDependencyVersion = '^0.3.0';
+const String fluvieLintsDependencyVersion = '^0.3.1';
 
 /// The pinned `custom_lint` dev dependency that hosts the fluvie_lints rules
 /// in the analyzer.

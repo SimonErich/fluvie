@@ -5,6 +5,19 @@ the versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-07-16
+
+### Changed
+
+- Extracted clip frames are cached across runs, so re-rendering a
+  composition that embeds a `Clip` reuses the frames instead of decoding
+  them again.
+
+### Fixed
+
+- The temporary clip-frame store is swept and deleted synchronously, so a
+  render no longer leaks temp frame directories.
+
 ## [0.3.0] - 2026-07-15
 
 The single-file release. A composition is a file with a top-level

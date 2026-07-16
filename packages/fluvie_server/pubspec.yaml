@@ -1,6 +1,6 @@
 name: fluvie_server
 description: "Self-hostable Fluvie server: render API, AI authoring, MCP, and a documentation helper in one binary, toggled by environment variables."
-version: 0.3.0
+version: 0.3.1
 repository: https://github.com/SimonErich/fluvie/tree/main/packages/fluvie_server
 homepage: https://github.com/SimonErich/fluvie
 issue_tracker: https://github.com/SimonErich/fluvie/issues
@@ -27,8 +27,8 @@ resolution: workspace
 dependencies:
   analyzer: ">=8.0.0 <9.0.0"
   crypto: ^3.0.7
-  fluvie_cli: ^0.3.0
-  fluvie_validate: ^0.3.0
+  fluvie_cli: ^0.3.1
+  fluvie_validate: ^0.3.1
   http: ^1.5.0
   meta: ^1.16.0
   minio: ^3.5.8

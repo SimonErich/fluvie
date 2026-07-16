@@ -3,6 +3,10 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.3.1] - 2026-07-16
+
+Lockstep release with the rest of the Fluvie workspace.
+
 ## [0.3.0] - 2026-07-15
 
 The single-file release. Point the CLI at a `.dart` file and it generates the
