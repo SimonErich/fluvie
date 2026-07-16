@@ -43,7 +43,7 @@ Positioned.fill(
 ),
 ```
 
-Lesson 13 renders exactly this. See the [API spec](../../concept/API_SPEC.md)
+Lesson 13 renders exactly this. See the [API spec](https://github.com/SimonErich/fluvie/blob/main/concept/API_SPEC.md)
 for the full type reference.
 
 ## Set up your keys

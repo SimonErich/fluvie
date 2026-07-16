@@ -2260,7 +2260,7 @@ All rendering packages are optional; the core `package:fluvie` never pulls in FF
 
 ---
 
-## 31. Consolidation map (old → new)
+## 31. Consolidation map
 
 | Today                                                                 | Becomes                                            |
 | --------------------------------------------------------------------- | -------------------------------------------------- |

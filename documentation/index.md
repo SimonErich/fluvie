@@ -21,7 +21,7 @@ you direct, Fluvie keeps continuity, and FFmpeg runs the projector.
 - **Want AI to direct?** See [AI and MCP](guides/ai-and-mcp.md): author a video from a
   prompt, run it locally, or point Claude at it.
 - **Need the reference?** The [cheatsheet](reference/cheatsheet.md) lists the whole
-  public surface on one page. The [full map](README.md) links every documentation page.
+  public surface on one page. The [full map](https://github.com/SimonErich/fluvie/blob/main/documentation/README.md) links every documentation page.
 
 ## Why people like it
 
