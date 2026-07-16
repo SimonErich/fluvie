@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:fluvie_cli/fluvie_cli.dart' show fileHarnessSource;
 import 'package:fluvie_server/src/api/render/code_import_policy.dart';
 import 'package:fluvie_server/src/api/render/code_render_setup.dart';
 import 'package:fluvie_server/src/api/render/render_runner.dart';
@@ -20,8 +21,37 @@ void main() {
 
     expect(File('${staged.dir.path}/input.dart').readAsStringSync(), _goodCode);
     final harness = File('${staged.dir.path}/harness_test.dart').readAsStringSync();
-    expect(harness, contains("import 'input.dart' as user;"));
+    expect(harness, contains("import 'input.dart' as target;"));
     expect(staged.dir.path, startsWith('${project.path}/.fluvie_playground/'));
+  });
+
+  test('generates the same harness the CLI does, so the two cannot drift', () {
+    // The server no longer carries its own copy of the harness text: it calls
+    // the CLI's template with the snippet as the target.
+    final staged = stageCodeRender(projectDir: project.path, code: _goodCode);
+
+    expect(
+      File('${staged.dir.path}/harness_test.dart').readAsStringSync(),
+      fileHarnessSource(targetImport: 'input.dart', timeout: codeRenderTimeout),
+    );
+  });
+
+  test('the harness carries a bounded timeout, so a runaway build() is killed', () {
+    // The difference from a trusted local render, which uses Timeout.none: an
+    // untrusted snippet gets a ceiling `flutter test` enforces.
+    final harness = File(
+      '${stageCodeRender(projectDir: project.path, code: _goodCode).dir.path}/harness_test.dart',
+    ).readAsStringSync();
+
+    expect(
+      harness,
+      contains('timeout: const Timeout(Duration(seconds: ${codeRenderTimeout.inSeconds}))'),
+    );
+    expect(harness, isNot(contains('Timeout.none')));
+  });
+
+  test('the staged harness is ephemeral: two submissions never share a directory', () {
+    expect(stageCodeRender(projectDir: project.path, code: _goodCode).ephemeral, isTrue);
   });
 
   test('the harness path is relative to the project root', () {
@@ -64,10 +94,14 @@ void main() {
 
   group('stageCodeRenderOrFail', () {
     test('stages under the given render project', () {
-      // The marker file resolveProjectDir looks for.
-      File(
-        '${project.path}/test/render/capture_harness_test.dart',
-      ).createSync(recursive: true);
+      // The pubspec depending on fluvie that resolveProjectDir probes for.
+      File('${project.path}/pubspec.yaml').writeAsStringSync('''
+name: fluvie_example
+dependencies:
+  flutter:
+    sdk: flutter
+  fluvie: ^0.2.0
+''');
 
       final staged = stageCodeRenderOrFail(renderProject: project.path, code: _goodCode);
 

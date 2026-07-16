@@ -1,12 +1,10 @@
 import 'dart:io';
 
-import 'package:fluvie_cli/src/templates/capture_harness_template.dart';
-import 'package:fluvie_cli/src/templates/widget_test_template.dart';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
 /// The pinned `fluvie` dependency `fluvie init` adds to a project.
-const String fluvieDependencyVersion = '^0.2.0';
+const String fluvieDependencyVersion = '^0.3.0';
 
 /// The pinned `alchemist` dev dependency the render harness needs (it loads the
 /// real bundled fonts so captured text is not Ahem boxes).
@@ -15,7 +13,7 @@ const String alchemistDependencyVersion = '^0.14.0';
 /// The pinned `fluvie_lints` dev dependency `fluvie init` wires up: the rules
 /// that catch timing mistakes (dangling anchors, cyclic triggers, animations
 /// past their window) as you type.
-const String fluvieLintsDependencyVersion = '^0.2.0';
+const String fluvieLintsDependencyVersion = '^0.3.0';
 
 /// The pinned `custom_lint` dev dependency that hosts the fluvie_lints rules
 /// in the analyzer.
@@ -77,68 +75,6 @@ bool ensureDependency(
   }
   pubspec.writeAsStringSync(editor.toString());
   return true;
-}
-
-/// Writes the render harness and a widget test for [names] into [projectDir],
-/// registering [packageName]'s `lib/`-relative [libPath], and adds the
-/// `alchemist` dev dependency the harness needs.
-///
-/// Returns the project-relative paths written (skipping any that already existed
-/// when [force] is `false`).
-List<String> writeRenderScaffold({
-  required Directory projectDir,
-  required String packageName,
-  required ScaffoldNames names,
-  required String libPath,
-  required bool force,
-}) {
-  final written = <String>[];
-  final harness = File('${projectDir.path}/test/render/capture_harness_test.dart');
-  final harnessWritten = writeFileIfAbsent(
-    harness,
-    captureHarnessSource(
-      packageName: packageName,
-      compositions: [(key: names.key, function: names.functionName, libPath: libPath)],
-    ),
-    force: force,
-  );
-  if (harnessWritten) written.add('test/render/capture_harness_test.dart');
-
-  final test = File('${projectDir.path}/test/${names.key}_test.dart');
-  final testWritten = writeFileIfAbsent(
-    test,
-    widgetTestSource(
-      importLine: "import 'package:$packageName/$libPath';",
-      functionName: names.functionName,
-    ),
-    force: force,
-  );
-  if (testWritten) written.add('test/${names.key}_test.dart');
-
-  ensureDependency(
-    File('${projectDir.path}/pubspec.yaml'),
-    section: 'dev_dependencies',
-    name: 'alchemist',
-    version: alchemistDependencyVersion,
-  );
-  // Fluvie's own lints ride the same scaffold: the rules that catch timing
-  // mistakes (dangling anchors, cyclic triggers) light up in the IDE without
-  // any manual wiring.
-  ensureDependency(
-    File('${projectDir.path}/pubspec.yaml'),
-    section: 'dev_dependencies',
-    name: 'custom_lint',
-    version: customLintDependencyVersion,
-  );
-  ensureDependency(
-    File('${projectDir.path}/pubspec.yaml'),
-    section: 'dev_dependencies',
-    name: 'fluvie_lints',
-    version: fluvieLintsDependencyVersion,
-  );
-  final lintsWired = ensureCustomLintPlugin(File('${projectDir.path}/analysis_options.yaml'));
-  if (lintsWired) written.add('analysis_options.yaml');
-  return written;
 }
 
 /// Wires the `custom_lint` analyzer plugin into [analysisOptions] so the

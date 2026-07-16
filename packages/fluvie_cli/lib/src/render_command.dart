@@ -4,9 +4,14 @@ import 'package:args/args.dart';
 import 'package:fluvie_cli/src/cli_failure.dart';
 import 'package:fluvie_cli/src/export_flags.dart';
 import 'package:fluvie_cli/src/ffmpeg_gate.dart';
+import 'package:fluvie_cli/src/file_target.dart';
 import 'package:fluvie_cli/src/process_runner.dart';
+import 'package:fluvie_cli/src/project_assets.dart';
 import 'package:fluvie_cli/src/render_defines.dart';
 import 'package:fluvie_cli/src/render_pipeline.dart';
+import 'package:fluvie_cli/src/stage_harness.dart';
+import 'package:fluvie_cli/src/templates/file_harness_template.dart';
+import 'package:path/path.dart' as p;
 
 /// Creates the per-render temp sandbox; deleted after the render unless
 /// `--keep-temp` is passed.
@@ -39,7 +44,20 @@ final class RenderCommand {
   static ArgParser buildParser() {
     final parser = ArgParser(usageLineLength: 80)
       ..addOption('out', help: 'Path of the output file (required).')
-      ..addOption('spec', help: 'Render a VideoSpec JSON file instead of a registry key.');
+      ..addOption('spec', help: 'Render a VideoSpec JSON file instead of a registry key.')
+      ..addOption(
+        'entry',
+        defaultsTo: 'build',
+        help: 'The top-level function returning the Video, when rendering a .dart file.',
+      )
+      ..addFlag(
+        'cache',
+        negatable: false,
+        help:
+            'Reuse cached frames when rendering a .dart file. Off by default: the '
+            'frame cache does not key on the composition, so an edit would replay '
+            'stale frames.',
+      );
     addSharedRenderOptions(parser);
     return parser;
   }
@@ -79,15 +97,33 @@ final class RenderCommand {
     }
     final extraDefines = hasSpec ? specDefines(specPath) : const <String, String>{};
     try {
+      // A `.dart` positional is a composition file: it needs no registry and no
+      // committed harness, so the CLI stages one that imports it directly.
+      final target = !hasSpec && isFileTarget(key)
+          ? resolveFileTarget(
+              arg: key,
+              entry: args.option('entry') ?? 'build',
+              project: args.option('project'),
+            )
+          : null;
+      if (target != null) syncAssetsBlock(target.projectDir);
       return await captureThenEncode(
         runner: _runner,
         createSandbox: _createSandbox,
         args: args,
-        key: key,
+        // The composition key namespaces the frame cache; a file target has no
+        // registry key, so its path stands in.
+        key: target == null ? key : p.relative(target.path, from: target.projectDir),
         outPath: outPath,
         frames: frames,
         flags: flags,
         extraDefines: extraDefines,
+        projectDirOverride: target?.projectDir,
+        // The frame cache keys on the config and the composition key, never on
+        // the composition itself, so an edited file with the same size and frame
+        // count would replay its old frames. Off unless asked for.
+        noCacheOverride: target == null ? null : !args.flag('cache'),
+        stage: target == null ? null : (projectDir) => _stageFor(target),
         out: out,
         err: err,
         resolveFfmpeg: _resolveFfmpeg,
@@ -96,5 +132,26 @@ final class RenderCommand {
       err.writeln(failure.message);
       return 1;
     }
+  }
+
+  /// Stages the generated harness for [target] under the project's `.fluvie/`.
+  ///
+  /// The directory is deterministic (keyed to the target, not to the run) and
+  /// survives the render, so `flutter test`'s kernel cache hits when the same
+  /// composition is rendered again.
+  static StagedHarness _stageFor(FileTarget target) {
+    final slug = p
+        .relative(target.path, from: target.projectDir)
+        .replaceAll(RegExp('[^A-Za-z0-9]+'), '_');
+    final relativeDir = '.fluvie/$slug';
+    return stageHarness(
+      projectDir: target.projectDir,
+      relativeDir: relativeDir,
+      ephemeral: false,
+      harnessSource: fileHarnessSource(
+        targetImport: target.importFrom(p.join(target.projectDir, relativeDir)),
+        entry: target.entry,
+      ),
+    );
   }
 }

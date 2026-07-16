@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:fluvie_cli/src/init_new_project.dart' show packageNameFor;
 import 'package:fluvie_cli/src/init_support.dart';
 import 'package:test/test.dart';
 
@@ -46,24 +45,6 @@ void main() {
         functionName: 'starterVideo',
         fileName: 'starter.dart',
       ));
-    });
-  });
-
-  group('packageNameFor', () {
-    test('passes through a valid name', () {
-      expect(packageNameFor('my_fluvie_video'), 'my_fluvie_video');
-    });
-
-    test('sanitizes punctuation and case', () {
-      expect(packageNameFor('My-Cool.App'), 'my_cool_app');
-    });
-
-    test('prefixes a leading digit', () {
-      expect(packageNameFor('123app'), 'app_123app');
-    });
-
-    test('uses the last path segment', () {
-      expect(packageNameFor('/tmp/some/cool_clip'), 'cool_clip');
     });
   });
 

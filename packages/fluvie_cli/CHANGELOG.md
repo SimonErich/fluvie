@@ -3,6 +3,56 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-07-15
+
+The single-file release. Point the CLI at a `.dart` file and it generates the
+harness and the preview app for you, so a project is a composition, an `assets/`
+folder, and a pubspec. See the
+[migration guide](https://docs.fluvie.dev/reference/migration/).
+
+### Added
+
+- **`fluvie preview <file.dart>`**: a live, hot-reloading preview. Edit the
+  composition, save, watch it redraw. `-d <device>` picks the device; the default
+  is the host desktop, not the browser, because a desktop preview decodes any clip
+  through FFmpeg while a browser is limited to what WebCodecs supports (no
+  ProRes). The app is generated and cached in `~/.cache/fluvie/preview/<hash>/`,
+  outside the project.
+- **`fluvie render <file.dart> --out <file>`**: render a composition file
+  directly. The capture harness is generated under `<project>/.fluvie/` per
+  render, so there is nothing to commit and nothing to drift.
+- `--entry <name>` on `render` and `preview`: the top-level function returning the
+  `Video`. Defaults to `build`.
+- `--cache` on `render`: reuse cached frames for a `.dart` target. Off by default,
+  because the render digest keys on the config and the composition key, never on
+  the composition itself, so an edited file with the same size and frame count
+  would replay stale frames.
+
+### Changed
+
+- **BREAKING. `fluvie init` scaffolds a project, not an app.** It writes exactly
+  `pubspec.yaml`, `.gitignore`, `<name>.dart`, `assets/.gitkeep`, and
+  `analysis_options.yaml`. It no longer runs `flutter create`, no longer
+  scaffolds a capture harness or a registry, and is no longer interactive.
+- **BREAKING. `fluvie init` flags are now `--name`, `--dir`, and `--force`.**
+  `--path`, `--render` / `--no-render`, and `--yes` / `-y` are gone. With no
+  prompts there is nothing to say yes to, and with no harness there is nothing to
+  skip.
+- A scaffolded composition exposes a top-level `Video build()` rather than a
+  named builder registered under a key.
+- The `flutter: assets:` pubspec block is CLI-managed and re-derived on every
+  render and preview. Flutter enumerates a declared asset directory
+  non-recursively, so an `assets/` entry alone silently misses
+  `assets/images/foo.png`; the CLI writes an entry for every subdirectory that
+  holds files.
+- The generated harness drives fluvie's `renderVideo`, so the CLI and any other
+  host run the same capture path.
+
+### Fixed
+
+- The Playground no longer requires `examples/gallery` to exist on the render
+  host: a code render stages its harness against any Fluvie project.
+
 ## [0.2.0] - 2026-07-06
 
 ### Changed

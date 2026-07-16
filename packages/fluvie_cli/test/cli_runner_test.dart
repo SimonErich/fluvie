@@ -24,11 +24,21 @@ void main() {
         ['init'],
         out: out,
         err: err,
-        init: InitCommand(workingDirectory: empty, readLine: () => 'n'),
+        init: InitCommand(workingDirectory: empty),
       );
 
-      expect(code, 0);
-      expect(out.toString(), contains('Nothing created'));
+      expect(code, 0, reason: err.toString());
+      expect(out.toString(), contains('Scaffolding a Fluvie project in ${empty.path}'));
+      expect(File('${empty.path}/lib/example_video.dart').existsSync(), isTrue);
+    });
+
+    test('--help mentions the preview command', () async {
+      final out = StringBuffer();
+      final err = StringBuffer();
+
+      await run(['--help'], out: out, err: err);
+
+      expect(out.toString(), contains('preview'));
     });
 
     test('--help prints usage to out and exits 0', () async {

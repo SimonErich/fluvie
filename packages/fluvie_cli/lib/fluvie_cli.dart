@@ -2,7 +2,7 @@
 /// render server can reuse the capture→encode pipeline without a command line.
 library;
 
-export 'src/capture_process.dart' show resolveProjectDir;
+export 'src/capture_process.dart' show isFluvieProject, resolveProjectDir;
 export 'src/cli_failure.dart';
 export 'src/cli_runner.dart';
 export 'src/codegen/dart_spec_printer.dart' show printVideoSpecJson;
@@ -13,10 +13,12 @@ export 'src/ffmpeg/ffmpeg_provisioner.dart';
 export 'src/ffmpeg/ffmpeg_release.dart' show pinnedFfmpegBuildLabel, pinnedFfmpegVersion;
 export 'src/ffmpeg_command.dart';
 export 'src/ffmpeg_gate.dart' show ensureFfmpeg;
+export 'src/file_target.dart';
 export 'src/generate_command.dart';
 export 'src/init_command.dart';
-export 'src/init_prompt.dart' show InitPrompt, LineReader;
+export 'src/preview_command.dart';
 export 'src/process_runner.dart';
+export 'src/project_assets.dart';
 export 'src/render_command.dart';
 export 'src/render_defines.dart';
 export 'src/render_manifest.dart' show RenderManifest;
@@ -28,3 +30,5 @@ export 'src/render_pipeline.dart'
         validateExportFlags,
         validateFrames;
 export 'src/render_progress.dart';
+export 'src/stage_harness.dart';
+export 'src/templates/file_harness_template.dart';

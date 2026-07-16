@@ -15,7 +15,7 @@ import 'package:fluvie_server/src/mcp/render_gateway.dart';
 /// `tool/set_version.sh` rewrites the version on release, in lockstep with the
 /// pubspec (a test guards the two staying equal).
 const String _name = 'fluvie';
-const String _version = '0.2.0';
+const String _version = '0.3.0';
 
 /// Loads the documentation corpus when docs are enabled, else `null`.
 DocSearchService? buildDocs(FluvieServerConfig config) => config.enableDocs

@@ -8,6 +8,7 @@ import 'package:fluvie_cli/src/ffmpeg/ffmpeg_provisioner.dart';
 import 'package:fluvie_cli/src/ffmpeg_gate.dart';
 import 'package:fluvie_cli/src/process_runner.dart';
 import 'package:fluvie_cli/src/render_pipeline.dart';
+import 'package:fluvie_cli/src/stage_harness.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -113,6 +114,7 @@ void main() {
     Map<String, String>? environment,
     Map<String, String> extraDefines = const {},
     String harnessPath = 'test/render/capture_harness_test.dart',
+    StagedHarness Function(String projectDir)? stage,
     void Function(StringSink out) report = _noop,
   }) => runRenderPipeline(
     runner: runner,
@@ -125,6 +127,7 @@ void main() {
     extraDefines: extraDefines,
     environment: environment,
     harnessPath: harnessPath,
+    stage: stage,
     out: out,
     err: err,
     report: report,
@@ -236,6 +239,87 @@ void main() {
     expect(reported, isTrue);
   });
 
+  group('stage', () {
+    late Directory project;
+
+    setUp(() {
+      project = Directory.systemTemp.createTempSync('fluvie_pipeline_project_');
+      addTearDown(() {
+        if (project.existsSync()) project.deleteSync(recursive: true);
+      });
+    });
+
+    StagedHarness stageIn(String projectDir) => stageHarness(
+      projectDir: projectDir,
+      harnessSource: '// GENERATED\nvoid main() {}\n',
+      relativeDir: '.fluvie_playground/abc',
+    );
+
+    test('a staged harness replaces the harnessPath in the capture argv', () async {
+      stubHappyPath();
+
+      final code = await run(options: _optionsFor(project.path), stage: stageIn);
+
+      expect(code, 0, reason: err.toString());
+      final captured =
+          verify(
+                () => runner.run(
+                  'flutter',
+                  captureAny(),
+                  workingDirectory: any(named: 'workingDirectory'),
+                ),
+              ).captured.single
+              as List<String>;
+      expect(captured, contains('.fluvie_playground/abc/harness_test.dart'));
+      expect(captured, isNot(contains('test/render/capture_harness_test.dart')));
+    });
+
+    test('the stage callback is handed the resolved project directory', () async {
+      stubHappyPath();
+      String? seen;
+
+      await run(
+        options: _optionsFor(project.path),
+        stage: (projectDir) {
+          seen = projectDir;
+          return stageIn(projectDir);
+        },
+      );
+
+      expect(seen, project.path);
+    });
+
+    test('an ephemeral staging is cleaned up after the render', () async {
+      stubHappyPath();
+
+      await run(options: _optionsFor(project.path), stage: stageIn);
+
+      expect(Directory('${project.path}/.fluvie_playground/abc').existsSync(), isFalse);
+    });
+
+    test('the staging is cleaned up even when the capture fails', () async {
+      stubHappyPath();
+      when(
+        () => runner.run('flutter', any(), workingDirectory: any(named: 'workingDirectory')),
+      ).thenAnswer((_) async => const ProcessRunResult(exitCode: 1, stdout: 'boom', stderr: ''));
+
+      await expectLater(
+        run(options: _optionsFor(project.path), stage: stageIn),
+        throwsA(isA<Object>()),
+      );
+
+      expect(Directory('${project.path}/.fluvie_playground/abc').existsSync(), isFalse);
+    });
+
+    test('the harness is staged before the sandbox, and the render still runs in it', () async {
+      stubHappyPath();
+
+      await run(options: _optionsFor(project.path), stage: stageIn);
+
+      verify(() => runner.run('flutter', any(), workingDirectory: project.path)).called(1);
+    });
+  });
+
   test('an ffmpeg below the floor aborts before any capture', () async {
     when(
       () => runner.run('ffmpeg', const ['-version']),
@@ -255,3 +339,14 @@ void main() {
 }
 
 void _noop(StringSink out) {}
+
+/// The default pipeline options, pointed at [projectDir].
+RenderPipelineOptions _optionsFor(String projectDir) => (
+  ffmpegBinary: null,
+  projectDir: projectDir,
+  noCache: false,
+  noDownload: false,
+  enableImpeller: false,
+  verbose: false,
+  keepTemp: false,
+);

@@ -93,9 +93,7 @@ void main() {
     bool writesManifest = true,
     bool writesFrames = true,
   }) {
-    when(
-      () => runner.run('flutter', any(), workingDirectory: any(named: 'workingDirectory')),
-    ).thenAnswer((_) async {
+    Future<ProcessRunResult> capture() async {
       if (writesFrames) {
         File('${sandbox.path}/frames.rgba').writeAsBytesSync(List.filled(64, 0));
       }
@@ -103,7 +101,21 @@ void main() {
         File('${sandbox.path}/manifest.json').writeAsStringSync(jsonEncode(_manifestJson()));
       }
       return ProcessRunResult(exitCode: exitCode, stdout: stdout, stderr: '');
-    });
+    }
+
+    when(
+      () => runner.run('flutter', any(), workingDirectory: any(named: 'workingDirectory')),
+    ).thenAnswer((_) => capture());
+    // A gate-resolved ffmpeg that is not a bare `ffmpeg` on PATH makes the
+    // pipeline hand the capture an environment, which is a distinct call shape.
+    when(
+      () => runner.run(
+        'flutter',
+        any(),
+        workingDirectory: any(named: 'workingDirectory'),
+        environment: any(named: 'environment'),
+      ),
+    ).thenAnswer((_) => capture());
   }
 
   void stubEncode({int exitCode = 0, String binary = 'ffmpeg'}) {
@@ -279,6 +291,233 @@ void main() {
       expect(code, 0);
       expect(sandbox.existsSync(), isTrue);
       expect(err.toString(), contains(sandbox.path));
+    });
+
+    test('the gate-resolved ffmpeg is prepended to the capture PATH', () async {
+      // The capture extracts a clip's frames itself, in the test subprocess, so
+      // it needs the gate-resolved ffmpeg on PATH too, not just the encode the
+      // CLI spawns directly. Without this a downloaded (cache-only) ffmpeg
+      // encodes fine while every Clip fails to decode.
+      stubProbe(binary: '/opt/tools/ffmpeg');
+      stubCapture();
+      stubEncode(binary: '/opt/tools/ffmpeg');
+
+      final code = await execute([
+        'demo',
+        '--out',
+        outPath,
+        '--project',
+        'example',
+        '--ffmpeg',
+        '/opt/tools/ffmpeg',
+      ]);
+
+      expect(code, 0, reason: err.toString());
+      final captured =
+          verify(
+                () => runner.run(
+                  'flutter',
+                  any(),
+                  workingDirectory: any(named: 'workingDirectory'),
+                  environment: captureAny(named: 'environment'),
+                ),
+              ).captured.single
+              as Map<String, String>;
+      expect(captured['PATH'], startsWith('/opt/tools'));
+      // Prepended, never replaced: the rest of the user's PATH survives.
+      expect(captured['PATH'], contains(Platform.environment['PATH'] ?? ''));
+    });
+
+    test('a bare ffmpeg on PATH needs no environment, so a plain render is unchanged', () async {
+      // Already on PATH: nothing to prepend, so the capture inherits this
+      // process's environment exactly as it did before the gate learned to
+      // forward ffmpeg.
+      stubProbe();
+      stubCapture();
+      stubEncode();
+
+      await execute(['demo', '--out', outPath, '--project', 'example']);
+
+      final captured = verify(
+        () => runner.run(
+          'flutter',
+          any(),
+          workingDirectory: any(named: 'workingDirectory'),
+          environment: captureAny(named: 'environment'),
+        ),
+      ).captured.single;
+      expect(captured, isNull);
+    });
+  });
+
+  group('RenderCommand file target', () {
+    late Directory project;
+    late String composition;
+
+    setUp(() {
+      project = Directory.systemTemp.createTempSync('fluvie_cli_file_project_');
+      File('${project.path}/pubspec.yaml').writeAsStringSync('''
+name: my_video
+dependencies:
+  flutter:
+    sdk: flutter
+  fluvie: ^0.2.0
+''');
+      composition = '${project.path}/example_video.dart';
+      File(composition).writeAsStringSync('Video build() => throw 0;');
+      addTearDown(() {
+        if (project.existsSync()) project.deleteSync(recursive: true);
+      });
+    });
+
+    /// The argv of the single capture spawned by the last render.
+    List<String> capturedArgv() =>
+        verify(
+              () => runner.run(
+                'flutter',
+                captureAny(),
+                workingDirectory: any(named: 'workingDirectory'),
+              ),
+            ).captured.single
+            as List<String>;
+
+    test('renders a .dart file through a generated harness under .fluvie/', () async {
+      stubProbe();
+      stubCapture();
+      stubEncode();
+
+      final code = await execute([composition, '--out', outPath]);
+
+      expect(code, 0, reason: err.toString());
+      final argv = capturedArgv();
+      expect(argv, contains('.fluvie/example_video_dart/harness_test.dart'));
+      expect(argv, isNot(contains('test/render/capture_harness_test.dart')));
+    });
+
+    test('the staged harness statically imports the composition', () async {
+      stubProbe();
+      stubCapture();
+      stubEncode();
+
+      await execute([composition, '--out', outPath]);
+
+      final harness = File(
+        '${project.path}/.fluvie/example_video_dart/harness_test.dart',
+      ).readAsStringSync();
+      expect(harness, contains("import '../../example_video.dart' as target;"));
+      expect(harness, contains('video: target.build(),'));
+    });
+
+    test('the staged harness survives the render, so the kernel cache hits again', () async {
+      // The directory is keyed to the target, not to the run.
+      stubProbe();
+      stubCapture();
+      stubEncode();
+
+      await execute([composition, '--out', outPath]);
+
+      expect(
+        File('${project.path}/.fluvie/example_video_dart/harness_test.dart').existsSync(),
+        isTrue,
+      );
+    });
+
+    test('the capture runs in the discovered project directory', () async {
+      stubProbe();
+      stubCapture();
+      stubEncode();
+
+      await execute([composition, '--out', outPath]);
+
+      verify(() => runner.run('flutter', any(), workingDirectory: project.path)).called(1);
+    });
+
+    test('--entry names the top-level function returning the Video', () async {
+      stubProbe();
+      stubCapture();
+      stubEncode();
+
+      await execute([composition, '--out', outPath, '--entry', 'introClipVideo']);
+
+      expect(
+        File('${project.path}/.fluvie/example_video_dart/harness_test.dart').readAsStringSync(),
+        contains('video: target.introClipVideo(),'),
+      );
+    });
+
+    test(
+      'the frame cache is off by default: an edited file must not replay stale frames',
+      () async {
+        // The cache keys on the config and the composition key, never on the
+        // composition itself, so an edited file with the same size and frame
+        // count would replay its old frames.
+        stubProbe();
+        stubCapture();
+        stubEncode();
+
+        await execute([composition, '--out', outPath]);
+
+        expect(capturedArgv(), contains('--dart-define=FLUVIE_RENDER_NO_CACHE=true'));
+      },
+    );
+
+    test('--cache opts back into the frame cache', () async {
+      stubProbe();
+      stubCapture();
+      stubEncode();
+
+      await execute([composition, '--out', outPath, '--cache']);
+
+      expect(capturedArgv(), isNot(contains('--dart-define=FLUVIE_RENDER_NO_CACHE=true')));
+    });
+
+    test('the composition path stands in for the registry key', () async {
+      // A file target has no registry key, so its project-relative path
+      // namespaces the frame cache.
+      stubProbe();
+      stubCapture();
+      stubEncode();
+
+      await execute([composition, '--out', outPath]);
+
+      expect(capturedArgv(), contains('--dart-define=FLUVIE_RENDER_KEY=example_video.dart'));
+    });
+
+    test('the pubspec assets block is synced before the render', () async {
+      stubProbe();
+      stubCapture();
+      stubEncode();
+      File('${project.path}/assets/images/hero.png')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(const [0]);
+
+      await execute([composition, '--out', outPath]);
+
+      expect(
+        File('${project.path}/pubspec.yaml').readAsStringSync(),
+        contains('assets/images/'),
+      );
+    });
+
+    test('a missing composition file is exit 1 with a stated reason', () async {
+      stubProbe();
+
+      final code = await execute(['no_such_file.dart', '--out', outPath]);
+
+      expect(code, 1);
+      expect(err.toString(), contains('No such composition file'));
+    });
+
+    test('a bare key still resolves through the registry harness', () async {
+      // `fluvie render starter` must keep working for a project with a
+      // committed, registry-based harness.
+      stubProbe();
+      stubCapture();
+      stubEncode();
+
+      await execute(['demo', '--out', outPath, '--project', 'example']);
+
+      expect(capturedArgv(), contains('test/render/capture_harness_test.dart'));
     });
   });
 

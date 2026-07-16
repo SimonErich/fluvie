@@ -77,7 +77,6 @@ Future<ui.Image> _frameImage() async {
 
 Video _video() => Video(
   size: VideoSize.square,
-  fps: 30,
   scenes: [
     Scene(
       duration: const Time.frames(4),

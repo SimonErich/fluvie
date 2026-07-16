@@ -137,16 +137,17 @@ void main() {
       tester,
       PreviewMediaScope(
         composition: _video(),
-        resolver: _resolver(decoder, maxEdge: 720),
-        maxClipEdge: 720,
+        resolver: _resolver(decoder, maxEdge: 360),
+        maxClipEdge: 360,
       ),
       controller,
     );
 
     expect(find.byType(ImageResolverScope), findsOneWidget, reason: 'the warm-up must have landed');
-    // 1920x1080 bounded to a 720 long edge: 8.3 MB a frame becomes 1.2 MB.
-    expect(decoder.decodedWidth, 720);
-    expect(decoder.decodedHeight, 404);
+    // 1920x1080 bounded to a 360 long edge: 8.3 MB a frame becomes 0.3 MB. The
+    // bound is deliberately not the 720 default, so this fails if it is ignored.
+    expect(decoder.decodedWidth, 360);
+    expect(decoder.decodedHeight, 202);
   });
 
   testWidgets('an unbounded preview decodes at the source resolution', (tester) async {
@@ -174,18 +175,18 @@ void main() {
       Center(
         child: PreviewMediaScope(
           composition: _video(),
-          resolver: _resolver(decoder, maxEdge: 720),
-          maxClipEdge: 720,
+          resolver: _resolver(decoder, maxEdge: 360),
+          maxClipEdge: 360,
         ),
       ),
       controller,
     );
 
     final raw = tester.widget<flutter.RawImage>(find.byType(flutter.RawImage));
-    expect(raw.image!.width, 720, reason: 'the raster really is the proxy');
+    expect(raw.image!.width, 360, reason: 'the raster really is the proxy');
     expect(
       raw.scale,
-      closeTo(720 / 1920, 1e-9),
+      closeTo(360 / 1920, 1e-9),
       reason: "RawImage's intrinsic size is image.width / scale, so this cancels the proxy out",
     );
     final render = tester.renderObject<RenderBox>(find.byType(flutter.RawImage));
