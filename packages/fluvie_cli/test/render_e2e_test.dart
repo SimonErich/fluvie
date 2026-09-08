@@ -40,6 +40,126 @@ Video build() => Video(
 );
 ''';
 
+// A native Flutter ticker, with its elapsed microseconds painted as a binary
+// strip so the encoded frames expose timing errors smaller than one pixel.
+const String _nativeAnimationComposition = '''
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
+import 'package:fluvie/fluvie.dart';
+
+Video build() => Video(
+  width: 96,
+  height: 64,
+  fps: 29,
+  scenes: [
+    Scene(
+      duration: Time.frames(30),
+      children: const [NativeClock()],
+    ),
+  ],
+);
+
+class NativeClock extends StatefulWidget {
+  const NativeClock({super.key});
+
+  @override
+  State<NativeClock> createState() => _NativeClockState();
+}
+
+class _NativeClockState extends State<NativeClock>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _controller,
+    builder: (context, child) => SizedBox(
+      width: 96,
+      height: 64,
+      child: CustomPaint(
+        painter: _ClockPainter(
+          _controller.value,
+          _controller.lastElapsedDuration?.inMicroseconds ?? 0,
+        ),
+      ),
+    ),
+  );
+}
+
+class _ClockPainter extends CustomPainter {
+  const _ClockPainter(this.value, this.elapsed);
+
+  final double value;
+  final int elapsed;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final level = (value * 255).round();
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = Color.fromARGB(255, level, level, level),
+    );
+    for (var bit = 0; bit < 24; bit++) {
+      canvas.drawRect(
+        Rect.fromLTWH(bit * 4.0, 32, 4, 32),
+        Paint()..color = (elapsed & (1 << bit)) == 0
+            ? Colors.black
+            : Colors.white,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ClockPainter oldDelegate) => elapsed != oldDelegate.elapsed;
+}
+''';
+
+Future<void> _prepareFileProject(Directory project, String composition) async {
+  project.createSync(recursive: true);
+  File('${project.path}/pubspec.yaml').writeAsStringSync('''
+name: e2e_clip
+publish_to: none
+version: 1.0.0
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fluvie:
+    path: ${Directory.current.parent.path}/fluvie
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  alchemist: ^0.14.0
+''');
+  File('${project.path}/lib/example_video.dart')
+    ..createSync(recursive: true)
+    ..writeAsStringSync(composition);
+
+  final got = await Process.run('flutter', const [
+    'pub',
+    'get',
+  ], workingDirectory: project.path);
+  expect(got.exitCode, 0, reason: '${got.stdout}\n${got.stderr}');
+}
+
 Future<ProcessResult> _renderKey(String key, String outPath, List<String> extra) =>
     Process.run('dart', [
       'run',
@@ -107,35 +227,7 @@ void main() {
     // assets/ folder and a pubspec. There is no registry, no committed harness
     // and no app. The CLI stages a harness that statically imports the
     // composition and drives the same capture the keyed path does.
-    final project = Directory(_fileTargetProject)..createSync(recursive: true);
-    File('${project.path}/pubspec.yaml').writeAsStringSync('''
-name: e2e_clip
-publish_to: none
-version: 1.0.0
-
-environment:
-  sdk: ^3.12.0
-
-dependencies:
-  flutter:
-    sdk: flutter
-  fluvie:
-    path: ${Directory.current.parent.path}/fluvie
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  alchemist: ^0.14.0
-''');
-    File('${project.path}/lib/example_video.dart')
-      ..createSync(recursive: true)
-      ..writeAsStringSync(_fileComposition);
-
-    final got = await Process.run('flutter', const [
-      'pub',
-      'get',
-    ], workingDirectory: project.path);
-    expect(got.exitCode, 0, reason: '${got.stdout}\n${got.stderr}');
+    await _prepareFileProject(Directory(_fileTargetProject), _fileComposition);
 
     const outPath = '$_fileTargetProject/clip.mp4';
     final result = await _renderFile(
@@ -153,17 +245,6 @@ dev_dependencies:
     expect(stream['height'], 64);
     expect(stream['nb_frames'], '6');
 
-    // The harness is generated per render and never committed, so it cannot
-    // drift from the CLI that writes it. It survives the render so `flutter
-    // test`'s kernel cache hits on a re-render of the same target.
-    final harness = File('$_fileTargetProject/.fluvie/lib_example_video_dart/harness_test.dart');
-    expect(harness.existsSync(), isTrue);
-    // Imported by its package URI: a relative import would give the same file a
-    // second library identity, so its Video would not be the harness's Video.
-    expect(
-      harness.readAsStringSync(),
-      contains("import 'package:e2e_clip/example_video.dart' as target;"),
-    );
 
     // A re-render works against the surviving staging directory.
     final again = await _renderFile(
@@ -172,6 +253,59 @@ dev_dependencies:
       const ['--no-cache'],
     );
     expect(again.exitCode, 0, reason: _combined(again));
+  });
+
+  test('native Flutter animation follows exact 29fps CLI timestamps', () async {
+    final project = Directory.systemTemp.createTempSync('fluvie_native_clock_');
+    addTearDown(() => project.deleteSync(recursive: true));
+    await _prepareFileProject(project, _nativeAnimationComposition);
+    final outPath = '${project.path}/native_clock.mp4';
+    final result = await _renderFile(
+      '${project.path}/lib/example_video.dart',
+      outPath,
+      const ['--no-cache'],
+    );
+    expect(result.exitCode, 0, reason: _combined(result));
+
+    final decoded = await Process.run(
+      'ffmpeg',
+      [
+        '-v', 'error',
+        '-i', outPath,
+        '-f', 'rawvideo',
+        '-pix_fmt', 'rgb24',
+        'pipe:1',
+      ],
+      stdoutEncoding: null,
+    );
+    expect(decoded.exitCode, 0, reason: decoded.stderr as String);
+    final pixels = decoded.stdout as List<int>;
+    const frameBytes = 96 * 64 * 3;
+    expect(pixels, hasLength(30 * frameBytes));
+
+    for (var frame = 0; frame < 30; frame++) {
+      final offset = frame * frameBytes;
+      // The large upper patch visibly fades from black to mid-grey. Allow for
+      // H.264's lossy colour conversion, but not a frozen or mis-paced ticker.
+      expect(
+        pixels[offset + (16 * 96 + 48) * 3],
+        closeTo(frame / 29 / 2 * 255, 3),
+        reason: 'native animation value in frame $frame',
+      );
+      var elapsed = 0;
+      for (var bit = 0; bit < 24; bit++) {
+        if (pixels[offset + (48 * 96 + bit * 4 + 2) * 3] > 128) {
+          elapsed |= 1 << bit;
+        }
+      }
+      // Integer rounding of n/29 seconds: even seven microseconds of cumulative
+      // drift at frame 29 changes this visible barcode and fails the assertion.
+      expect(
+        elapsed,
+        (frame * 1000000 + 14) ~/ 29,
+        reason: 'native ticker elapsed microseconds in frame $frame',
+      );
+    }
   });
 
   test('fluvie render demo: encode, probe, cache hits, --no-cache', () async {

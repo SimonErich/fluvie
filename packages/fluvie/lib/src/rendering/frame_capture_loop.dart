@@ -28,14 +28,14 @@ typedef FrameHandler = Future<void> Function(RawFrame frame);
 
 /// The deterministic capture loop, shared by every render backend.
 ///
-/// Runs `config.startFrame .. startFrame + frameCount - 1` in order, appending
-/// each frame's RGBA bytes to [sink]. With a [store] active, a frame found under
-/// `digest + index` is appended from cache without pumping; otherwise it is
-/// pumped via [pump], captured under [boundaryKey], appended, and stored. A
-/// cached entry whose byte length does not match the expected frame size is
-/// treated as a miss and recaptured (the store is advisory). The frame is the
-/// only clock and the sink is storage-agnostic, so the same loop drives a disk
-/// file (desktop/mobile) or an in-memory buffer (web) identically.
+/// Runs `config.startFrame .. startFrame + frameCount - 1` in order, pumping
+/// every frame exactly once via [pump] before selecting its pixels. This keeps
+/// widget state and native animations evolving even on cache hits. With a
+/// [store] active, valid bytes found under `digest + index` are reused; only
+/// misses are captured under [boundaryKey] and stored. A cached entry whose
+/// byte length does not match the expected frame size is treated as a miss and
+/// recaptured (the store is advisory). The frame is the only clock and the sink
+/// is storage-agnostic, so disk and in-memory consumers evolve identically.
 /// Provide exactly one frame consumer: a [sink] the raw bytes are appended to
 /// (desktop/mobile/server), or an [onFrame] handler each [RawFrame] is passed to
 /// (the bounded-memory web PNG path). When [onFrame] is set the [sink] is unused.
@@ -57,6 +57,7 @@ Future<void> runFrameCaptureLoop({
   final useStore = config.cacheEnabled && store != null;
   final end = config.startFrame + config.frameCount;
   for (var frame = config.startFrame; frame < end; frame++) {
+    await pump(frame);
     final cached = useStore ? await store.lookup(digest, frame) : null;
     final RawFrame raw;
     if (cached != null && cached.length == frameBytes) {
@@ -67,7 +68,6 @@ Future<void> runFrameCaptureLoop({
         rgba: cached,
       );
     } else {
-      await pump(frame);
       raw = await capture.capture(
         boundaryKey: boundaryKey,
         frameIndex: frame,

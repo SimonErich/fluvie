@@ -14,9 +14,6 @@ library;
 /// (`build` by convention). [timeout] bounds the test: `null` means
 /// `Timeout.none`, which a trusted local render wants; an untrusted render
 /// passes a duration so a runaway `build()` is killed by `flutter test`.
-///
-/// A pure function (no IO), so the template is unit-tested without a Flutter
-/// toolchain.
 String fileHarnessSource({
   required String targetImport,
   String entry = 'build',
@@ -61,9 +58,12 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     final progressFile = Platform.environment['FLUVIE_PROGRESS_FILE'];
+    final video = target.$entry();
+    var frame = 0;
+    var previousTimestamp = 0;
 
     await renderVideo(
-      video: target.$entry(),
+      video: video,
       outDir: Directory(_outDir),
       compositionKey: _key.isEmpty ? 'render' : _key,
       frameCountOverride: _frames.isEmpty ? null : int.parse(_frames),
@@ -78,7 +78,14 @@ void main() {
         tester.view.devicePixelRatio = 1.0;
       },
       pumpWidget: tester.pumpWidget,
-      pumpFrame: () => tester.pump(),
+      pumpFrame: () async {
+        // The capture loop pumps every frame in order, including cache hits.
+        // Round absolute timestamps so fractional frame periods never drift.
+        final timestamp = (frame * Duration.microsecondsPerSecond / video.fps).round();
+        await tester.pump(Duration(microseconds: timestamp - previousTimestamp));
+        previousTimestamp = timestamp;
+        frame++;
+      },
       runAsync: tester.runAsync,
       onProgress: progressFile == null || progressFile.isEmpty
           ? null

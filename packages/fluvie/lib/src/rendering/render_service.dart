@@ -35,13 +35,13 @@ typedef AudioMixStager =
     Future<AudioMixLanes> Function({required MediaResolver resolver, required Directory sandbox});
 
 /// Drives the deterministic capture pipeline: pre-resolve media, loop the
-/// frames (cache → pump → capture → append), then write the manifest **last**
+/// frames (pump → cache lookup → capture on miss → append), then write the manifest **last**
 /// as the completion signal.
 ///
 /// The frame loop is the only clock: every frame is explicitly pumped via the
-/// injected [FramePump] before its pixels are read, media is pre-resolved
-/// before the first frame, and frames whose render digest is already cached
-/// replay from disk without pumping at all.
+/// injected [FramePump] before its pixels are selected, media is pre-resolved
+/// before the first frame, and cached frames reuse their pixels from disk
+/// without skipping widget-tree evolution.
 final class RenderService {
   /// Creates a render service over the injected seams.
   ///
@@ -67,9 +67,9 @@ final class RenderService {
   /// `outDir/manifest.json` **last**, returning the parsed manifest.
   ///
   /// Order of operations: `media.preResolveAll(mediaSources)` → frame loop
-  /// (`config.startFrame` ascending; per frame: cache lookup by digest+index,
-  /// else [pump] then capture under [boundaryKey], append to the frames file,
-  /// cache store) → manifest write. The manifest embeds the complete encode
+  /// (`config.startFrame` ascending; per frame: [pump], cache lookup by digest+index,
+  /// capture under [boundaryKey] and cache store on a miss, append to the frames
+  /// file) → manifest write. The manifest embeds the complete encode
   /// argument array from [VideoEncoderService.planEncodeArgs].
   Future<RenderManifest> captureToDirectory({
     required RenderConfig config,

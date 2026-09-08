@@ -5,6 +5,14 @@ the versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.1+ws.1] - 2026-09-08
+
+### Fixed
+
+- Pump every frame during cached capture so stateful Flutter widgets mount and
+  advance identically in cold, warm and partially cached renders. Cached frames
+  still skip pixel capture. The render version invalidates earlier frame caches.
+
 ## [0.3.1] - 2026-07-16
 
 ### Changed
