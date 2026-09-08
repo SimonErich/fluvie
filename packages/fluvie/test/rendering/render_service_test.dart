@@ -21,6 +21,8 @@ import 'package:fluvie/src/rendering/capture/render_manifest.dart';
 import 'package:fluvie/src/rendering/capture/repaint_boundary_capture_service.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/encoding/frame_cache.dart';
+import 'package:fluvie/src/rendering/frame_capture_loop.dart';
+import 'package:fluvie/src/rendering/io/memory_render_sandbox.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
 import 'package:fluvie/src/rendering/render_service.dart';
 import 'package:fluvie/src/rendering/runtime/frame_provider.dart';
@@ -67,6 +69,39 @@ class _FrameColorBox extends StatelessWidget {
     final f = FrameProvider.of(context).frame;
     return ColoredBox(color: Color.fromARGB(255, (f * 5) % 256, (f * 3) % 256, (f * 7) % 256));
   }
+}
+
+/// Starts a native ticker when mounted, rather than deriving pixels from a seek.
+class _NativeAnimationBox extends StatefulWidget {
+  const _NativeAnimationBox();
+
+  @override
+  State<_NativeAnimationBox> createState() => _NativeAnimationBoxState();
+}
+
+class _NativeAnimationBoxState extends State<_NativeAnimationBox>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animation = AnimationController(vsync: this, duration: const Duration(seconds: 1))
+      ..forward();
+  }
+
+  @override
+  void dispose() {
+    _animation.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _animation,
+    builder: (context, child) =>
+        ColoredBox(color: Color.fromARGB(255, (_animation.value * 255).round(), 0, 0)),
+  );
 }
 
 const int _width = 16;
@@ -221,6 +256,100 @@ void main() {
         File('${outA.path}/frames.rgba').readAsBytesSync(),
       );
     });
+
+    for (final useHandler in [false, true]) {
+      testWidgets(
+        'partial cache preserves native animation bytes through '
+        '${useHandler ? 'onFrame' : 'sink'}',
+        (tester) async {
+          tester.view.physicalSize = const ui.Size(_width * 1.0, _height * 1.0);
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          final config = _config(frameCount: 6);
+          const digest = 'native-animation';
+          final cache = FrameCache(_tempDir('partial_animation'));
+
+          Future<Uint8List> render(_CountingCapture capture, {bool cached = false}) async {
+            final frame = ValueNotifier(-1);
+            final boundaryKey = GlobalKey();
+            await tester.pumpWidget(
+              RepaintBoundary(
+                key: boundaryKey,
+                child: ValueListenableBuilder<int>(
+                  valueListenable: frame,
+                  builder: (context, value, child) => value >= 1
+                      ? const _NativeAnimationBox()
+                      : const ColoredBox(color: Color(0xFF000000)),
+                ),
+              ),
+            );
+            final sandbox = MemoryRenderSandbox();
+            final sink = useHandler ? null : sandbox.openFrames('frames.rgba');
+            final handled = BytesBuilder(copy: false);
+            final pumped = <int>[];
+            var previousTimestamp = 0;
+            try {
+              await tester.runAsync(() async {
+                await runFrameCaptureLoop(
+                  config: config,
+                  digest: digest,
+                  pump: (index) async {
+                    pumped.add(index);
+                    frame.value = index;
+                    final timestamp = (index * 1000000 / config.fps).round();
+                    await tester.pump(
+                      Duration(microseconds: timestamp - previousTimestamp),
+                    );
+                    previousTimestamp = timestamp;
+                  },
+                  boundaryKey: boundaryKey,
+                  capture: capture,
+                  store: cached ? FrameCacheStore(cache) : null,
+                  sink: sink,
+                  onFrame: useHandler ? (raw) async => handled.add(raw.rgba) : null,
+                );
+              });
+            } finally {
+              await sink?.close();
+              await tester.pumpWidget(const SizedBox());
+              frame.dispose();
+            }
+            expect(pumped, [0, 1, 2, 3, 4, 5]);
+            return useHandler ? handled.takeBytes() : sandbox.readBytes('frames.rgba');
+          }
+
+          final coldCapture = _CountingCapture();
+          final cold = await render(coldCapture);
+          Uint8List bytesAt(int frame) =>
+              Uint8List.sublistView(cold, frame * _frameBytes, (frame + 1) * _frameBytes);
+          expect(coldCapture.captures, 6);
+          expect(
+            bytesAt(5),
+            isNot(orderedEquals(bytesAt(2))),
+            reason: 'the native animation must actually change the captured pixels',
+          );
+
+          await tester.runAsync(() async {
+            // Frame 1 mounts the ticker. Skipping this cached frame starts the
+            // animation late, changing later uncached pixels even with absolute time.
+            for (final frame in [0, 1, 3]) {
+              await cache.store(cache.frameKey(digest, frame), bytesAt(frame));
+            }
+            // A corrupt hit must be recaptured after exactly one frame pump.
+            await cache.store(cache.frameKey(digest, 4), Uint8List(1));
+          });
+
+          final partialCapture = _CountingCapture();
+          final partial = await render(partialCapture, cached: true);
+          expect(partial, orderedEquals(cold));
+          expect(partialCapture.captures, 3, reason: 'only missing or corrupt pixels are read');
+          await tester.runAsync(() async {
+            expect(await cache.lookup(cache.frameKey(digest, 4)), orderedEquals(bytesAt(4)));
+          });
+        },
+      );
+    }
 
     testWidgets('cacheEnabled: false always captures', (tester) async {
       final (_, key, pump) = await _mountDemoTree(tester);

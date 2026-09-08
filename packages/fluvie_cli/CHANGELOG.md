@@ -3,6 +3,14 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.3.1+ws.1] - 2026-09-08
+
+### Fixed
+
+- Advance Flutter's animation clock during generated CLI captures, using the
+  video's FPS and rounded absolute timestamps. Native widget animations render
+  without accumulating fractional-frame timing drift.
+
 ## [0.3.1] - 2026-07-16
 
 Lockstep release with the rest of the Fluvie workspace.
