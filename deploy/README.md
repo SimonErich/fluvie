@@ -11,6 +11,8 @@ folder.
 | `fluvie-server` | `server.Dockerfile` | `env/server.env` | 8080 | api.fluvie.dev |
 | `fluvie-server-docs` | `server-docs.Dockerfile` | `env/server-docs.env` | 8080 | mcp.fluvie.dev |
 | `fluvie-demo` | `demo.Dockerfile` | `env/demo.env` (build-time) | 80 | demo.fluvie.dev |
+| `fluvie-examples` | `examples.Dockerfile` | build argument `FLUVIE_API_URL` | 80 | examples.fluvie.dev, playground.fluvie.dev |
+| `fluvie-editor` | `editor.Dockerfile` | none | 80 | editor.fluvie.dev |
 
 `fluvie-server` is the full server: the render API, the MCP server, and the
 documentation helper in one binary, each toggled by env (`FLUVIE_ENABLE_API` /
