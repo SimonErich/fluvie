@@ -97,7 +97,10 @@ class _ReactiveView extends StatelessWidget {
   /// The band energy at the current frame, or `0` for the neutral fallback —
   /// throwing only when a capture has no precomputed table.
   double _energy(BuildContext context, BandTable? table) {
-    if (PreparationScope.exposesOnlyGeometry(context)) return 0;
+    if (PreparationScope.exposesOnlyGeometry(context)) {
+      PreparationScope.requestAudioAnalysis(context);
+      return 0;
+    }
     if (table == null) {
       if (RenderModeContext.isCapture(context)) {
         throw FluvieRenderException(

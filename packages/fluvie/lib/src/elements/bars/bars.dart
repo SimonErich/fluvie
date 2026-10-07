@@ -10,6 +10,7 @@ import 'package:fluvie/src/elements/bars/render/bars_painter.dart';
 import 'package:fluvie/src/elements/runtime/element_shared.dart';
 import 'package:fluvie/src/rendering/runtime/frame_provider.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
 import 'package:fluvie/src/theme/build_context_tokens.dart';
 
 /// A spectrum-bar visualizer driven by a precomputed audio band table — an
@@ -73,6 +74,10 @@ final class Bars extends StatelessWidget {
   /// The current frame's energy for [band], or `0` for the neutral fallback —
   /// throwing only when a capture has no precomputed table.
   double _energy(BuildContext context, BandTable? table) {
+    if (PreparationScope.exposesOnlyGeometry(context)) {
+      PreparationScope.requestAudioAnalysis(context);
+      return 0;
+    }
     if (table == null) {
       if (RenderModeContext.isCapture(context)) {
         throw FluvieRenderException(
