@@ -9,8 +9,8 @@ import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/elements/bars/render/bars_painter.dart';
 import 'package:fluvie/src/elements/runtime/element_shared.dart';
 import 'package:fluvie/src/rendering/runtime/frame_provider.dart';
-import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
 import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
+import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
 import 'package:fluvie/src/theme/build_context_tokens.dart';
 
 /// A spectrum-bar visualizer driven by a precomputed audio band table — an
