@@ -17,6 +17,19 @@ on:
   push:
     tags: ["v[0-9]+.[0-9]+.[0-9]+"]
   workflow_dispatch:
+    inputs:
+      service:
+        description: Build and redeploy one image, or all services
+        type: choice
+        options:
+          - all
+          - fluvie-server
+          - fluvie-server-docs
+          - fluvie-demo
+          - fluvie-examples
+          - fluvie-editor
+        default: all
+        required: true
 
 permissions:
   contents: read
@@ -25,6 +38,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.name
     strategy:
       fail-fast: false
       matrix:
