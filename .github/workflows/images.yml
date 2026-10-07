@@ -38,7 +38,6 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.name
     strategy:
       fail-fast: false
       matrix:
@@ -60,13 +59,17 @@ jobs:
             hook: DOKPLOY_WEBHOOK_EDITOR
     steps:
       - uses: actions/checkout@v4
+        if: github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.name
       - uses: docker/setup-buildx-action@v3
+        if: github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.name
       - uses: docker/login-action@v3
+        if: github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.name
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - id: meta
+        if: github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.name
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
@@ -75,6 +78,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest
       - uses: docker/build-push-action@v6
+        if: github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.name
         # Disable the post-push GitHub build summary/record upload and the
         # provenance attestation: both call the flaky GitHub Actions API, which
         # has been 404ing and failing the step AFTER the image already pushed —
@@ -99,6 +103,7 @@ jobs:
       # build above stops the leg before this runs, leaving the other services'
       # legs untouched.
       - name: Redeploy ${{ matrix.name }}
+        if: github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.name
         env:
           DOKPLOY_WEBHOOK_SERVER: ${{ secrets.DOKPLOY_WEBHOOK_SERVER }}
           DOKPLOY_WEBHOOK_SERVER_DOCS: ${{ secrets.DOKPLOY_WEBHOOK_SERVER_DOCS }}
