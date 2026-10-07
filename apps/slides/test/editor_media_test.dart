@@ -140,6 +140,17 @@ void main() {
       expect(pick.isVideo, isTrue);
     });
 
+    test('a browser object URL is never serialized as a file path', () async {
+      final pick = await mediaPickFor(
+        name: 'photo.png',
+        path: 'blob:https://editor.fluvie.dev/1234',
+        bytes: [1, 2, 3],
+      );
+      expect(pick!.source['value'], isNot('blob:https://editor.fluvie.dev/1234'));
+      expect(pick.source['kind'], 'file'); // VM test materializes bytes to a temp file.
+      File(pick.source['value']! as String).deleteSync();
+    });
+
     test('bytes are materialized to a real temp file on desktop', () async {
       final pick = await mediaPickFor(name: 'photo.png', bytes: [1, 2, 3]);
       expect(pick!.isVideo, isFalse);

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:fluvie_editor/fluvie_editor.dart' show MediaImporter, MediaPick;
 import 'package:slides/editor/dropped_media_io.dart'
     if (dart.library.js_interop) 'package:slides/editor/dropped_media_web.dart';
@@ -18,6 +19,12 @@ const Set<String> videoExtensions = {'mp4', 'mov', 'webm'};
 const Set<String> audioExtensions = {'mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac'};
 
 String _extension(String name) => name.split('.').last.toLowerCase();
+
+/// An importer that can return every file selected in one picker action.
+abstract interface class MultiMediaImporter implements MediaImporter {
+  /// Picks zero or more media files.
+  Future<List<MediaPick>> pickMediaMany();
+}
 
 /// Whether [name] looks like a video file.
 bool isVideoName(String name) => videoExtensions.contains(_extension(name));
@@ -38,8 +45,11 @@ Future<MediaPick?> mediaPickFor({required String name, String? path, List<int>? 
   if (!isMediaName(name)) return null;
   final video = isVideoName(name);
   final audio = isAudioName(name);
-  if (path == null && (bytes == null || bytes.isEmpty)) return null;
-  final source = path != null
+  final hasUsablePath = path != null && !kIsWeb && !path.startsWith('blob:');
+  if (!hasUsablePath && (bytes == null || bytes.isEmpty)) return null;
+  // file_picker exposes a browser object URL in `path` on web. It is useful
+  // only to the picker and must never be serialized as a filesystem source.
+  final source = hasUsablePath
       ? <String, Object?>{'kind': 'file', 'value': path}
       : await materializeDroppedMedia(name, bytes!);
   final metadata = await probeImportedMedia(
@@ -63,18 +73,33 @@ Future<MediaPick?> mediaPickFor({required String name, String? path, List<int>? 
 }
 
 /// The platform media picker behind the editor's media tool.
-final class FileMediaImporter implements MediaImporter {
+final class FileMediaImporter implements MultiMediaImporter {
   // coverage:ignore-start the real picker needs a live platform channel
   @override
   Future<MediaPick?> pickMedia() async {
+    final picks = await pickMediaMany();
+    return picks.firstOrNull;
+  }
+
+  @override
+  Future<List<MediaPick>> pickMediaMany() async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: [...imageExtensions, ...videoExtensions, ...audioExtensions],
+      allowMultiple: true,
       withData: true,
     );
-    final file = result?.files.firstOrNull;
-    if (file == null) return null;
-    return mediaPickFor(name: file.name, path: file.path, bytes: file.bytes);
+    final picks = <MediaPick>[];
+    for (final file in result?.files ?? const <PlatformFile>[]) {
+      final pick = await mediaPickFor(
+        name: file.name,
+        // Browser paths are blob URLs, not paths Fluvie can serialize.
+        path: kIsWeb ? null : file.path,
+        bytes: file.bytes,
+      );
+      if (pick != null) picks.add(pick);
+    }
+    return picks;
   }
 
   // coverage:ignore-end

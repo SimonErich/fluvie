@@ -21,7 +21,11 @@ extension _EditorScreenMedia on _EditorScreenState {
         // coverage:ignore-start external drops need a real platform drag event and the pick and insert halves are unit tested via mediaPickFor and the asset panel
         onExternalDrop: (files) {
           if (files.isEmpty) return;
-          unawaited(_insertDropped(files.first.name, files.first.bytes));
+          unawaited(
+            _insertDroppedFiles([
+              for (final file in files) (name: file.name, bytes: file.bytes),
+            ]),
+          );
         },
         // coverage:ignore-end
         child: ListenableBuilder(
@@ -74,17 +78,27 @@ extension _EditorScreenMedia on _EditorScreenState {
   /// Import control reusing the media tool's own pick-and-insert path. A
   /// cancelled pick, or a host with no importer wired, is a safe no-op.
   Future<void> _importAsset({int? scene}) async {
-    final pick = await _selectionScope.read(mediaImporterProvider)?.pickMedia();
-    if (pick == null || !mounted) return;
-    _insertPick(pick, scene: scene);
+    final picks = await _pickMedia();
+    if (!mounted) return;
+    for (final pick in picks) {
+      _insertPick(pick, scene: scene);
+    }
   }
 
   /// Bin import does not choose a timeline position. Placement follows source
   /// inspection and writes its own single undoable range.
   Future<void> _importIntoBin() async {
-    final pick = await _selectionScope.read(mediaImporterProvider)?.pickMedia();
-    if (pick == null || !mounted) return;
-    _recordBinPick(pick);
+    final picks = await _pickMedia();
+    if (!mounted) return;
+    picks.forEach(_recordBinPick);
+  }
+
+  Future<List<MediaPick>> _pickMedia() async {
+    final importer = _selectionScope.read(mediaImporterProvider);
+    if (importer == null) return const [];
+    if (importer case final MultiMediaImporter multi) return multi.pickMediaMany();
+    final pick = await importer.pickMedia();
+    return pick == null ? const [] : [pick];
   }
 
   void _recordBinPick(MediaPick pick) {
@@ -122,12 +136,18 @@ extension _EditorScreenMedia on _EditorScreenState {
     }
   }
 
+  Future<void> _insertDroppedFiles(List<({String name, Object? bytes})> files) async {
+    for (final file in files) {
+      await _insertDropped(file.name, file.bytes);
+    }
+  }
+
   // coverage:ignore-end
 }
 
 /// Wraps the media importer so a session-budget refusal becomes a visible
 /// dialog instead of an unhandled error.
-final class _GuardedMediaImporter implements MediaImporter {
+final class _GuardedMediaImporter implements MultiMediaImporter {
   _GuardedMediaImporter(this.inner, this.onRefused);
 
   final MediaImporter inner;
@@ -140,6 +160,18 @@ final class _GuardedMediaImporter implements MediaImporter {
     } on SessionMediaBudgetError catch (error) {
       onRefused(error);
       return null;
+    }
+  }
+
+  @override
+  Future<List<MediaPick>> pickMediaMany() async {
+    try {
+      if (inner case final MultiMediaImporter multi) return await multi.pickMediaMany();
+      final pick = await inner.pickMedia();
+      return pick == null ? const [] : [pick];
+    } on SessionMediaBudgetError catch (error) {
+      onRefused(error);
+      return const [];
     }
   }
 }
