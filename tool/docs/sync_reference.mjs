@@ -45,11 +45,13 @@ await output('packages/fluvie_cli/lib/src/docs/documentation_bundle.g.dart',
   `const String bundledDocumentationDigest =\n    '${digest}';\n` +
   'const String bundledDocumentationBase64 =\n' +
   encoded.match(/.{1,96}/g).map((chunk) => `    '${chunk}'`).join('\n') + ';\n');
-const llms = `# Fluvie ${version}\n\nFlutter widgets become reproducible video. Canonical documentation is generated from the same versioned source as the CLI and MCP bundle.\n\n## Start here\n\n- [Create a video from local assets](https://docs.fluvie.dev/getting-started/authoring-with-assets/): fresh Flutter project, AI authoring, browser preview, and MP4 output.\n- [Offline complete documentation](https://docs.fluvie.dev/llms-full.txt): the full versioned corpus.\n- Local agents: run \`fluvie docs --context\`; no network or repository checkout is required.\n\n## Documentation\n\n` +
+const llms = `# Fluvie ${version}\n\nFlutter widgets become reproducible video. Canonical documentation is generated from the same versioned source as the CLI and MCP bundle.\n\n## Start here\n\n- [AI authoring entry page](https://fluvie.dev/for-ai): prompt template, quick or guided workflow, and direct links for assistants.\n- [Portable Fluvie video skill](https://fluvie.dev/skills/fluvie-video/SKILL.md): end-to-end workflow for a new or existing project; MCP is optional.\n- [AI video authoring guide](https://docs.fluvie.dev/guides/ai-video-authoring/): choose direct creation or approval checkpoints.\n- [Create a video from local assets](https://docs.fluvie.dev/getting-started/authoring-with-assets/): project setup, asset inspection, preview, and MP4 output.\n- Local agents: run \`fluvie docs --context\` for version-matched offline guidance.\n- [Offline complete documentation](https://docs.fluvie.dev/llms-full.txt): use when a focused page is not enough.\n\n## Documentation\n\n` +
   pages.map((page) => `- [${page.title}](https://docs.fluvie.dev/${page.path === 'index.md' ? '' : `${page.path.slice(0, -3)}/`})`).join('\n') + '\n';
 for (const app of ['docs', 'site']) {
   await output(`web/${app}/public/llms.txt`, llms);
   await output(`web/${app}/public/llms-full.txt`, `# Fluvie ${version} documentation\n\nCorpus SHA-256: ${digest}\n\n` + pages.map((page) => `<!-- source: documentation/${page.path} -->\n${page.body}`).join('\n\n'));
+  await output(`web/${app}/public/skills/fluvie-video/SKILL.md`,
+    await readFile(join(root, '.agents/skills/fluvie-video/SKILL.md'), 'utf8'));
 }
 const snippetSource = await readFile(join(root, 'examples/gallery/lib/snippets/authoring_snippets.dart'), 'utf8');
 function snippet(region) {

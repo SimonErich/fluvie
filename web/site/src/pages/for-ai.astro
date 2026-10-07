@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="Start here to create a Fluvie video with an AI coding assistant. Use the CLI and local project files; MCP is optional." />
+    <title>Build with AI · Fluvie</title>
+    <style>
+      :root { color-scheme: light; font-family: system-ui, sans-serif; color: #101727; background: #f6f8fc; }
+      body { margin: 0; }
+      main { box-sizing: border-box; width: min(760px, 100%); margin: 0 auto; padding: 64px 24px 88px; }
+      h1 { margin: 0; font-size: clamp(2rem, 6vw, 3.5rem); letter-spacing: -.04em; }
+      p, li { line-height: 1.65; }
+      pre { overflow-x: auto; padding: 20px; border-radius: 14px; background: #0b1020; color: #e5edff; line-height: 1.6; white-space: pre-wrap; }
+      a { color: #155dcc; }
+      .links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 28px; }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p><a href="/">Fluvie</a> / AI authoring</p>
+      <h1>Build a video with Fluvie</h1>
+      <p>Give your AI coding assistant the topic, scenes, and this page. It can read the Fluvie guide, work in a new or existing Flutter project, inspect local assets, and render with the Fluvie CLI. MCP is optional.</p>
+      <pre>Create a video using Fluvie: https://fluvie.dev/for-ai
+Topic: [what the video is about]
+Scenes: [the scenes, in order]
+Use the quick path. Use assets in ./assets, write the composition to
+lib/my_video.dart, preview it, and render the MP4.</pre>
+      <p><strong>Quick path</strong> builds directly from your direction and asks only about decisions that block a good result. Say “guided path” if you want to approve the story beats, a few style frames, and the storyboard before rendering.</p>
+      <p>In an installed Fluvie project, the assistant can begin with <code>fluvie docs --context</code> for version-matched offline instructions. It should inspect real media before assigning scenes or timing, then validate, preview, render, and report what it checked.</p>
+      <nav class="links" aria-label="AI authoring resources">
+        <a href="/skills/fluvie-video/SKILL.md">Read the portable Fluvie video skill</a>
+        <a href="https://docs.fluvie.dev/guides/ai-video-authoring/">AI workflow guide</a>
+        <a href="https://docs.fluvie.dev/llms.txt">Documentation index</a>
+        <a href="https://docs.fluvie.dev/guides/ai-and-mcp/">CLI and optional MCP guide</a>
+      </nav>
+    </main>
+  </body>
+</html>

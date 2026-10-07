@@ -55,6 +55,7 @@ Each guide describes its current API and backend limits.
 | getting-started/ | [Start a Fluvie project](getting-started/start-a-project.md) |
 | getting-started/ | [Your first video](getting-started/your-first-video.md) |
 | guides/ | [AI and MCP](guides/ai-and-mcp.md) |
+| guides/ | [Build a Fluvie video with an AI assistant](guides/ai-video-authoring.md) |
 | guides/ | [Animating elements](guides/animating-elements.md) |
 | guides/ | [Give AI evidence about your assets](guides/asset-evidence.md) |
 | guides/ | [Audio and captions](guides/audio-and-captions.md) |
