@@ -22,6 +22,8 @@ documentation helper in one binary, each toggled by env (`FLUVIE_ENABLE_API` /
 toolchain: the documentation helper and the MCP docs tools, offline. Point it at a
 full server with `FLUVIE_API_URL` to render through it. Run just one of the two —
 the slim image only when you want a tiny docs/MCP endpoint separate from rendering.
+The full server also needs a persistent volume mounted at `/data/renders` for its
+file-backed render-job records, including when rendered media is stored in S3.
 
 All build contexts are the repo root; the Dockerfiles just live under `deploy/`.
 The marketing landing (fluvie.dev) is not a container here; it is built from
