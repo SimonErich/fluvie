@@ -4,6 +4,14 @@ FROM ghcr.io/cirruslabs/flutter:3.44.0 AS build
 WORKDIR /src
 COPY . .
 RUN flutter pub get
+
+# The in-browser encoder's runtime is deliberately fetched at image-build
+# time, not committed. The script pins the package ranges used by the app.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends nodejs npm \
+    && rm -rf /var/lib/apt/lists/* \
+    && bash apps/slides/tool/fetch_ffmpeg.sh
+
 WORKDIR /src/apps/slides
 RUN flutter build web --release --no-web-resources-cdn
 
