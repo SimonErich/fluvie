@@ -1,11 +1,17 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/audio/audio.dart';
 import 'package:fluvie/src/audio/encoding/audio_mix_staging.dart';
+import 'package:fluvie/src/composition/runtime/audio_collector.dart';
+import 'package:fluvie/src/composition/scene.dart';
+import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
 import 'package:fluvie/src/core/time_extensions.dart';
 import 'package:fluvie/src/core/time_range.dart';
+import 'package:fluvie/src/core/trigger.dart';
+import 'package:fluvie/src/core/video_size.dart';
 
 import '../../rendering/fakes/fake_media_resolver.dart';
 
@@ -173,6 +179,64 @@ void main() {
       final node = plan.tracks.single;
       expect(node.trimStartSeconds, 2.0); // 60 frames @ 30fps
       expect(node.trimEndSeconds, 10.0); // 300 frames @ 30fps
+    });
+
+    test('a Video with memory audio renders a full mix plan', () async {
+      // The 9.6 export law: imported bytes (a memory AudioSource) flow through
+      // Audio into the same materialize-and-mix pipeline as path-shaped audio.
+      final bedBytes = Uint8List.fromList(const [1, 2, 3, 4]);
+      final bed = AudioSource.memory(bedBytes, debugLabel: 'bed.mp3');
+      final ping = AudioSource.memory(Uint8List.fromList(const [9]), debugLabel: 'ping.wav');
+      final video = Video(
+        size: VideoSize.square,
+        audio: [
+          Audio.musicSource(bed, volume: 0.6, fadeIn: 30.frames),
+          Audio.sfxSource(ping, at: Trigger.at(1.seconds), volume: 0.5),
+        ],
+        scenes: [Scene(duration: 6.seconds)],
+      );
+
+      final tracks = collectAudioTracks(video);
+      final sources = collectAudioSources(video);
+      expect(sources, {bed, ping});
+
+      final resolver = FakeMediaResolver(
+        const {},
+        audioPaths: {
+          bed: materialize('bed.bin', bedBytes),
+          ping: materialize('ping.bin', const [9]),
+        },
+      );
+      await resolver.preResolveAudio(sources);
+
+      final plan = await stageAudioMix(
+        tracks: tracks,
+        resolver: resolver,
+        sandbox: sandbox,
+        fps: 30,
+        totalFrames: 180,
+      );
+
+      expect(plan.tracks, hasLength(2));
+      expect(plan.amix, isNotNull);
+      // The materialized memory bytes land in the sandbox under the content
+      // hash, so the encoder -i's a real file fed from memory.
+      expect(plan.tracks[0].name, 'audio_0_${bed.cacheKey}');
+      expect(File('${sandbox.path}/audio_0_${bed.cacheKey}').readAsBytesSync(), bedBytes);
+      // The authored volume, fade, and delay all reach the filter graph.
+      expect(plan.tracks[0].filterChain(inputIndex: 1, label: 'a0'), contains('volume=0.6'));
+      expect(
+        plan.tracks[0].filterChain(inputIndex: 1, label: 'a0'),
+        contains('afade=t=in:st=0:d=1'),
+      );
+      expect(
+        plan.tracks[1].filterChain(inputIndex: 2, label: 'a1'),
+        contains('adelay=1000|1000'),
+      );
+      expect(
+        plan.amix!.mixChain(labels: ['a0', 'a1'], outLabel: 'aout'),
+        contains('amix=inputs=2'),
+      );
     });
 
     test('a silent composition stages nothing and yields an empty plan', () async {

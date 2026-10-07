@@ -89,24 +89,30 @@ final class SharedElementRegistry {
   SharedPair? pairAtBoundary(int boundary) {
     for (final anchor in _anchors()) {
       final scenes = _scenesOf(anchor);
-      if (scenes.length != 2) continue;
-      final lower = scenes.reduce((a, b) => a < b ? a : b);
-      if (lower != boundary || !scenes.contains(lower + 1)) continue;
+      // Any pair the chain actually crosses, not only its first: a chain of
+      // four has three internal boundaries and each one morphs its own ends.
+      if (!scenes.contains(boundary) || !scenes.contains(boundary + 1)) continue;
       return (
         anchor: anchor,
-        source: _slotIn(anchor, lower),
-        target: _slotIn(anchor, lower + 1),
+        source: _slotIn(anchor, boundary),
+        target: _slotIn(anchor, boundary + 1),
       );
     }
     return null;
   }
 
-  /// Validates the whole slot set against the [sceneCount],
-  /// then marks the set stable. Throws a [FluvieTimingError] for an anchor in
-  /// one scene, in three or more scenes, or in two non-adjacent scenes. Two
-  /// adjacent scenes are valid whether their boundary is timed or a cut — a
-  /// cut boundary opens a zero-frame window, so the pair is simply inert (no
-  /// morph), which lets transitions toggle without restructuring the scenes.
+  /// Validates the whole slot set against the [sceneCount], then marks the set
+  /// stable.
+  ///
+  /// A hero belongs to a **contiguous run** of scenes: a pair is the shortest
+  /// one, and a longer chain morphs through every cut it crosses. Throws a
+  /// [FluvieTimingError] for an anchor in one scene (a hero with nothing to
+  /// morph to) or for a run with a gap in it (which is two morphs pretending
+  /// to be one — the hero would vanish for a scene and come back).
+  ///
+  /// A run is valid whether its boundaries are timed or cuts: a cut opens a
+  /// zero-frame window, so that pair is simply inert, which lets transitions
+  /// toggle without restructuring the scenes.
   void validate(int sceneCount) {
     for (final anchor in _anchors()) {
       _validateAnchor(anchor, _scenesOf(anchor), sceneCount);
@@ -137,20 +143,12 @@ final class SharedElementRegistry {
         anchors: [anchor],
       );
     }
-    if (scenes.length >= 3) {
+    final sorted = [...scenes]..sort();
+    if (sorted.last - sorted.first != sorted.length - 1) {
       throw FluvieTimingError(
-        'The shared element "$name" appears in $where — a hero morphs across '
-        'one boundary, so it may belong to at most two adjacent scenes.',
-        anchors: [anchor],
-      );
-    }
-    final lower = scenes.first < scenes.last ? scenes.first : scenes.last;
-    final upper = scenes.first < scenes.last ? scenes.last : scenes.first;
-    if (upper - lower != 1) {
-      throw FluvieTimingError(
-        'The shared element "$name" spans non-adjacent scenes ($where). '
-        'Heroes morph across one boundary — put the pair in neighbouring '
-        'scenes.',
+        'The shared element "$name" spans non-contiguous scenes ($where). A '
+        'hero morphs through the cuts it crosses, so its scenes must be a '
+        'contiguous run — fill the gap or drop shared.',
         anchors: [anchor],
       );
     }

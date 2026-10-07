@@ -7,11 +7,9 @@ import 'package:fluvie_mobile_encoder/src/mobile_channel.dart';
 
 /// A [FrameExtractionService] backed by the platform decoder: decodes the
 /// requested source frames to RGBA on the device (`MediaMetadataRetriever` on
-/// Android) over the mobile encoder channel, with no ffmpeg.
-///
-/// On-device frame extraction is Android-only today; iOS implements only
-/// encoding, so `extractFrames` there throws a [FluvieMobileEncoderException]
-/// with code `unimplemented`.
+/// Android, AVFoundation on iOS) over the mobile encoder channel, with no
+/// ffmpeg. iOS maps source ordinals through sample presentation timestamps and
+/// applies the track's display transform before returning the requested size.
 ///
 /// The whole batch is decoded in one platform call and returned as a single
 /// row-major RGBA buffer (the requested frames concatenated in order), which
@@ -55,8 +53,8 @@ final class NativeFrameExtractionService implements FrameExtractionService {
   /// heap, so the work is chunked.
   static const int _batch = 8;
 
-  /// The `decoder` name is ignored: `MediaMetadataRetriever` picks the decoder
-  /// for a track itself, and its VP9 decode already carries alpha through.
+  /// The `decoder` name is ignored: the platform media framework picks its own
+  /// decoder. Supported source codecs depend on the OS and device.
   @override
   Future<Map<int, RawFrame>> extractFrames(
     Uri source,
@@ -85,7 +83,7 @@ final class NativeFrameExtractionService implements FrameExtractionService {
         });
       } on MissingPluginException {
         throw const FluvieMobileEncoderException(
-          'On-device frame extraction is not available on this platform (Android only).',
+          'On-device frame extraction requires the Android or iOS plugin.',
           code: 'unimplemented',
         );
       } on PlatformException catch (error) {

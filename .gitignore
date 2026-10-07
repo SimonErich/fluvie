@@ -39,6 +39,10 @@ pubspec_overrides.yaml
 # OS
 .DS_Store
 
+# Python bytecode from local design and verification tools.
+__pycache__/
+*.pyc
+
 # NOTE: *.g.dart / *.freezed.dart are intentionally committed (see .gitattributes).
 # NOTE: the workspace root pubspec.lock is intentionally committed.
 
@@ -63,3 +67,24 @@ examples/*/web/vendor/
 
 # The web render e2e harness installs puppeteer here with `npm ci`.
 tool/web/e2e/node_modules/
+
+# Slides browser encoder and source decoder, fetched by app tool script.
+apps/slides/web/ffmpeg/
+apps/slides/web/vendor/
+
+# Local agent context and implementation notes are not part of the public repo.
+/AGENTS.md
+/CLAUDE.md
+/PROGRESS.md
+/.claude/
+/.gemini/
+/fluvie_editor_concept/
+/fluvie_presenter_concept/
+/fluvie_studio_concept/
+/design/
+/reports/
+/screenshot-heaven/
+/screenshot-heaven.zip
+/fluvie studio redesign.html
+/apps/slides/assets/fonts/
+/tool/qa_report.txt

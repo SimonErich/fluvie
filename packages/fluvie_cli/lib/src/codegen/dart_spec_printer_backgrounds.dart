@@ -8,11 +8,15 @@ String _background(Map<String, Object?> background) {
     case 'gradient':
       return 'Background.gradient(${_args([
         _colors(background['colors']),
+        if (background['stops'] != null) 'stops: ${_numList(background['stops'])}',
         if (background['begin'] != null) 'begin: ${_alignment(background['begin'])}',
         if (background['end'] != null) 'end: ${_alignment(background['end'])}',
       ])})';
     case 'radial':
-      return 'Background.radial(${_colors(background['colors'])})';
+      return 'Background.radial(${_args([
+        _colors(background['colors']),
+        if (background['stops'] != null) 'stops: ${_numList(background['stops'])}',
+      ])})';
     case 'image':
       return 'Background.image(${_args([
         _str(background['source']! as String),
@@ -43,7 +47,7 @@ String _transition(Map<String, Object?> transition) {
   final duration = _time(transition['duration']! as String);
   final tail = <String?>[
     if (transition['overlap'] != null) 'overlap: ${transition['overlap']}',
-    if (transition['ease'] != null) 'ease: ${_ease(transition['ease']! as String)}',
+    if (transition['ease'] != null) 'ease: ${_ease(transition['ease'])}',
   ];
   switch (kind) {
     case 'crossFade':
@@ -63,7 +67,9 @@ String _transition(Map<String, Object?> transition) {
     case 'slide':
       return 'Transition.slide(${_args([duration, _edgeArg('from', transition['from']), ...tail])})';
   }
-  throw FormatException('Unknown transition "$kind"');
+  final parameters = {...transition}
+    ..removeWhere((key, _) => const {'kind', 'duration', 'ease', 'overlap'}.contains(key));
+  return 'Transition.custom(${_args([_str(kind! as String), duration, 'parameters: ${_jsonLiteral(parameters)}', ...tail])})';
 }
 
 /// An `Export.<mode>(...)` expression.
@@ -72,6 +78,11 @@ String _export(Map<String, Object?> export) {
     case 'mp4':
       return 'Export.mp4(${_args([
         if (export['quality'] != null) 'quality: ${_enumValue('Quality', export['quality']! as String)}',
+        if (export['codec'] != null) 'codec: ${_enumValue('ExportCodec', export['codec']! as String)}',
+        if (export['crf'] != null) 'crf: ${_num(export['crf'])}',
+        if (export['bitRate'] != null) 'bitRate: ${_num(export['bitRate'])}',
+        if (export['preset'] != null) 'preset: ${_enumValue('EncoderPreset', export['preset']! as String)}',
+        if (export['pixelFormat'] != null) 'pixelFormat: ${_enumValue('ExportPixelFormat', export['pixelFormat']! as String)}',
       ])})';
     case 'gif':
       return 'Export.gif(${_args([if (export['fps'] != null) 'fps: ${_num(export['fps'])}'])})';
@@ -89,7 +100,7 @@ String _export(Map<String, Object?> export) {
 String _defaults(Map<String, Object?> defaults) =>
     'Defaults(${_args([
       if (defaults['duration'] != null) 'duration: ${_time(defaults['duration']! as String)}',
-      if (defaults['ease'] != null) 'ease: ${_ease(defaults['ease']! as String)}',
+      if (defaults['ease'] != null) 'ease: ${_ease(defaults['ease'])}',
       if (defaults['stagger'] != null) 'stagger: ${_stagger(_map(defaults['stagger']))}',
     ])})';
 

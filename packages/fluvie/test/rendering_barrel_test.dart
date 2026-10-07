@@ -112,6 +112,28 @@ void main() {
       expect([loader, mix, track], everyElement(isNull));
     });
 
+    test('the waveform surface an editor draws from is reachable', () {
+      // fluvie_editor draws clip audio; without these it would have to reach
+      // into src/, which the layering law forbids.
+      expect(reduceToWaveform, isNotNull);
+      expect(readPcmWav, isNotNull);
+      const PcmDecoder? decoder = null;
+      const PcmAudio? audio = null;
+      const WaveformEnvelope? envelope = null;
+      expect([decoder, audio, envelope], everyElement(isNull));
+      expect(WaveformBucket.silent.peak, 0);
+    });
+
+    test('the shader warm surface a host runs is reachable', () {
+      expect(collectShaderAssets, isNotNull);
+      expect(preLoadShaders, isNotNull);
+      expect(preLoadCompositionShaders, isNotNull);
+      expect(probeTrimmedClips, isNotNull);
+      const ShaderLoader loader = FragmentProgramShaderLoader();
+      expect(loader, isNotNull);
+      expect(WarmShaderScope, isNotNull);
+    });
+
     test('the media collectors and FadeBox primitive are reachable', () {
       expect(collectMediaSources, isNotNull);
       expect(collectSnapshotSources, isNotNull);

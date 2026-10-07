@@ -1,7 +1,7 @@
 # Root strictness; the custom_lint plugin joins once a fluvie_lints rule
 # targets CLI code (the current rules all target library/render code).
-include: ../../analysis_options.yaml
+include: analysis_options.shared.yaml
 
-# Declared directly so the published package formats at width 100 standalone.
+# Keep the package entry point explicit; the generated include also carries this policy.
 formatter:
   page_width: 100

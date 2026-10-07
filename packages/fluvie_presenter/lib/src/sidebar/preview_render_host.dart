@@ -49,23 +49,36 @@ final class PreviewRenderHostState extends State<PreviewRenderHost> {
 
   /// Renders [slide]'s settled final state to an image. Calls serialize:
   /// the host shows one composition at a time.
+  ///
+  /// A presentation can close while previews are still rendering, so a host
+  /// that is gone (before the render starts, while it waits its turn, or
+  /// while the boundary is being read back) fails the returned future with a
+  /// [StateError] instead of capturing a stage that is no longer there.
   Future<ui.Image> render(int slide) {
+    if (!mounted) return Future<ui.Image>.error(_hostGone(slide), StackTrace.current);
     final result = _serial.then((_) => _renderNow(slide));
+    // The chain only sequences renders; the failure itself stays on the
+    // future the caller holds.
     _serial = result.then((_) {}, onError: (_) {});
     return result;
   }
 
   Future<ui.Image> _renderNow(int slide) async {
+    if (!mounted) throw _hostGone(slide);
     setState(() => _request = slide);
     // Three frames: mount and collect, resolve post-frame, paint settled.
     for (var i = 0; i < 3; i++) {
       await WidgetsBinding.instance.endOfFrame;
     }
-    final boundary = _boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+    final boundary = _boundary.currentContext?.findRenderObject();
+    if (boundary is! RenderRepaintBoundary) throw _hostGone(slide);
     final image = await boundary.toImage();
     if (mounted) setState(() => _request = null);
     return image;
   }
+
+  StateError _hostGone(int slide) =>
+      StateError('The preview host closed before slide $slide rendered.');
 
   @override
   Widget build(BuildContext context) {

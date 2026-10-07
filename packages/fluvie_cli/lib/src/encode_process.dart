@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:fluvie_cli/src/cli_failure.dart';
 import 'package:fluvie_cli/src/process_runner.dart';
 import 'package:fluvie_cli/src/render_manifest.dart';
+import 'package:path/path.dart' as p;
 
 /// Runs the encode step: read `manifest.json` from [sandbox], validate its
 /// sandbox confinement, spawn ffmpeg with **exactly** the manifest's argument
@@ -86,6 +87,11 @@ Future<File> _collectImageSequence(
   }
   final destination = Directory(outPath);
   await destination.create(recursive: true);
+  // A shorter rerender replaces its sequence without retaining a stale tail.
+  // Only the manifest's exact bare-name pattern belongs to this export.
+  for (final existing in destination.listSync().whereType<File>()) {
+    if (_matchesPattern(_baseName(existing.path), bounds)) await existing.delete();
+  }
   for (final still in stills) {
     await moveIntoPlace(still, '${destination.path}/${_baseName(still.path)}');
   }
@@ -142,11 +148,12 @@ Future<void> _runPoster(
   if (!poster.existsSync()) {
     throw CliFailure('ffmpeg exited 0 but produced no poster $posterFileName in ${sandbox.path}.');
   }
-  await moveIntoPlace(poster, _posterPathFor(outPath));
+  await moveIntoPlace(poster, posterOutputPath(outPath));
 }
 
 /// The `.poster.png` path beside [outPath] (e.g. `demo.mp4` -> `demo.poster.png`).
-String _posterPathFor(String outPath) => outPath.replaceFirst(RegExp(r'\.[^.]+$'), '.poster.png');
+String posterOutputPath(String outPath) =>
+    p.join(p.dirname(outPath), '${p.basenameWithoutExtension(outPath)}.poster.png');
 
 /// Moves [source] to [targetPath], creating parent directories.
 ///

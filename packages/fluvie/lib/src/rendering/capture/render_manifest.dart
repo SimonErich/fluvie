@@ -28,8 +28,10 @@ final class RenderManifest {
     required List<String> ffmpegArgs,
     List<String>? posterArgs,
     this.posterFileName,
+    Map<String, Object?>? outputIntent,
   }) : ffmpegArgs = List.unmodifiable(ffmpegArgs),
-       posterArgs = posterArgs == null ? null : List<String>.unmodifiable(posterArgs);
+       posterArgs = posterArgs == null ? null : List<String>.unmodifiable(posterArgs),
+       outputIntent = outputIntent == null ? null : Map.unmodifiable(outputIntent);
 
   /// Reads a manifest from its [toJson] form.
   ///
@@ -55,6 +57,7 @@ final class RenderManifest {
       ffmpegArgs: (json['ffmpegArgs']! as List<Object?>).cast<String>(),
       posterArgs: (json['posterArgs'] as List<Object?>?)?.cast<String>(),
       posterFileName: json['posterFileName'] as String?,
+      outputIntent: (json['outputIntent'] as Map<Object?, Object?>?)?.cast<String, Object?>(),
     );
   }
 
@@ -94,6 +97,12 @@ final class RenderManifest {
   /// there is no poster.
   final String? posterFileName;
 
+  /// Verifiable encoded output facts, separate from the captured frame stream.
+  ///
+  /// Timing may differ for sampled formats such as GIF and is omitted when the
+  /// encoder cannot express an exact expectation. Older readers may ignore it.
+  final Map<String, Object?>? outputIntent;
+
   /// The JSON form, with [schemaVersion] first. The poster keys appear only
   /// when a poster is present, so a no-poster manifest is byte-identical to a
   /// pre-poster one.
@@ -109,6 +118,7 @@ final class RenderManifest {
     'ffmpegArgs': ffmpegArgs,
     if (posterArgs != null) 'posterArgs': posterArgs,
     if (posterFileName != null) 'posterFileName': posterFileName,
+    if (outputIntent != null) 'outputIntent': outputIntent,
   };
 
   @override
@@ -123,7 +133,8 @@ final class RenderManifest {
       other.renderDigest == renderDigest &&
       listEquals(other.ffmpegArgs, ffmpegArgs) &&
       listEquals(other.posterArgs, posterArgs) &&
-      other.posterFileName == posterFileName;
+      other.posterFileName == posterFileName &&
+      mapEquals(other.outputIntent, outputIntent);
 
   @override
   int get hashCode => Object.hash(
@@ -137,5 +148,10 @@ final class RenderManifest {
     Object.hashAll(ffmpegArgs),
     posterArgs == null ? null : Object.hashAll(posterArgs!),
     posterFileName,
+    outputIntent == null
+        ? null
+        : Object.hashAllUnordered(
+            outputIntent!.entries.map((entry) => Object.hash(entry.key, entry.value)),
+          ),
   );
 }

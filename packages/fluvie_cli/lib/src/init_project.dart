@@ -10,13 +10,11 @@ import 'package:path/path.dart' as p;
 ///
 /// Nothing else. There is no app, no capture harness, no registry, and no
 /// platform directories: `flutter test` needs only a pubspec in its working
-/// directory, and the harness a render runs is generated per render. What is
+/// directory, and renders reuse a package-managed external adapter. What is
 /// left is the composition and its media, which is the whole project.
 ///
-/// The composition goes under `lib/` so it has a `package:` URI. `fluvie
-/// preview` runs a generated app from outside the project, and a relative import
-/// cannot escape a package, so a composition anywhere else can be rendered but
-/// never previewed.
+/// Compositions under `lib/` keep canonical package imports. Files elsewhere
+/// can also render and preview through an absolute import adapter.
 ///
 /// Every file is written only when absent unless [force], so re-running `init`
 /// in a project is safe and reports what it skipped.
@@ -26,7 +24,11 @@ Future<int> initProject({
   required bool force,
   required StringSink out,
   required StringSink err,
+  String? fluviePath,
+  bool withLints = false,
+  bool withAi = false,
 }) async {
+  final localFluviePath = fluviePath == null ? null : resolveFluviePath(fluviePath);
   final packageName = packageNameFor(dir.path);
   final wrote = <String>[];
   final skipped = <String>[];
@@ -41,19 +43,48 @@ Future<int> initProject({
   }
 
   final composition = p.url.join('lib', fileName);
-  write('pubspec.yaml', projectPubspecSource(packageName: packageName));
-  write('.gitignore', projectGitignoreSource());
+  final pubspec = File(p.join(dir.path, 'pubspec.yaml'));
+  if (pubspec.existsSync()) {
+    if (ensureFluvieDependencies(
+      pubspec,
+      fluviePath: localFluviePath,
+      withLints: withLints,
+      withAi: withAi,
+    )) {
+      wrote.add('pubspec.yaml (merged dependencies)');
+    } else {
+      skipped.add('pubspec.yaml');
+    }
+  } else {
+    write('pubspec.yaml', projectPubspecSource(packageName: packageName));
+    if (fluviePath != null || withLints || withAi) {
+      ensureFluvieDependencies(
+        pubspec,
+        fluviePath: localFluviePath,
+        withLints: withLints,
+        withAi: withAi,
+      );
+    }
+  }
+  if (ensureProjectGitignore(File(p.join(dir.path, '.gitignore')), projectGitignoreSource())) {
+    wrote.add('.gitignore');
+  } else {
+    skipped.add('.gitignore');
+  }
   write(composition, starterCompositionSource(fileName: fileName));
   // A .gitkeep so the directory survives a clone; the CLI derives the pubspec's
   // assets block from whatever is in here.
   write(p.join('assets', '.gitkeep'), '');
-  ensureCustomLintPlugin(File(p.join(dir.path, 'analysis_options.yaml')));
+  final analysis = File(p.join(dir.path, 'analysis_options.yaml'));
+  if (withLints) {
+    ensureCustomLintPlugin(analysis);
+  } else if (!analysis.existsSync() && pubspec.readAsStringSync().contains('flutter_lints:')) {
+    analysis.writeAsStringSync('include: package:flutter_lints/flutter.yaml\n');
+  }
 
   if (wrote.isEmpty) {
-    err.writeln(
-      'Nothing to do: ${skipped.join(', ')} already exist. Pass --force to overwrite.',
-    );
-    return 1;
+    out.writeln('Fluvie is already configured in ${dir.path}.');
+    return 0;
   }
   for (final file in wrote) {
     out.writeln('  created $file');
@@ -66,7 +97,7 @@ Future<int> initProject({
     ..writeln('Next:')
     ..writeln('  flutter pub get')
     ..writeln('  fluvie preview ./$composition')
-    ..writeln('  fluvie render ./$composition --out ${p.basenameWithoutExtension(fileName)}.mp4');
+    ..writeln('  fluvie render ./$composition');
   return 0;
 }
 

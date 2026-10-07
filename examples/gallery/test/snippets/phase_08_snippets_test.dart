@@ -32,6 +32,10 @@ void main() {
   test('the image-constructor menu builds the four sources', () {
     expect(imageConstructors(Uint8List(0)), hasLength(4));
   });
+
+  test('the clip-constructor menu builds the four sources', () {
+    expect(clipConstructors(Uint8List(0)), hasLength(4));
+  });
 }
 
 const TimeScope _scope = _RootScope();

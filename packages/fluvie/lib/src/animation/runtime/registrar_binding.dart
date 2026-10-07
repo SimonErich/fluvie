@@ -9,10 +9,13 @@ import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/defaults.dart';
 import 'package:fluvie/src/core/errors/fluvie_timing_error.dart';
 import 'package:fluvie/src/core/time_range.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
+import 'package:fluvie/src/timing/placement/window_resolver.dart';
 import 'package:fluvie/src/timing/schedule/composition_registrar.dart';
 import 'package:fluvie/src/timing/schedule/composition_registrar_scope.dart';
 import 'package:fluvie/src/timing/schedule/element_registration.dart';
 import 'package:fluvie/src/timing/schedule/resolved_schedule_scope.dart';
+import 'package:fluvie/src/timing/time_scope_provider.dart';
 import 'package:fluvie/src/timing/window_scope.dart';
 
 export 'package:fluvie/src/animation/runtime/schedule_lookup.dart'
@@ -27,9 +30,9 @@ export 'package:fluvie/src/animation/runtime/schedule_lookup.dart'
 /// window-less target nested inside a shown (windowed) subtree inherits the
 /// enclosing window and its animations place inside it (the windowed
 /// target must enclose the animated one in the tree). An explicit window
-/// nested inside another explicit window resolves against the **scene**;
-/// window-relative nesting remains a local-fallback-only behavior outside
-/// `Video`.
+/// nested inside another explicit window resolves against its nearest
+/// enclosing window, then registers scene-relative endpoints. This mirrors
+/// the scope used by its painter and by structural media collection.
 final class RegistrarBinding {
   ElementRegistration? _token;
   CompositionRegistrar? _registrar;
@@ -58,6 +61,29 @@ final class RegistrarBinding {
     required Defaults? defaults,
     required Type childType,
   }) {
+    try {
+      return _lookup(
+        context,
+        animations: animations,
+        anchor: anchor,
+        window: window,
+        defaults: defaults,
+        childType: childType,
+      );
+    } on FluvieTimingError catch (error) {
+      if (!PreparationScope.reportTimingError(context, error)) rethrow;
+      return const CollectPending();
+    }
+  }
+
+  ScheduleLookup _lookup(
+    BuildContext context, {
+    required List<Animation> animations,
+    required Anchor? anchor,
+    required TimeRange? window,
+    required Defaults? defaults,
+    required Type childType,
+  }) {
     if (_staleAfterResolution) {
       throw FluvieTimingError(
         "The timing-relevant fields of '${_token?.debugOwner ?? '$childType'}' "
@@ -72,10 +98,15 @@ final class RegistrarBinding {
     final registrar = CompositionRegistrarScope.maybeOf(context);
     if (registrar == null) return const Standalone();
     _registrar = registrar;
+    final owner = CompositionRegistrarScope.ownerTimeScopeOf(context);
+    final enclosing = TimeScopeProvider.maybeOf(context);
+    final registeredWindow = owner != null && enclosing != null
+        ? registrationWindowFor(window, enclosing, owner)
+        : window ?? WindowScope.maybeWindowOf(context);
     final token = _token ??= ElementRegistration(
       debugOwner: anchor?.debugName ?? '$childType',
       anchor: anchor,
-      window: window ?? WindowScope.maybeWindowOf(context),
+      window: registeredWindow,
       animations: [for (final animation in animations) toAnimationPlan(animation)],
       defaults: defaults,
     );

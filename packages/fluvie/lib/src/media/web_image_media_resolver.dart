@@ -6,10 +6,12 @@ import 'package:fluvie/src/core/captions/caption_cue.dart';
 import 'package:fluvie/src/core/captions/caption_source.dart';
 import 'package:fluvie/src/core/contracts/beat_detection_service.dart';
 import 'package:fluvie/src/core/contracts/beat_grid.dart';
+import 'package:fluvie/src/core/contracts/clip_timeline_resolver.dart';
 import 'package:fluvie/src/core/contracts/disposable_resolver.dart';
 import 'package:fluvie/src/core/contracts/frequency_analyzer.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
 import 'package:fluvie/src/core/contracts/snapshot_service.dart';
+import 'package:fluvie/src/core/errors/fluvie_capability_exception.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/media/clip_source_kind.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
@@ -19,6 +21,9 @@ import 'package:fluvie/src/media/runtime/clip_resolve_cache.dart';
 import 'package:fluvie/src/media/runtime/image_resolve_cache.dart';
 import 'package:fluvie/src/media/web_clip_decoder.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
+import 'package:fluvie_media/fluvie_media.dart' show MediaTimeline;
+
+part 'web_unsupported_capabilities.dart';
 
 /// The browser [MediaResolver]: resolves declared **image** media (asset,
 /// network, memory) for in-browser rendering, with no `dart:io`, plus **clips**
@@ -33,15 +38,16 @@ import 'package:fluvie/src/rendering/capture/raw_frame.dart';
 /// of a confusing decode failure. `file://` sources fail through the byte
 /// loader's web seam.
 final class WebImageMediaResolver
-    with ImageResolveCache, ClipResolveCache
-    implements MediaResolver, DisposableResolver {
+    with ImageResolveCache, ClipResolveCache, _UnsupportedWebCapabilities
+    implements MediaResolver, DisposableResolver, ClipTimelineResolver {
   /// Creates a resolver over the byte [loader], optionally with a [clipDecoder]
   /// for in-browser clip support.
   ///
   /// Pass [maxClipDecodeEdge] to decode clips at a bounded long edge. The
-  /// browser path is decode-all (no disk store), so an unbounded full-HD clip
-  /// holds every planned frame at ~8.3 MB each — a live preview sets a bound; a
-  /// render leaves it null.
+  /// browser resolver has no disk frame store. The shared composition session
+  /// resolves frames on demand and retires its bounded scrub cache after paint;
+  /// each retained full-HD RGBA frame takes approximately 8.3 MB. A live
+  /// preview sets a decode-size bound; a render leaves it null.
   WebImageMediaResolver({required this.loader, this.clipDecoder, this.maxClipDecodeEdge});
 
   @override
@@ -79,8 +85,23 @@ final class WebImageMediaResolver
   Future<ClipMetadata> probeClipSource(MediaSource source) async {
     final decoder = _requireDecoder(source);
     final media = resolved[source] ?? await loadAndCacheBytes(source);
-    return decoder.probe(media.bytes);
+    final metadata = await decoder.probe(media.bytes);
+    if (decoder is WebClipTimelineDecoder) {
+      final timeline = await (decoder as WebClipTimelineDecoder).probeTimeline(media.bytes);
+      if (timeline != null) {
+        if (timeline.frameCount != metadata.frameCount) {
+          throw FluvieRenderException(
+            'Clip "$source" has inconsistent decoder frame count and display timing.',
+          );
+        }
+        clipTimelines[source] = timeline;
+      }
+    }
+    return metadata;
   }
+
+  @override
+  MediaTimeline? clipTimelineFor(MediaSource source) => clipTimelines[source];
 
   @override
   Future<Map<int, RawFrame>> extractClipFrames(
@@ -150,52 +171,4 @@ final class WebImageMediaResolver
   @override
   ui.Image decodedClipFrame(MediaSource source, int sourceFrame) =>
       decodedClipFrameLookup(source, sourceFrame);
-
-  @override
-  Future<void> preResolveSnapshots(
-    Iterable<SnapshotSource> sources,
-    SnapshotService service,
-  ) async {
-    if (sources.isNotEmpty) _unsupported('Snapshot "${sources.first}"');
-  }
-
-  @override
-  ui.Image decodedSnapshotFor(SnapshotSource source) => _unsupported('Snapshot "$source"');
-
-  @override
-  Future<void> preResolveAudio(Iterable<AudioSource> sources) async {
-    if (sources.isNotEmpty) _unsupported('Audio "${sources.first}"');
-  }
-
-  @override
-  String materializedAudioPathFor(AudioSource source) => _unsupported('Audio "$source"');
-
-  @override
-  Future<void> preResolveReactive(
-    Iterable<AudioSource> sources, {
-    required BeatDetectionService beatDetector,
-    required FrequencyAnalyzer analyzer,
-    required int fps,
-    required int totalFrames,
-  }) async {
-    if (sources.isNotEmpty) _unsupported('Reactive audio "${sources.first}"');
-  }
-
-  @override
-  BeatGrid beatGridFor(AudioSource source) => _unsupported('Beat grid for "$source"');
-
-  @override
-  BandTable bandTableFor(AudioSource source) => _unsupported('Band table for "$source"');
-
-  @override
-  Future<void> preResolveCaptions(CaptionSource source) async => _unsupported('Captions "$source"');
-
-  @override
-  List<CaptionCue> cuesFor(CaptionSource source) => _unsupported('Captions "$source"');
-
-  /// Fails with the shared "images only on web" message naming [what].
-  Never _unsupported(String what) => throw FluvieRenderException(
-    '$what is not supported on web yet; only images (asset, network, memory) '
-    'render in the browser.',
-  );
 }

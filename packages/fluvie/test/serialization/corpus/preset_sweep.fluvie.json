@@ -1,0 +1,60 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "150f",
+      "background": {
+        "kind": "color",
+        "color": "#101018"
+      },
+      "children": [
+        {
+          "id": "el-entering",
+          "type": "Text",
+          "text": "Enter presets",
+          "animate": [
+            {"preset": "slideIn", "from": "left", "duration": "20f"},
+            {"preset": "scaleIn", "from": 0.5, "ease": "out"},
+            {"preset": "blurIn", "sigma": 8}
+          ]
+        },
+        {
+          "id": "el-ambient",
+          "type": "Box",
+          "color": "#6C5CE7",
+          "animate": [
+            {"preset": "grain", "amount": 0.2},
+            {"preset": "vignette", "amount": 0.5},
+            {"preset": "spin", "period": "90f"},
+            {"preset": "drift", "to": "right", "distance": 0.15},
+            {"preset": "kenBurns", "zoom": 1.2, "pan": "left"}
+          ]
+        }
+      ]
+    },
+    {
+      "duration": "150f",
+      "children": [
+        {
+          "id": "el-exiting",
+          "type": "Text",
+          "text": "Exit presets",
+          "animate": [
+            {"preset": "fadeOut", "duration": "15f"},
+            {"preset": "slideOut", "to": "top"},
+            {"preset": "slideFadeOut", "to": "bottom", "delay": "10f"},
+            {"preset": "scaleOut", "to": 0.7},
+            {"preset": "blurOut", "sigma": 10},
+            {"preset": "maskWipeOut", "shape": "rect", "origin": "topLeft"},
+            {"preset": "glitchOut", "to": "right"}
+          ]
+        }
+      ]
+    }
+  ]
+}

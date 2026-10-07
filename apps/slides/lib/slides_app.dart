@@ -1,202 +1,89 @@
 import 'dart:async' show unawaited;
+import 'dart:convert' show jsonDecode, jsonEncode;
 
 import 'package:flutter/widgets.dart';
-import 'package:fluvie/fluvie.dart' show Video;
-import 'package:fluvie_editor/fluvie_editor.dart' show EditorDocument;
+import 'package:fluvie/fluvie.dart' show MediaFileBase, Video;
+import 'package:fluvie_editor/fluvie_editor.dart' show EditorDocument, documentBundleValues;
 import 'package:fluvie_presenter/fluvie_presenter.dart';
 import 'package:obers_ui/obers_ui.dart';
 import 'package:slides/deck/deck_registry.dart';
 import 'package:slides/editor/demo_spec.dart';
 import 'package:slides/editor/editor_screen.dart';
+import 'package:slides/editor/session_media_store.dart';
+import 'package:slides/loader/autosave_record.dart';
+import 'package:slides/loader/autosave_store.dart';
+import 'package:slides/loader/fluvie_file_saver.dart';
 import 'package:slides/loader/open_fluvie_file.dart';
+import 'package:slides/loader/open_fluvie_path.dart';
+import 'package:slides/loader/recent_deck.dart';
+import 'package:slides/loader/recent_decks_store.dart';
+import 'package:slides/loader/start_prefs_store.dart';
+import 'package:slides/routing/session_media_urls.dart';
+import 'package:slides/routing/speaker_deck_payload.dart';
 import 'package:slides/routing/speaker_route.dart';
+import 'package:slides/start/start_screen.dart';
 
-/// The Fluvie slides shell: pick a bundled tutorial deck or open a local
-/// `.fluvie` file, then present it with `FluvieSlides`.
+part 'slides_app_open.dart';
+part 'slides_app_prefs.dart';
+part 'slides_app_recents.dart';
+part 'slides_app_recovery.dart';
+part 'slides_app_state.dart';
+
+/// The Fluvie slides shell: pick a bundled tutorial deck, a recent deck, or
+/// a local `.fluvie` file, then present or edit it.
 ///
 /// All presentation logic lives in `package:fluvie_presenter`; this app only
 /// decides what to present (and, on the web, hands the choice to the
 /// speaker popup through local storage).
 final class SlidesApp extends StatefulWidget {
   /// Creates the shell.
-  const SlidesApp({this.openFile = openFluvieFile, super.key});
+  const SlidesApp({
+    this.openFile = openFluvieFile,
+    this.openPath = openFluvieFileAtPath,
+    this.saver,
+    this.recents,
+    this.startPrefs,
+    this.autosave,
+    this.sessionMedia,
+    this.storeSpeaker,
+    this.layoutSettings = const OiLocalStorageDriver(prefix: 'fluvie.slides'),
+    super.key,
+  });
 
-  /// How "Open a .fluvie file" obtains one; tests inject a fake picker.
+  /// How the file actions obtain a deck; tests inject a fake picker.
   final Future<LoadedDeck?> Function() openFile;
+
+  /// How a recent entry reopens by path; tests inject a fake reader.
+  final Future<LoadedDeck> Function(String path) openPath;
+
+  /// How the editor saves; null takes the platform saver, tests inject one.
+  final FluvieFileSaver? saver;
+
+  /// Where the recents list lives; null takes the platform store.
+  final RecentDecksStore? recents;
+
+  /// Where the editor shell persists its panel layout.
+  ///
+  /// Defaults to the platform store (shared preferences off the web, local
+  /// storage on it) so a reopened editor looks the way it was left; a test
+  /// passes an in-memory driver, or null to lay out without remembering.
+  final OiSettingsDriver? layoutSettings;
+
+  /// Where the start screen's remembered preferences live (the first-run
+  /// tips dismissal); null takes the platform store.
+  final StartPrefsStore? startPrefs;
+
+  /// Where crash-recovery autosaves live; null takes the platform store.
+  final AutosaveStore? autosave;
+
+  /// The session media store recoveries adopt into and speaker payloads
+  /// read from; null takes the app session.
+  final SessionMediaStore? sessionMedia;
+
+  /// How presenting records the deck for the speaker popup; null takes the
+  /// platform handoff (localStorage on the web, a no-op on desktop).
+  final void Function({required String kind, required String payload})? storeSpeaker;
 
   @override
   State<SlidesApp> createState() => _SlidesAppState();
-}
-
-final class _SlidesAppState extends State<SlidesApp> {
-  Video? _presenting;
-  (EditorDocument, String)? _editing;
-  String? _loadError;
-
-  void _editDocument(String title, Map<String, Object?> json) {
-    try {
-      final document = EditorDocument.fromJson(json);
-      setState(() {
-        _editing = (document, title);
-        _loadError = null;
-      });
-    } on Object catch (error) {
-      setState(() => _loadError = '$title: $error');
-    }
-  }
-
-  Future<void> _editFile() async {
-    final loaded = await widget.openFile();
-    if (loaded == null || !mounted) return;
-    final raw = loaded.rawJson;
-    if (raw == null) {
-      setState(() => _loadError = '${loaded.name}: ${loaded.error}');
-      return;
-    }
-    _editDocument(loaded.name, parseRawJson(raw));
-  }
-
-  void _presentBundled(DeckEntry deck) {
-    storeSpeakerDeck(kind: 'bundled', payload: deck.id);
-    setState(() {
-      _presenting = deck.build();
-      _loadError = null;
-    });
-  }
-
-  Future<void> _presentFile() async {
-    final loaded = await widget.openFile();
-    if (loaded == null || !mounted) return;
-    _presentLoaded(loaded);
-  }
-
-  void _presentLoaded(LoadedDeck loaded) {
-    if (loaded.video == null) {
-      setState(() => _loadError = '${loaded.name}: ${loaded.error}');
-      return;
-    }
-    storeSpeakerDeck(kind: 'file', payload: loaded.rawJson!);
-    setState(() {
-      _presenting = loaded.video;
-      _loadError = null;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final presenting = _presenting;
-    final editing = _editing;
-    return OiApp(
-      title: 'fluvie slides',
-      theme: OiThemeData.dark(),
-      home: presenting != null
-          ? _PresentingScreen(
-              video: presenting,
-              onClose: () => setState(() => _presenting = null),
-            )
-          : editing != null
-          ? EditorScreen(
-              document: editing.$1,
-              title: editing.$2,
-              onClose: () => setState(() => _editing = null),
-            )
-          : OiFileDropTarget(
-              dropMessage: 'Drop a .fluvie file to present it',
-              onInternalDrop: (_, _) {},
-              // The barrel hides the drop payload type; inference names it.
-              onExternalDrop: (files) {
-                if (files.isEmpty) return;
-                _presentLoaded(parseDroppedFluvie(files.first.name, files.first.bytes));
-              },
-              child: _DeckPicker(
-                error: _loadError,
-                onPickBundled: _presentBundled,
-                onOpenFile: () => unawaited(_presentFile()),
-                onEditDemo: () => _editDocument('Demo deck', demoSpecJson),
-                onEditFile: () => unawaited(_editFile()),
-              ),
-            ),
-    );
-  }
-}
-
-final class _PresentingScreen extends StatelessWidget {
-  const _PresentingScreen({required this.video, required this.onClose});
-
-  final Video video;
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) => FluvieSlides(video, onClose: onClose);
-}
-
-final class _DeckPicker extends StatelessWidget {
-  const _DeckPicker({
-    required this.error,
-    required this.onPickBundled,
-    required this.onOpenFile,
-    required this.onEditDemo,
-    required this.onEditFile,
-  });
-
-  final String? error;
-  final void Function(DeckEntry deck) onPickBundled;
-  final VoidCallback onOpenFile;
-  final VoidCallback onEditDemo;
-  final VoidCallback onEditFile;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return ColoredBox(
-      color: colors.background,
-      child: Center(
-        // Scrolls when the deck list outgrows a small window.
-        child: SingleChildScrollView(
-          child: SizedBox(
-            width: 520,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const OiLabel.h1('fluvie slides', textAlign: TextAlign.center),
-                const SizedBox(height: 8),
-                OiLabel.body(
-                  'Pick a tutorial deck, open a .fluvie file, or drop one anywhere here.',
-                  color: colors.textSubtle,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                for (final deck in bundledDecks)
-                  OiListTile(
-                    title: deck.title,
-                    subtitle: deck.subtitle,
-                    onTap: () => onPickBundled(deck),
-                  ),
-                const SizedBox(height: 16),
-                OiButton.primary(label: 'Open a .fluvie file', onTap: onOpenFile),
-                const SizedBox(height: 24),
-                OiLabel.small('Edit', color: colors.textSubtle),
-                const SizedBox(height: 8),
-                OiListTile(
-                  title: 'Edit the demo deck',
-                  subtitle: 'The bundled spec, opened on the canvas',
-                  onTap: onEditDemo,
-                ),
-                OiListTile(
-                  title: 'Edit a .fluvie file',
-                  subtitle: 'Open your own document read-only',
-                  onTap: onEditFile,
-                ),
-                if (error != null) ...[
-                  const SizedBox(height: 12),
-                  OiLabel.small(error!, color: colors.error.base),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

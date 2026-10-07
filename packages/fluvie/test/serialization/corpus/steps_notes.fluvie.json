@@ -1,0 +1,71 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "8s",
+      "background": {
+        "kind": "color",
+        "color": "#101018"
+      },
+      "children": [
+        {
+          "id": "el-title",
+          "type": "Text",
+          "text": "Incident review",
+          "style": {
+            "fontSize": 40,
+            "color": "#F0F0F5"
+          },
+          "animate": [
+            {
+              "preset": "fadeIn",
+              "duration": "20f"
+            }
+          ]
+        },
+        {
+          "id": "el-b1",
+          "type": "Text",
+          "text": "3am page",
+          "animate": [
+            {
+              "preset": "slideFadeIn",
+              "duration": "20f"
+            }
+          ]
+        },
+        {
+          "id": "el-b2",
+          "type": "Text",
+          "text": "one line fix",
+          "animate": [
+            {
+              "preset": "slideFadeIn",
+              "duration": "30f"
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "elements": ["el-b1"]
+        },
+        {
+          "elements": ["el-b2"],
+          "notes": {
+            "text": "Land the punchline."
+          }
+        }
+      ],
+      "notes": {
+        "text": "Open with the outage story.",
+        "highlights": ["3am page", "one line fix"]
+      }
+    }
+  ]
+}

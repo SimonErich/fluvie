@@ -38,7 +38,27 @@ class FluvieMobileEncoderPlugin : FlutterPlugin, MethodCallHandler {
       "encode" -> handleEncode(call, result)
       "probeVideo" -> handleProbe(call, result)
       "extractFrames" -> handleExtract(call, result)
+      "decodePcm" -> handleDecodePcm(call, result)
       else -> result.notImplemented()
+    }
+  }
+
+  private fun handleDecodePcm(call: MethodCall, result: Result) {
+    val path = call.argument<String>("path")
+    val output = call.argument<String>("outputPath")
+    val maximum = call.argument<Number>("maxSamples")?.toLong()
+    if (path.isNullOrEmpty() || output.isNullOrEmpty() || maximum == null ||
+      maximum <= 0 || maximum > Int.MAX_VALUE) {
+      result.error("bad_request", "Expected path, outputPath and positive bounded maxSamples", null)
+      return
+    }
+    worker.execute {
+      try {
+        val facts = NativePcmAnalysis.decode(path, output, maximum.toInt())
+        main.post { result.success(facts) }
+      } catch (e: Exception) {
+        main.post { result.error("pcm_decode_failed", e.message, null) }
+      }
     }
   }
 
@@ -52,10 +72,15 @@ class FluvieMobileEncoderPlugin : FlutterPlugin, MethodCallHandler {
     val audioMaps = call.argument<List<Map<String, Any?>>>("audioTracks") ?: emptyList()
     val audioTracks = audioMaps.map { AudioTrackSpec.from(it) }
     val masterVolume = (call.argument<Double>("audioMasterVolume") ?: 1.0).toFloat()
+    val audioStartSeconds = call.argument<Double>("audioStartSeconds") ?: 0.0
+    if (!audioStartSeconds.isFinite() || audioStartSeconds < 0) {
+      result.error("bad_request", "audioStartSeconds must be finite and nonnegative", null)
+      return
+    }
 
     worker.execute {
       try {
-        encode(request, audioTracks, masterVolume)
+        encode(request, audioTracks, masterVolume, audioStartSeconds)
         main.post { result.success(request.outputPath) }
       } catch (e: Exception) {
         main.post { result.error("encode_failed", e.message, null) }
@@ -80,17 +105,14 @@ class FluvieMobileEncoderPlugin : FlutterPlugin, MethodCallHandler {
   }
 
   private fun handleExtract(call: MethodCall, result: Result) {
-    val path = call.argument<String>("path")
-    val indices = call.argument<List<Int>>("indices")
-    val width = call.argument<Int>("width")
-    val height = call.argument<Int>("height")
-    if (path == null || indices == null || width == null || height == null) {
-      result.error("bad_request", "missing path/indices/width/height", null)
+    val request = FrameExtractionRequest.from(call.arguments)
+    if (request == null) {
+      result.error("bad_request", "Expected path, nonnegative frame indices, positive dimensions, and a batch no larger than 256 MiB.", null)
       return
     }
     worker.execute {
       try {
-        val frames = VideoFrameReader.extractFrames(path, indices, width, height)
+        val frames = VideoFrameReader.extractFrames(request.path, request.indices, request.width, request.height)
         main.post { result.success(frames) }
       } catch (e: Exception) {
         main.post { result.error("extract_failed", e.message, null) }
@@ -102,6 +124,7 @@ class FluvieMobileEncoderPlugin : FlutterPlugin, MethodCallHandler {
     request: EncodeRequest,
     audioTracks: List<AudioTrackSpec>,
     masterVolume: Float,
+    audioStartSeconds: Double,
   ) {
     if (audioTracks.isEmpty()) {
       RgbaVideoEncoder(request).encode(request.outputPath)
@@ -110,17 +133,22 @@ class FluvieMobileEncoderPlugin : FlutterPlugin, MethodCallHandler {
     val parent = File(request.outputPath).parentFile
     val videoOnly = File(parent, "fluvie_video_only.mp4").absolutePath
     val audioOnly = File(parent, "fluvie_audio_only.m4a").absolutePath
+    val stagedOutput = File(parent, "fluvie_muxed.mp4")
     try {
       RgbaVideoEncoder(request).encode(videoOnly)
-      AudioMixEncoder(
+      val priming = AudioMixEncoder(
         audioTracks,
         masterVolume,
         request.frameCount.toDouble() / request.fps,
+        audioStartSeconds,
       ).encodeTo(audioOnly)
-      TrackMuxer.combine(videoOnly, audioOnly, request.outputPath)
+      TrackMuxer.combine(videoOnly, audioOnly, stagedOutput.path)
+      Mp4AudioWindow.apply(stagedOutput.path, priming, 44100, request.frameCount.toDouble() / request.fps)
+      check(stagedOutput.renameTo(File(request.outputPath))) { "Could not publish encoded MP4" }
     } finally {
       File(videoOnly).delete()
       File(audioOnly).delete()
+      stagedOutput.delete()
     }
   }
 

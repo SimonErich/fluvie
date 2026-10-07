@@ -1,5 +1,6 @@
 import 'package:fluvie/src/serialization/codecs/video_size_codec.dart' show namedVideoSizes;
 import 'package:fluvie/src/serialization/video_spec_schema_defs.dart' show buildSpecDefs;
+import 'package:fluvie/src/serialization/video_spec_schema_export.dart';
 
 /// A JSON Schema (draft-07) describing the `VideoSpec` document.
 ///
@@ -30,9 +31,38 @@ final Map<String, Object?> videoSpecSchema = {
     },
     'fps': {'type': 'integer', 'minimum': 1, 'default': 30},
     'poster': {r'$ref': r'#/$defs/time'},
-    'export': {'type': 'object'},
+    'export': exportSchema(),
     'motionDefaults': {r'$ref': r'#/$defs/defaults'},
     'transition': {r'$ref': r'#/$defs/transition'},
+    'theme': {r'$ref': r'#/$defs/theme'},
+    'masters': {
+      'type': 'object',
+      'description':
+          'Named master layouts scenes adopt through their "master" key; '
+          'applied at build time with no copies.',
+      'propertyNames': {'pattern': r'^[a-zA-Z][a-zA-Z0-9]*$'},
+      'additionalProperties': {r'$ref': r'#/$defs/master'},
+    },
+    'audio': {
+      'type': 'array',
+      'description': 'Composition-wide audio tracks, mixed video-first with scene tracks.',
+      'items': {r'$ref': r'#/$defs/audioTrack'},
+    },
+    'lanes': {
+      'type': 'array',
+      'description':
+          'The timeline rows this document declares. Elements and audio '
+          'tracks point at one by id through their "lane".',
+      'items': {r'$ref': r'#/$defs/lane'},
+    },
+    'overlays': {
+      'type': 'array',
+      'description':
+          "Elements that live outside every scene, on the whole video's clock. "
+          'Their "show" windows resolve against the video, not a scene, so '
+          'they cross every boundary as one instance.',
+      'items': {r'$ref': r'#/$defs/overlayElement'},
+    },
     'scenes': {
       'type': 'array',
       'minItems': 1,

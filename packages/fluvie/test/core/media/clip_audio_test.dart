@@ -22,8 +22,10 @@ void main() {
       expect(audio.fadeIn, const Time.seconds(0.3));
     });
 
-    test('rejects a volume outside 0..1', () {
-      expect(() => ClipAudio.included(volume: 1.5), throwsA(isA<AssertionError>()));
+    test('allows amplification and rejects invalid gains', () {
+      expect(const ClipAudio.included(volume: 1.5).volume, 1.5);
+      expect(() => ClipAudio.included(volume: double.infinity), throwsA(isA<AssertionError>()));
+      expect(() => ClipAudio.included(volume: double.nan), throwsA(isA<AssertionError>()));
       expect(() => ClipAudio.included(volume: -0.1), throwsA(isA<AssertionError>()));
     });
   });

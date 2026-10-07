@@ -82,6 +82,8 @@ sed -i -E "s/(const String (fluvieDependencyVersion|fluvieLintsDependencyVersion
   packages/fluvie_cli/lib/src/init_support.dart
 sed -i -E "s/(const String _version = ')[^']*(';)/\1${version}\2/" \
   packages/fluvie_server/lib/src/app/server_runtime.dart
+sed -i -E "s/^(      fluvie: )\^?[0-9][0-9A-Za-z.+-]*$/\1^${version}/" \
+  packages/fluvie_server/lib/src/mcp/init_tool.dart
 
 echo "Set ${#changed[@]} packages to ${version}: ${changed[*]}"
 echo "Stamped a [${version}] section into each package CHANGELOG (idempotent)."

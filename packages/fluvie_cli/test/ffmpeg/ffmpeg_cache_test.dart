@@ -11,8 +11,9 @@ void main() {
         abi: Abi.linuxX64,
         environment: const {'XDG_CACHE_HOME': '/xdg', 'HOME': '/home/me'},
       );
-      expect(cache.versionDir, '/xdg/fluvie/ffmpeg/$pinnedFfmpegVersion');
-      expect(cache.binaryPath, '/xdg/fluvie/ffmpeg/$pinnedFfmpegVersion/ffmpeg');
+      expect(cache.versionDir, '/xdg/fluvie/toolchains/$pinnedFfmpegBuildId/linux_x64');
+      expect(cache.binaryPath, '/xdg/fluvie/toolchains/$pinnedFfmpegBuildId/linux_x64/bin/ffmpeg');
+      expect(cache.probePath, '/xdg/fluvie/toolchains/$pinnedFfmpegBuildId/linux_x64/bin/ffprobe');
     });
 
     test('falls back to ~/.cache when XDG is unset', () {
@@ -22,7 +23,7 @@ void main() {
       );
       expect(
         cache.binaryPath,
-        '/Users/me/.cache/fluvie/ffmpeg/$pinnedFfmpegVersion/ffmpeg',
+        '/Users/me/.cache/fluvie/toolchains/$pinnedFfmpegBuildId/macos_arm64/bin/ffmpeg',
       );
     });
 
@@ -39,11 +40,11 @@ void main() {
         environment: const {'HOME': '/h'},
         version: '9.9',
       );
-      expect(cache.binaryPath, '/h/.cache/fluvie/ffmpeg/9.9/ffmpeg');
+      expect(cache.binaryPath, '/h/.cache/fluvie/toolchains/9.9/linux_x64/bin/ffmpeg');
     });
 
     test('defaults to the process environment and host ABI', () {
-      expect(FfmpegCache().version, pinnedFfmpegVersion);
+      expect(FfmpegCache().version, pinnedFfmpegBuildId);
     });
   });
 
@@ -54,7 +55,7 @@ void main() {
         environment: const {'LOCALAPPDATA': r'C:\Users\me\AppData\Local'},
       );
       expect(cache.binaryPath, startsWith(r'C:\Users\me\AppData\Local'));
-      expect(cache.binaryPath, contains(r'\fluvie\ffmpeg\'));
+      expect(cache.binaryPath, contains(r'\fluvie\toolchains\'));
       expect(cache.binaryPath, contains(pinnedFfmpegVersion));
       expect(cache.binaryPath, endsWith(r'\ffmpeg.exe'));
     });

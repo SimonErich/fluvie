@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart' show Directionality, TextDirection, Widget, debugPrint;
 import 'package:fluvie/src/core/aspect.dart';
+import 'package:fluvie/src/core/contracts/clip_timeline_resolver.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart' show MediaResolver;
 import 'package:fluvie/src/core/defaults.dart';
+import 'package:fluvie/src/core/quality.dart';
 import 'package:fluvie/src/core/render_phase.dart';
 import 'package:fluvie/src/media/net/network_allowlist.dart';
 import 'package:fluvie/src/media/render_resolver_scope.dart';
@@ -12,12 +14,18 @@ import 'package:fluvie/src/rendering/capture/repaint_boundary_capture_service.da
 import 'package:fluvie/src/rendering/encoding/ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/platform/process_ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/render_aspect.dart' as capture;
+import 'package:fluvie/src/rendering/render_cancellation.dart';
 import 'package:fluvie/src/rendering/render_cleanup.dart';
 import 'package:fluvie/src/rendering/render_duration.dart';
 import 'package:fluvie/src/rendering/render_progress.dart';
 import 'package:fluvie/src/rendering/render_service.dart';
 import 'package:fluvie/src/rendering/render_stage.dart';
+import 'package:fluvie/src/rendering/request_video_renderer.dart';
+import 'package:fluvie/src/rendering/video_render_request.dart';
 import 'package:fluvie/src/rendering/video_renderer.dart';
+import 'package:fluvie_media/fluvie_media.dart' show RenderCapabilities;
+
+part 'desktop_video_renderer_capture.dart';
 
 /// Renders a Fluvie composition to an MP4 file with a local FFmpeg.
 ///
@@ -33,7 +41,7 @@ import 'package:fluvie/src/rendering/video_renderer.dart';
 /// injected so the orchestration is unit-testable; the host owns pumping
 /// through [pumpWidget] and [pumpFrame] (a widget test passes the tester's,
 /// the CLI passes its binding's).
-final class DesktopVideoRenderer implements VideoRenderer<File> {
+final class DesktopVideoRenderer implements VideoRenderer<File>, RequestVideoRenderer<File> {
   /// Creates a renderer over its seams; the defaults target a real desktop.
   DesktopVideoRenderer({
     required this.pumpWidget,
@@ -44,7 +52,9 @@ final class DesktopVideoRenderer implements VideoRenderer<File> {
     void Function(String message)? onWarning,
     this.mediaResolver,
     this.networkAllowlist,
-  }) : _runner = runner ?? ProcessFfmpegRunner(),
+    this.cancellation,
+    // ignore: prefer_initializing_formals — the public runner parameter keeps its established name.
+  }) : _runner = runner,
        _service = service ?? RenderService(capture: const RepaintBoundaryCaptureService()),
        _sandboxFactory = sandboxFactory ?? _defaultSandboxFactory,
        _onWarning = onWarning ?? _defaultWarn;
@@ -62,7 +72,7 @@ final class DesktopVideoRenderer implements VideoRenderer<File> {
   /// Pumps the host one frame after each seek.
   final capture.ShellFramePump pumpFrame;
 
-  final FfmpegRunner _runner;
+  final FfmpegRunner? _runner;
   final RenderService _service;
   final Future<Directory> Function() _sandboxFactory;
 
@@ -74,6 +84,9 @@ final class DesktopVideoRenderer implements VideoRenderer<File> {
   /// per-render resolver when none is injected; ignored when [mediaResolver]
   /// is provided (configure the allowlist on it instead).
   final NetworkAllowlist? networkAllowlist;
+
+  /// Optional cancellation shared with the owning export job.
+  final RenderCancellation? cancellation;
 
   /// Renders [composition] for [aspect] over [duration] to an MP4 file in a
   /// fresh sandbox directory, returning that file.
@@ -88,69 +101,36 @@ final class DesktopVideoRenderer implements VideoRenderer<File> {
     required Duration duration,
     int fps = VideoDefaults.fps,
     int longEdge = VideoDefaults.longEdge,
+    Quality? quality,
     bool audio = true,
     bool warnOnDroppedAudio = true,
     String compositionKey = 'render',
     RenderProgressCallback? onProgress,
   }) async {
-    final frameCount = frameCountFor(duration, fps);
-    final sandbox = await _sandboxFactory();
-    final scope = resolverScope(mediaResolver, networkAllowlist: networkAllowlist);
-    try {
-      if (!audio) _warnIfDroppingAudio(composition, warnOnDroppedAudio, fps, frameCount);
-      onProgress?.call(RenderProgress(RenderPhase.capturing, compositionKey: compositionKey));
-      final result = await runStage(
-        RenderPhase.capturing,
-        () => capture.render(
-          // The host mounts this with no app ancestors, so the tree needs an
-          // ambient Directionality for Text/RichText to lay out. Audio is
-          // collected from the raw Video by the capture entry itself, so the
-          // wrap is mount-only.
-          composition: Directionality(textDirection: TextDirection.ltr, child: composition),
-          aspect: aspect,
-          frameCount: frameCount,
-          outDir: sandbox,
-          service: _service,
-          pumpWidget: pumpWidget,
-          pumpFrame: pumpFrame,
-          longEdge: longEdge,
-          fps: fps,
-          compositionKey: compositionKey,
-          stageAudio: audio ? null : _silentAudio,
-          resolver: scope.resolver,
-        ),
-      );
-      final manifest = result.manifest;
-      onProgress?.call(RenderProgress(RenderPhase.encoding, compositionKey: compositionKey));
-      await runStage(RenderPhase.encoding, () async {
-        await _runner.encode(args: manifest.ffmpegArgs, sandbox: sandbox);
-        final posterArgs = manifest.posterArgs;
-        if (posterArgs != null) {
-          await _runner.encode(args: posterArgs, sandbox: sandbox);
-        }
-      });
-      onProgress?.call(RenderProgress(RenderPhase.complete, compositionKey: compositionKey));
-      return File('${sandbox.path}/${manifest.outputFileName}');
-    } finally {
-      await runGuarded([
-        scope.dispose,
-      ], (error, _) => _onWarning('Cleanup after render failed: $error'));
-    }
-  }
-
-  /// Warns once when [composition] declares audio that `audio: false` drops —
-  /// the shared opt-in gate ([gateOptInAudio]) in its warn-only role.
-  void _warnIfDroppingAudio(Widget composition, bool warn, int fps, int frameCount) {
-    gateOptInAudio(
-      composition: composition,
-      encode: false,
-      warn: warn,
-      fps: fps,
-      frameCount: frameCount,
-      warnSink: _onWarning,
-      platformLabel: 'local',
+    final size = aspect.sizeFor(longEdge);
+    return renderRequest(
+      VideoRenderRequest(
+        composition: composition,
+        width: size.width,
+        height: size.height,
+        fps: fps,
+        frameCount: frameCountFor(duration, fps),
+        aspect: aspect,
+        quality: quality,
+        audio: audio,
+        warnOnDroppedAudio: warnOnDroppedAudio,
+        compositionKey: compositionKey,
+        onProgress: onProgress,
+        cancellation: cancellation,
+      ),
     );
   }
+
+  @override
+  RenderCapabilities get capabilities => RenderCapabilities.desktop;
+
+  @override
+  Future<File> renderRequest(VideoRenderRequest request) => _renderRequest(request);
 
   static Future<Directory> _defaultSandboxFactory() =>
       Directory.systemTemp.createTemp('fluvie_desktop_render_');

@@ -19,6 +19,10 @@ export 'src/notes/speaker_notes.dart' show SpeakerNotes;
 export 'src/player/live_scene_player.dart' show LiveScenePlayer;
 export 'src/shell/fluvie_slides.dart' show FluvieSlides;
 export 'src/shell/presenter_theme.dart' show PresenterTheme, presenterThemeProvider;
+export 'src/sidebar/preview_render_host.dart' show PreviewRenderHost, PreviewRenderHostState;
+export 'src/sidebar/slide_preview_frame.dart' show SlidePreviewFrame;
+export 'src/sidebar/slide_preview_service.dart'
+    show SlidePreviewService, slidePreviewServiceProvider;
 export 'src/speaker/fluvie_speaker.dart' show FluvieSpeaker;
 export 'src/speaker/presentation_sync_channel.dart'
     show PresentationSyncChannel, presentationSyncChannelProvider;
@@ -30,6 +34,8 @@ export 'src/speaker/speaker_window_launcher.dart'
         speakerWindowLauncherProvider;
 export 'src/speaker/sync_message.dart'
     show NavigationAction, NavigationRequest, PositionUpdate, SyncMessage;
+export 'src/spec/deck_from_spec.dart' show deckFromSpec;
+export 'src/spec/validate_step_plan.dart' show validateStepPlan;
 export 'src/stepping/slide_plan.dart' show SlidePlan, SlideStep;
 export 'src/stepping/slide_view.dart' show SlideView;
 export 'src/stepping/step_compile_error.dart' show StepCompileError;

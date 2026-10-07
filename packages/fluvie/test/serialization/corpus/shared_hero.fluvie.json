@@ -1,0 +1,96 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "transition": {
+    "kind": "crossFade",
+    "duration": "18f"
+  },
+  "scenes": [
+    {
+      "duration": "90f",
+      "layout": "canvas",
+      "background": {
+        "kind": "color",
+        "color": "#101018"
+      },
+      "children": [
+        {
+          "id": "el-logo-large",
+          "type": "Box",
+          "color": "#6C5CE7",
+          "shared": "logo",
+          "transform": {
+            "x": 0.5,
+            "y": 0.5,
+            "w": 0.4,
+            "h": 0.4
+          }
+        },
+        {
+          "id": "el-headline",
+          "type": "Text",
+          "text": "One brand",
+          "shared": "headline",
+          "style": {
+            "fontSize": 32,
+            "color": "#F0F0F5"
+          },
+          "transform": {
+            "x": 0.5,
+            "y": 0.85,
+            "w": 0.8,
+            "h": 0.15
+          }
+        }
+      ]
+    },
+    {
+      "duration": "90f",
+      "layout": "canvas",
+      "background": {
+        "kind": "color",
+        "color": "#0B0B12"
+      },
+      "children": [
+        {
+          "id": "el-logo-small",
+          "type": "Box",
+          "color": "#6C5CE7",
+          "shared": "logo",
+          "transform": {
+            "x": 0.12,
+            "y": 0.12,
+            "w": 0.12,
+            "h": 0.12
+          },
+          "animate": [
+            {
+              "preset": "fadeIn",
+              "duration": "12f"
+            }
+          ]
+        },
+        {
+          "id": "el-headline-2",
+          "type": "Text",
+          "text": "One brand",
+          "shared": "headline",
+          "style": {
+            "fontSize": 18,
+            "color": "#F0F0F5"
+          },
+          "transform": {
+            "x": 0.3,
+            "y": 0.12,
+            "w": 0.5,
+            "h": 0.1
+          }
+        }
+      ]
+    }
+  ]
+}

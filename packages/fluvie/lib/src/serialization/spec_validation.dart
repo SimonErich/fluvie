@@ -1,11 +1,26 @@
 import 'package:fluvie/src/core/errors/fluvie_spec_error.dart';
+import 'package:fluvie/src/serialization/animation_spec.dart';
+import 'package:fluvie/src/serialization/audio_track_spec.dart';
 import 'package:fluvie/src/serialization/background_spec.dart';
+import 'package:fluvie/src/serialization/codecs/box_decoration_codec.dart';
+import 'package:fluvie/src/serialization/codecs/geometry_codec.dart';
+import 'package:fluvie/src/serialization/codecs/particles_codec.dart';
 import 'package:fluvie/src/serialization/codecs/placement_codec.dart';
+import 'package:fluvie/src/serialization/effect_spec.dart';
 import 'package:fluvie/src/serialization/element_spec.dart';
+import 'package:fluvie/src/serialization/lane_spec.dart';
+import 'package:fluvie/src/serialization/master_spec.dart';
 import 'package:fluvie/src/serialization/scene_spec.dart';
+import 'package:fluvie/src/serialization/theme_spec.dart';
 import 'package:fluvie/src/serialization/video_spec.dart';
 
+part 'spec_validation_animations.dart';
+part 'spec_validation_audio.dart';
+part 'spec_validation_elements.dart';
+part 'spec_validation_element_nested.dart';
+part 'spec_validation_masters.dart';
 part 'spec_validation_message.dart';
+part 'spec_validation_steps.dart';
 
 /// A non-fatal spec diagnostic: a property Fluvie does not recognize and would
 /// silently ignore while rendering.
@@ -28,26 +43,6 @@ final class FluvieSpecWarning {
   String toString() => path.isEmpty ? message : '$message (at ${path.join('.')})';
 }
 
-/// The element keys [ElementSpec.fromJson] reserves; mirror of its private set.
-Set<String> get _reservedElementKeys => ElementSpec.reservedElementKeys;
-
-/// Text-style fields (the `decodeTextStyle` subset): the contents of a `"style"`
-/// object, also used to hint when one is mistakenly placed at the top level of a
-/// `Text`/`Counter`.
-const Set<String> _styleFields = {
-  'color',
-  'fontSize',
-  'fontWeight',
-  'fontFamily',
-  'letterSpacing',
-  'height',
-};
-
-/// The closed nested object shapes, mirrored from the codecs: a `Box` `size`
-/// ({width, height}) and an `Image` `source` ({kind, value}).
-const Set<String> _sizeFields = {'width', 'height'};
-const Set<String> _sourceFields = {'kind', 'value'};
-
 /// Reports every property in [json] (a decoded `VideoSpec` document) that Fluvie
 /// does not recognize and would silently drop, each located by its path and
 /// naming the allowed keys (with a "did you mean" hint when one is close).
@@ -62,6 +57,13 @@ List<FluvieSpecWarning> unknownSpecProps(Map<String, Object?> json) {
   _checkKeys(json, VideoSpec.knownKeys, 'the video', const [], warnings);
   // The `editor` block is tool-owned and deliberately open; nothing inside
   // it is Fluvie's to second-guess (and the digest ignores it anyway).
+  final theme = json['theme'];
+  if (theme is Map<String, Object?>) _checkTheme(theme, warnings);
+  final masters = json['masters'];
+  if (masters is Map<String, Object?>) _checkMasters(masters, warnings);
+  _checkAudioTracks(json['audio'], const ['audio'], warnings);
+  _checkLanes(json['lanes'], warnings);
+  _checkOverlays(json['overlays'], warnings);
   final scenes = json['scenes'];
   if (scenes is! List) return warnings;
   for (var i = 0; i < scenes.length; i++) {
@@ -69,6 +71,9 @@ List<FluvieSpecWarning> unknownSpecProps(Map<String, Object?> json) {
     if (scene is! Map<String, Object?>) continue;
     final scenePath = ['scenes', '$i'];
     _checkKeys(scene, SceneSpec.knownKeys, 'a scene', scenePath, warnings);
+    _checkStepsAndNotes(scene, scenePath, warnings);
+    _checkSceneMaster(scene, masters, scenePath, warnings);
+    _checkAudioTracks(scene['audio'], [...scenePath, 'audio'], warnings);
     final background = scene['background'];
     if (background is Map<String, Object?>) {
       _checkBackground(background, [...scenePath, 'background'], warnings);
@@ -82,6 +87,27 @@ List<FluvieSpecWarning> unknownSpecProps(Map<String, Object?> json) {
     }
   }
   return warnings;
+}
+
+/// Reports every unknown property on an overlay, exactly as on a scene child:
+/// an overlay is an element, and the same rules read it.
+void _checkOverlays(Object? raw, List<FluvieSpecWarning> warnings) {
+  if (raw is! List) return;
+  for (var i = 0; i < raw.length; i++) {
+    final overlay = raw[i];
+    if (overlay is! Map<String, Object?>) continue;
+    _checkElement(overlay, ['overlays', '$i'], warnings);
+  }
+}
+
+/// Reports every unknown key on a lane declaration.
+void _checkLanes(Object? raw, List<FluvieSpecWarning> warnings) {
+  if (raw is! List) return;
+  for (var i = 0; i < raw.length; i++) {
+    final lane = raw[i];
+    if (lane is! Map<String, Object?>) continue;
+    _checkKeys(lane, LaneSpec.knownKeys, 'a lane', ['lanes', '$i'], warnings);
+  }
 }
 
 /// Throws a [FluvieSpecError] enumerating every unknown property in [json], or
@@ -100,28 +126,6 @@ void assertNoUnknownSpecProps(Map<String, Object?> json) {
   );
 }
 
-void _checkElement(Map<String, Object?> json, List<String> path, List<FluvieSpecWarning> out) {
-  final type = json['type'];
-  if (type is! String) return; // Absent/non-string type: the parser reports it.
-  final allowedProps = knownElementProps[type];
-  if (allowedProps == null) return; // Unknown type: the parser reports it.
-  final allowed = {..._reservedElementKeys, ...allowedProps};
-  for (final key in json.keys) {
-    if (allowed.contains(key)) continue;
-    out.add(FluvieSpecWarning(_message(key, 'a $type', allowedProps, type), path: path));
-  }
-  // The curated nested objects are closed shapes too: a typo inside style/size/
-  // source is dropped by the codec, so check one level deeper.
-  _checkNested(json, 'transform', knownPlacementKeys, 'a transform', path, out);
-  if (type == 'Text' || type == 'Counter') {
-    _checkNested(json, 'style', _styleFields, 'a text style', path, out);
-  } else if (type == 'Box') {
-    _checkNested(json, 'size', _sizeFields, 'a Box size', path, out);
-  } else if (type == 'Image') {
-    _checkNested(json, 'source', _sourceFields, 'an image source', path, out);
-  }
-}
-
 void _checkNested(
   Map<String, Object?> json,
   String key,
@@ -136,6 +140,21 @@ void _checkNested(
   for (final prop in nested.keys) {
     if (allowed.contains(prop)) continue;
     out.add(FluvieSpecWarning(_message(prop, subject, allowed, null), path: nestedPath));
+  }
+}
+
+/// The theme block: closed over [ThemeSpec.knownKeys], and every type-scale
+/// entry a closed *literal* style shape (no `token` — a type-scale style
+/// cannot reference tokens, so the parser rejects one anyway).
+void _checkTheme(Map<String, Object?> theme, List<FluvieSpecWarning> out) {
+  const path = ['theme'];
+  _checkKeys(theme, ThemeSpec.knownKeys, 'a theme', path, out);
+  final typeScale = theme['typeScale'];
+  if (typeScale is! Map<String, Object?>) return; // Wrong type: the parser reports it.
+  for (final entry in typeScale.entries) {
+    final style = entry.value;
+    if (style is! Map<String, Object?>) continue;
+    _checkKeys(style, _styleFields, 'a type scale style', [...path, 'typeScale', entry.key], out);
   }
 }
 

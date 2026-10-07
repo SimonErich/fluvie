@@ -8,6 +8,8 @@ import 'package:fluvie_server/src/api/render/render_runner.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
+import '../../support/mock_toolchain.dart';
+
 class _MockProcessRunner extends Mock implements ProcessRunner {}
 
 const _banner8 = 'ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers';
@@ -50,6 +52,7 @@ void main() {
 
   setUp(() {
     runner = _MockProcessRunner();
+    stubOutputProbe(runner);
     project = Directory.systemTemp.createTempSync('fluvie_code_project_');
     // The generated harness is self-contained (it drives fluvie's renderVideo
     // directly), so the project needs nothing but the pubspec resolveProjectDir
@@ -68,6 +71,7 @@ void main() {
     renderProject: project.path,
     aiEnv: aiEnv,
     processRunner: runner,
+    resolveToolchain: mockToolchain(),
     createSandbox: () async => sandbox,
   );
 
@@ -126,7 +130,9 @@ void main() {
 
     expect(inputAtSpawn, _goodCode);
     expect(harnessAtSpawn, contains("import 'input.dart' as target;"));
-    expect(harnessAtSpawn, contains('video: target.build(),'));
+    expect(harnessAtSpawn, contains('final video = target.build();'));
+    expect(harnessAtSpawn, contains('video: video,'));
+    expect(harnessAtSpawn, contains('videoFactory: target.build,'));
     expect(outcome.videoContentType, 'video/mp4');
     expect(File(outcome.videoPath).existsSync(), isTrue);
     expect(outcome.specPath, isNull);
@@ -210,6 +216,7 @@ void main() {
     final timed = PipelineRenderRunner(
       renderProject: project.path,
       processRunner: runner,
+      resolveToolchain: mockToolchain(),
       createSandbox: () async => sandbox,
       captureTimeout: const Duration(milliseconds: 200),
     );

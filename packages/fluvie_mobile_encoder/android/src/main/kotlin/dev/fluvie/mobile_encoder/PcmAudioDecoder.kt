@@ -58,7 +58,9 @@ object PcmAudioDecoder {
         if (outIndex >= 0) {
           val buffer = codec.getOutputBuffer(outIndex)
           if (buffer != null && info.size > 0) {
-            val shorts = buffer.order(ByteOrder.nativeOrder()).asShortBuffer()
+            buffer.position(info.offset)
+            buffer.limit(info.offset + info.size)
+            val shorts = buffer.slice().order(ByteOrder.nativeOrder()).asShortBuffer()
             while (shorts.hasRemaining()) out.add(shorts.get())
           }
           codec.releaseOutputBuffer(outIndex, false)

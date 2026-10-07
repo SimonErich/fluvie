@@ -30,7 +30,7 @@ const _clip = MediaSource.asset('fixtures/clip_1s.mp4');
 
 /// A resolver with everything a warm-up needs: a 4-frame 30fps source matching
 /// the 4-frame composition below one-to-one.
-FakeMediaResolver _readyResolver(ui.Image image) => FakeMediaResolver(
+_TrackingResolver _readyResolver(ui.Image image) => _TrackingResolver(
   {_clip: (bytes: Uint8List(0), contentHash: 'x')},
   metadata: {
     _clip: (fps: 30, frameCount: 4, width: 4, height: 4, hasAudio: false),
@@ -39,6 +39,16 @@ FakeMediaResolver _readyResolver(ui.Image image) => FakeMediaResolver(
     _clip: {0: image, 1: image, 2: image, 3: image},
   },
 );
+
+final class _TrackingResolver extends FakeMediaResolver {
+  _TrackingResolver(super.canned, {super.metadata, super.clipFrames});
+  final extractedFrames = <MediaSource, Set<int>>{};
+  @override
+  Future<void> preResolveClip(MediaSource source, Iterable<int> sourceFrames) async {
+    extractedFrames.putIfAbsent(source, () => {}).addAll(sourceFrames);
+    await super.preResolveClip(source, sourceFrames);
+  }
+}
 
 /// Holds the pre-pass open until its gate completes, so a test can tear the tree
 /// down while a warm-up is genuinely in flight (a plain fake resolves in
@@ -100,6 +110,54 @@ void main() {
 
   setUp(() => controller = RenderController());
   tearDown(() => controller.dispose());
+
+  testWidgets('warms the composition while mounting a separate interactive child', (tester) async {
+    final image = await _frameImage();
+    addTearDown(image.dispose);
+    final resolver = _readyResolver(image);
+    await tester.pumpWidget(
+      _harness(
+        PreviewMediaScope(
+          composition: _video(),
+          resolver: resolver,
+          child: const flutter.Text('interactive stage'),
+        ),
+        controller,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('interactive stage'), findsOneWidget);
+    expect(find.byType(ImageResolverScope), findsOneWidget);
+    expect(find.byType(flutter.RawImage), findsNothing);
+  });
+
+  testWidgets('a preview clock decodes only requested frames and coalesces scrubs', (tester) async {
+    final image = await _frameImage();
+    addTearDown(image.dispose);
+    final frames = ValueNotifier<int>(0);
+    addTearDown(frames.dispose);
+    final resolver = _readyResolver(image);
+    await tester.pumpWidget(
+      _harness(
+        PreviewMediaScope(
+          composition: _video(),
+          resolver: resolver,
+          frames: frames,
+        ),
+        controller,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(resolver.extractedFrames[_clip], {0});
+    frames
+      ..value = 2
+      ..value = 3;
+    controller.seek(3);
+    await tester.pumpAndSettle();
+    expect(resolver.extractedFrames[_clip], contains(3));
+    expect(resolver.extractedFrames[_clip], isNot(contains(1)));
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('mounts an ImageResolverScope once warm-up completes', (tester) async {
     final image = await _frameImage();

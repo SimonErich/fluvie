@@ -1,7 +1,12 @@
 import 'package:fluvie/src/audio/encoding/audio_filter_graph.dart';
+import 'package:fluvie/src/audio/encoding/audio_tempo_filter.dart';
 import 'package:fluvie/src/audio/encoding/resolved_audio_track.dart';
+import 'package:fluvie/src/core/audio/audio_automation.dart';
+import 'package:fluvie/src/core/audio/audio_time_map.dart';
 import 'package:fluvie/src/rendering/encoding/audio_graph_nodes.dart';
 import 'package:meta/meta.dart';
+
+part 'audio_track_node_filters.dart';
 
 /// One audio track in the encoder mix: a materialized source
 /// file plus the per-track filter that trims, delays, gains, and fades it.
@@ -27,10 +32,14 @@ final class AudioTrackNode implements FfmpegAudioNode {
     this.trimStartSeconds,
     this.trimEndSeconds,
     this.volume = 1,
+    this.volumeEnvelope = const [],
+    this.endSeconds,
     this.fadeInSeconds,
     this.fadeOutSeconds,
     this.fadeOutStartSeconds = 0,
     this.loop = false,
+    this.tempo = 1,
+    this.timeMap,
   });
 
   /// Builds the FFmpeg node for an encoder-neutral [resolved] track, decoding the
@@ -45,12 +54,16 @@ final class AudioTrackNode implements FfmpegAudioNode {
         name: name,
         delayMs: resolved.delayMs,
         volume: resolved.volume,
+        volumeEnvelope: resolved.volumeEnvelope,
+        endSeconds: resolved.endSeconds,
         trimStartSeconds: resolved.trimStartSeconds,
         trimEndSeconds: resolved.trimEndSeconds,
         fadeInSeconds: resolved.fadeInSeconds,
         fadeOutSeconds: resolved.fadeOutSeconds,
         fadeOutStartSeconds: resolved.fadeOutStartSeconds,
         loop: resolved.loop,
+        tempo: resolved.tempo,
+        timeMap: resolved.timeMap,
       );
 
   /// The sandbox-relative materialized source file this track decodes from.
@@ -68,6 +81,12 @@ final class AudioTrackNode implements FfmpegAudioNode {
   /// The linear gain applied to the track (`1` plays as authored).
   final double volume;
 
+  /// Resolved volume multipliers relative to the audible start.
+  final List<AudioVolumePoint> volumeEnvelope;
+
+  /// Exclusive composition end for a scene-scoped track.
+  final double? endSeconds;
+
   /// How long the track ramps in from silence, in seconds; `null` for no fade.
   final double? fadeInSeconds;
 
@@ -76,6 +95,21 @@ final class AudioTrackNode implements FfmpegAudioNode {
 
   /// When the fade-out begins, in seconds (only used with [fadeOutSeconds]).
   final double fadeOutStartSeconds;
+
+  /// The playback-rate multiplier applied to the stream (`1` leaves it alone).
+  ///
+  /// Emitted as `atempo`, which only accepts `0.5..2.0` per stage, so a rate
+  /// outside that range is compiled into a chain of stages whose product is the
+  /// rate — never a single clipped value, which would silently play the audio
+  /// at the wrong speed.
+  ///
+  /// Must be finite and greater than zero. A zero or non-finite rate throws an
+  /// [ArgumentError] when the chain is built: the staging maths cannot converge
+  /// on one, and looping instead of throwing would hang the encoder.
+  final double tempo;
+
+  /// Integrated source clock for an authored clip speed ramp.
+  final AudioTimeMap? timeMap;
 
   /// Whether the track loops to fill the render window (a music bed).
   ///
@@ -106,18 +140,32 @@ final class AudioTrackNode implements FfmpegAudioNode {
   ///
   /// The order is fixed for determinism: optional `atrim`, then the mandatory
   /// `asetpts=PTS-STARTPTS` (so a trim restarts at zero), then `aloop` for a
-  /// trimmed loop, then optional `adelay`, then `volume`, then optional `afade`
-  /// in/out.
+  /// trimmed loop, then any `atempo` stages, then optional `adelay`, then
+  /// `volume`, then optional `afade` in/out.
+  ///
+  /// `atempo` sits before `adelay` deliberately: the delay pads the head with
+  /// silence, so retiming afterwards would compress that padding and start the
+  /// track early.
   @override
   String filterChain({required int inputIndex, required String label}) {
     final filters = <String>[
       if (_hasTrim) _atrim(),
       'asetpts=PTS-STARTPTS',
       if (loop && _hasTrim) 'aloop=loop=-1:size=$_loopSampleBudget',
-      if (delayMs > 0) 'adelay=$delayMs|$delayMs',
-      'volume=${formatFilterNumber(volume)}',
-      if (fadeInSeconds != null) 'afade=t=in:st=0:d=${formatFilterNumber(fadeInSeconds!)}',
+      // Before adelay, not after: adelay pads the head with silence, and
+      // retiming the padded stream would speed the silence up too, opening a
+      // delayed clip's audio earlier than its picture.
+      ...timeMap == null ? _atempo() : audioTimeMapFilters(timeMap!, inputIndex),
+      if (delayMs > 0) ...[
+        'adelay=$delayMs|$delayMs',
+        // Delay can emit leading silence with missing timestamps. Normalize
+        // every sample before volume/trim/amix so that silence is retained.
+        'asetpts=N/SR/TB',
+      ],
+      _volumeFilter(),
+      if (fadeInSeconds != null) _fadeIn(),
       if (fadeOutSeconds != null) _fadeOut(),
+      if (endSeconds != null) 'atrim=end=${formatFilterNumber(endSeconds!)}',
     ];
     return '[$inputIndex:a]${filters.join(',')}[$label]';
   }
@@ -126,18 +174,4 @@ final class AudioTrackNode implements FfmpegAudioNode {
   /// it actually receives (the trimmed window), so this is a ceiling, not an
   /// allocation; `1 << 30` samples is ~6 hours at 48 kHz, beyond any real trim.
   static const int _loopSampleBudget = 1073741824;
-
-  String _fadeOut() {
-    final start = formatFilterNumber(fadeOutStartSeconds);
-    final duration = formatFilterNumber(fadeOutSeconds!);
-    return 'afade=t=out:st=$start:d=$duration';
-  }
-
-  String _atrim() {
-    final parts = <String>[
-      if (trimStartSeconds != null) 'start=${formatFilterNumber(trimStartSeconds!)}',
-      if (trimEndSeconds != null) 'end=${formatFilterNumber(trimEndSeconds!)}',
-    ];
-    return 'atrim=${parts.join(':')}';
-  }
 }

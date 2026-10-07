@@ -14,7 +14,9 @@ String _videoSize(Object? size) {
 
 /// A `Color(0x...)` from a `#RRGGBB`/`#AARRGGBB` hex string; the canonical spec
 /// form is eight upper-hex digits, opaque six-digit forms gain an `FF` alpha.
+/// A `{"token": "<name>"}` reference resolves to its palette literal first.
 String _color(Object? hex) {
+  if (hex is Map<String, Object?>) return _color(_tokenColor(hex));
   final text = hex! as String;
   var digits = text.startsWith('#') ? text.substring(1) : text;
   if (digits.length == 6) digits = 'FF$digits';
@@ -42,7 +44,13 @@ String _time(String raw) {
 }
 
 /// An `Ease.<name>` value; the reserved `in` maps to the `in_` member.
-String _ease(String name) => name == 'in' ? 'Ease.in_' : 'Ease.$name';
+String _ease(Object? value) {
+  if (value is Map) {
+    final points = value['cubic']! as List;
+    return 'Cubic(${points.map((p) => _num(p! as num)).join(', ')})';
+  }
+  return value == 'in' ? 'Ease.in_' : 'Ease.$value';
+}
 
 /// A typed enum value, e.g. `BoxFit.cover`, from its `.name`.
 String _enumValue(String type, String name) => '$type.$name';
@@ -64,6 +72,9 @@ String _num(Object? value) {
   }
   throw FormatException('Expected a number, got $value');
 }
+
+/// A `[n, n, ...]` list literal over JSON numbers — gradient stop offsets.
+String _numList(Object? raw) => '[${(raw! as List).map(_num).join(', ')}]';
 
 /// Formats the numeric part of a time string: drops a redundant `.0` so whole
 /// values read as `4`, while preserving the exact text of fractions like `2.5`.

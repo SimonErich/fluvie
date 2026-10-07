@@ -22,6 +22,7 @@ folder is the map.
 | [Fullscreen and black screen](guides/fullscreen-and-black-screen.md) | Own the room |
 | [Presenting on the web](guides/presenting-on-the-web.md) | Just visit and present |
 | [Deploying your own](guides/deploying-your-own.md) | Ship a slides app like slides.fluvie.dev |
+| [Decks from specs](guides/decks-from-specs.md) | Load a `.fluvie` file and present it |
 
 ## Advanced
 

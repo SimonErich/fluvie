@@ -1,0 +1,87 @@
+{
+  "fluvieSpec": 1,
+  "size": {"width": 480, "height": 270},
+  "fps": 30,
+  "masters": {
+    "content": {
+      "background": {"kind": "color", "color": "#FF101018"},
+      "layout": "canvas",
+      "children": [
+        {
+          "type": "Box",
+          "color": "#FF6C5CE7",
+          "transform": {"x": 0.5, "y": 0.94, "w": 1.0, "h": 0.06}
+        },
+        {
+          "type": "Placeholder",
+          "slot": "title",
+          "transform": {"x": 0.5, "y": 0.24, "w": 0.9, "h": 0.28},
+          "style": {"color": "#FFF5F6FA", "fontSize": 34, "fontWeight": "w700"}
+        },
+        {
+          "type": "Placeholder",
+          "slot": "body",
+          "transform": {"x": 0.5, "y": 0.62, "w": 0.86, "h": 0.34}
+        }
+      ]
+    }
+  },
+  "scenes": [
+    {
+      "duration": "90f",
+      "layout": "canvas",
+      "master": "content",
+      "fills": {
+        "title": {
+          "type": "Text",
+          "id": "s1-title",
+          "text": "Masters lay out",
+          "textAlign": "center",
+          "transform": {"x": 0.5, "y": 0.14, "w": 0.9, "h": 0.24},
+          "animate": [
+            {"preset": "fadeIn", "duration": "15f"}
+          ]
+        },
+        "body": {
+          "type": "Text",
+          "id": "s1-body",
+          "text": "One master, two slides",
+          "textAlign": "center",
+          "style": {"color": "#FFB2BEC3", "fontSize": 20}
+        }
+      },
+      "children": [
+        {
+          "type": "Box",
+          "id": "s1-extra",
+          "color": "#FFFFD166",
+          "transform": {"x": 0.85, "y": 0.1, "w": 0.16, "h": 0.1}
+        }
+      ],
+      "steps": [
+        {"elements": ["s1-body"]}
+      ],
+      "notes": {"text": "The title fill overrides the slot transform."}
+    },
+    {
+      "duration": "90f",
+      "background": {"kind": "color", "color": "#FF2D3436"},
+      "layout": "canvas",
+      "master": "content",
+      "fills": {
+        "title": {
+          "type": "Text",
+          "id": "s2-title",
+          "text": "Body left unfilled",
+          "textAlign": "center"
+        }
+      }
+    },
+    {
+      "duration": "60f",
+      "children": [
+        {"type": "Text", "id": "free-1", "text": "Fully freeform", "textAlign": "center"}
+      ]
+    }
+  ]
+}

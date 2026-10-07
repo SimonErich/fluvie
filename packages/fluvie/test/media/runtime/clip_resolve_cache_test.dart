@@ -282,11 +282,9 @@ void main() {
       expect(cache.decodedClipFrameLookup(_clip, 15).width, 2);
     });
 
-    test('an off-window composition frame warms the clamped boundary frame', () async {
-      // Regression: a clip in a later scene still paints (clamped to its first
-      // source frame) while an earlier scene is on screen, so prepare must warm
-      // that clamped frame for composition frames before the clip's window —
-      // not skip them.
+    test('a future window needs no decoded frame before it becomes visible', () async {
+      // ClipPainter publishes probed geometry while a window is inactive, so
+      // sequential capture does not decode all later scenes' first frames.
       final store = _MemoryClipFrameStore();
       final cache = _FakeClipCache(_meta, store: store)
         ..markResolved()
@@ -300,11 +298,70 @@ void main() {
         );
       await cache.resolveClipFrames(_clip, [0]);
 
-      // Composition frame 0 is before the window (windowStart 30): the resampler
-      // clamps it to the trim start (source 0), which paint then reads.
       await cache.prepareClipFramesForComposition(0);
-
+      expect(() => cache.decodedClipFrameLookup(_clip, 0), throwsA(isA<FluvieRenderException>()));
+      await cache.prepareClipFramesForComposition(30);
       expect(cache.decodedClipFrameLookup(_clip, 0).width, 2);
+    });
+
+    test('two windows on one source each warm their own frame', () async {
+      // Regression: the registry kept one plan per source, so a source painted
+      // by two elements lost the first window and paint missed on it.
+      final store = _MemoryClipFrameStore();
+      final cache = _FakeClipCache(_meta, store: store)
+        ..markResolved()
+        ..registerClipPlan(
+          source: _clip,
+          windowStart: 0,
+          windowLength: 10,
+          compFps: 30,
+          trimStartFrames: 0,
+          trimEndFrames: 30,
+        )
+        ..registerClipPlan(
+          source: _clip,
+          windowStart: 20,
+          windowLength: 10,
+          compFps: 30,
+          trimStartFrames: 0,
+          trimEndFrames: 30,
+        );
+      await cache.resolveClipFrames(_clip, [5, 9]);
+
+      // At composition frame 25 the first window retains its final visible
+      // frame 9 for a held transition; the second window reads source 5.
+      await cache.prepareClipFramesForComposition(25);
+
+      expect(cache.decodedClipFrameLookup(_clip, 9), isNotNull);
+      expect(cache.decodedClipFrameLookup(_clip, 5), isNotNull);
+    });
+
+    test('re-registering the same window twice keeps one plan', () async {
+      final store = _MemoryClipFrameStore();
+      final cache = _FakeClipCache(_meta, store: store, windowCapacity: 1)
+        ..markResolved()
+        ..registerClipPlan(
+          source: _clip,
+          windowStart: 0,
+          windowLength: 10,
+          compFps: 30,
+          trimStartFrames: 0,
+          trimEndFrames: 30,
+        )
+        ..registerClipPlan(
+          source: _clip,
+          windowStart: 0,
+          windowLength: 10,
+          compFps: 30,
+          trimStartFrames: 0,
+          trimEndFrames: 30,
+        );
+      await cache.resolveClipFrames(_clip, [3]);
+
+      // One plan, so a capacity of one is still enough to hold its frame.
+      await cache.prepareClipFramesForComposition(3);
+
+      expect(cache.decodedClipFrameLookup(_clip, 3), isNotNull);
     });
 
     test('the decode window evicts least-recently-used beyond capacity', () async {

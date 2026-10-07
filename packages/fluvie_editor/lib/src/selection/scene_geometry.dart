@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:fluvie/fluvie.dart' show Placement, decodePlacement;
+import 'package:fluvie_editor/src/arrange/group_math.dart';
 import 'package:fluvie_editor/src/document/editor_document.dart';
 
 /// One element's place on the canvas: its unrotated layout rect and its
@@ -65,22 +66,45 @@ final class SceneGeometry {
   SceneGeometry._(this._geometries);
 
   /// Resolves the geometry of slide [slide] in [document].
+  ///
+  /// Without [enteredGroup] the slide's top-level elements resolve — a group
+  /// is one unit through its own transform (E15's rule) — under them the
+  /// slide's master-slot fills (their z is the master's slot order), each
+  /// through its own transform or its placeholder's. Naming an entered
+  /// (top-level) group scopes the geometry to that group's children instead,
+  /// their rects mapped into absolute canvas pixels.
   factory SceneGeometry.of(
     EditorDocument document,
     int slide, {
     Map<String, Size> intrinsicSizes = const {},
+    String? enteredGroup,
   }) {
     final size = document.spec.size;
     final canvas = Size(size.width.toDouble(), size.height.toDouble());
+    final frame = enteredGroup == null ? null : groupFrameRect(document, enteredGroup);
+    final ids = frame == null
+        ? document.elementIdsInScene(slide)
+        : document.childIdsOfGroup(enteredGroup!);
     final geometries = <ElementGeometry>[];
-    for (final id in document.elementIdsInScene(slide)) {
-      final transform = document.elementJson(id)?['transform'];
+    void add(String id, Object? transform, Rect? frame) {
       final placement = transform == null
           ? const Placement(x: 0.5, y: 0.5)
           : decodePlacement(transform);
-      final rect = placement.rectFor(canvas, childSize: intrinsicSizes[id]);
-      if (rect == null) continue;
-      geometries.add(ElementGeometry._(id, rect, placement.rotation));
+      final rect = placement.rectFor(frame?.size ?? canvas, childSize: intrinsicSizes[id]);
+      if (rect == null) return;
+      geometries.add(
+        ElementGeometry._(id, rect.shift(frame?.topLeft ?? Offset.zero), placement.rotation),
+      );
+    }
+
+    if (frame == null) {
+      // Fills first: they render under the scene's own children.
+      for (final slot in document.masterSlots(slide)) {
+        if (slot.fillId case final String fillId) add(fillId, slot.transform, null);
+      }
+    }
+    for (final id in ids) {
+      add(id, document.elementJson(id)?['transform'], frame);
     }
     return SceneGeometry._(geometries);
   }
@@ -96,9 +120,12 @@ final class SceneGeometry {
   /// The rotated shape corners of [id], or null while its size is unknown.
   List<Offset>? cornersOf(String id) => _byId(id)?.corners;
 
-  /// The topmost element whose shape contains [point], or null.
-  String? hitTest(Offset point) {
+  /// The topmost element whose shape contains [point], or null. Elements
+  /// in [skip] (locked or hidden) let the hit fall through to what is
+  /// underneath.
+  String? hitTest(Offset point, {Set<String> skip = const {}}) {
     for (final geometry in _geometries.reversed) {
+      if (skip.contains(geometry.id)) continue;
       if (geometry.contains(point)) return geometry.id;
     }
     return null;
@@ -116,6 +143,17 @@ final class SceneGeometry {
     }
     return null;
   }
+}
+
+/// The absolute canvas-pixel box of the top-level group [groupId] in
+/// [document] — the frame its children's fractions resolve against. A group
+/// without a transform frames the whole canvas. Null for non-groups and
+/// unknown ids.
+Rect? groupFrameRect(EditorDocument document, String groupId) {
+  final element = document.elementJson(groupId);
+  if (element == null || element['type'] != 'Group') return null;
+  final size = document.spec.size;
+  return groupRectIn(element['transform'], Size(size.width.toDouble(), size.height.toDouble()));
 }
 
 /// Separating-axis intersection between an axis-aligned [marquee] and a

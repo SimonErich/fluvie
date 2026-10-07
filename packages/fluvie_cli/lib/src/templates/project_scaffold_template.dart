@@ -35,11 +35,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  # The generated capture harness loads the real bundled fonts through this;
-  # without it `flutter test` draws every glyph as an Ahem box.
-  alchemist: $alchemistDependencyVersion
-  custom_lint: $customLintDependencyVersion
-  fluvie_lints: $fluvieLintsDependencyVersion
+  flutter_lints: ^6.0.0
 ''';
 
 /// The `.gitignore` for a new Fluvie project.

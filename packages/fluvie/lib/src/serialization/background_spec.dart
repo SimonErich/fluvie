@@ -4,6 +4,7 @@ import 'package:fluvie/src/core/errors/fluvie_spec_error.dart';
 import 'package:fluvie/src/serialization/codecs/alignment_codec.dart';
 import 'package:fluvie/src/serialization/codecs/color_codec.dart';
 import 'package:fluvie/src/serialization/codecs/enum_codec.dart';
+import 'package:fluvie/src/serialization/codecs/gradient_stops_codec.dart';
 
 /// The background variants the spec can build.
 const Set<String> knownBackgroundKinds = {
@@ -21,8 +22,8 @@ const Set<String> knownBackgroundKinds = {
 /// `videoSpecSchema`; it must stay in step with what `buildBackground` reads.
 const Map<String, Set<String>> knownBackgroundProps = {
   'color': {'color'},
-  'gradient': {'colors', 'begin', 'end'},
-  'radial': {'colors'},
+  'gradient': {'colors', 'stops', 'begin', 'end'},
+  'radial': {'colors', 'stops'},
   'image': {'source', 'fit'},
   'video': {'source'},
   'noise': {'scale'},
@@ -75,13 +76,27 @@ Background buildBackground(BackgroundSpec spec) {
     case 'color':
       return Background.color(decodeColor(props['color'], path: const ['color']));
     case 'gradient':
+      final colors = _colors(props['colors']);
       return Background.gradient(
-        _colors(props['colors']),
+        colors,
+        stops: decodeGradientStops(
+          props['stops'],
+          colorCount: colors.length,
+          path: const ['stops'],
+        ),
         begin: _alignment(props['begin'], Alignment.topLeft),
         end: _alignment(props['end'], Alignment.bottomRight),
       );
     case 'radial':
-      return Background.radial(_colors(props['colors']));
+      final colors = _colors(props['colors']);
+      return Background.radial(
+        colors,
+        stops: decodeGradientStops(
+          props['stops'],
+          colorCount: colors.length,
+          path: const ['stops'],
+        ),
+      );
     case 'image':
       return Background.image(
         _string(props['source'], 'source'),

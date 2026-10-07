@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "path": "custom_widget.dart",
+    "byteLength": 954,
+    "sha256": "c34482aa773edaee4bc6d3e3bc7a69b929a7bc9a2c3db8fb73d3017748f205b7"
+  },
+  "sourceFingerprint": "cb635a37e7f928c2b88edd8d8cc006755bf5c448db7e8c7ed240426985fb568d",
+  "output": {
+    "path": "custom_widget.mp4",
+    "byteLength": 5536,
+    "sha256": "c65a1297f83676e35ccfc12caddbec3dd811083321c8af7e84c3b7671f7bfbd3",
+    "media": {
+      "container": "mov,mp4,m4a,3gp,3g2,mj2",
+      "codec": "h264",
+      "width": 160,
+      "height": 160,
+      "pixelFormat": "yuv420p",
+      "hasAlpha": false,
+      "hasAudio": false,
+      "durationSeconds": 3,
+      "declaredFrameCount": 90,
+      "frameCount": 90,
+      "averageFrameRate": "30/1",
+      "nominalFrameRate": "30/1",
+      "fps": 30,
+      "audio": []
+    }
+  },
+  "capture": {
+    "schemaVersion": 1,
+    "width": 160,
+    "height": 160,
+    "fps": 30,
+    "frameCount": 90,
+    "framesFileName": "frames.rgba",
+    "outputFileName": "out.mp4",
+    "renderDigest": "69969ed43d7a748d",
+    "ffmpegArgs": [
+      "-f",
+      "rawvideo",
+      "-pix_fmt",
+      "rgba",
+      "-video_size",
+      "160x160",
+      "-framerate",
+      "30",
+      "-i",
+      "frames.rgba",
+      "-vf",
+      "format=pix_fmts=yuv420p",
+      "-c:v",
+      "libx264",
+      "-preset",
+      "medium",
+      "-crf",
+      "18",
+      "-pix_fmt",
+      "yuv420p",
+      "-r",
+      "30",
+      "-an",
+      "-fflags",
+      "+bitexact",
+      "-flags:v",
+      "+bitexact",
+      "-map_metadata",
+      "-1",
+      "-threads",
+      "1",
+      "out.mp4"
+    ],
+    "outputIntent": {
+      "width": 160,
+      "height": 160,
+      "frameCount": 90,
+      "fps": 30,
+      "durationSeconds": 3,
+      "codec": "h264",
+      "container": "mp4",
+      "hasAudio": false,
+      "hasAlpha": false,
+      "pixelFormat": "yuv420p"
+    }
+  },
+  "reproduction": {
+    "command": "fluvie render custom_widget.dart --out custom_widget.mp4 --no-cache",
+    "flutter": "3.47.2",
+    "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+    "dart": "3.13.2",
+    "ffmpeg": "ffmpeg version n8.1.1-9-g58d4114d36-20260531 Copyright (c) 2000-2026 the FFmpeg developers",
+    "note": "Resource and timing replay is supported. Encoded bytes can vary across engines and platforms."
+  },
+  "poster": {
+    "path": "custom_widget.png",
+    "byteLength": 3542,
+    "sha256": "165e0de60843c1d103611c857753a657694595eded5a7c01f9faacb8971822ac"
+  }
+}

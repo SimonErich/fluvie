@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/hash/fnv1a.dart';
@@ -64,6 +65,13 @@ sealed class AudioSource {
 
   /// A remote asset at [url]; only allowlisted hosts and schemes are fetched.
   const factory AudioSource.network(Uri url) = NetworkAudioSource;
+
+  /// Verbatim [bytes] already in memory (an imported file that never touched
+  /// disk); [debugLabel] names it in errors and `toString`. Equality is by the
+  /// identity of [bytes] plus [debugLabel], mirroring `MediaSource.memory`;
+  /// the [cacheKey] hashes the byte *content*, so a re-import of the same
+  /// file shares one cache entry.
+  const factory AudioSource.memory(Uint8List bytes, {String? debugLabel}) = MemoryAudioSource;
 
   /// The canonical string that fully identifies this source's audio — hashed
   /// into [cacheKey]. Distinct for every field that changes the decoded PCM.
@@ -137,4 +145,29 @@ final class NetworkAudioSource extends AudioSource {
 
   @override
   String toString() => 'AudioSource.network($url)';
+}
+
+/// An [AudioSource] backed by verbatim in-memory bytes.
+final class MemoryAudioSource extends AudioSource {
+  /// Creates a memory source over [bytes], optionally named by [debugLabel].
+  const MemoryAudioSource(this.bytes, {this.debugLabel});
+
+  /// The raw encoded audio bytes, used verbatim with no IO.
+  final Uint8List bytes;
+
+  /// A human-readable name shown in errors and `toString`.
+  final String? debugLabel;
+
+  @override
+  String get _canonical => 'memory|${fnv1a64Hex(bytes)}';
+
+  @override
+  bool operator ==(Object other) =>
+      other is MemoryAudioSource && identical(other.bytes, bytes) && other.debugLabel == debugLabel;
+
+  @override
+  int get hashCode => Object.hash(MemoryAudioSource, identityHashCode(bytes), debugLabel);
+
+  @override
+  String toString() => 'AudioSource.memory(${debugLabel ?? 'unnamed'}, ${bytes.length} bytes)';
 }

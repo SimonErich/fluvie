@@ -4,6 +4,8 @@ import 'package:fluvie/src/captions/captions.dart';
 import 'package:fluvie/src/captions/runtime/captions_layer.dart';
 import 'package:fluvie/src/composition/camera/camera.dart';
 import 'package:fluvie/src/composition/camera/camera_layer.dart';
+import 'package:fluvie/src/composition/composition_resources.dart';
+import 'package:fluvie/src/composition/runtime/overlay_layer.dart';
 import 'package:fluvie/src/composition/runtime/timeline_probe.dart';
 import 'package:fluvie/src/composition/runtime/transition_compositor.dart';
 import 'package:fluvie/src/composition/runtime/video_plan_builder.dart';
@@ -19,6 +21,7 @@ import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/core/transition.dart';
 import 'package:fluvie/src/core/video_size.dart';
 import 'package:fluvie/src/rendering/capture/beat_grid_scope.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
 import 'package:fluvie/src/theme/build_context_tokens.dart';
 import 'package:fluvie/src/timing/placement/scene_offset_resolver.dart';
 import 'package:fluvie/src/timing/scene_scope.dart';
@@ -70,9 +73,11 @@ final class Video extends StatefulWidget {
     this.motionDefaults,
     this.transition,
     this.audio = const [],
+    this.overlays = const [],
     this.captions,
     this.export,
     this.poster,
+    this.resources = const CompositionResources(),
     super.key,
   }) : width = size?.width ?? width,
        height = size?.height ?? height {
@@ -87,6 +92,9 @@ final class Video extends StatefulWidget {
 
   /// The scenes, played back-to-back in declaration order. Never empty.
   final List<Scene> scenes;
+
+  /// Optional alternatives introduced by frame-dependent custom components.
+  final CompositionResources resources;
 
   /// The canvas preset, or `null` when [width]/[height] are given loose.
   final VideoSize? size;
@@ -114,6 +122,19 @@ final class Video extends StatefulWidget {
   /// Composition-wide audio tracks — authoring data the audio pipeline mounts
   /// at render.
   final List<Audio> audio;
+
+  /// The elements that live outside every scene, painted above the whole
+  /// composition and below the captions.
+  ///
+  /// One widget instance for the whole video: an overlay is mounted once,
+  /// never re-parented across a boundary, and its `.show(...)` window resolves
+  /// against the video's own length rather than a scene's. That is the one
+  /// thing a scene-paired hero morph can never be — a morph is two elements
+  /// that look like one across a cut, and this is one element that *is* one.
+  ///
+  /// Overlays take no part in the offset math: adding one never lengthens the
+  /// video or moves a boundary.
+  final List<Widget> overlays;
 
   /// The caption track, or `null` for none. When set, the shell mounts a
   /// caption layer above the composition that shows the active cue per frame.

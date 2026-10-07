@@ -60,7 +60,9 @@ final class FfmpegCommand {
   }) async {
     try {
       final path = await _resolvedInstaller.install(force: force, log: out.writeln);
-      out.writeln('FFmpeg ready: $path');
+      out
+        ..writeln('FFmpeg ready: $path')
+        ..writeln('ffprobe ready: ${_cache.probePath}');
       return 0;
     } on CliFailure catch (failure) {
       err.writeln(failure.message);
@@ -85,15 +87,19 @@ final class FfmpegCommand {
       out.writeln('Managed cache: unavailable (no cache directory on this platform).');
       return 0;
     }
-    out.writeln('Managed path: $path');
-    if (!File(path).existsSync()) {
+    out
+      ..writeln('Managed path: $path')
+      ..writeln('Managed ffprobe: ${_cache.probePath}');
+    if (!File(path).existsSync() || !File(_cache.probePath!).existsSync()) {
       out.writeln('Status: not installed (run `fluvie ffmpeg install`).');
       return 0;
     }
     final banner = await _versionBanner(path);
+    final probeBanner = await _versionBanner(_cache.probePath!);
     out
       ..writeln('Status: installed.')
-      ..writeln('Version: $banner');
+      ..writeln('Version: $banner')
+      ..writeln('ffprobe version: $probeBanner');
     return 0;
   }
 

@@ -3,6 +3,17 @@ import 'package:test/test.dart';
 
 void main() {
   group('fileHarnessSource', () {
+    test('provides the original entry for fresh factory checks in the same engine', () {
+      for (final asynchronous in [false, true]) {
+        final source = fileHarnessSource(
+          targetImport: 'input.dart',
+          entry: 'intro',
+          asynchronous: asynchronous,
+        );
+        expect(source, contains('videoFactory: target.intro,'));
+      }
+    });
+
     test('statically imports the target so flutter test JIT-compiles it', () {
       // The static import is the only way to load arbitrary user code into a
       // pre-built tester.
@@ -20,13 +31,13 @@ void main() {
     test('calls the default build entry', () {
       final source = fileHarnessSource(targetImport: 'input.dart');
 
-      expect(source, contains('video: target.build(),'));
+      expect(source, contains('final video = target.build();'));
     });
 
     test('calls a custom entry', () {
       final source = fileHarnessSource(targetImport: 'input.dart', entry: 'introClipVideo');
 
-      expect(source, contains('video: target.introClipVideo(),'));
+      expect(source, contains('final video = target.introClipVideo();'));
       expect(source, isNot(contains('target.build()')));
     });
 
@@ -49,9 +60,12 @@ void main() {
     test('drives the shared capture pipeline and reads the CLI dart-defines', () {
       final source = fileHarnessSource(targetImport: 'input.dart');
 
-      expect(source, contains('renderVideo('));
-      expect(source, contains("String.fromEnvironment('FLUVIE_RENDER_OUT_DIR')"));
-      expect(source, contains("String.fromEnvironment('FLUVIE_RENDER_KEY')"));
+      expect(source, contains('runFluvieRender('));
+      expect(source, contains('RenderHostContext('));
+      expect(source, isNot(contains('alchemist')));
+      expect(source, isNot(contains('FLUVIE_RENDER_OUT')));
+      expect(source, contains('HttpOverrides.runWithHttpOverrides'));
+      expect(source, isNot(contains('HttpOverrides.global')));
     });
 
     test('is marked generated so nobody edits it by hand', () {

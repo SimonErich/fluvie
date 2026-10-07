@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/captions/caption_position.dart';
 import 'package:fluvie/src/captions/caption_style.dart';
@@ -46,18 +48,24 @@ final class CaptionCueView extends StatelessWidget {
   bool get _perWord => style.wordPop || style.karaoke;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: EdgeInsets.all(position.safeArea),
-    child: Align(
-      alignment: position.alignment,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: style.background,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: _perWord ? _wordRow() : _plainText(),
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => Padding(
+      padding: EdgeInsets.all(
+        position.adaptiveSafeArea
+            ? math.min(position.safeArea, constraints.biggest.shortestSide / 12)
+            : position.safeArea,
+      ),
+      child: Align(
+        alignment: position.alignment,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: style.background,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: _perWord ? _wordRow() : _plainText(),
+          ),
         ),
       ),
     ),

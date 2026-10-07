@@ -1,0 +1,49 @@
+{
+  "id": "credits",
+  "name": "Closing credits",
+  "family": "Credits",
+  "theme": {
+    "palette": {
+      "titleInk": "#F6F7FB",
+      "titleAccent": "#7C6EF6",
+      "titleSurface": "#18202F"
+    },
+    "typeScale": {
+      "titleHeadline": {
+        "fontSize": 54,
+        "fontWeight": "bold",
+        "color": "#F6F7FB"
+      },
+      "titleBody": {
+        "fontSize": 24,
+        "color": "#F6F7FB"
+      }
+    }
+  },
+  "children": [
+    {
+      "type": "SplitText",
+      "text": "Created by\nYour team\nThank you for watching",
+      "by": "line",
+      "style": {
+        "token": "titleBody"
+      },
+      "textAlign": "center",
+      "transform": {
+        "x": 0.5,
+        "y": 0.5,
+        "w": 0.7,
+        "h": 0.7
+      },
+      "animate": [
+        {
+          "preset": "slideFadeIn",
+          "duration": "0.4r",
+          "stagger": {
+            "each": "0.04r"
+          }
+        }
+      ]
+    }
+  ]
+}

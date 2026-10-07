@@ -1,12 +1,22 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:fluvie/src/core/errors/fluvie_encode_exception.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
+import 'package:fluvie/src/rendering/encoding/frame_extraction_cache_identity.dart';
 import 'package:fluvie/src/rendering/encoding/frame_extraction_service.dart';
+import 'package:fluvie/src/rendering/encoding/frame_extraction_session.dart';
 import 'package:fluvie/src/rendering/platform/process_runner.dart';
+import 'package:fluvie/src/rendering/render_cancellation.dart';
+import 'package:fluvie_media/native.dart';
 import 'package:riverpod/riverpod.dart';
+
+part 'ffmpeg_frame_extraction_session.dart';
+part 'ffmpeg_frame_extraction_io.dart';
+part 'ffmpeg_frame_extraction_identity.dart';
 
 /// The real [FrameExtractionService]: spawns FFmpeg through a [ProcessRunner]
 /// with a typed **argument array** (never a shell string) and reads back one
@@ -20,20 +30,60 @@ import 'package:riverpod/riverpod.dart';
 /// [FluvieEncodeException] carrying the stderr tail; a payload of the wrong
 /// length is a [FluvieRenderException]. Every path argument is validated so it
 /// can never be parsed as a flag.
-final class FfmpegFrameExtractionService implements FrameExtractionService {
-  /// Creates a service running `binaryPath` (default `ffmpeg`) through `runner`.
+///
+/// Inputs must already be materialized as local files. Native input protocols
+/// are restricted to `file`; the media loader stages allowlisted network clips
+/// before they reach this service.
+final class FfmpegFrameExtractionService
+    implements FrameExtractionService, FrameExtractionSessionService, FrameExtractionCacheIdentity {
+  /// Creates a service using `binaryPath` (default `ffmpeg`).
+  /// Batched native extraction owns and terminates the default decoder process
+  /// on timeout. An injected runner owns its own process cancellation.
   const FfmpegFrameExtractionService({
     this._runner = const IoProcessRunner(),
-    this.binaryPath = 'ffmpeg',
+    this._binaryPath,
+    this.timeout = const Duration(minutes: 3),
+    this._cacheIdentity,
   });
 
   /// How much trailing stderr is retained for diagnostics (4 KiB).
   static const int stderrTailLength = 4096;
 
   final ProcessRunner _runner;
+  final String? _cacheIdentity;
+
+  /// Explicit identity for custom runners, or the native executable/build digest.
+  ///
+  /// Native metadata is memoized by canonical executable path, size and times;
+  /// replacing the executable invalidates that entry. Unidentified injected
+  /// runners and unavailable build metadata disable persistent frame reuse.
+  @override
+  Future<String?> get cacheIdentity => _frameExtractionCacheIdentity(this);
+
+  /// Maximum lifetime of one batched decoder process.
+  final Duration timeout;
 
   /// The FFmpeg binary this service spawns (default `ffmpeg` on `PATH`).
-  final String binaryPath;
+  final String? _binaryPath;
+
+  /// Effective explicit, managed, or PATH executable.
+  String get binaryPath => resolveMediaExecutable('ffmpeg', explicit: _binaryPath);
+
+  @override
+  Future<FrameExtractionSession> openSession(
+    Uri source, {
+    required int width,
+    required int height,
+    String? decoder,
+    Future<void>? whenCancelled,
+  }) => _openExtractionSession(
+    this,
+    source,
+    width: width,
+    height: height,
+    decoder: decoder,
+    whenCancelled: whenCancelled,
+  );
 
   @override
   Future<RawFrame> extractFrame(
@@ -92,89 +142,52 @@ final class FfmpegFrameExtractionService implements FrameExtractionService {
     required int height,
     String? decoder,
   }) async {
-    final frames = <int, RawFrame>{};
-    for (final index in frameIndices) {
-      frames[index] = await extractFrame(
+    final tools = FfmpegMediaTools(
+      ffmpegPath: binaryPath,
+      timeout: timeout,
+      // Process.run exposes no child handle: wrapping the default IO runner
+      // would bypass the tools' timeout termination and leave FFmpeg alive.
+      runner: _runner is IoProcessRunner
+          ? null
+          : (executable, args, {workingDirectory}) async {
+              final result = await _runner.run(
+                executable,
+                args,
+                workingDirectory: workingDirectory,
+              );
+              return (exitCode: result.exitCode, stdout: result.stdout, stderr: result.stderr);
+            },
+    );
+    try {
+      final decoded = await tools.extractFrames(
         source,
-        index,
+        frameIndices,
         width: width,
         height: height,
         decoder: decoder,
       );
+      return {
+        for (final entry in decoded.entries)
+          entry.key: RawFrame(
+            frameIndex: entry.key,
+            width: width,
+            height: height,
+            rgba: entry.value.rgba,
+          ),
+      };
+    } on MediaProcessException catch (error) {
+      if (error.exitCode != null) {
+        throw FluvieEncodeException(
+          error.message,
+          exitCode: error.exitCode,
+          stderrTail: error.stderr,
+        );
+      }
+      throw FluvieRenderException(error.toString());
+    } finally {
+      tools.close();
     }
-    return frames;
   }
-
-  /// The typed extraction argument array — a frame select + scale filter, one
-  /// rawvideo frame, written to the sandbox-relative [output] file.
-  ///
-  /// `-c:v` selects the decoder for the input that *follows* it, so it must
-  /// precede `-i` to apply to the source rather than to the output.
-  static List<String> _args({
-    required String path,
-    required int frameIndex,
-    required int width,
-    required int height,
-    required String output,
-    String? decoder,
-  }) => [
-    '-v',
-    'error',
-    '-nostdin',
-    if (decoder != null) ...['-c:v', decoder],
-    '-i',
-    path,
-    '-vf',
-    'select=eq(n\\,$frameIndex),scale=$width:$height',
-    '-frames:v',
-    '1',
-    '-f',
-    'rawvideo',
-    '-pix_fmt',
-    'rgba',
-    '-y',
-    output,
-  ];
-
-  Future<Uint8List> _readOutput(File file, Uri source, int frameIndex) async {
-    if (!file.existsSync()) {
-      throw FluvieRenderException(
-        'FFmpeg wrote no frame file for frame $frameIndex of "$source".',
-      );
-    }
-    return file.readAsBytes();
-  }
-
-  /// Maps [source] to a local file path and rejects anything that could be
-  /// parsed as a flag (a leading `-`) or is empty — flag-injection safety.
-  static String _validatedPath(Uri source) {
-    final path = source.isScheme('file') ? source.toFilePath() : source.toString();
-    if (path.isEmpty) {
-      throw ArgumentError.value(path, 'source', 'must not be empty');
-    }
-    if (path.startsWith('-')) {
-      throw ArgumentError.value(path, 'source', 'must not start with "-" (flag injection)');
-    }
-    return path;
-  }
-
-  /// Rejects a decoder name that could be parsed as a flag or is empty — the
-  /// same guard [_validatedPath] applies, because the decoder reaches this
-  /// service as a public parameter too.
-  static String? _validatedDecoder(String? decoder) {
-    if (decoder == null) return null;
-    if (decoder.isEmpty) {
-      throw ArgumentError.value(decoder, 'decoder', 'must not be empty');
-    }
-    if (decoder.startsWith('-')) {
-      throw ArgumentError.value(decoder, 'decoder', 'must not start with "-" (flag injection)');
-    }
-    return decoder;
-  }
-
-  static String _tail(String stderr) => stderr.length <= stderrTailLength
-      ? stderr
-      : stderr.substring(stderr.length - stderrTailLength);
 }
 
 /// The frame extractor used by the clip render path; defaults to

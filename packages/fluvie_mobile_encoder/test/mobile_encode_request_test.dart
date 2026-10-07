@@ -13,6 +13,7 @@ void main() {
     MobileVideoCodec codec = MobileVideoCodec.h264,
     List<MobileAudioTrack> audioTracks = const [],
     double audioMasterVolume = 1,
+    double audioStartSeconds = 0,
   }) => MobileEncodeRequest(
     framesPath: framesPath,
     outputPath: outputPath,
@@ -24,7 +25,14 @@ void main() {
     codec: codec,
     audioTracks: audioTracks,
     audioMasterVolume: audioMasterVolume,
+    audioStartSeconds: audioStartSeconds,
   );
+
+  test('audio begins at the same authored time as a captured picture range', () {
+    expect(build(audioStartSeconds: 1.5).toArguments()['audioStartSeconds'], 1.5);
+    expect(() => build(audioStartSeconds: -1), throwsArgumentError);
+    expect(() => build(audioStartSeconds: double.nan), throwsArgumentError);
+  });
 
   test('serializes to the channel argument map', () {
     expect(build(codec: MobileVideoCodec.hevc).toArguments(), {

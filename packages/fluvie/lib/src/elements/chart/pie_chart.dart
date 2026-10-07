@@ -39,7 +39,8 @@ PieChartPainter buildPiePainter({
   final values = data.values.toList();
   final total = values.fold<num>(0, (sum, v) => sum + (v > 0 ? v : 0));
   final fullAngles = [
-    for (final value in values) total <= 0 ? 0.0 : 2 * math.pi * (value > 0 ? value : 0) / total,
+    for (final value in values)
+      if (total <= 0) 0.0 else 2 * math.pi * (value > 0 ? value : 0) / total,
   ];
   return PieChartPainter(
     tokens: tokens,

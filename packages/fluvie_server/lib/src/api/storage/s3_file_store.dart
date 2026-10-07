@@ -12,12 +12,17 @@ import 'package:fluvie_server/src/api/storage/stored_object.dart';
 /// presigned GET URL, so a download link is never stale.
 final class S3FileStore implements FileStore {
   /// Creates a store over `storage`; public objects use [publicBaseUrl] when set.
-  S3FileStore(this._storage, {this.publicBaseUrl});
+  S3FileStore(this._storage, {this.publicBaseUrl, this.proxyDownloads = false});
 
   final S3ObjectStorage _storage;
 
   /// Base URL for public objects (e.g. a CDN); `null` streams them through.
   final Uri? publicBaseUrl;
+
+  /// Stream downloads through the authenticated API instead of redirecting.
+  /// Useful for private endpoints and browser clients without bucket CORS.
+  /// Defaults to false, preserving direct presigned/CDN downloads.
+  final bool proxyDownloads;
 
   static const _visibilityKey = 'visibility';
   static const _contentTypeKey = 'contenttype';
@@ -81,6 +86,7 @@ final class S3FileStore implements FileStore {
     required StoreVisibility visibility,
     required Duration ttl,
   }) async {
+    if (proxyDownloads) return const DownloadGrant.stream();
     if (visibility == StoreVisibility.public) {
       final base = publicBaseUrl;
       if (base == null) return const DownloadGrant.stream();

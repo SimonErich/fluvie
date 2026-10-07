@@ -3,7 +3,7 @@ import 'package:analyzer/error/listener.dart' show DiagnosticReporter;
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
 /// Enforces Fluvie's layering law: dependencies point **down only**
-/// (CLAUDE.md). `core` depends on nothing; `timing` only on `core`; feature
+/// (CONTRIBUTING.md). `core` depends on nothing; `timing` only on `core`; feature
 /// layers on `core` + `timing` but **never** on `diagnostics`.
 ///
 /// The rule is purely path-based. It reads the importing file's layer from its

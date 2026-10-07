@@ -1,3 +1,4 @@
+import 'package:fluvie/src/audio/runtime/analysis_pcm.dart';
 import 'package:fluvie/src/audio/runtime/ffmpeg_pcm_decoder.dart';
 import 'package:fluvie/src/audio/runtime/frame_list_beat_grid.dart';
 import 'package:fluvie/src/audio/runtime/pcm_decoder.dart';
@@ -6,6 +7,7 @@ import 'package:fluvie/src/core/audio/dsp/onset_detector.dart';
 import 'package:fluvie/src/core/audio/dsp/spectral_flux.dart';
 import 'package:fluvie/src/core/contracts/beat_detection_service.dart';
 import 'package:fluvie/src/core/contracts/beat_grid.dart';
+import 'package:fluvie/src/core/contracts/ranged_audio_analysis.dart';
 
 /// The real [BeatDetectionService]: decode → in-house spectral-flux onset
 /// detection → onsets snapped to absolute video frames → an immutable
@@ -17,7 +19,7 @@ import 'package:fluvie/src/core/contracts/beat_grid.dart';
 /// injected [PcmDecoder] (the default reads a committed WAV; the live path
 /// spawns ffmpeg), so everything from the PCM onward is pure and the
 /// analyse-twice→identical-grid property holds.
-final class SpectralBeatDetectionService implements BeatDetectionService {
+final class SpectralBeatDetectionService implements RangedBeatDetectionService {
   /// Creates a service decoding through [decoder] (defaults to the ffmpeg-backed
   /// [FfmpegPcmDecoder]).
   SpectralBeatDetectionService({PcmDecoder decoder = const FfmpegPcmDecoder()})
@@ -30,15 +32,26 @@ final class SpectralBeatDetectionService implements BeatDetectionService {
   final Map<String, BeatGrid> _cache = {};
 
   @override
-  Future<BeatGrid> detect(
+  Future<BeatGrid> detect(AudioSource source, {required int fps, required int totalFrames}) =>
+      detectRange(source, start: Duration.zero, fps: fps, totalFrames: totalFrames);
+
+  @override
+  Future<BeatGrid> detectRange(
     AudioSource source, {
+    required Duration start,
     required int fps,
     required int totalFrames,
   }) async {
-    final key = '${source.cacheKey}|$fps|$totalFrames';
+    final key = '${source.cacheKey}|${start.inMicroseconds}|$fps|$totalFrames';
     final cached = _cache[key];
     if (cached != null) return cached;
-    final pcm = await _decoder.decode(source);
+    final pcm = await decodeAnalysisPcm(
+      _decoder,
+      source,
+      fps: fps,
+      totalFrames: totalFrames,
+      start: start,
+    );
     final flux = spectralFlux(pcm.samples);
     final onsetHops = detectOnsets(flux);
     final frames = onsetFramesAt(

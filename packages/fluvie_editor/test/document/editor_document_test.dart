@@ -182,6 +182,83 @@ void main() {
       expect(next.renderDigest, isNot(doc.renderDigest));
       expect(next.documentDigest, isNot(doc.documentDigest));
     });
+
+    test('scene meta reads and writes through the editor block', () {
+      final doc = EditorDocument.fromJson(_deck());
+      expect(doc.sceneMeta(0), isEmpty);
+      final next = doc.setSceneMeta(0, {
+        'guides': [
+          {'axis': 'vertical', 'pos': 0.5},
+        ],
+      });
+      expect(next.sceneMeta(0), {
+        'guides': [
+          {'axis': 'vertical', 'pos': 0.5},
+        ],
+      });
+      expect(next.sceneMeta(1), isEmpty);
+      expect(doc.sceneMeta(0), isEmpty, reason: 'the original stays untouched');
+      // A second write merges over the first.
+      final renamed = next.setSceneMeta(0, {'note': 'intro'});
+      expect(renamed.sceneMeta(0).keys, containsAll(['guides', 'note']));
+    });
+
+    test('guides never move the render digest', () {
+      final doc = EditorDocument.fromJson(_deck());
+      final guided = doc.setSceneMeta(0, {
+        'guides': [
+          {'axis': 'horizontal', 'pos': 0.25},
+        ],
+      });
+      expect(guided.renderDigest, doc.renderDigest);
+      expect(guided.documentDigest, isNot(doc.documentDigest));
+    });
+
+    test('scene meta follows its slide through reorder, insert, and removal', () {
+      final doc = EditorDocument.fromJson(
+        _deck(),
+      ).setSceneMeta(0, {'note': 'first'}).setSceneMeta(1, {'note': 'second'});
+
+      final reordered = doc.reorderScene(0, 1);
+      expect(reordered.sceneMeta(0), {'note': 'second'});
+      expect(reordered.sceneMeta(1), {'note': 'first'});
+
+      final inserted = doc.addScene({'duration': '10f'}, at: 0);
+      expect(inserted.sceneMeta(0), isEmpty);
+      expect(inserted.sceneMeta(1), {'note': 'first'});
+      expect(inserted.sceneMeta(2), {'note': 'second'});
+
+      final removed = doc.removeScene(0);
+      expect(removed.sceneMeta(0), {'note': 'second'});
+    });
+
+    test('setSceneMeta rejects an index the deck does not have', () {
+      final doc = EditorDocument.fromJson(_deck());
+      expect(() => doc.setSceneMeta(9, {'note': 'nope'}), throwsRangeError);
+    });
+
+    test('the remap tolerates hand-edited editor blocks', () {
+      // A non-index key is dropped rather than guessed at; a block without
+      // per-slide metadata passes through untouched.
+      final json = _deck();
+      json['editor'] = {
+        'editorSchema': 1,
+        'scenes': {
+          'not-a-number': {'note': 'junk'},
+          '0': {'note': 'first'},
+        },
+      };
+      final reordered = EditorDocument.fromJson(json).reorderScene(0, 1);
+      expect(reordered.sceneMeta(1), {'note': 'first'});
+      final editor = reordered.toJson()['editor']! as Map<String, Object?>;
+      expect((editor['scenes']! as Map<String, Object?>).keys, ['1']);
+
+      // Element metadata alone (no scenes map) survives a reorder.
+      final elementOnly = EditorDocument.fromJson(
+        _deck(),
+      ).setElementMeta('el-title', {'name': 'Headline'}).reorderScene(0, 1);
+      expect(elementOnly.elementMeta('el-title'), {'name': 'Headline'});
+    });
   });
 
   group('spec access', () {
@@ -190,5 +267,65 @@ void main() {
       expect(doc.spec.scenes, hasLength(2));
       expect(doc.spec.build().scenes, hasLength(2));
     });
+  });
+  patchSuite();
+}
+
+// Scene and video patches back the inspector's background and deck fields.
+void patchSuite() {
+  test('updateScene merges keys and null removes them', () {
+    final document = EditorDocument.fromJson(_deck());
+    final withBackground = document.updateScene(0, {
+      'background': {'kind': 'color', 'color': '#FF0000'},
+    });
+    expect(
+      withBackground.sceneJson(0)['background'],
+      {'kind': 'color', 'color': '#FF0000'},
+    );
+    // The original stayed untouched, and null clears.
+    expect(document.sceneJson(0).containsKey('background'), isFalse);
+    final cleared = withBackground.updateScene(0, {'background': null});
+    expect(cleared.sceneJson(0).containsKey('background'), isFalse);
+  });
+
+  test('updateVideo patches deck-level keys but never scenes or editor', () {
+    final document = EditorDocument.fromJson(_deck());
+    final resized = document.updateVideo({
+      'size': {'width': 640, 'height': 360},
+    });
+    expect(resized.toJson()['size'], {'width': 640, 'height': 360});
+    expect(resized.sceneCount, document.sceneCount);
+    expect(() => document.updateVideo({'scenes': <Object?>[]}), throwsArgumentError);
+    expect(() => document.updateVideo({'editor': <String, Object?>{}}), throwsArgumentError);
+  });
+  duplicateSuite();
+}
+
+// Duplicating a slide must re-mint every element id.
+void duplicateSuite() {
+  test('duplicatedScene copies content with fresh ids', () {
+    final document = EditorDocument.fromJson(_deck());
+    final copy = document.duplicatedScene(0);
+    final original = document.sceneJson(0);
+    final copiedChildren = (copy['children']! as List).cast<Map<String, Object?>>();
+    final originalChildren = (original['children']! as List).cast<Map<String, Object?>>();
+    expect(copiedChildren, hasLength(originalChildren.length));
+    final existing = {
+      for (var s = 0; s < document.sceneCount; s++) ...document.elementIdsInScene(s),
+    };
+    for (var i = 0; i < copiedChildren.length; i++) {
+      expect(copiedChildren[i]['id'], isNot(originalChildren[i]['id']));
+      expect(existing, isNot(contains(copiedChildren[i]['id'])));
+      expect(copiedChildren[i]['type'], originalChildren[i]['type']);
+    }
+    // The copies are distinct from each other too.
+    expect(copiedChildren.map((c) => c['id']).toSet(), hasLength(copiedChildren.length));
+    // Adding it round-trips through the command layer cleanly.
+    final grown = document.addScene(copy);
+    expect(grown.sceneCount, document.sceneCount + 1);
+    expect(
+      grown.elementIdsInScene(grown.sceneCount - 1),
+      copiedChildren.map((c) => c['id']).toList(),
+    );
   });
 }

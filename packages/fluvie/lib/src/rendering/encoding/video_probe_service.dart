@@ -3,10 +3,16 @@ import 'dart:io';
 
 import 'package:fluvie/src/core/errors/fluvie_encode_exception.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
+import 'package:fluvie/src/media/media_providers_common.dart';
 import 'package:fluvie/src/rendering/platform/process_runner.dart';
+import 'package:fluvie_media/fluvie_media.dart' show MediaTimeline;
+import 'package:fluvie_media/native.dart'
+    show FfmpegMediaTools, FfmpegTimelineTools, MediaProcessException, resolveMediaExecutable;
 import 'package:riverpod/riverpod.dart';
 
 part 'video_probe_service_parse.dart';
+part 'video_probe_report_values.dart';
+part 'video_probe_service_native.dart';
 
 /// Reads the stream facts of an encoded video file (codec, size, frame
 /// count, duration) — what the determinism tests assert against.
@@ -35,15 +41,17 @@ final class VideoProbeResult {
     this.declaredFps,
     this.hasAudio = false,
     this.hasAlpha = false,
+    this.rotationDegrees = 0,
+    this.timeline,
   });
 
   /// The codec name of the first video stream (for example `h264`).
   final String codec;
 
-  /// Stream width in pixels.
+  /// Display width in pixels, after the container's rotation is applied.
   final int width;
 
-  /// Stream height in pixels.
+  /// Display height in pixels, after the container's rotation is applied.
   final int height;
 
   /// The frame count of the video stream.
@@ -84,6 +92,13 @@ final class VideoProbeResult {
   /// as a second layer that only the `libvpx-vp9` decoder reads, so the clip
   /// path selects that decoder when this is true.
   final bool hasAlpha;
+
+  /// Display rotation reported by ffprobe, normalized to 0–359 degrees.
+  final int rotationDegrees;
+
+  /// Optional exact presentation timing, normalized to the first picture.
+  /// Legacy probes can omit it and keep constant-rate resampling.
+  final MediaTimeline? timeline;
 }
 
 /// The real [VideoProbeService]: spawns `ffprobe` through a [ProcessRunner]
@@ -93,17 +108,24 @@ final class FfprobeVideoProbeService implements VideoProbeService {
   /// `PATH`) through `runner`.
   const FfprobeVideoProbeService({
     this._runner = const IoProcessRunner(),
-    this._binaryPath = 'ffprobe',
-  });
+    String? binaryPath,
+    this.whenCancelled,
+  }) : _explicitBinaryPath = binaryPath;
 
   final ProcessRunner _runner;
-  final String _binaryPath;
+  final String? _explicitBinaryPath;
+
+  /// Stops owned native probing when the render session is cancelled.
+  final Future<void>? whenCancelled;
+
+  String get _binaryPath => resolveMediaExecutable('ffprobe', explicit: _explicitBinaryPath);
 
   @override
   Future<VideoProbeResult> probe(String filePath) async {
     if (!File(filePath).existsSync()) {
       throw FluvieRenderException('Cannot probe "$filePath": the file does not exist.');
     }
+    if (_runner is IoProcessRunner) return _probeNative(filePath);
     final result = await _runner.run(_binaryPath, [
       '-v',
       'error',
@@ -128,5 +150,8 @@ final class FfprobeVideoProbeService implements VideoProbeService {
 /// [FfprobeVideoProbeService] over [processRunnerProvider] and is overridable
 /// in tests.
 final videoProbeServiceProvider = Provider<VideoProbeService>(
-  (ref) => FfprobeVideoProbeService(runner: ref.watch(processRunnerProvider)),
+  (ref) => FfprobeVideoProbeService(
+    runner: ref.watch(processRunnerProvider),
+    whenCancelled: ref.watch(mediaCancellationProvider),
+  ),
 );

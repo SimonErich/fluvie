@@ -1,6 +1,7 @@
 // fluvie:large-file-ok: one cohesive MCP tool registry; buildFluvieTools is the surface, the rest are its private formatters
 import 'dart:convert';
 
+import 'package:fluvie_cli/fluvie_cli.dart' show aspectNames, formatNames;
 import 'package:fluvie_server/client.dart';
 import 'package:fluvie_server/src/api/render/render_code_printer.dart' show printSpecMap;
 import 'package:fluvie_server/src/mcp/mcp_tool.dart';
@@ -21,18 +22,15 @@ List<McpTool> buildFluvieTools(RenderGateway gateway) => [
         'use render_video; if the project registers the composition by key, '
         'use render_composition; if the user asks for real Flutter/Dart widget '
         'code or to start a project, use init_project instead.',
-    inputSchema: const {
+    inputSchema: {
       'type': 'object',
       'properties': {
-        'prompt': {'type': 'string', 'description': 'What the video should show.'},
-        'aspect': {'type': 'string', 'description': 'Optional aspect, e.g. "16:9", "9:16", "1:1".'},
-        'format': {
-          'type': 'string',
-          'description': 'Optional: mp4, gif, imageSequence, transparent.',
-        },
-        'provider': {'type': 'string', 'description': 'Optional LLM provider override.'},
+        'prompt': const {'type': 'string', 'description': 'What the video should show.'},
+        'aspect': _aspectSchema,
+        'format': _formatSchema,
+        'provider': const {'type': 'string', 'description': 'Optional LLM provider override.'},
       },
-      'required': ['prompt'],
+      'required': const ['prompt'],
     },
     handler: (args) async => _describe(
       await gateway.render(
@@ -55,7 +53,7 @@ List<McpTool> buildFluvieTools(RenderGateway gateway) => [
       'properties': {
         'base': {'type': 'object', 'description': 'The current VideoSpec to change.'},
         'change': {'type': 'string', 'description': 'The change to make.'},
-        'aspect': {'type': 'string', 'description': 'Optional aspect override.'},
+        'aspect': _aspectSchema,
         'provider': {'type': 'string', 'description': 'Optional LLM provider override.'},
       },
       'required': ['base', 'change'],
@@ -97,17 +95,14 @@ List<McpTool> buildFluvieTools(RenderGateway gateway) => [
         'Render a Fluvie VideoSpec (JSON) you already hold to a video. Returns '
         'a download URL. No model runs: the spec renders as-is. From a prompt '
         'use generate_video; from a registered key use render_composition.',
-    inputSchema: const {
+    inputSchema: {
       'type': 'object',
       'properties': {
-        'spec': {'type': 'object', 'description': 'A serialized Fluvie VideoSpec.'},
-        'aspect': {'type': 'string', 'description': 'Optional aspect override.'},
-        'format': {
-          'type': 'string',
-          'description': 'Optional: mp4, gif, imageSequence, transparent.',
-        },
+        'spec': const {'type': 'object', 'description': 'A serialized Fluvie VideoSpec.'},
+        'aspect': _aspectSchema,
+        'format': _formatSchema,
       },
-      'required': ['spec'],
+      'required': const ['spec'],
     },
     handler: (args) async => _describe(
       await gateway.render(
@@ -125,17 +120,14 @@ List<McpTool> buildFluvieTools(RenderGateway gateway) => [
         'Render a composition registered in the render project by its key '
         '(for example "demo" or a lesson key). Returns a download URL. For a '
         'JSON VideoSpec use render_video; from a prompt use generate_video.',
-    inputSchema: const {
+    inputSchema: {
       'type': 'object',
       'properties': {
-        'key': {'type': 'string', 'description': 'The registered composition key.'},
-        'aspect': {'type': 'string', 'description': 'Optional aspect override.'},
-        'format': {
-          'type': 'string',
-          'description': 'Optional: mp4, gif, imageSequence, transparent.',
-        },
+        'key': const {'type': 'string', 'description': 'The registered composition key.'},
+        'aspect': _aspectSchema,
+        'format': _formatSchema,
       },
-      'required': ['key'],
+      'required': const ['key'],
     },
     handler: (args) async => _describe(
       await gateway.render(
@@ -181,6 +173,18 @@ List<McpTool> buildFluvieTools(RenderGateway gateway) => [
     },
   ),
 ];
+
+const Map<String, Object?> _aspectSchema = {
+  'type': 'string',
+  'enum': aspectNames,
+  'description': 'Optional authored aspect override.',
+};
+
+final Map<String, Object?> _formatSchema = {
+  'type': 'string',
+  'enum': formatNames.where((format) => format != 'imageSequence').toList(),
+  'description': 'Optional single-file HTTP export format.',
+};
 
 McpToolResult _describeValidation(ApiValidationResult result) {
   if (result.diagnostics.isEmpty) {

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "create",
+      "action": "generate",
+      "prompt": "Create a gentle 4-second video about fictional cat Milo playing with a red ball. Use assets/ball.png and assets/play.mp4 and assets/music.wav. The image and clip are synthetic red geometric fixtures, not photos of a cat. Use a 160 by 160 canvas at 30 fps, two readable scenes and a short title in 18px text. Use only these asset keys. Use a size object with width 160 and height 160. Keep the result four seconds long.",
+      "contextFiles": ["assets/story.txt"],
+      "requiredSourceText": ["assets/ball.png", "assets/play.mp4", "assets/music.wav"]
+    },
+    {
+      "id": "pacing",
+      "action": "edit",
+      "base": "create",
+      "prompt": "Make this video exactly six seconds long by lengthening its scenes. Keep its assets and canvas unchanged. Preserve the entry function and all existing custom code."
+    },
+    {
+      "id": "custom_widget",
+      "action": "edit",
+      "source": "lib/custom_video.dart",
+      "prompt": "Change only the title text Milo plays to Milo rests. Preserve the complete BenchmarkBadge class byte-for-byte and keep its use in the scene.",
+      "preserve": ["final class BenchmarkBadge extends StatelessWidget", "Text('Handwritten Flutter'"],
+      "preserveRegions": ["custom-widget"],
+      "requiredSourceText": ["Milo rests", "const BenchmarkBadge()"]
+    },
+    {
+      "id": "captions",
+      "action": "edit",
+      "base": "pacing",
+      "prompt": "Add Captions.fromSrt('assets/captions.srt') as this video's captions. Preserve existing scenes, assets and size. Use a custom CaptionStyle with TextStyle(fontSize: 14, color: Colors.white), a translucent dark background, and white highlight so captions fit the 160 pixel canvas.",
+      "requiredSourceText": ["assets/captions.srt"]
+    },
+    {
+      "id": "formats",
+      "action": "formats",
+      "base": "captions",
+      "prompt": "Export the same authored composition for square, reels and landscape. Keep its source identical."
+    }
+  ]
+}

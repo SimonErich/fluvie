@@ -1,8 +1,9 @@
 # On-device web rendering
 
-Render a Fluvie video to an MP4 inside the browser, with no server and no
-network. The frames and the encode both run on the page, so the video never
-leaves the user's machine. This is what [`fluvie_web_encoder`](https://pub.dev/packages/fluvie_web_encoder)
+Capture and encode a Fluvie video to an MP4 inside the browser, without sending
+frames to a render server. Offline rendering requires self-hosted encoder files
+and locally available media; network assets or generators can still make
+requests. This is what [`fluvie_web_encoder`](https://pub.dev/packages/fluvie_web_encoder)
 adds, on Flutter web.
 
 You write the same `Video` you would render anywhere. Only the renderer changes,
@@ -20,10 +21,10 @@ final bytes = await WebVideoRenderer().render(
 // The MP4 never left the browser; deliver `bytes` as a download or upload.
 ```
 
-This is the cleanest on-device path Fluvie has. `ffmpeg.wasm` **is** FFmpeg
-compiled to WebAssembly, so the exact argument plan the desktop and server use
-runs verbatim in the browser. There is no native encoder to reimplement (the way
-mobile reimplements it), so the feature set matches the desktop.
+`ffmpeg.wasm` is FFmpeg compiled to WebAssembly. Fluvie shares its encode-plan
+builder with the desktop path and adapts the video input to PNG files. The
+selected wasm build still determines which codecs and filters are available;
+sharing the plan does not give every browser the desktop's capabilities.
 
 ## Setup
 
@@ -134,7 +135,8 @@ its demuxer lazily, so a page that renders no clips never fetches it:
 
 A complete, working bridge (sample extraction, codec description,
 presentation-order reindexing, error handling) lives in
-[reday](https://github.com/SimonErich/reday)'s `web/index.html`; vendor mp4box.js
+the local [browser studio example](../../examples/web_browser_studio/README.md),
+in `web/clip_decoder.js`; vendor mp4box.js
 under `web/vendor/` with a fetch step, the same way you vendor the wasm core. A
 browser without WebCodecs, or that can't decode the clip's codec (Safari and some
 headless Chromium builds can't do H.264), fails fast with a clear typed error.
@@ -153,27 +155,46 @@ Video  ->  off-screen capture (Fluvie)  ->  PNG frame sequence  ->  ffmpeg.wasm 
    `FluvieWebStage` surface, sized to your target resolution and parked
    off-screen. Each captured frame is encoded to a PNG and written to an
    in-memory sandbox as a numbered image sequence (`frame_000000.png`, …), never
-   to disk. Encoding per frame keeps capture memory flat (one frame at a time)
-   instead of holding every raw frame at once, so a longer render no longer
-   overflows the browser tab during capture.
+   to disk. Compressing each frame avoids retaining the entire raw RGBA
+   sequence. The PNG sequence remains in the sandbox and is then copied into
+   the wasm file system, so total memory still grows with the render's length.
 2. It hands the sandbox to `ffmpeg.wasm`, which runs the same H.264 encode and
    audio-mix plan a desktop render would, reading the PNG image sequence as its
    input (the desktop path reads a raw stream) and writing the output in its
    in-memory file system.
 3. The renderer reads the encoded file back and returns it as a `Uint8List`.
 
-No `dart:io`, no temp directory, no subprocess. The capture half is Fluvie's own,
-so every element, animation, and transition renders exactly as it does on the
-desktop.
+No `dart:io`, no temp directory, no subprocess. The capture half shares Fluvie's
+frame clock and timing engine. Browser rasterization, fonts, shaders and resource
+support can differ from desktop capture; compare decoded pictures within an
+appropriate tolerance rather than assuming pixel or file equality.
 
 ## The advantages
 
-- **Privacy.** The frames are captured and the MP4 is encoded on the page.
-  Nothing is uploaded, so no server can see, cache, or index the video.
+- **Local encoding.** The renderer captures frames and encodes the MP4 on the
+  page. It does not upload them to a render service; your asset loaders,
+  generators and app's download/upload flow control other network traffic.
 - **No render bill and no round trip.** There is no render service to run or pay
   for.
-- **The full FFmpeg feature set.** Because `ffmpeg.wasm` is FFmpeg, the same plan
-  runs as on the desktop: H.264, and GIF or transparent WebM through `Export`.
+- **Shared export plans.** H.264, GIF and transparent WebM use the shared
+  `Export` plans when the configured wasm build includes the required codecs.
+
+## Capabilities of the default browser host
+
+| Composition feature | Default `WebVideoRenderer` |
+| --- | --- |
+| Flutter layout, authored animation and scene transitions | Shared timing engine; browser rasterization. |
+| Images and video clips | Assets/memory/allowlisted URLs; clips require the installed decoder and a supported source codec. |
+| Declared music, effects and embedded clip audio | Opt-in with `audio: true`, for MP4 output. |
+| Beat/spectrum-reactive widgets and `ctx.audio` | No default browser analysis backend. |
+| Caption sources | Not supported by the built-in browser media resolver. |
+| Flutter `Snapshot` subtrees | Mounted snapshot preparation follows the shared frame clock. |
+| Mermaid, Html and WebView snapshots | External capture requires a suitable backend; not provided by the default browser adapter. |
+| Generated media | No default generator in this renderer. Resolve it to ordinary assets first, or use an advanced host with the required services. |
+
+These are the independently hosted browser defaults. `fluvie preview` instead
+adds an authenticated local native FFmpeg bridge for clip and audio decoding;
+that bridge does not establish feature parity for all browser capture services.
 
 ## The trade-offs
 
@@ -228,16 +249,18 @@ for the decode. `WebVideoRenderer` wires a decoder by default; it bridges to the
 `FluvieClipDecoder` object the page installs (the same way `FluvieFfmpeg` provides
 the encoder), which demuxes the clip's MP4 with mp4box.js and decodes the samples
 it reads with a `VideoDecoder`. The **same** resample math the desktop uses picks
-the source frames, so motion matches a desktop render. A clip's embedded audio is
+the source frames. A browser decoder without a presentation timeline falls back
+to average FPS, so variable frame rate sources can have imperfect timestamp alignment. A clip's embedded audio is
 mixed in when you pass `audio: true` (see [Audio](#audio)).
 
-The browser has no file system to stream frames to. Unlike the
-[mobile](on-device-mobile-rendering.md#clips) path, which streams clip frames to
-disk, the web decoder holds every frame it extracts **in memory**, at the source
-resolution. Memory therefore scales with the clip's length × resolution: a short
-reel is fine, but a long or high-resolution clip can exhaust a browser tab. Keep
-in-browser clips short and known, and render long or full-resolution clips on the
-[server](rendering-on-a-server.md) or [mobile](on-device-mobile-rendering.md) path.
+The shared composition session requests source frames on demand and retires
+its bounded scrub cache after paint; it no longer retains every extracted frame
+for a clip's full duration. Full-resolution RGBA pictures, the loaded source
+bytes, captured PNG sequence and wasm file system still consume browser memory.
+A preview can limit clip decode size; export preserves the source resolution.
+For long renders, budget those retained inputs or use the
+[server](rendering-on-a-server.md). See [Performance](../advanced/performance.md)
+for the per-source cache budget and its exceptions.
 
 A clip's `trim` and its `ClipAudio` policy are the same shared behavior as every
 other renderer: `trim` selects which source frames the decoder is asked for (only
@@ -285,8 +308,10 @@ in-browser rendering earns its size.
 A single Flutter app can render on-device on both mobile and web. Pick the
 renderer per platform behind a conditional import: `OnDeviceVideoRenderer` from
 [`fluvie_mobile_encoder`](on-device-mobile-rendering.md) on Android and iOS,
-`WebVideoRenderer` from `fluvie_web_encoder` on the web. The `Video` you pass is
-identical; only the encoder differs.
+`WebVideoRenderer` from `fluvie_web_encoder` on the web. The authored `Video` stays
+the same; decoder, snapshot, audio-analysis and output support depend on the
+selected backend. Use the [capability registry](../reference/render-capabilities.md)
+and validate on your supported browsers and devices.
 
 <!-- code-excerpt "examples/gallery/lib/cross_platform/render_on_device.dart (conditional-export)" -->
 ```dart
@@ -304,8 +329,10 @@ directly. The runnable demo lives in
 
 `fluvie_web_encoder` injects its capture host and its ffmpeg.wasm runtime, so the
 renderer's orchestration runs in a plain VM unit test against a fake runtime. The
-full browser chain (real capture plus `ffmpeg.wasm`) is proven by a headless
-Chrome end-to-end render in the package's example.
+real browser acceptance checks exercise capture, decoding and wasm encoding on
+specific fixtures and engine versions. See [Browser release checks](../contributing/browser-release-checks.md)
+for coverage and comparison tolerances. Those checks do not prove every
+composition or codec works in every browser.
 
 ## Where to next
 
@@ -313,5 +340,5 @@ Chrome end-to-end render in the package's example.
   renders, an audio mix, or to keep the web bundle light.
 - [On-device mobile rendering](on-device-mobile-rendering.md): the same idea on
   Android and iOS, with the platform's native encoder.
-- [Exporting your video](exporting-your-video.md): every export format, including
-  the GIF and transparent WebM that `ffmpeg.wasm` renders in the browser too.
+- [Exporting your video](exporting-your-video.md): export plans, including GIF
+  and transparent WebM; verify the codecs in your configured wasm build.

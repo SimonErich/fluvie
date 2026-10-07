@@ -1,0 +1,67 @@
+{
+  "id": "callout",
+  "name": "Feature callout",
+  "family": "Callouts",
+  "theme": {
+    "palette": {
+      "titleInk": "#F6F7FB",
+      "titleAccent": "#7C6EF6",
+      "titleSurface": "#18202F"
+    },
+    "typeScale": {
+      "titleHeadline": {
+        "fontSize": 54,
+        "fontWeight": "bold",
+        "color": "#F6F7FB"
+      },
+      "titleBody": {
+        "fontSize": 24,
+        "color": "#F6F7FB"
+      }
+    }
+  },
+  "children": [
+    {
+      "type": "Box",
+      "color": {
+        "token": "titleAccent"
+      },
+      "transform": {
+        "x": 0.75,
+        "y": 0.35,
+        "w": 0.36,
+        "h": 0.2
+      },
+      "animate": [
+        {
+          "preset": "slideFadeIn",
+          "duration": "0.4r"
+        }
+      ]
+    },
+    {
+      "type": "SplitText",
+      "text": "A closer look",
+      "by": "character",
+      "style": {
+        "token": "titleBody"
+      },
+      "textAlign": "center",
+      "transform": {
+        "x": 0.75,
+        "y": 0.35,
+        "w": 0.34,
+        "h": 0.19
+      },
+      "animate": [
+        {
+          "preset": "slideFadeIn",
+          "duration": "0.4r",
+          "stagger": {
+            "each": "0.02r"
+          }
+        }
+      ]
+    }
+  ]
+}

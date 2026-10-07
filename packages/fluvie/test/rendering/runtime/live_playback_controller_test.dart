@@ -19,6 +19,54 @@ void main() {
   });
 
   group('play and tick', () {
+    test('the final picture keeps playing for its full frame interval', () {
+      final controller = LivePlaybackController(fps: 10, totalFrames: 3)
+        ..play()
+        ..handleTick(const Duration(milliseconds: 200));
+      expect(controller.frame, 2);
+      expect(controller.state, LivePlaybackState.playing);
+      controller.handleTick(const Duration(milliseconds: 299));
+      expect(controller.frame, 2);
+      expect(controller.state, LivePlaybackState.playing);
+      controller.handleTick(const Duration(milliseconds: 300));
+      expect(controller.frame, 2);
+      expect(controller.state, LivePlaybackState.paused);
+      controller.dispose();
+    });
+
+    test('a single picture can play its complete interval', () {
+      final controller = LivePlaybackController(fps: 10, totalFrames: 1)..play();
+      expect(controller.state, LivePlaybackState.playing);
+      controller.handleTick(const Duration(milliseconds: 99));
+      expect(controller.state, LivePlaybackState.playing);
+      controller.handleTick(const Duration(milliseconds: 100));
+      expect(controller.frame, 0);
+      expect(controller.state, LivePlaybackState.paused);
+      controller.dispose();
+    });
+
+    test('position preserves sub-frame phase through pause and rate changes', () {
+      final controller = LivePlaybackController(fps: 10, totalFrames: 3)
+        ..play()
+        ..handleTick(const Duration(milliseconds: 250));
+      expect(controller.position, const Duration(milliseconds: 250));
+      expect(controller.isComplete, isFalse);
+      controller
+        ..pause()
+        ..rate = 2
+        ..play()
+        ..handleTick(const Duration(milliseconds: 20));
+      expect(controller.position, const Duration(milliseconds: 290));
+      expect(controller.state, LivePlaybackState.playing);
+      controller.handleTick(const Duration(milliseconds: 25));
+      expect(controller.position, const Duration(milliseconds: 300));
+      expect(controller.isComplete, isTrue);
+      controller.hold(2);
+      expect(controller.position, const Duration(milliseconds: 200));
+      expect(controller.isComplete, isFalse);
+      controller.dispose();
+    });
+
     test('advances the frame clock by elapsed wall time × fps', () {
       final controller = LivePlaybackController(fps: 30)
         ..play()
@@ -62,8 +110,11 @@ void main() {
       controller.dispose();
     });
 
-    test('play at the end of a bounded clock is a no-op', () {
-      final controller = LivePlaybackController(fps: 30, totalFrames: 10, initialFrame: 9)..play();
+    test('play after the complete bounded interval is a no-op', () {
+      final controller = LivePlaybackController(fps: 30, totalFrames: 10)
+        ..play()
+        ..handleTick(const Duration(seconds: 1))
+        ..play();
       expect(controller.state, LivePlaybackState.paused);
       controller.dispose();
     });

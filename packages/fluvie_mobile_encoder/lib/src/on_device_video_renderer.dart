@@ -1,6 +1,4 @@
-// fluvie:large-file-ok: one on-device render orchestration; render() is a single
-// linear capture, mix, and encode pipeline over injected seams, and the capture
-// half already lives in the on_device_video_renderer_capture.dart part.
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
@@ -15,11 +13,14 @@ import 'package:fluvie_mobile_encoder/src/mobile_encode_request.dart';
 import 'package:fluvie_mobile_encoder/src/mobile_video_codec.dart';
 import 'package:fluvie_mobile_encoder/src/mobile_video_encoder.dart';
 import 'package:fluvie_mobile_encoder/src/native_frame_extraction_service.dart';
+import 'package:fluvie_mobile_encoder/src/native_pcm_decoder.dart';
+import 'package:fluvie_mobile_encoder/src/native_poster.dart';
 import 'package:fluvie_mobile_encoder/src/native_video_probe_service.dart';
 import 'package:fluvie_mobile_encoder/src/offscreen_capture_host.dart';
 import 'package:riverpod/riverpod.dart';
 
 part 'on_device_video_renderer_capture.dart';
+part 'on_device_video_renderer_pipeline.dart';
 
 /// Builds the off-screen [CaptureHost] for a render at [size] logical pixels.
 typedef CaptureHostFactory = CaptureHost Function(Size size);
@@ -39,7 +40,7 @@ typedef SandboxFactory = Future<Directory> Function();
 /// opt-in: pass `audio: true` to [render] to decode, mix, and mux a `Video`'s
 /// declared `Audio` tracks; by default a `Video` with audio renders silent and
 /// (unless silenced) [render] warns through the injected warning sink.
-final class OnDeviceVideoRenderer implements VideoRenderer<File> {
+final class OnDeviceVideoRenderer implements VideoRenderer<File>, RequestVideoRenderer<File> {
   /// Creates a renderer over its seams; the defaults target a real device.
   ///
   /// [mediaResolver] resolves a composition's `Image`/`Clip` sources; when left
@@ -54,11 +55,14 @@ final class OnDeviceVideoRenderer implements VideoRenderer<File> {
     void Function(String message)? onWarning,
     this.mediaResolver,
     this.networkAllowlist,
+    this.cancellation,
+    this.pcmDecoder,
   }) : _encoder = encoder ?? const MethodChannelMobileVideoEncoder(),
        _hostFactory = hostFactory ?? _defaultHostFactory,
        _sandboxFactory = sandboxFactory ?? _defaultSandboxFactory,
        _service = service ?? RenderService(capture: const RepaintBoundaryCaptureService()),
-       _audioMaterializer = audioMaterializer ?? BundleAudioMaterializer(),
+       // ignore: prefer_initializing_formals — preserve the established public injection parameter.
+       _audioMaterializer = audioMaterializer,
        _onWarning = onWarning ?? _defaultWarn;
 
   /// Sink for renderer warnings (e.g. a `Video` declares audio but on-device
@@ -73,7 +77,7 @@ final class OnDeviceVideoRenderer implements VideoRenderer<File> {
   final CaptureHostFactory _hostFactory;
   final SandboxFactory _sandboxFactory;
   final RenderService _service;
-  final MobileAudioMaterializer _audioMaterializer;
+  final MobileAudioMaterializer? _audioMaterializer;
 
   /// The injected media resolver, or null to build (and dispose) one per
   /// [render] from `mediaResolverProvider`.
@@ -83,6 +87,14 @@ final class OnDeviceVideoRenderer implements VideoRenderer<File> {
   /// to the per-render resolver when none is injected; ignored when
   /// [mediaResolver] is provided (configure the allowlist on it instead).
   final NetworkAllowlist? networkAllowlist;
+
+  /// Stops capture before another frame or encode stage is started.
+  /// Native encode already in progress is allowed to finish, then discarded.
+  final RenderCancellation? cancellation;
+
+  /// Optional PCM backend used by both beat and frequency analysis.
+  /// The default uses native compressed-audio decoding, without FFmpeg.
+  final PcmDecoder? pcmDecoder;
 
   /// Renders [composition] for [aspect] over [duration] to an MP4 file.
   ///
@@ -108,7 +120,7 @@ final class OnDeviceVideoRenderer implements VideoRenderer<File> {
     required Duration duration,
     int fps = VideoDefaults.fps,
     int longEdge = VideoDefaults.longEdge,
-    MobileVideoCodec codec = MobileVideoCodec.h264,
+    MobileVideoCodec? codec,
     int? bitRate,
     bool audio = false,
     bool warnOnDroppedAudio = true,
@@ -116,98 +128,49 @@ final class OnDeviceVideoRenderer implements VideoRenderer<File> {
     RenderProgressCallback? onProgress,
     File? outputFile,
   }) async {
-    final frameCount = frameCountFor(duration, fps);
-    final size = aspect.sizeFor(longEdge);
-    final sandbox = await _sandboxFactory();
-    final host = _hostFactory(Size(size.width.toDouble(), size.height.toDouble()));
-    // Build the media resolver with the device-native clip seams (probe +
-    // frame extraction via MediaMetadataRetriever, no ffmpeg). resolverScope is
-    // bypassed here because it is shared with the web encoder and cannot import
-    // the io-only clip providers.
-    final ownedContainer = mediaResolver == null
-        ? ProviderContainer(
-            overrides: [
-              frameExtractionServiceProvider.overrideWithValue(
-                const NativeFrameExtractionService(),
-              ),
-              videoProbeServiceProvider.overrideWithValue(
-                const NativeVideoProbeService(),
-              ),
-              if (networkAllowlist != null)
-                networkAllowlistProvider.overrideWithValue(networkAllowlist!),
-            ],
-          )
-        : null;
-    final resolver = mediaResolver ?? ownedContainer!.read<MediaResolver>(mediaResolverProvider);
-    try {
-      onProgress?.call(RenderProgress(RenderPhase.capturing, compositionKey: compositionKey));
-      final captured = await runStage(
-        RenderPhase.capturing,
-        () => _captureToSandbox(
-          // The offscreen capture host mounts this with no app ancestors, so the
-          // tree needs an ambient Directionality for Text/RichText to lay out
-          // (the CLI capture harness wraps the same way). _resolveAudioTracks
-          // below reads the raw Video, so the wrap stays off the audio path.
-          composition: Directionality(textDirection: TextDirection.ltr, child: composition),
-          aspect: aspect,
-          frameCount: frameCount,
-          outDir: sandbox,
-          service: _service,
-          pumpWidget: host.mount,
-          pumpFrame: host.pumpFrame,
-          longEdge: longEdge,
+    final authored = compositionVideo(composition)?.export;
+    if (authored != null) {
+      try {
+        final size = aspect.sizeFor(longEdge);
+        VideoRenderRequest(
+          composition: composition,
+          width: size.width,
+          height: size.height,
           fps: fps,
-          compositionKey: compositionKey,
-          resolver: resolver,
-        ),
-      );
-      final manifest = captured.manifest;
-      final mix = await _resolveAudioTracks(
-        composition,
-        encode: audio,
-        warn: warnOnDroppedAudio,
-        fps: fps,
-        frameCount: frameCount,
-        materializer: _audioMaterializer,
-        warnSink: _onWarning,
-      );
-      final outputPath = outputFile?.path ?? '${sandbox.path}/${manifest.outputFileName}';
-      onProgress?.call(RenderProgress(RenderPhase.encoding, compositionKey: compositionKey));
-      await runStage(
-        RenderPhase.encoding,
-        () => _encoder.encode(
-          MobileEncodeRequest(
-            framesPath: '${sandbox.path}/${manifest.framesFileName}',
-            outputPath: outputPath,
-            width: manifest.width,
-            height: manifest.height,
-            fps: manifest.fps,
-            frameCount: manifest.frameCount,
-            bitRate:
-                bitRate ??
-                defaultBitRate(width: manifest.width, height: manifest.height, fps: manifest.fps),
-            codec: codec,
-            audioTracks: mix.tracks,
-            audioMasterVolume: mix.masterVolume,
-          ),
-        ),
-      );
-      onProgress?.call(RenderProgress(RenderPhase.complete, compositionKey: compositionKey));
-      return File(outputPath);
-    } finally {
-      await runGuarded([
-        host.dispose,
-        () async {
-          // Only dispose the resolver this render built; a caller-injected
-          // resolver is the caller's to dispose.
-          if (ownedContainer != null && resolver is DisposableResolver) {
-            (resolver as DisposableResolver).dispose();
-          }
-          ownedContainer?.dispose();
-        },
-      ], (error, _) => _onWarning('Cleanup after render failed: $error'));
+          frameCount: frameCountFor(duration, fps),
+          export: authored,
+          audio: audio,
+        ).validateCapabilities(capabilities);
+      } on FluvieCapabilityException catch (error) {
+        throw UnsupportedError(error.message);
+      }
     }
+    final size = aspect.sizeFor(longEdge);
+    return _renderRequest(
+      VideoRenderRequest(
+        composition: composition,
+        width: size.width,
+        height: size.height,
+        fps: fps,
+        frameCount: frameCountFor(duration, fps),
+        aspect: aspect,
+        audio: audio,
+        warnOnDroppedAudio: warnOnDroppedAudio,
+        compositionKey: compositionKey,
+        onProgress: onProgress,
+        cancellation: cancellation,
+      ),
+      codec: codec,
+      bitRate: bitRate,
+      outputFile: outputFile,
+    );
   }
+
+  @override
+  RenderCapabilities get capabilities => RenderCapabilities.mobile;
+
+  @override
+  Future<File> renderRequest(VideoRenderRequest request) => _renderRequest(request);
 
   // coverage:ignore-line constructs the engine backed host exercised only on a device
   static CaptureHost _defaultHostFactory(Size size) => OffscreenCaptureHost(size);

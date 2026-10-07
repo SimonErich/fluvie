@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'src/lcov_summary.dart';
+import 'src/workspace_inventory_loader.dart';
 
 /// The coverage gate: `dart tool/check_coverage.dart --min 95 <pkg dirs...>`.
 ///
@@ -11,16 +12,30 @@ import 'src/lcov_summary.dart';
 /// Dart sources under `lib/` fails.
 Future<void> main(List<String> args) async {
   var min = 95.0;
+  var workspace = false;
   final dirs = <String>[];
   for (var i = 0; i < args.length; i++) {
     if (args[i] == '--min') {
       min = double.parse(args[++i]);
+    } else if (args[i] == '--workspace') {
+      workspace = true;
     } else {
       dirs.add(args[i]);
     }
   }
+  if (workspace) {
+    final inventory = loadWorkspaceInventory(Directory.current);
+    if (inventory.problems.isNotEmpty) {
+      stderr.writeln(inventory.problems.join('\n'));
+      exitCode = 1;
+      return;
+    }
+    dirs.addAll(inventory.coveragePaths);
+  }
   if (dirs.isEmpty) {
-    stderr.writeln('usage: dart tool/check_coverage.dart --min <pct> <package dirs...>');
+    stderr.writeln(
+      'usage: dart tool/check_coverage.dart --min <pct> --workspace | <package dirs...>',
+    );
     exitCode = 64;
     return;
   }

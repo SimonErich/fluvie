@@ -1,0 +1,7 @@
+{
+  "fluvieSpec": 1,
+  "size": {"width": 640, "height": 360},
+  "fps": 30,
+  "export": {"mode": "mp4", "quality": "high", "codec": "h265", "crf": 21, "preset": "slow", "pixelFormat": "yuv420p10le"},
+  "scenes": [{"duration": "60f", "children": [{"type": "Text", "text": "Delivery"}]}]
+}

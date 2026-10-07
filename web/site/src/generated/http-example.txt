@@ -1,0 +1,10 @@
+curl -X POST "$FLUVIE_API_URL/v1/renders" \
+  -H "Authorization: Bearer $FLUVIE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{
+  "prompt": "A 4-second teal title card saying Hello, Fluvie.",
+  "options": {
+    "format": "mp4",
+    "aspect": "reels"
+  }
+}'

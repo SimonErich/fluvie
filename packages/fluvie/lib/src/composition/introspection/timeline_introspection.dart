@@ -4,18 +4,22 @@ library;
 import 'package:flutter/widgets.dart' show Key, Widget;
 import 'package:fluvie/src/animation/motion_target.dart';
 import 'package:fluvie/src/animation/runtime/animation_plan_adapter.dart';
+import 'package:fluvie/src/composition/clip_transition.dart';
 import 'package:fluvie/src/composition/introspection/animation_introspection.dart';
 import 'package:fluvie/src/composition/introspection/element_introspection.dart';
 import 'package:fluvie/src/composition/introspection/frame_span.dart';
 import 'package:fluvie/src/composition/introspection/scene_introspection.dart';
 import 'package:fluvie/src/composition/runtime/scene_tree_walk.dart';
+import 'package:fluvie/src/composition/runtime/spec_element_id.dart';
 import 'package:fluvie/src/composition/runtime/video_plan_builder.dart';
 import 'package:fluvie/src/composition/transition/boundary_resolver.dart';
 import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/anchor.dart';
-import 'package:fluvie/src/core/time_range.dart';
 import 'package:fluvie/src/timing/placement/scene_offset_resolver.dart';
+import 'package:fluvie/src/timing/placement/window_resolver.dart';
+import 'package:fluvie/src/timing/resolver/anchor_registry.dart' show overlaySceneIndex;
 import 'package:fluvie/src/timing/schedule/element_registration.dart';
+import 'package:fluvie/src/timing/time_scope_data.dart';
 
 part 'timeline_introspector.dart';
 
@@ -38,6 +42,7 @@ final class TimelineIntrospection {
     required this.fps,
     required this.totalFrames,
     required this.scenes,
+    required this.overlays,
     required this._byWidget,
   });
 
@@ -51,12 +56,19 @@ final class TimelineIntrospection {
   /// elements.
   final List<SceneIntrospection> scenes;
 
+  /// The elements that belong to no scene, in declaration order. Empty for a
+  /// video that declares none.
+  final List<ElementIntrospection> overlays;
+
   /// Widget-instance identity: both the `.animate()` wrapper and its child
   /// map to the element, so a consumer holding either finds its window.
   final Map<Widget, ElementIntrospection> _byWidget;
 
   /// Every element across all scenes, in scene then walk order.
-  Iterable<ElementIntrospection> get elements => scenes.expand((scene) => scene.elements);
+  Iterable<ElementIntrospection> get elements => [
+    for (final scene in scenes) ...scene.elements,
+    ...overlays,
+  ];
 
   /// The element declared with [anchor], or `null` when no element carries
   /// that instance. Anchors compare by identity, like everywhere in fluvie.
@@ -80,6 +92,22 @@ final class TimelineIntrospection {
   /// `.animate()` wrapper or its direct child — or `null` for a widget the
   /// walk never met.
   ElementIntrospection? elementFor(Widget widget) => _byWidget[widget];
+
+  /// The element carrying the spec element id [id], or `null` when none does
+  /// — the lookup that joins a document element to its resolved spans.
+  ///
+  /// Ids come from the `SpecElementId` marker the spec builder wraps every
+  /// identified element in; widget-authored elements without a marker never
+  /// match. The editor mints document-unique ids, so this flat lookup is the
+  /// common join; an id duplicated across scenes (legal in raw JSON) resolves
+  /// first-wins in scene-then-walk order — use
+  /// `SceneIntrospection.elementById` for the scene-scoped join.
+  ElementIntrospection? elementById(String id) {
+    for (final element in elements) {
+      if (element.elementId == id) return element;
+    }
+    return null;
+  }
 
   /// The elements declared at or below [root], in walk order — the subtree
   /// lookup a consumer uses to find where a wrapped group's entrances sit.

@@ -31,6 +31,50 @@
 
   <title>slides</title>
   <link rel="manifest" href="manifest.json">
+
+  <!--
+    The FluvieFfmpeg bridge: the page-global object fluvie's in-browser
+    encoder drives (load / writeFile / exec / readFile), wrapping
+    @ffmpeg/ffmpeg loaded as ESM with the single-threaded core (no
+    cross-origin-isolation headers needed). Vendor the wasm files with
+    tool/fetch_ffmpeg.sh before serving; without this script the export
+    menu's video entry stays disabled and says what is missing.
+  -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@ffmpeg/ffmpeg": "./ffmpeg/ffmpeg/index.js",
+        "@ffmpeg/util": "./ffmpeg/util/index.js"
+      }
+    }
+  </script>
+  <script type="module">
+    import { FFmpeg } from '@ffmpeg/ffmpeg';
+
+    async function toBlobURL(url, type) {
+      const buffer = await (await fetch(url)).arrayBuffer();
+      return URL.createObjectURL(new Blob([buffer], { type }));
+    }
+
+    const ffmpeg = new FFmpeg();
+    let loaded = null;
+    async function loadFfmpeg() {
+      await ffmpeg.load({
+        coreURL: await toBlobURL('./ffmpeg/core/ffmpeg-core.js', 'text/javascript'),
+        wasmURL: await toBlobURL('./ffmpeg/core/ffmpeg-core.wasm', 'application/wasm'),
+      });
+    }
+
+    globalThis.FluvieFfmpeg = {
+      load: () => (loaded ??= loadFfmpeg()),
+      writeFile: (name, bytes) => ffmpeg.writeFile(name, bytes),
+      exec: (args) => ffmpeg.exec(args),
+      readFile: (name) => ffmpeg.readFile(name),
+      deleteFile: (name) => ffmpeg.deleteFile(name),
+      terminate: async () => { ffmpeg.terminate(); loaded = null; },
+    };
+  </script>
+  <script type="module" src="clip_decoder.js"></script>
 </head>
 <body>
   <!--

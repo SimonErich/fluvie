@@ -19,6 +19,18 @@ final class SceneIntrospection {
   /// The scene's animated elements in walk (declaration) order.
   final List<ElementIntrospection> elements;
 
+  /// The scene's element carrying the spec element id [id], or `null` when
+  /// none does — the scene-scoped join a timeline row uses, immune to the
+  /// same id appearing in another scene. An id duplicated inside one scene
+  /// (legal in raw JSON; the editor mints document-unique ids) resolves
+  /// first-wins in walk order.
+  ElementIntrospection? elementById(String id) {
+    for (final element in elements) {
+      if (element.elementId == id) return element;
+    }
+    return null;
+  }
+
   @override
   String toString() => 'SceneIntrospection($index, $span, elements: ${elements.length})';
 }

@@ -1,12 +1,16 @@
 # Root strictness + the custom_lint plugin, and docs are mandatory on every
 # public member (mirrors packages/fluvie).
-include: ../../analysis_options.yaml
+include: analysis_options.shared.yaml
 
-# Declared directly so the published package formats at width 100 standalone.
+# Keep the package entry point explicit; the generated include also carries this policy.
 formatter:
   page_width: 100
 
 analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
   plugins:
     - custom_lint
 

@@ -210,6 +210,25 @@ void main() {
       expect(Directory(nested).listSync().whereType<File>(), hasLength(2));
     });
 
+    test('a shorter rerender removes old matching frames and preserves unrelated files', () async {
+      writeSeqManifest();
+      stubSeqFfmpeg(stills: 2);
+      Directory(outSeqPath).createSync();
+      for (var index = 0; index < 4; index++) {
+        File('$outSeqPath/frame_${index.toString().padLeft(6, '0')}.png').writeAsBytesSync([99]);
+      }
+      File('$outSeqPath/notes.txt').writeAsStringSync('keep me');
+      File('$outSeqPath/frame_cover.png').writeAsBytesSync([12]);
+
+      await runEncode(runner: runner, sandbox: sandbox, outPath: outSeqPath);
+
+      expect(File('$outSeqPath/frame_000001.png').readAsBytesSync(), [1, 1]);
+      expect(File('$outSeqPath/frame_000002.png').existsSync(), isFalse);
+      expect(File('$outSeqPath/frame_000003.png').existsSync(), isFalse);
+      expect(File('$outSeqPath/notes.txt').readAsStringSync(), 'keep me');
+      expect(File('$outSeqPath/frame_cover.png').readAsBytesSync(), [12]);
+    });
+
     test('a zero exit that produced no stills names the pattern', () async {
       writeSeqManifest();
       stubSeqFfmpeg(produces: false);
@@ -261,6 +280,17 @@ void main() {
       final posterPath = outPath.replaceFirst(RegExp(r'\.[^.]+$'), '.poster.png');
       expect(File(posterPath).existsSync(), isTrue);
       expect(File(posterPath).readAsBytesSync(), [9, 9]);
+    });
+
+    test('an extensionless output in a dotted folder gets a distinct sibling poster', () async {
+      writePosterManifest();
+      stubBoth();
+      final destination = '${File(outPath).parent.path}/conference.v1/video';
+
+      await runEncode(runner: runner, sandbox: sandbox, outPath: destination);
+
+      expect(File(destination).readAsBytesSync(), [0, 0, 0, 1]);
+      expect(File('$destination.poster.png').readAsBytesSync(), [9, 9]);
     });
 
     test('a poster ffmpeg failure surfaces as a CliFailure', () async {

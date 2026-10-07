@@ -3,6 +3,8 @@
 // a real API. Each `#docregion` flows into one fence via a
 // `<!-- code-excerpt -->` marker.
 
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
@@ -13,6 +15,16 @@ List<Audio> audioConstructors(String path) => [
   Audio.music(path), // a looping or one-shot bed for the whole video
   Audio.sfx(path), // a one-shot effect placed at a moment
   // #enddocregion audio-constructors
+];
+
+/// The typed-source twins: the same tracks over an [AudioSource], skipping
+/// the string classification. This is how imported bytes that never touched
+/// disk ([AudioSource.memory]) reach the encoder mix.
+List<Audio> audioTypedSources(Uint8List bytes) => [
+  // #docregion audio-typed-sources
+  Audio.musicSource(AudioSource.memory(bytes, debugLabel: 'bed.mp3'), loop: true),
+  Audio.sfxSource(AudioSource.memory(bytes), at: const Trigger.at(Time.seconds(2))),
+  // #enddocregion audio-typed-sources
 ];
 
 /// The three caption-source constructors. SRT/VTT parse a file before frame 0;

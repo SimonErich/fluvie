@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart' hide Animation;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_presenter/fluvie_presenter.dart';
-import 'package:fluvie_presenter/src/sidebar/preview_render_host.dart';
 
 void main() {
   testWidgets('the hidden host renders a slide to a thumbnail image', (tester) async {

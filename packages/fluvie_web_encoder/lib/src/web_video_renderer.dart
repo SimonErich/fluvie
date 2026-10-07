@@ -10,6 +10,9 @@ import 'package:fluvie_web_encoder/src/web_audio_materializer.dart';
 import 'package:fluvie_web_encoder/src/web_capture_host.dart';
 import 'package:fluvie_web_encoder/src/web_video_encoder.dart';
 
+part 'web_video_renderer_policy.dart';
+part 'web_video_renderer_capture.dart';
+
 /// Builds the off-screen [WebCaptureHost] for a render at [size] logical pixels.
 typedef WebCaptureHostFactory = WebCaptureHost Function(Size size);
 
@@ -28,7 +31,7 @@ typedef WebCaptureHostFactory = WebCaptureHost Function(Size size);
 /// the injected warning sink. Every dependency is injected so the orchestration is
 /// unit-testable: tests pass a tester-backed [WebCaptureHost], a [WebVideoEncoder]
 /// over a fake runtime, and a fake [WebAudioMaterializer].
-final class WebVideoRenderer implements VideoRenderer<Uint8List> {
+final class WebVideoRenderer implements VideoRenderer<Uint8List>, RequestVideoRenderer<Uint8List> {
   /// Creates a renderer; the defaults target a real browser.
   WebVideoRenderer({
     WebVideoEncoder? encoder,
@@ -39,6 +42,7 @@ final class WebVideoRenderer implements VideoRenderer<Uint8List> {
     void Function(String message)? onWarning,
     this.mediaResolver,
     this.networkAllowlist,
+    this.cancellation,
   }) : _hostFactory = hostFactory ?? _defaultHostFactory,
        // coverage:ignore-line the _defaultEncoder default only runs in a browser
        _encoder = encoder ?? _defaultEncoder(),
@@ -59,13 +63,13 @@ final class WebVideoRenderer implements VideoRenderer<Uint8List> {
   /// [mediaResolver] is provided (configure the allowlist on it instead).
   final NetworkAllowlist? networkAllowlist;
 
+  /// Cancellation shared with the export queue; checked between captures.
+  final RenderCancellation? cancellation;
+
   /// Sink for renderer warnings (for example a `Video` declares audio but
   /// in-browser audio is off). Defaults to [debugPrint]; inject one to route
   /// warnings (a test captures them here).
   final void Function(String message) _onWarning;
-
-  // coverage:ignore-line the default sink runs only when no onWarning is injected which tests always do
-  static void _defaultWarn(String message) => debugPrint('fluvie_web_encoder: $message');
 
   final WebVideoEncoder _encoder;
   final WebCaptureHostFactory _hostFactory;
@@ -110,100 +114,29 @@ final class WebVideoRenderer implements VideoRenderer<Uint8List> {
     int? posterFrame,
     RenderProgressCallback? onProgress,
   }) async {
-    final frameCount = frameCountFor(duration, fps);
     final size = aspect.sizeFor(longEdge);
-    final sandbox = MemoryRenderSandbox();
-    final host = _hostFactory(Size(size.width.toDouble(), size.height.toDouble()));
-    final scope = resolverScope(
-      mediaResolver,
-      networkAllowlist: networkAllowlist,
-      clipDecoder: _clipDecoder,
-    );
-    try {
-      // Resolve audio inside the try so a throw here still disposes the host.
-      final mix = _audioFor(
-        composition,
-        encode: audio,
-        warn: warnOnDroppedAudio,
-        export: export,
+    return renderRequest(
+      VideoRenderRequest(
+        composition: composition,
+        width: size.width,
+        height: size.height,
         fps: fps,
-        frameCount: frameCount,
-      );
-      final manifest = await runStage(
-        RenderPhase.capturing,
-        () => renderToSandbox(
-          // The offscreen capture host mounts this with no app ancestors, so the
-          // tree needs an ambient Directionality for Text/RichText to lay out.
-          // Audio is already resolved into `mix` above, so the wrap is mount-only.
-          composition: Directionality(textDirection: TextDirection.ltr, child: composition),
-          aspect: aspect,
-          frameCount: frameCount,
-          sandbox: sandbox,
-          capture: const RepaintBoundaryCaptureService(),
-          pumpWidget: host.mount,
-          pumpFrame: host.pumpFrame,
-          longEdge: longEdge,
-          fps: fps,
-          compositionKey: compositionKey,
-          export: export,
-          posterFrame: posterFrame,
-          onProgress: (completed, total) => onProgress?.call(
-            RenderProgress(
-              RenderPhase.capturing,
-              completedFrames: completed,
-              totalFrames: total,
-              compositionKey: compositionKey,
-            ),
-          ),
-          audioTracks: mix.tracks,
-          loadAudioBytes: _audioMaterializer.materialize,
-          audioMasterVolume: mix.masterVolume,
-          resolver: scope.resolver,
-          frameEncoder: _frameEncoder,
-        ),
-      );
-      onProgress?.call(RenderProgress(RenderPhase.encoding, compositionKey: compositionKey));
-      final bytes = await runStage(
-        RenderPhase.encoding,
-        () => _encoder.encode(manifest: manifest, sandbox: sandbox),
-      );
-      onProgress?.call(RenderProgress(RenderPhase.complete, compositionKey: compositionKey));
-      return bytes;
-    } finally {
-      await runGuarded([
-        host.dispose,
-        scope.dispose,
-      ], (error, _) => _onWarning('Cleanup after render failed: $error'));
-    }
-  }
-
-  /// Resolves [composition]'s audio into resolved tracks to stage, or none —
-  /// the shared opt-in gate ([gateOptInAudio]) with the in-browser label.
-  ({List<ResolvedAudioTrack> tracks, double masterVolume}) _audioFor(
-    Widget composition, {
-    required bool encode,
-    required bool warn,
-    required Export? export,
-    required int fps,
-    required int frameCount,
-  }) {
-    final mix = gateOptInAudio(
-      composition: composition,
-      encode: encode,
-      warn: warn,
-      export: export,
-      fps: fps,
-      frameCount: frameCount,
-      warnSink: _onWarning,
-      platformLabel: 'in-browser',
+        frameCount: frameCountFor(duration, fps),
+        aspect: aspect,
+        export: export,
+        posterFrame: posterFrame,
+        audio: audio,
+        warnOnDroppedAudio: warnOnDroppedAudio,
+        compositionKey: compositionKey,
+        onProgress: onProgress,
+        cancellation: cancellation,
+      ),
     );
-    if (mix == null) return (tracks: const <ResolvedAudioTrack>[], masterVolume: 1.0);
-    return (tracks: mix.tracks, masterVolume: mix.masterVolume);
   }
 
-  // coverage:ignore-line binds to the live FluvieWebStage exercised only in a browser
-  static WebCaptureHost _defaultHostFactory(Size size) => FluvieWebStage.hostFor(size);
+  @override
+  RenderCapabilities get capabilities => RenderCapabilities.browser;
 
-  // coverage:ignore-line constructs the default ffmpeg wasm encoder only valid in a browser
-  static WebVideoEncoder _defaultEncoder() => WebVideoEncoder();
+  @override
+  Future<Uint8List> renderRequest(VideoRenderRequest request) => _renderRequest(request);
 }

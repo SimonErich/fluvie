@@ -1,3 +1,4 @@
+import 'package:fluvie/src/core/encoder_options.dart';
 import 'package:fluvie/src/core/export.dart';
 import 'package:fluvie/src/rendering/encoding/audio_graph_nodes.dart';
 import 'package:fluvie/src/rendering/encoding/export_args.dart';
@@ -103,6 +104,11 @@ final class VideoEncoderService {
         builder.setH264Output(
           name: name,
           quality: export?.quality ?? config.quality,
+          codec: export?.codec ?? ExportCodec.h264,
+          crf: export?.crf,
+          bitRate: export?.bitRate,
+          preset: export?.preset ?? EncoderPreset.medium,
+          pixelFormat: export?.pixelFormat ?? ExportPixelFormat.yuv420p,
           fps: config.fps,
           filters: const FfmpegFilterGraphBuilder().forFrames(
             width: config.width,
@@ -110,6 +116,7 @@ final class VideoEncoderService {
           ),
           audio: audio,
           amix: amix,
+          audioStartSeconds: config.startFrame / config.fps,
         );
       case ExportMode.gif:
         builder.setGifOutput(name: name, fps: export!.gifFps ?? 15);

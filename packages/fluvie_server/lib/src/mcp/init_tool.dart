@@ -48,7 +48,7 @@ Add the dependency:
 
     # pubspec.yaml
     dependencies:
-      fluvie: ^0.3.0
+      fluvie: ^0.3.1
 
 Write the composition (lib/my_video.dart). The entry point is a top-level
 `Video build()`; pass `--entry <name>` to use a different name.

@@ -1,7 +1,7 @@
 # Coverage and the ignore policy
 
-Fluvie gates line coverage at 97% on every package under `packages/`. The goal
-is 100%. This page explains when you may mark a line `// coverage:ignore`. It
+Fluvie gates line coverage at 97% on production packages and apps with Dart
+sources under `lib/`. The goal is 100%. This page explains when you may mark a line `// coverage:ignore`. It
 also says when you must write a test instead.
 
 Run the gate before you commit:
@@ -13,6 +13,29 @@ melos run coverage:check
 It runs every package test with coverage. Then it checks the lcov reports
 against the 97% floor. Generated files never count. Those are `*.g.dart`,
 `*.freezed.dart`, and `*.mocks.dart`.
+
+`dart tool/workspace_inventory.dart --json` derives the targets from the root
+workspace and package manifests. Production targets are immediate
+`packages/<name>` and `apps/<name>` directories. Examples and nested fixture
+packages are analyzed and tested when they have tests, but do not carry the
+production coverage threshold. The inventory fails when a production library
+has no test producer or a discovered package is omitted from the workspace.
+New packages, including `fluvie_media` and `fluvie_render_client`, enter the gate
+and coverage upload automatically. `coverage:gate` accepts no separately
+maintained list of package names.
+
+The same inventory selects public API documentation targets through `--dartdoc`.
+`melos run docs:dartdoc` validates links and rejects warnings for every production
+package with Dart library sources, including private library packages. Apps and
+examples retain their analysis/test policy rather than producing API reference
+sites. A new library enters this gate without another package-name list.
+
+The required CI coverage job provisions Fluvie's checksum-verified FFmpeg/ffprobe
+pair and sets `FLUVIE_TEST_NATIVE_MEDIA=1`. This runs `fluvie_media`'s real native
+timeline, decoder and contact-sheet regressions in its normal source-derived
+coverage producer. Local runs may opt in with the same flag and configured
+`FLUVIE_FFMPEG`/`FLUVIE_FFPROBE` pair; a skipped native suite is not evidence that
+those integration paths were verified.
 
 ## The rule
 

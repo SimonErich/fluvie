@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/animation/runtime/keyframe_scope.dart';
+import 'package:fluvie/src/composition/runtime/collectible_children.dart';
 import 'package:fluvie/src/composition/transition/runtime/shared_element_registry.dart';
 import 'package:fluvie/src/composition/transition/runtime/shared_element_scope.dart';
 import 'package:fluvie/src/composition/transition/runtime/shared_element_slot.dart';
@@ -35,7 +36,7 @@ import 'package:fluvie/src/core/anchor.dart';
 /// raises the documented guidance error.
 ///
 /// Wrap an element in a `SharedElement` yourself to make it shared.
-final class SharedElement extends StatefulWidget {
+final class SharedElement extends StatefulWidget implements CollectibleChildren {
   /// Creates a shared slot tying [child] to [anchor] across one boundary.
   const SharedElement({required this.anchor, required this.child, super.key});
 
@@ -46,6 +47,12 @@ final class SharedElement extends StatefulWidget {
 
   /// The element that morphs across the boundary.
   final Widget child;
+
+  /// The wrapped element, so the structural walk (media collectors, timeline
+  /// introspection) sees through the hero slot to a `MediaCarrier` inside —
+  /// `wrapShared` mounts this widget around any element, media included.
+  @override
+  Iterable<Widget> get collectibleChildren => [child];
 
   @override
   State<SharedElement> createState() => _SharedElementState();

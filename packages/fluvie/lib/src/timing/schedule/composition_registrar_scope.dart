@@ -3,6 +3,8 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/timing/schedule/composition_registrar.dart';
+import 'package:fluvie/src/timing/time_scope_data.dart';
+import 'package:fluvie/src/timing/time_scope_provider.dart';
 
 /// Carries the nearest [CompositionRegistrar] down the tree — how elements
 /// find the composition that owns their schedule.
@@ -31,6 +33,13 @@ final class CompositionRegistrarScope extends InheritedWidget {
   /// back to local resolution.
   static CompositionRegistrar? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<CompositionRegistrarScope>()?.registrar;
+
+  /// The scene (or overlay root) clock enclosing the nearest registrar.
+  /// Nested element windows use this origin when registering their schedule.
+  static TimeScopeData? ownerTimeScopeOf(BuildContext context) {
+    final owner = context.getElementForInheritedWidgetOfExactType<CompositionRegistrarScope>();
+    return owner == null ? null : TimeScopeProvider.maybeOf(owner);
+  }
 
   @override
   bool updateShouldNotify(CompositionRegistrarScope oldWidget) =>

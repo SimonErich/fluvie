@@ -1,0 +1,73 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "audio": [
+    {
+      "kind": "music",
+      "source": {
+        "kind": "file",
+        "value": "/home/ada/music/bed.mp3"
+      },
+      "volume": 0.8,
+      "fadeIn": "30f",
+      "fadeOut": "60f",
+      "loop": true,
+      "trim": {
+        "from": "0f",
+        "to": "900f"
+      },
+      "track": "bed"
+    },
+    {
+      "kind": "music",
+      "source": {
+        "kind": "network",
+        "value": "https://cdn.example/pads.mp3"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "duration": "150f",
+      "audio": [
+        {
+          "kind": "sfx",
+          "source": {
+            "kind": "asset",
+            "value": "audio/whoosh.mp3"
+          },
+          "at": {
+            "kind": "at",
+            "time": "500ms"
+          },
+          "volume": 0.6
+        },
+        {
+          "kind": "sfx",
+          "source": {
+            "kind": "asset",
+            "value": "audio/tick.mp3"
+          },
+          "at": "sceneStart"
+        }
+      ],
+      "children": [
+        {
+          "id": "el-title",
+          "type": "Text",
+          "text": "Drop",
+          "animate": [
+            {
+              "preset": "pop",
+              "duration": "12f"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

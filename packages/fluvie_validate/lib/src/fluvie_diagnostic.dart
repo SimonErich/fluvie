@@ -42,4 +42,18 @@ final class FluvieDiagnostic {
 
   /// The analyzer or lint rule code, when known.
   final String? code;
+
+  /// Stable, editor-friendly diagnostic representation.
+  Map<String, Object?> toJson() => {
+    'severity': severity.name,
+    'message': message,
+    'line': line,
+    'column': column,
+    if (length != null) 'length': length,
+    if (code != null) 'code': code,
+  };
+
+  @override
+  String toString() =>
+      '${severity.name} at $line:$column: $message${code == null ? '' : ' [$code]'}';
 }

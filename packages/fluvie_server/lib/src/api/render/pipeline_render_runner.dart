@@ -21,8 +21,10 @@ final class PipelineRenderRunner implements RenderRunner {
   PipelineRenderRunner({
     this.renderProject,
     this.ffmpegPath,
+    this.mediaOrigin,
     this.aiEnv = const {},
     this.processRunner = const IoProcessRunner(),
+    this.resolveToolchain = ensureFfmpegToolchain,
     this.captureTimeout = const Duration(minutes: 8),
     Future<Directory> Function()? createSandbox,
   }) : _createSandbox = createSandbox ?? _defaultSandbox;
@@ -41,11 +43,17 @@ final class PipelineRenderRunner implements RenderRunner {
   /// The ffmpeg binary, or `null` for `ffmpeg` on PATH.
   final String? ffmpegPath;
 
+  /// This server's origin for private inputs, supplied by trusted server config.
+  final Uri? mediaOrigin;
+
   /// AI provider/model/key env vars forwarded to the capture process.
   final Map<String, String> aiEnv;
 
   /// The process seam every spawn goes through (injected for tests).
   final ProcessRunner processRunner;
+
+  /// Toolchain preparation seam; production resolves the pinned managed pair.
+  final ToolchainResolver resolveToolchain;
 
   final Future<Directory> Function() _createSandbox;
 
@@ -102,6 +110,7 @@ final class PipelineRenderRunner implements RenderRunner {
       final code = await _bounded(
         runRenderPipeline(
           runner: processRunner,
+          resolveToolchain: resolveToolchain,
           createSandbox: _createSandbox,
           options: (
             ffmpegBinary: ffmpegPath,
@@ -135,6 +144,7 @@ final class PipelineRenderRunner implements RenderRunner {
           // merges over each request's own defines (empty for a code render,
           // which takes the staged path).
           extraDefines: {
+            if (mediaOrigin != null) 'FLUVIE_MEDIA_ORIGIN': mediaOrigin!.origin,
             ...definesFor(request, workDir, specOut),
             if (isUntrusted) 'FLUVIE_BLOCK_FILE_SOURCES': 'true',
           },

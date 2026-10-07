@@ -133,9 +133,16 @@ final class _PresenterShellState extends ConsumerState<PresenterShell> {
 
   /// Re-reads the platform truth after a transition, so the tracked state
   /// stays honest even when a request was refused (web needs a gesture).
+  ///
+  /// Every transition is a real platform round-trip (the window manager, the
+  /// browser's Fullscreen API) and the presentation may close during one, so
+  /// neither read may happen once the shell is gone: `ref` throws on a
+  /// widget that has been unmounted, and nothing awaits these calls.
   Future<void> _trackFullscreen() async {
+    if (!mounted) return;
     final active = await ref.read(fullscreenControllerProvider).isFullscreen;
-    if (mounted) ref.read(fullscreenActiveProvider.notifier).visible = active;
+    if (!mounted) return;
+    ref.read(fullscreenActiveProvider.notifier).visible = active;
   }
 
   /// S: mobile has no second window, so the in-app notes panel is the

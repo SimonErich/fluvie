@@ -11,7 +11,6 @@ import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_presenter/fluvie_presenter.dart';
 import 'package:fluvie_presenter/src/shell/presenter_shell.dart';
 import 'package:fluvie_presenter/src/shell/ui_state.dart';
-import 'package:fluvie_presenter/src/sidebar/slide_preview_service.dart';
 import 'package:fluvie_presenter/src/sidebar/slide_preview_tile.dart';
 
 Future<ui.Image> _pixel(int _) {

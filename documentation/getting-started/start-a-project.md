@@ -1,9 +1,9 @@
 # Start a Fluvie project
 
 A Fluvie project is a directory holding a composition file, an `assets/` folder,
-and a `pubspec.yaml`. That is the whole thing. There is no app to run, no
-`main.dart`, no capture harness, and no registry to keep in step. `fluvie init`
-scaffolds it:
+and a `pubspec.yaml`. It can also live in an existing Flutter app. You maintain
+the composition; the CLI manages its preview app and capture host. `fluvie init`
+scaffolds the composition setup:
 
 ```sh
 dart pub global activate fluvie_cli
@@ -12,14 +12,19 @@ cd my_reel
 flutter pub get
 ```
 
+For unpublished Fluvie changes, use the [source-checkout
+installer](installation.md#use-an-unpublished-checkout), then run `fluvie init`
+in your Flutter project. It discovers that checkout automatically;
+`--fluvie-path /path/to/fluvie` selects another one explicitly.
+
 ## What you get
 
-Five files, and nothing you have to maintain:
+Your composition and normal project configuration:
 
 ```text
 my_reel/
 ├── pubspec.yaml            # the project: a name, and a dependency on fluvie
-├── analysis_options.yaml   # wires custom_lint so fluvie_lints runs as you type
+├── analysis_options.yaml   # normal Flutter analysis; optional Fluvie lints
 ├── lib/
 │   └── example_video.dart  # your composition
 ├── assets/                 # your images, clips, audio, fonts
@@ -27,8 +32,8 @@ my_reel/
 ```
 
 `init` is not interactive and it never runs `flutter create`. It writes only
-files that are absent, so re-running it in a project is safe and it reports what
-it skipped.
+new files and merges the required dependency and asset setup into an existing
+Flutter project. Your app entry point and other dependencies remain yours.
 
 The flags:
 
@@ -37,6 +42,9 @@ The flags:
 - `--dir <project>` picks the directory to scaffold into. It defaults to the
   working directory.
 - `--force` overwrites files that already exist.
+- `--with-ai` adds the optional AI authoring package.
+- `--with-lints` adds Fluvie's custom timing and layering lints.
+- `--fluvie-path <checkout>` uses a local Fluvie checkout while developing it.
 
 ## The composition
 
@@ -71,11 +79,10 @@ and the preview redraws:
 fluvie preview ./lib/example_video.dart
 ```
 
-It runs on your desktop by default. That is deliberate: a desktop preview decodes
-any clip through FFmpeg, while a browser can only decode what WebCodecs supports.
-ProRes is not on that list, so a browser default would show a placeholder for
-exactly the compositions you care about. Pass `-d chrome` when you want the
-browser anyway, or `-d <device>` for a phone or an emulator.
+Preview prints a local browser URL by default. `-d chrome` opens Chrome;
+`-d <device>` selects a Flutter desktop device. The CLI provides a local native
+media bridge for browser preview, including clip decoding and audio. Browser
+sound requires a user gesture. Native encoding tools are managed automatically.
 
 The preview app is generated for you and cached in `~/.cache/fluvie/preview/`,
 outside your project. Your project stays a composition file, an `assets/` folder,
@@ -86,26 +93,30 @@ and a pubspec.
 `fluvie render` takes the file directly:
 
 ```sh
-fluvie render ./lib/example_video.dart --out example.mp4
+fluvie render ./lib/example_video.dart
 ```
 
-The CLI generates a capture harness under `my_reel/.fluvie/`, captures every frame
-with `flutter test`, then FFmpeg encodes the file. You do not need FFmpeg
+The CLI prepares its capture harness and rendering dependencies in an external
+user cache, captures every frame with Flutter, then encodes the file. The default
+output is `build/fluvie/example_video.mp4`. You do not need FFmpeg
 installed: the first render downloads a pinned build and caches it. See
 [Managing FFmpeg](../guides/managing-ffmpeg.md).
 
 ## Assets
 
-Drop images, clips, audio, and fonts anywhere under `assets/`. The CLI re-derives
-the pubspec's `assets:` block from the tree on every render and every preview, so
-adding `assets/images/logo.png` needs no pubspec edit.
+Drop images, clips, audio, and story notes anywhere under `assets/`. Nested
+directories are discovered automatically. Original Flutter asset and font
+declarations remain available; rendering does not replace your asset block.
 
 This is managed for you because Flutter enumerates a declared asset directory
 non-recursively. An `assets/` entry alone bundles only the files sitting directly
 in it, and `assets/images/logo.png` goes silently missing at runtime with no build
-error. The CLI writes an entry for every subdirectory that holds files.
+error. Fluvie discovers each subdirectory that holds files when preparing its render
+resources. Declare font families in the normal Flutter `fonts:` section.
 
 ## Where to next
+
+- [Create from local assets](authoring-with-assets.md): the fresh Flutter project and AI workflow.
 
 - [Your first video](your-first-video.md): a line-by-line tour of the starter.
 - [Core concepts](core-concepts.md): Video, Scene, Time, animate, Defaults.

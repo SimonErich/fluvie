@@ -75,6 +75,12 @@ final class TimeRange {
   static int _clamp(int value, int min, int max) => math.max(min, math.min(value, max));
 
   @override
+  bool operator ==(Object other) => other is TimeRange && other.start == start && other.end == end;
+
+  @override
+  int get hashCode => Object.hash(TimeRange, start, end);
+
+  @override
   String toString() => 'TimeRange($start to $end)';
 }
 

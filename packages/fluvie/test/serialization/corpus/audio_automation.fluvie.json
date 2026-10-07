@@ -1,0 +1,8 @@
+{
+  "fluvieSpec": 1,
+  "size": {"width": 640, "height": 360},
+  "fps": 30,
+  "lanes": [{"id": "music", "kind": "audio", "gain": 0.5}],
+  "audio": [{"kind": "music", "source": {"kind": "asset", "value": "bed.wav"}, "lane": "music", "automation": {"volume": {"values": [1.0, 0.25, 1.0], "positions": ["0f", "30f", "90f"], "easings": ["smooth", "linear"]}}}],
+  "scenes": [{"duration": "120f", "children": [{"type": "Clip", "source": {"kind": "asset", "value": "shot.mp4"}, "automation": {"volume": 0.5}}]}]
+}

@@ -37,7 +37,9 @@ Future<void> main() async {
   late ui.FragmentShader shader;
   setUpAll(() async {
     await TestWidgetsFlutterBinding.ensureInitialized().runAsync(() async {
-      shader = await const FragmentProgramShaderLoader().load('shaders/ripple.frag');
+      shader = (await const FragmentProgramShaderLoader().load(
+        'shaders/ripple.frag',
+      )).fragmentShader();
     });
   });
 

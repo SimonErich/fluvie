@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart' show AssetBundle;
 import 'package:fluvie/src/core/contracts/disposable_resolver.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
 import 'package:fluvie/src/media/media_resolver_provider.dart';
@@ -30,12 +31,16 @@ ResolverScope resolverScope(
   WebClipDecoder? clipDecoder,
   int? clipDecodeMaxEdge,
   bool streamClipFrames = true,
+  AssetBundle? assetBundle,
+  Future<void>? whenCancelled,
 }) {
   if (injected != null) {
     return (resolver: injected, dispose: () async {});
   }
   final container = ProviderContainer(
     overrides: [
+      if (whenCancelled != null) mediaCancellationProvider.overrideWithValue(whenCancelled),
+      if (assetBundle != null) assetBundleProvider.overrideWithValue(assetBundle),
       if (networkAllowlist != null) networkAllowlistProvider.overrideWithValue(networkAllowlist),
       if (clipDecoder != null) webClipDecoderProvider.overrideWithValue(clipDecoder),
       if (clipDecodeMaxEdge != null) clipDecodeMaxEdgeProvider.overrideWithValue(clipDecodeMaxEdge),

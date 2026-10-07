@@ -5,6 +5,7 @@ import 'package:fluvie/src/core/errors/fluvie_encode_exception.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/rendering/encoding/video_probe_service.dart';
 import 'package:fluvie/src/rendering/platform/process_runner.dart';
+import 'package:fluvie_media/fluvie_media.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -52,6 +53,20 @@ String _countJson(String frames) => '{"streams": [{"nb_read_frames": "$frames"}]
 const _noCountJson = '{"streams": [{}]}';
 
 void main() {
+  test('a probe result carries exact display timing without changing legacy facts', () {
+    final timeline = MediaTimeline.fromTimestamps([0, 100000, 600000], endTimeUs: 1000000);
+    final result = VideoProbeResult(
+      codec: 'h264',
+      width: 2,
+      height: 2,
+      nbFrames: 3,
+      durationSeconds: 1,
+      timeline: timeline,
+    );
+    expect(result.timeline?.frameAt(0.5), 1);
+    expect(result.nbFrames, 3);
+  });
+
   late _MockProcessRunner runner;
   late File video;
 
@@ -86,9 +101,28 @@ void main() {
   ).captured.cast<List<String>>().where((args) => args.contains('-count_frames')).toList();
 
   group('FfprobeVideoProbeService', () {
+    test('display rotation and pixel-format alpha match native frame geometry', () async {
+      stubProbe(
+        stdout: '''
+{
+        "streams":[{"codec_type":"video","codec_name":"prores","width":320,"height":240,
+          "nb_frames":"48","pix_fmt":"yuva444p12le",
+          "side_data_list":[{"rotation":-90}]}],"format":{"duration":"1.6"}
+      }''',
+      );
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
+      expect(result.width, 240);
+      expect(result.height, 320);
+      expect(result.rotationDegrees, 270);
+      expect(result.hasAlpha, isTrue);
+    });
+
     test('parses codec, dimensions, nb_frames and duration', () async {
       stubProbe();
-      final service = FfprobeVideoProbeService(runner: runner);
+      final service = FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner);
 
       final result = await service.probe(video.path);
 
@@ -101,7 +135,7 @@ void main() {
 
     test('spawns ffprobe with the exact argument array', () async {
       stubProbe();
-      await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      await FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner).probe(video.path);
 
       verify(
         () => runner.run('ffprobe', [
@@ -117,7 +151,7 @@ void main() {
     });
 
     test('a missing file throws before any process spawns', () async {
-      final service = FfprobeVideoProbeService(runner: runner);
+      final service = FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner);
 
       await expectLater(
         () => service.probe('/nope/missing.mp4'),
@@ -130,7 +164,7 @@ void main() {
 
     test('a non-zero exit throws FluvieEncodeException with the stderr', () async {
       stubProbe(exitCode: 1, stdout: '', stderr: 'moov atom not found');
-      final service = FfprobeVideoProbeService(runner: runner);
+      final service = FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner);
 
       await expectLater(
         () => service.probe(video.path),
@@ -144,7 +178,7 @@ void main() {
 
     test('malformed JSON throws a typed error', () async {
       stubProbe(stdout: 'not json at all {');
-      final service = FfprobeVideoProbeService(runner: runner);
+      final service = FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner);
 
       await expectLater(
         () => service.probe(video.path),
@@ -156,7 +190,7 @@ void main() {
 
     test('a JSON report without a video stream throws a typed error', () async {
       stubProbe(stdout: '{"streams": [], "format": {"duration": "1.0"}}');
-      final service = FfprobeVideoProbeService(runner: runner);
+      final service = FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner);
 
       await expectLater(
         () => service.probe(video.path),
@@ -172,7 +206,7 @@ void main() {
 
     test('a non-numeric nb_frames throws a typed error naming the field', () async {
       stubProbe(stdout: _probeJson.replaceFirst('"48"', '"forty-eight"'));
-      final service = FfprobeVideoProbeService(runner: runner);
+      final service = FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner);
 
       await expectLater(
         () => service.probe(video.path),
@@ -186,7 +220,7 @@ void main() {
 
     test('a non-numeric duration throws a typed error naming the field', () async {
       stubProbe(stdout: _probeJson.replaceFirst('"1.600000"', '"about a second"'));
-      final service = FfprobeVideoProbeService(runner: runner);
+      final service = FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner);
 
       await expectLater(
         () => service.probe(video.path),
@@ -200,7 +234,7 @@ void main() {
 
     test('a non-object JSON document throws a typed error', () async {
       stubProbe(stdout: '[1, 2, 3]');
-      final service = FfprobeVideoProbeService(runner: runner);
+      final service = FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner);
 
       await expectLater(
         () => service.probe(video.path),
@@ -216,7 +250,10 @@ void main() {
 
     test('reports hasAudio false when the report has only a video stream', () async {
       stubProbe();
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
       expect(result.hasAudio, isFalse);
     });
 
@@ -232,7 +269,10 @@ void main() {
 }
 ''',
       );
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
       expect(result.hasAudio, isTrue);
     });
   });
@@ -243,14 +283,17 @@ void main() {
     test('counts the frames exactly with a -count_frames pass', () async {
       stubProbe(stdout: _webmJson, countStdout: _countJson('106'));
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.nbFrames, 106);
     });
 
     test('spawns the -count_frames pass with the exact argument array', () async {
       stubProbe(stdout: _webmJson, countStdout: _countJson('106'));
-      await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      await FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner).probe(video.path);
 
       expect(countPasses(), [
         [
@@ -271,7 +314,10 @@ void main() {
     test('prefers the exact count over the duration estimate', () async {
       stubProbe(stdout: _webmJson, countStdout: _countJson('106'));
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(
         result.nbFrames,
@@ -283,7 +329,10 @@ void main() {
     test('falls back to duration x frame rate when the count pass reports none', () async {
       stubProbe(stdout: _webmJson);
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.nbFrames, 107, reason: '3.55s x 30fps, rounded');
     });
@@ -291,7 +340,10 @@ void main() {
     test('falls back to duration x frame rate when the count pass exits non-zero', () async {
       stubProbe(stdout: _webmJson, countExitCode: 1, countStdout: '');
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.nbFrames, 107);
     });
@@ -299,7 +351,10 @@ void main() {
     test('falls back to duration x frame rate when the count pass emits garbage', () async {
       stubProbe(stdout: _webmJson, countStdout: 'not json at all {');
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.nbFrames, 107);
     });
@@ -307,7 +362,10 @@ void main() {
     test('takes the duration from the container when the stream reports none', () async {
       stubProbe(stdout: _webmJson, countStdout: _countJson('106'));
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.durationSeconds, closeTo(3.55, 1e-9));
     });
@@ -321,7 +379,7 @@ void main() {
 }
 ''',
       );
-      final service = FfprobeVideoProbeService(runner: runner);
+      final service = FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner);
 
       await expectLater(
         () => service.probe(video.path),
@@ -353,7 +411,7 @@ void main() {
 }
 ''',
       );
-      final service = FfprobeVideoProbeService(runner: runner);
+      final service = FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner);
 
       await expectLater(
         () => service.probe(video.path),
@@ -372,7 +430,10 @@ void main() {
     test('never runs for a container that reports its own nb_frames', () async {
       stubProbe();
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.nbFrames, 48);
       expect(countPasses(), isEmpty, reason: 'counting decodes the file; do not pay for it');
@@ -381,7 +442,7 @@ void main() {
     test('runs once for a container that reports no nb_frames', () async {
       stubProbe(stdout: _webmJson, countStdout: _countJson('106'));
 
-      await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      await FfprobeVideoProbeService(binaryPath: 'ffprobe', runner: runner).probe(video.path);
 
       expect(countPasses(), hasLength(1));
     });
@@ -409,7 +470,10 @@ void main() {
     test('30/1 reads as 30fps', () async {
       stubProbe(stdout: rateJson('30/1', '2.0'));
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.nbFrames, 60);
     });
@@ -417,7 +481,10 @@ void main() {
     test('30000/1001 reads as 29.97fps, not 30', () async {
       stubProbe(stdout: rateJson('30000/1001', '100.1'));
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.nbFrames, 3000, reason: 'a naive 30fps read would give 3003');
     });
@@ -425,7 +492,10 @@ void main() {
     test('a bare number reads as a rate', () async {
       stubProbe(stdout: rateJson('25', '4.0'));
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.nbFrames, 100);
     });
@@ -449,7 +519,10 @@ void main() {
 ''',
       );
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.nbFrames, 48);
     });
@@ -465,7 +538,10 @@ void main() {
       // that really runs at 30.
       stubProbe(stdout: _webmJson, countStdout: _countJson('106'));
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.declaredFps, 30);
       expect(result.fps, 30);
@@ -503,7 +579,10 @@ void main() {
 ''',
       );
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.fps, 30);
       expect(result.fps, isNot(600));
@@ -515,7 +594,10 @@ void main() {
         countStdout: _countJson('106'),
       );
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.fps, closeTo(29.97002997, 1e-6));
       expect(result.fps, isNot(30));
@@ -524,7 +606,10 @@ void main() {
     test('falls back to the derived rate when the rate is unknown (0/0)', () async {
       stubProbe(stdout: _webmJson.replaceAll('"30/1"', '"0/0"'), countStdout: _countJson('106'));
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.declaredFps, isNull);
       expect(result.fps, closeTo(106 / 3.55, 1e-9));
@@ -533,7 +618,10 @@ void main() {
     test('falls back to the derived rate when no rate is reported at all', () async {
       stubProbe();
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.declaredFps, isNull);
       expect(result.fps, closeTo(30, 1e-9), reason: '48 frames over 1.6s');
@@ -572,7 +660,10 @@ void main() {
 ''',
       );
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.durationSeconds, closeTo(1.5, 1e-9));
     });
@@ -596,7 +687,10 @@ void main() {
 ''',
       );
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.durationSeconds, closeTo(2, 1e-9));
     });
@@ -606,7 +700,10 @@ void main() {
     test('reads hasAlpha from the Matroska ALPHA_MODE tag', () async {
       stubProbe(stdout: _webmJson, countStdout: _countJson('106'));
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.hasAlpha, isTrue);
       expect(result.codec, 'vp9');
@@ -618,7 +715,10 @@ void main() {
         countStdout: _countJson('106'),
       );
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.hasAlpha, isTrue);
     });
@@ -629,7 +729,10 @@ void main() {
         countStdout: _countJson('106'),
       );
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.hasAlpha, isFalse);
     });
@@ -637,7 +740,10 @@ void main() {
     test('a stream with no tags is not alpha', () async {
       stubProbe();
 
-      final result = await FfprobeVideoProbeService(runner: runner).probe(video.path);
+      final result = await FfprobeVideoProbeService(
+        binaryPath: 'ffprobe',
+        runner: runner,
+      ).probe(video.path);
 
       expect(result.hasAlpha, isFalse);
     });

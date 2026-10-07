@@ -1,0 +1,831 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-03",
+  "flutter": "3.47.2",
+  "dart": "3.13.2",
+  "status": "postupdate_and_full_gate_verified_twice",
+  "scope": "Existing pre-redesign baseline only; no Studio application parity claim",
+  "attribution": "Unchanged-source native rounded-edge rasterization drift inferred; no old/new engine bisection executed",
+  "golden_comparison_tolerance": 0,
+  "geometry_audit_note": "3px signed-distance containment around reviewed unchanged rounded borders is a causal audit, not a golden comparison tolerance or ignored region.",
+  "rerender_passes": 2,
+  "identical_test_png_bytes": true,
+  "variant_reports_complete": true,
+  "postupdate_verification": {
+    "passes": 2,
+    "package_runs": 8,
+    "all_exit_codes_zero": true,
+    "all_terminal_json_success": true,
+    "json_errors": 0,
+    "accepted_reference_hashes_unchanged": true,
+    "updates_enabled": false,
+    "scope": "Six exact golden test files across core, editor, gallery and slides; not the complete repository gate"
+  },
+  "full_gate_verification": {
+    "passes": 2,
+    "command": "CI=true melos run gate",
+    "runtime": "Fresh external owned TMPDIR per run",
+    "all_exit_codes_zero": true,
+    "fresh_flutter_batches_per_pass": 20,
+    "fresh_dart_packages_per_pass": 4,
+    "all_terminal_json_success": true,
+    "json_errors": 0,
+    "root_tool_tests_per_pass": 70,
+    "required_coverage_targets": 11,
+    "minimum_required_line_coverage": 97,
+    "all_required_targets_pass": true,
+    "reference_updates_enabled": false,
+    "scope": "Pre-redesign Fluvie baseline; excludes Studio application parity and local Obers acceptance"
+  },
+  "fixtures": [
+    {
+      "fixture": "wave2_text_scene",
+      "variant": "Linux",
+      "size": [
+        480,
+        301
+      ],
+      "changed_pixels": 95,
+      "maximum_channel_delta": 7,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          28.8,
+          139,
+          182.4,
+          220,
+          18
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "348fad7450613551354edb1ba48380a65ff3cf8a95f2fee5f3ad3914e6fe9feb",
+      "accepted_sha256": "d92316e08d14e15cc19061c49526658765ad8844092ae16725bc76a4fcd5bd7f",
+      "reference": "packages/fluvie/test/serialization/goldens/linux/wave2_text_scene.png"
+    },
+    {
+      "fixture": "wave2_text_scene",
+      "variant": "CI",
+      "size": [
+        480,
+        300
+      ],
+      "changed_pixels": 95,
+      "maximum_channel_delta": 7,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          28.8,
+          138,
+          182.4,
+          219,
+          18
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "762d8e89119dca930b7d6c78e174606b19463b30577e6f66742803a343f227e4",
+      "accepted_sha256": "8c39c23425d844d7a580c6c1b42feded8c3de32d793864ee30a07a8b7ba4d28c",
+      "reference": "packages/fluvie/test/serialization/goldens/ci/wave2_text_scene.png"
+    },
+    {
+      "fixture": "gradient_editor",
+      "variant": "Linux",
+      "size": [
+        502,
+        221
+      ],
+      "changed_pixels": 200,
+      "maximum_channel_delta": 35,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          8,
+          39,
+          232,
+          59,
+          4
+        ],
+        [
+          270,
+          39,
+          494,
+          59,
+          4
+        ],
+        [
+          106,
+          178,
+          232,
+          200,
+          4
+        ],
+        [
+          368,
+          129,
+          494,
+          151,
+          4
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "ec7bbbf7a90fd61b549e8e45b3aa5e5209131e06d5a449277655920c0ece6c28",
+      "accepted_sha256": "4ad1f130e1dee6893a2d543406c4f1f707374eb2593cc8eab95e089afdab89a7",
+      "reference": "packages/fluvie_editor/test/widgets/goldens/linux/gradient_editor.png"
+    },
+    {
+      "fixture": "spectrum_color_picker",
+      "variant": "Linux",
+      "size": [
+        440,
+        249
+      ],
+      "changed_pixels": 264,
+      "maximum_channel_delta": 34,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          0,
+          31,
+          18,
+          49,
+          4
+        ],
+        [
+          22,
+          31,
+          40,
+          49,
+          4
+        ],
+        [
+          44,
+          31,
+          62,
+          49,
+          4
+        ],
+        [
+          220,
+          31,
+          238,
+          49,
+          4
+        ],
+        [
+          242,
+          31,
+          260,
+          49,
+          4
+        ],
+        [
+          264,
+          31,
+          282,
+          49,
+          4
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "e4a4400dbf58fef4b87900db78745f7ab3311b97ddb6c7820515f511fec1f7f3",
+      "accepted_sha256": "49d5355b1fca0ac9099bf8982fb4773ebb45d18bf39819452f92de78fe23324b",
+      "reference": "packages/fluvie_editor/test/widgets/goldens/linux/spectrum_color_picker.png"
+    },
+    {
+      "fixture": "gradient_editor",
+      "variant": "CI",
+      "size": [
+        1041,
+        220
+      ],
+      "changed_pixels": 209,
+      "maximum_channel_delta": 35,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          8,
+          38,
+          232,
+          58,
+          4
+        ],
+        [
+          648,
+          38,
+          872,
+          58,
+          4
+        ],
+        [
+          106,
+          177,
+          232,
+          199,
+          4
+        ],
+        [
+          744,
+          128,
+          871,
+          150,
+          4
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "1ab53660927b2c48bb64e43e72c7bc291fab7fca030bd7207bf6f37fb568434c",
+      "accepted_sha256": "780f27d502ba99def97668f46ae238003a04f1ceed7c84597cfd0af6fca656a2",
+      "reference": "packages/fluvie_editor/test/widgets/goldens/ci/gradient_editor.png"
+    },
+    {
+      "fixture": "spectrum_color_picker",
+      "variant": "CI",
+      "size": [
+        511,
+        248
+      ],
+      "changed_pixels": 404,
+      "maximum_channel_delta": 34,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          0,
+          30,
+          18,
+          48,
+          4
+        ],
+        [
+          22,
+          30,
+          40,
+          48,
+          4
+        ],
+        [
+          44,
+          30,
+          62,
+          48,
+          4
+        ],
+        [
+          238,
+          30,
+          256,
+          48,
+          4
+        ],
+        [
+          260,
+          30,
+          278,
+          48,
+          4
+        ],
+        [
+          282,
+          30,
+          300,
+          48,
+          4
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "69bbac318f3ad2f779122b81f4de8c70d0f652d32acd7c2e9df71692eb37b69b",
+      "accepted_sha256": "282f3ef5ee6450ae9015e5552e67e9c5d5d904f793fdbb0271186a6d1f1e76d4",
+      "reference": "packages/fluvie_editor/test/widgets/goldens/ci/spectrum_color_picker.png"
+    },
+    {
+      "fixture": "inspector_shell",
+      "variant": "Linux",
+      "size": [
+        1280,
+        831
+      ],
+      "changed_pixels": 315,
+      "maximum_channel_delta": 21,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          698,
+          98,
+          754,
+          130,
+          16
+        ],
+        [
+          783,
+          173,
+          1268,
+          730,
+          16
+        ],
+        [
+          1210,
+          185,
+          1253,
+          204,
+          5
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "62638dd4b4df52d8933da43a6e6d725c4322e3874f37a6e2a742acc92a2898e6",
+      "accepted_sha256": "4f027421ab32954b656edb63149b758ce83a4c06130cea544d2c41304e230c44",
+      "reference": "examples/gallery/test/inspector/goldens/linux/inspector_shell.png"
+    },
+    {
+      "fixture": "playground_idle",
+      "variant": "Linux",
+      "size": [
+        520,
+        791
+      ],
+      "changed_pixels": 118,
+      "maximum_channel_delta": 21,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          12,
+          43,
+          508,
+          690,
+          16
+        ],
+        [
+          450,
+          55,
+          493,
+          74,
+          5
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "15037f67aab736bf53364250536447d72e594606c44dd70c8f8b836fb0d5023d",
+      "accepted_sha256": "b9e9777c3f8b05bfd92eec7a15aacc9e0c3ee22aef2982ba7b47610fd1b9a4d7",
+      "reference": "examples/gallery/test/playground/goldens/linux/playground_idle.png"
+    },
+    {
+      "fixture": "inspector_shell",
+      "variant": "CI",
+      "size": [
+        1280,
+        830
+      ],
+      "changed_pixels": 312,
+      "maximum_channel_delta": 21,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          698,
+          97,
+          754,
+          129,
+          16
+        ],
+        [
+          783,
+          172,
+          1268,
+          729,
+          16
+        ],
+        [
+          1210,
+          184,
+          1253,
+          203,
+          5
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "7dac23f72407b50e9baee92f0a492e3e18ef0dc66fdd9ad996fb1bb747045325",
+      "accepted_sha256": "19972819dcf67f06fdca2d951a0d5395b74fa0784ceb31faaf04714225a26898",
+      "reference": "examples/gallery/test/inspector/goldens/ci/inspector_shell.png"
+    },
+    {
+      "fixture": "playground_idle",
+      "variant": "CI",
+      "size": [
+        520,
+        790
+      ],
+      "changed_pixels": 115,
+      "maximum_channel_delta": 21,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          12,
+          42,
+          508,
+          689,
+          16
+        ],
+        [
+          450,
+          54,
+          493,
+          73,
+          5
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "aa3d0d859eaa5560b1764aadc28a914a8511d8f3c5f08865a7bafb81ded1fb0f",
+      "accepted_sha256": "94440846e5d56738b5a44746a908fb4ff0342fbe62d3c468fdce8a11c7b8d5e4",
+      "reference": "examples/gallery/test/playground/goldens/ci/playground_idle.png"
+    },
+    {
+      "fixture": "start_compact",
+      "variant": "Linux",
+      "size": [
+        720,
+        931
+      ],
+      "changed_pixels": 46,
+      "maximum_channel_delta": 85,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          60,
+          629,
+          660,
+          1081,
+          8
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "1eb8c0a58ff8523afcfa28d1d62ea8bebda5aaede58b214d14f9405d7591c76e",
+      "accepted_sha256": "ef108ee9a77b67b41c869fafe9554b71d87e9449512692de3cd37a729a92e063",
+      "reference": "apps/slides/test/goldens/linux/start_compact.png"
+    },
+    {
+      "fixture": "start_first_run",
+      "variant": "Linux",
+      "size": [
+        1400,
+        931
+      ],
+      "changed_pixels": 450,
+      "maximum_channel_delta": 87,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          353,
+          652,
+          525,
+          803,
+          8
+        ],
+        [
+          537,
+          652,
+          709,
+          803,
+          8
+        ],
+        [
+          721,
+          652,
+          893,
+          803,
+          8
+        ],
+        [
+          905,
+          652,
+          1077,
+          803,
+          8
+        ],
+        [
+          353,
+          239,
+          1233,
+          584,
+          8
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "8fb74cea32095c5cbbb093b418edd109b97861e744ff146ea537e3208ac0c9fb",
+      "accepted_sha256": "b22f0711acf41496541f7eac3d1768d5319b17ea485927c75e4072acbfc69fab",
+      "reference": "apps/slides/test/goldens/linux/start_first_run.png"
+    },
+    {
+      "fixture": "start_returning",
+      "variant": "Linux",
+      "size": [
+        1400,
+        931
+      ],
+      "changed_pixels": 804,
+      "maximum_channel_delta": 87,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          353,
+          599,
+          525,
+          750,
+          8
+        ],
+        [
+          537,
+          599,
+          709,
+          750,
+          8
+        ],
+        [
+          721,
+          599,
+          893,
+          750,
+          8
+        ],
+        [
+          905,
+          599,
+          1077,
+          750,
+          8
+        ],
+        [
+          369,
+          297,
+          413,
+          323,
+          4
+        ],
+        [
+          369,
+          360,
+          413,
+          386,
+          4
+        ],
+        [
+          369,
+          423,
+          413,
+          449,
+          4
+        ],
+        [
+          369,
+          484,
+          413,
+          510,
+          4
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "6ad7bdff73ce39a590fdccc08b82b11649390c8b5f18bee8a65a45008c7e800e",
+      "accepted_sha256": "f5aac2a28f3df99ec302d7b93d12a081df8b4fe50d9b86bf982f131228ccf2ce",
+      "reference": "apps/slides/test/goldens/linux/start_returning.png"
+    },
+    {
+      "fixture": "start_samples_open",
+      "variant": "Linux",
+      "size": [
+        1400,
+        931
+      ],
+      "changed_pixels": 43,
+      "maximum_channel_delta": 34,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          353,
+          599,
+          525,
+          750,
+          8
+        ],
+        [
+          537,
+          599,
+          709,
+          750,
+          8
+        ],
+        [
+          721,
+          599,
+          893,
+          750,
+          8
+        ],
+        [
+          905,
+          599,
+          1077,
+          750,
+          8
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "fb02eec43ed25ad9c7fbb4dfad397f0c6eabdefda34d188cf3a8b83989f720a8",
+      "accepted_sha256": "619f1b2a8f2b7863260a883cfade378ab23feb91d309e8962719933cb9778214",
+      "reference": "apps/slides/test/goldens/linux/start_samples_open.png"
+    },
+    {
+      "fixture": "start_compact",
+      "variant": "CI",
+      "size": [
+        720,
+        930
+      ],
+      "changed_pixels": 46,
+      "maximum_channel_delta": 85,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          60,
+          628,
+          660,
+          1080,
+          8
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "5cd89e3097d3cc6c3a494c3ee20966bfdf87b7c8058a31c30aa55760e5a29820",
+      "accepted_sha256": "e0a8360551fbf52df46155b036cbbebcf6c49c635b715bf27de3e570904f37b1",
+      "reference": "apps/slides/test/goldens/ci/start_compact.png"
+    },
+    {
+      "fixture": "start_first_run",
+      "variant": "CI",
+      "size": [
+        1400,
+        930
+      ],
+      "changed_pixels": 450,
+      "maximum_channel_delta": 87,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          353,
+          723,
+          525,
+          874,
+          8
+        ],
+        [
+          537,
+          723,
+          709,
+          874,
+          8
+        ],
+        [
+          721,
+          723,
+          893,
+          874,
+          8
+        ],
+        [
+          905,
+          723,
+          1077,
+          874,
+          8
+        ],
+        [
+          353,
+          238,
+          1233,
+          655,
+          8
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "4f66804331c1580e1fd6d7622e79adc8daa69cc7e049c0d74fc4eba0de4b49bd",
+      "accepted_sha256": "664fefb63761796b8d04dc8fbc1288da898286758700869f370534d0ac8854cb",
+      "reference": "apps/slides/test/goldens/ci/start_first_run.png"
+    },
+    {
+      "fixture": "start_returning",
+      "variant": "CI",
+      "size": [
+        1400,
+        930
+      ],
+      "changed_pixels": 802,
+      "maximum_channel_delta": 87,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          353,
+          598,
+          525,
+          749,
+          8
+        ],
+        [
+          537,
+          598,
+          709,
+          749,
+          8
+        ],
+        [
+          721,
+          598,
+          893,
+          749,
+          8
+        ],
+        [
+          905,
+          598,
+          1077,
+          749,
+          8
+        ],
+        [
+          369,
+          296,
+          413,
+          322,
+          4
+        ],
+        [
+          369,
+          359,
+          413,
+          385,
+          4
+        ],
+        [
+          369,
+          422,
+          413,
+          448,
+          4
+        ],
+        [
+          369,
+          483,
+          413,
+          509,
+          4
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "0c6406df5669df61670bed7c046eadb0f27099562734302f61790920b67d9621",
+      "accepted_sha256": "9edccef821f2dbd2ba3e6c6c3f0e7826b7f0566f514da3798008dfa16a94702b",
+      "reference": "apps/slides/test/goldens/ci/start_returning.png"
+    },
+    {
+      "fixture": "start_samples_open",
+      "variant": "CI",
+      "size": [
+        1400,
+        930
+      ],
+      "changed_pixels": 43,
+      "maximum_channel_delta": 35,
+      "edge_distance_limit": 3,
+      "rounded_rectangles": [
+        [
+          353,
+          598,
+          525,
+          749,
+          8
+        ],
+        [
+          537,
+          598,
+          709,
+          749,
+          8
+        ],
+        [
+          721,
+          598,
+          893,
+          749,
+          8
+        ],
+        [
+          905,
+          598,
+          1077,
+          749,
+          8
+        ]
+      ],
+      "outside_rounded_edges": [],
+      "previous_sha256": "1721c949b82eb7ec68715a0bfd26e683d390c911b85fd3c2771dddf9b7187c51",
+      "accepted_sha256": "fa01a4b11da04f4a23e5d497c47d4fa8fc0b2084badf2602668ce6f34e3bed3f",
+      "reference": "apps/slides/test/goldens/ci/start_samples_open.png"
+    }
+  ],
+  "independent_review": {
+    "accepted_exact_reference_count": 18,
+    "changed_pixels": 4811,
+    "maximum_rounded_edge_distance": 2.47389295,
+    "gallery_badge_source_radius": 5,
+    "old_and_new_input_hashes_checked_before_copy": true
+  }
+}

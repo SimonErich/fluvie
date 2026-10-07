@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/composition/runtime/scene_tree_walk.dart';
 import 'package:fluvie/src/composition/scene.dart';
 import 'package:fluvie/src/core/media/generative_carrier.dart';
@@ -14,9 +15,12 @@ import 'package:fluvie/src/core/media/generative_source.dart';
 /// harness hands this set to `GenerativeResolver.generateAll` before media
 /// pre-resolution; the produced files then fold back in as plain
 /// `MediaSource`/`AudioSource`s.
-Set<GenerativeSource> collectGenerativeSources(List<Scene> scenes) {
+Set<GenerativeSource> collectGenerativeSources(
+  List<Scene> scenes, {
+  List<Widget> overlays = const [],
+}) {
   final sources = <GenerativeSource>{};
-  walkSceneTree(scenes, (widget) {
+  walkSceneTree(scenes, overlays: overlays, (widget) {
     if (widget is! GenerativeCarrier) return;
     final source = (widget as GenerativeCarrier).generativeSource;
     if (source != null) sources.add(source);

@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie_mobile_encoder/fluvie_mobile_encoder.dart';
-import 'package:fluvie_mobile_encoder/src/native_video_probe_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -10,6 +9,27 @@ void main() {
   final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
   tearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+  test('probe preserves exact native presentation timestamps when available', () async {
+    messenger.setMockMethodCallHandler(
+      channel,
+      (_) async => <String, Object?>{
+        'width': 32,
+        'height': 32,
+        'frameCount': 3,
+        'durationUs': 1000000,
+        'fps': 3,
+        'timeline': {
+          'schemaVersion': 1,
+          'presentationTimesUs': [0, 100000, 600000],
+          'durationUs': 1000000,
+        },
+      },
+    );
+    final result = await const NativeVideoProbeService().probe('/cat.mp4');
+    expect(result.timeline!.timeForFrame(2), 0.6);
+    expect(result.timeline!.frameAt(0.5), 1);
+  });
 
   test('probe maps the platform facts into a VideoProbeResult', () async {
     MethodCall? observed;
@@ -45,6 +65,40 @@ void main() {
     expect(result.height, 0);
     expect(result.nbFrames, 0);
     expect(result.durationSeconds, 0.0);
+    expect(result.hasAudio, isFalse);
+  });
+
+  test('preserves embedded audio and declared fps across an audio tail', () async {
+    messenger.setMockMethodCallHandler(
+      channel,
+      (call) async => <String, Object?>{
+        'width': 160,
+        'height': 160,
+        'frameCount': 96,
+        'durationMs': 4047,
+        'fps': 24.0,
+        'hasAudio': true,
+      },
+    );
+
+    final result = await const NativeVideoProbeService().probe('/clips/with-audio.mp4');
+    expect(result.hasAudio, isTrue);
+    expect(result.fps, 24);
+  });
+
+  test('preserves fractional video duration when the native track reports microseconds', () async {
+    messenger.setMockMethodCallHandler(
+      channel,
+      (call) async => <String, Object?>{
+        'frameCount': 12,
+        'durationMs': 400,
+        'durationUs': 400400,
+        'fps': 30000 / 1001,
+      },
+    );
+    final result = await const NativeVideoProbeService().probe('/clips/ntsc.mp4');
+    expect(result.durationSeconds, 0.4004);
+    expect(result.fps, closeTo(30000 / 1001, 0.000001));
   });
 
   test('probe caps an oversized clip to the long-edge bound', () async {
@@ -98,7 +152,7 @@ void main() {
     );
   });
   test('probe maps a missing platform implementation to a typed error', () async {
-    // No mock handler registered: the method is unimplemented, as on iOS.
+    // No mock handler registered: the platform method is unavailable.
     await expectLater(
       () => const NativeVideoProbeService().probe('/clips/a.mp4'),
       throwsA(

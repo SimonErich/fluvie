@@ -4,16 +4,12 @@ library;
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:fluvie/src/rendering/runtime/live_playback_state.dart';
 import 'package:fluvie/src/rendering/runtime/render_controller.dart';
 
-/// Whether a [LivePlaybackController] is advancing its frame clock.
-enum LivePlaybackState {
-  /// The clock is frozen at the current frame; ticks are ignored.
-  paused,
+export 'package:fluvie/src/rendering/runtime/live_playback_state.dart';
 
-  /// The clock maps elapsed wall time to frames as ticks arrive.
-  playing,
-}
+part 'live_playback_clock.dart';
 
 /// A wall-clock face for the frame clock: maps elapsed time to frame indexes
 /// so a composition plays live instead of being stepped by a capture loop.
@@ -40,8 +36,8 @@ final class LivePlaybackController extends ChangeNotifier {
   /// Creates a paused clock at [initialFrame] that resolves elapsed time
   /// against [fps], scaled by [rate].
   ///
-  /// [totalFrames] bounds playback: the clock clamps to the last frame and
-  /// pauses there. `null` leaves it unbounded.
+  /// [totalFrames] bounds playback: the last picture remains visible for its
+  /// full interval before the clock pauses. `null` leaves it unbounded.
   LivePlaybackController({
     required this.fps,
     this.totalFrames,
@@ -54,13 +50,14 @@ final class LivePlaybackController extends ChangeNotifier {
        ),
        assert(rate > 0, 'rate must be > 0, got $rate'),
        _rate = rate,
+       _positionFrames = initialFrame.toDouble(),
        _renderController = RenderController(initialFrame: initialFrame);
 
   /// Frames per second the clock resolves elapsed wall time against.
   final int fps;
 
   /// The bound of the clock, or `null` for an unbounded one. A bounded clock
-  /// clamps to `totalFrames - 1` and pauses when it gets there.
+  /// paints `totalFrames - 1` until the full `totalFrames / fps` duration ends.
   final int? totalFrames;
 
   final RenderController _renderController;
@@ -70,7 +67,8 @@ final class LivePlaybackController extends ChangeNotifier {
   // The play-segment bookkeeping: frames resolve as
   // `_baseFrame + (elapsed - _baseElapsed) × fps × rate`, and every seek,
   // play, or rate change rebases so the clock never jumps.
-  int _baseFrame = 0;
+  double _baseFrame = 0;
+  double _positionFrames;
   Duration _baseElapsed = Duration.zero;
   Duration _lastElapsed = Duration.zero;
   int? _rangeEnd;
@@ -90,6 +88,16 @@ final class LivePlaybackController extends ChangeNotifier {
   /// The current frame index.
   int get frame => _renderController.frame;
 
+  /// Continuous transport time, including the final picture's full interval.
+  Duration get position => Duration(
+    microseconds: (_positionFrames / fps * Duration.microsecondsPerSecond).round(),
+  );
+
+  /// Whether natural playback reached the complete authored duration.
+  ///
+  /// Holding or seeking the final picture does not complete playback.
+  bool get isComplete => totalFrames != null && _positionFrames >= totalFrames!;
+
   /// Whether the clock is advancing or frozen.
   LivePlaybackState get state => _state;
 
@@ -107,13 +115,12 @@ final class LivePlaybackController extends ChangeNotifier {
   /// Starts free-running playback from the current frame.
   ///
   /// A no-op while already playing, and on a bounded clock that is already
-  /// holding its last frame — there is nothing left to play.
+  /// at its complete duration. A held last picture can still play its interval.
   void play() {
     if (_state == LivePlaybackState.playing) return;
-    final last = _lastFrame;
-    if (last != null && frame >= last) return;
+    if (isComplete) return;
     _state = LivePlaybackState.playing;
-    _baseFrame = frame;
+    _baseFrame = _positionFrames;
     _baseElapsed = Duration.zero;
     _lastElapsed = Duration.zero;
     notifyListeners();
@@ -135,7 +142,8 @@ final class LivePlaybackController extends ChangeNotifier {
     assert(frame >= 0, 'frame must be >= 0, got $frame');
     _rangeEnd = null;
     _completeRange();
-    _renderController.seek(frame);
+    _positionFrames = frame.toDouble();
+    _renderController.seek(_paintFrame(frame));
     _rebase();
   }
 
@@ -163,7 +171,7 @@ final class LivePlaybackController extends ChangeNotifier {
     _rangeCompleter = completer;
     _rangeEnd = end;
     _state = LivePlaybackState.playing;
-    _baseFrame = start;
+    _baseFrame = start.toDouble();
     _baseElapsed = Duration.zero;
     _lastElapsed = Duration.zero;
     notifyListeners();
@@ -179,52 +187,7 @@ final class LivePlaybackController extends ChangeNotifier {
   /// the clock rebases at the current frame and carries on — it never
   /// rewinds.
   void handleTick(Duration elapsed) {
-    if (_state == LivePlaybackState.paused) return;
-    if (elapsed < _lastElapsed) {
-      _baseFrame = frame;
-      _baseElapsed = elapsed;
-    }
-    _lastElapsed = elapsed;
-    final seconds = (elapsed - _baseElapsed).inMicroseconds / Duration.microsecondsPerSecond;
-    var target = _baseFrame + (seconds * fps * _rate).floor();
-    final stopAt = _stopFrame;
-    if (stopAt != null && target >= stopAt) {
-      target = stopAt;
-      _renderController.seek(target);
-      _rangeEnd = null;
-      _completeRange();
-      _state = LivePlaybackState.paused;
-      notifyListeners();
-      return;
-    }
-    _renderController.seek(target);
-  }
-
-  /// The frame the current run must stop on: the pending range end, the
-  /// bound of the clock, or `null` for a free run on an unbounded clock.
-  int? get _stopFrame {
-    final last = _lastFrame;
-    final end = _rangeEnd;
-    if (end == null) return last;
-    return last == null ? end : (end < last ? end : last);
-  }
-
-  int? get _lastFrame {
-    final total = totalFrames;
-    return total == null ? null : total - 1;
-  }
-
-  /// Rebases the elapsed→frame mapping at the current frame so the next tick
-  /// continues from here — the no-jump invariant behind seek and rate.
-  void _rebase() {
-    _baseFrame = frame;
-    _baseElapsed = _lastElapsed;
-  }
-
-  void _completeRange() {
-    final completer = _rangeCompleter;
-    _rangeCompleter = null;
-    if (completer != null && !completer.isCompleted) completer.complete();
+    if (_handleTick(elapsed)) notifyListeners();
   }
 
   @override

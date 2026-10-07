@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:fluvie/src/core/contracts/media_resolver.dart' show ClipMetadata;
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
+import 'package:fluvie_media/fluvie_media.dart' show MediaTimeline;
 
 /// Decodes a video clip in the browser from its bytes — the WebCodecs seam the
 /// web `MediaResolver` probes and extracts clip frames through.
@@ -24,4 +25,12 @@ abstract interface class WebClipDecoder {
     required int width,
     required int height,
   });
+}
+
+/// Optional exact presentation timing supplied by a browser decoder.
+/// Legacy [WebClipDecoder] implementations can keep constant-rate metadata.
+// ignore: one_member_abstracts, optional capability avoids breaking existing decoders.
+abstract interface class WebClipTimelineDecoder {
+  /// Display timeline for [bytes], or null when the decoder cannot provide one.
+  Future<MediaTimeline?> probeTimeline(Uint8List bytes);
 }

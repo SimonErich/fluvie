@@ -36,26 +36,9 @@ dependencies:
   });
 
   group('defaultPreviewDevice', () {
-    test('is the host desktop', () {
-      final expected = switch (Platform.operatingSystem) {
-        'linux' => 'linux',
-        'macos' => 'macos',
-        'windows' => 'windows',
-        _ => 'chrome',
-      };
-
-      expect(defaultPreviewDevice(), expected);
-    });
-
-    test('is never the browser on a desktop host', () {
-      // A desktop preview decodes any clip through ffmpeg, while the browser can
-      // only decode what WebCodecs supports (no ProRes, the one format that
-      // carries alpha), so a browser default would show a placeholder for
-      // exactly the compositions people care most about.
-      if (!Platform.isLinux && !Platform.isMacOS && !Platform.isWindows) return;
-
-      expect(defaultPreviewDevice(), isNot('chrome'));
-      expect(platformsFor(defaultPreviewDevice()), isNot(contains('web')));
+    test('exposes an addressable browser preview by default', () {
+      expect(defaultPreviewDevice(), 'web-server');
+      expect(platformsFor(defaultPreviewDevice()), ['web']);
     });
   });
 
@@ -176,18 +159,15 @@ dependencies:
       expect(seen?.projectDir, '/somewhere/else');
     });
 
-    test('syncs the pubspec assets block before previewing', () async {
+    test('discovers dropped assets without mutating the source pubspec', () async {
       // Dropping assets/images/hero.png in needs no pubspec edit by hand.
       File(p.join(project.path, 'assets', 'images', 'hero.png'))
         ..createSync(recursive: true)
         ..writeAsBytesSync(const [0]);
 
+      final before = File(p.join(project.path, 'pubspec.yaml')).readAsStringSync();
       await execute([composition]);
-
-      expect(
-        File(p.join(project.path, 'pubspec.yaml')).readAsStringSync(),
-        contains('assets/images/'),
-      );
+      expect(File(p.join(project.path, 'pubspec.yaml')).readAsStringSync(), before);
     });
 
     test('a CliFailure while preparing the app is exit 1, not a raw throw', () async {

@@ -1,3 +1,5 @@
 tags:
   golden:
     description: Pixel-golden tests via Alchemist; run with `melos run test:goldens`.
+  render:
+    description: The measured performance pass; run with `flutter test --tags render`.

@@ -1,6 +1,19 @@
 import 'dart:typed_data';
+import 'dart:ui' show Offset, Rect, Size;
 
-import 'package:flutter/widgets.dart' show BoxFit, BuildContext, StatelessWidget, Widget;
+import 'package:flutter/widgets.dart'
+    show
+        Alignment,
+        BorderRadius,
+        BoxFit,
+        BuildContext,
+        ClipRRect,
+        ClipRect,
+        LayoutBuilder,
+        OverflowBox,
+        StatelessWidget,
+        Transform,
+        Widget;
 import 'package:fluvie/src/composition/photo_frame.dart';
 import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/media/media_carrier.dart';
@@ -34,22 +47,51 @@ import 'package:fluvie/src/media/runtime/resolved_image.dart';
 final class Image extends StatelessWidget implements MediaCarrier {
   /// A remote image at [url] (a `Uri` or a `String`); only allowlisted hosts
   /// and schemes are fetched in capture.
-  Image.network(Object url, {this.fit, this.frame, this.shared, super.key})
-    : source = MediaSource.network(url is Uri ? url : Uri.parse(url as String));
+  Image.network(
+    Object url, {
+    this.fit,
+    this.frame,
+    this.crop,
+    this.cornerRadius,
+    this.shared,
+    super.key,
+  }) : source = MediaSource.network(url is Uri ? url : Uri.parse(url as String));
 
   /// A bundled image addressed by its asset key [name]
   /// (for example `fixtures/swatch.png`).
-  Image.asset(String name, {this.fit, this.frame, this.shared, super.key})
-    : source = MediaSource.asset(name);
+  Image.asset(
+    String name, {
+    this.fit,
+    this.frame,
+    this.crop,
+    this.cornerRadius,
+    this.shared,
+    super.key,
+  }) : source = MediaSource.asset(name);
 
   /// An image file on disk at [path].
-  Image.file(String path, {this.fit, this.frame, this.shared, super.key})
-    : source = MediaSource.file(path);
+  Image.file(
+    String path, {
+    this.fit,
+    this.frame,
+    this.crop,
+    this.cornerRadius,
+    this.shared,
+    super.key,
+  }) : source = MediaSource.file(path);
 
   /// An image already in memory as raw encoded [bytes], optionally named by
   /// [debugLabel] for errors.
-  Image.memory(Uint8List bytes, {String? debugLabel, this.fit, this.frame, this.shared, super.key})
-    : source = MediaSource.memory(bytes, debugLabel: debugLabel);
+  Image.memory(
+    Uint8List bytes, {
+    String? debugLabel,
+    this.fit,
+    this.frame,
+    this.crop,
+    this.cornerRadius,
+    this.shared,
+    super.key,
+  }) : source = MediaSource.memory(bytes, debugLabel: debugLabel);
 
   /// The declared media this image paints — the key the collect pass gathers
   /// and the resolver pre-resolves.
@@ -67,6 +109,14 @@ final class Image extends StatelessWidget implements MediaCarrier {
   /// How the image scales into its box, or `null` for Flutter's default.
   final BoxFit? fit;
 
+  /// The source region to show, as fractions of the source (`x`, `y`, `w`,
+  /// `h` in `0..1`), or `null` for the whole image. The cropped region fills
+  /// the element's box.
+  final Rect? crop;
+
+  /// The corner radius the image clips to, or `null` for square corners.
+  final double? cornerRadius;
+
   /// An optional decorative wrapper (`PhotoFrame.card`, `PhotoFrame.polaroid`, …), or
   /// `null` for a bare image.
   final PhotoFrame? frame;
@@ -78,10 +128,39 @@ final class Image extends StatelessWidget implements MediaCarrier {
 
   @override
   Widget build(BuildContext context) {
-    final Widget painted = ResolvedImage(source: source, fit: fit);
+    final region = crop;
+    var painted = region == null
+        ? ResolvedImage(source: source, fit: fit)
+        : _cropped(ResolvedImage(source: source, fit: BoxFit.fill), region);
+    final radius = cornerRadius;
+    if (radius != null) {
+      painted = ClipRRect(borderRadius: BorderRadius.circular(radius), child: painted);
+    }
     final framed = frame == null ? painted : _reframe(frame!, painted);
     return wrapShared(shared, framed);
   }
+
+  /// Shows only the [region] of [image]: the full image lays out scaled so
+  /// the region exactly fills the box, shifted into place and clipped.
+  static Widget _cropped(Widget image, Rect region) => LayoutBuilder(
+    builder: (context, constraints) {
+      final box = constraints.biggest;
+      final full = Size(box.width / region.width, box.height / region.height);
+      return ClipRect(
+        child: OverflowBox(
+          alignment: Alignment.topLeft,
+          minWidth: full.width,
+          maxWidth: full.width,
+          minHeight: full.height,
+          maxHeight: full.height,
+          child: Transform.translate(
+            offset: Offset(-region.left * full.width, -region.top * full.height),
+            child: image,
+          ),
+        ),
+      );
+    },
+  );
 
   /// Rebuilds [frame] around [child]: a `PhotoFrame` declares its style at
   /// construction and carries its own child, so wrapping the image means

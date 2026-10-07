@@ -1,0 +1,246 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "90f",
+      "background": {
+        "kind": "color",
+        "color": "#101018"
+      },
+      "children": [
+        {
+          "id": "el-grainy",
+          "type": "Text",
+          "text": "Graded",
+          "transform": {
+            "x": 0.5,
+            "y": 0.3
+          },
+          "effects": [
+            {
+              "kind": "grain",
+              "amount": 0.35
+            },
+            {
+              "kind": "vignette",
+              "amount": 0.55
+            }
+          ]
+        },
+        {
+          "id": "el-crt",
+          "type": "Box",
+          "color": "#2ECC8F",
+          "transform": {
+            "x": 0.5,
+            "y": 0.7,
+            "w": 0.5,
+            "h": 0.2
+          },
+          "effects": [
+            {
+              "kind": "parallax",
+              "depth": 0.35
+            },
+            {
+              "kind": "scanlines",
+              "spacing": 4,
+              "opacity": 0.25
+            },
+            {
+              "kind": "chromatic",
+              "px": 3
+            },
+            {
+              "kind": "bloom",
+              "amount": 0.2,
+              "enabled": false
+            },
+            {
+              "kind": "blur",
+              "sigma": 2
+            }
+          ]
+        },
+        {
+          "id": "el-ramped",
+          "type": "Box",
+          "color": "#F5B041",
+          "transform": {
+            "x": 0.5,
+            "y": 0.5,
+            "w": 0.3,
+            "h": 0.3
+          },
+          "effects": [
+            {
+              "kind": "vignette",
+              "amount": {
+                "values": [
+                  0,
+                  0.9
+                ],
+                "positions": [
+                  "0f",
+                  "90f"
+                ],
+                "easings": [
+                  "smooth"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "el-graded",
+          "type": "Box",
+          "color": "#D0D4DC",
+          "transform": {
+            "x": 0.5,
+            "y": 0.2,
+            "w": 0.4,
+            "h": 0.15
+          },
+          "effects": [
+            {
+              "kind": "grade",
+              "contrast": 1.2,
+              "saturation": 0.8,
+              "temperature": 0.3,
+              "exposure": {
+                "values": [
+                  -1,
+                  0.5
+                ],
+                "positions": [
+                  "0f",
+                  "90f"
+                ]
+              },
+              "intensity": 0.6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "duration": "60f",
+      "children": [
+        {
+          "id": "el-glitchy",
+          "type": "Text",
+          "text": "Torn",
+          "effects": [
+            {
+              "kind": "glitch",
+              "from": "right",
+              "reverse": true,
+              "intensity": 0.7
+            }
+          ],
+          "animate": [
+            {
+              "preset": "fadeIn",
+              "duration": "12f"
+            }
+          ]
+        },
+        {
+          "id": "el-shaded",
+          "type": "Box",
+          "color": "#8E44AD",
+          "transform": {
+            "x": 0.3,
+            "y": 0.5,
+            "w": 0.25,
+            "h": 0.25
+          },
+          "effects": [
+            {
+              "kind": "particles",
+              "particles": {
+                "kind": "confetti",
+                "count": 40,
+                "seed": "launch"
+              }
+            },
+            {
+              "kind": "shader",
+              "asset": "shaders/glow.frag",
+              "uniforms": {
+                "strength": 0.6
+              }
+            }
+          ]
+        },
+        {
+          "id": "el-toned",
+          "type": "Box",
+          "color": "#B36A5E",
+          "transform": {
+            "x": 0.7,
+            "y": 0.5,
+            "w": 0.25,
+            "h": 0.25
+          },
+          "effects": [
+            {
+              "kind": "curves",
+              "curves": {
+                "master": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    0.4,
+                    0.55
+                  ],
+                  [
+                    1,
+                    1
+                  ]
+                ],
+                "blue": [
+                  [
+                    0,
+                    0.05
+                  ],
+                  [
+                    1,
+                    0.95
+                  ]
+                ]
+              },
+              "intensity": 0.85
+            },
+            {
+              "kind": "lut",
+              "asset": "luts/warm.cube",
+              "intensity": {
+                "values": [
+                  0,
+                  1
+                ],
+                "positions": [
+                  "0f",
+                  "60f"
+                ]
+              }
+            },
+            {
+              "kind": "lut",
+              "cube": "LUT_3D_SIZE 2\n0 0 0\n1 0 0\n0 1 0\n1 1 0\n0 0 1\n1 0 1\n0 1 1\n1 1 1\n",
+              "intensity": 0.6
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

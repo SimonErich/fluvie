@@ -1,6 +1,8 @@
 package dev.fluvie.mobile_encoder
 
 import android.graphics.Bitmap
+import android.media.MediaExtractor
+import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
 import android.os.Build
 
@@ -25,24 +27,72 @@ object VideoFrameReader {
       val rawHeight = meta(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
       val rotation = meta(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
       val durationMs = meta(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
-      val mime = meta(MediaMetadataRetriever.METADATA_KEY_MIMETYPE) ?: "video/avc"
-      var frameCount =
-        meta(MediaMetadataRetriever.METADATA_KEY_VIDEO_FRAME_COUNT)?.toIntOrNull() ?: 0
+      var mime = "video/avc"
+      var fpsHint: Double? = null
+      var videoDurationUs = 0L
+      var presentationSpanUs: Long? = null
+      val presentationTimesUs = ArrayList<Long>()
+      var frameCount = meta(MediaMetadataRetriever.METADATA_KEY_VIDEO_FRAME_COUNT)?.toIntOrNull() ?: 0
+      // Container duration includes any AAC tail. Preserve the video track's
+      // declared clock rather than deriving a slower fps from that duration.
+      val extractor = MediaExtractor()
+      try {
+        extractor.setDataSource(path)
+        for (index in 0 until extractor.trackCount) {
+          val format = extractor.getTrackFormat(index)
+          val trackMime = format.getString(MediaFormat.KEY_MIME) ?: continue
+          if (!trackMime.startsWith("video/")) continue
+          mime = trackMime
+          if (format.containsKey(MediaFormat.KEY_FRAME_RATE)) {
+            fpsHint = format.getInteger(MediaFormat.KEY_FRAME_RATE).toDouble()
+          }
+          if (format.containsKey(MediaFormat.KEY_DURATION)) videoDurationUs = format.getLong(MediaFormat.KEY_DURATION)
+          // KEY_FRAME_RATE is an integer, while KEY_DURATION may include a
+          // decoder lead-in even for a video-only B-frame track. Read the
+          // presentation span without decoding or retaining sample buffers.
+          extractor.selectTrack(index)
+          var samples = 0
+          var firstTime = Long.MAX_VALUE
+          var lastTime = Long.MIN_VALUE
+          while (extractor.sampleTrackIndex >= 0) {
+            val time = extractor.sampleTime
+            firstTime = minOf(firstTime, time)
+            lastTime = maxOf(lastTime, time)
+            check(samples < Int.MAX_VALUE) { "The clip contains too many frames." }
+            check(samples < 1_000_000) { "Clip timestamp indexing is limited to one million frames." }
+            presentationTimesUs.add(time)
+            samples++
+            if (!extractor.advance()) break
+          }
+          if (samples > 0) {
+            frameCount = samples
+            presentationSpanUs = lastTime - firstTime
+          }
+          break
+        }
+      } finally {
+        extractor.release()
+      }
       // Frames come back display-oriented, so report display (rotated) dimensions.
       val rotated = rotation == 90 || rotation == 270
       val width = if (rotated) rawHeight else rawWidth
       val height = if (rotated) rawWidth else rawHeight
-      // Some containers omit the frame count; estimate from duration at 30fps so
-      // the clip still resolves (fps = frameCount / durationSeconds upstream).
-      if (frameCount <= 0 && durationMs > 0) {
-        frameCount = Math.round(durationMs / 1000.0 * 30.0).toInt()
-      }
+      val durationUs = if (videoDurationUs > 0) videoDurationUs else durationMs * 1000
+      val fps = VideoTrackTiming.fps(frameCount, durationUs, fpsHint, presentationSpanUs)
+      presentationTimesUs.sort()
+      val originUs = presentationTimesUs.firstOrNull() ?: 0L
       return mapOf(
         "width" to width,
         "height" to height,
         "frameCount" to frameCount,
-        "durationMs" to durationMs,
+        "durationMs" to (durationUs / 1000),
+        "durationUs" to durationUs,
         "codec" to codecName(mime),
+        "fps" to fps,
+        "timeline" to mapOf("schemaVersion" to 1,
+          "presentationTimesUs" to presentationTimesUs.map { it - originUs },
+          "durationUs" to durationUs),
+        "hasAudio" to (meta(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) == "yes"),
       )
     } finally {
       retriever.release()
@@ -56,6 +106,7 @@ object VideoFrameReader {
    */
   fun extractFrames(path: String, indices: List<Int>, width: Int, height: Int): ByteArray {
     requireFrameApi()
+    if (indices.isEmpty()) return ByteArray(0)
     val retriever = MediaMetadataRetriever()
     try {
       retriever.setDataSource(path)

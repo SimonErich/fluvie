@@ -23,6 +23,7 @@ final class GlitchEffect implements PixelAnimationEffect {
   const GlitchEffect({
     this.from = Edge.left,
     this.reverse = false,
+    this.intensity = 1,
     NoiseSource noise = const ValueNoise(),
   }) : _noise = noise; // ignore: prefer_initializing_formals — public arg `noise`, private field
 
@@ -32,6 +33,9 @@ final class GlitchEffect implements PixelAnimationEffect {
   /// Runs the glitch backwards: the tear grows instead of resolving, so the
   /// element degrades as progress runs `0 → 1` (the `glitchOut` exit).
   final bool reverse;
+
+  /// Scales the band shifts and channel split; zero is an exact no-op.
+  final double intensity;
 
   final NoiseSource _noise;
 
@@ -44,10 +48,10 @@ final class GlitchEffect implements PixelAnimationEffect {
   @override
   Widget build(Widget child, double progress) {
     final resolve = reverse ? 1 - progress : progress;
-    if (resolve >= 1) return child;
-    final intensity = (1 - resolve).clamp(0.0, 1.0);
+    if (resolve >= 1 || intensity <= 0) return child;
+    final strength = (1 - resolve).clamp(0.0, 1.0) * intensity.clamp(0.0, 1.0);
     final bias = from == Edge.right ? 1.0 : -1.0;
-    final split = intensity * 4;
+    final split = strength * 4;
     // A mounted NoiseScope wins; otherwise the effect's own source (the const
     // ValueNoise() default), so a tree with no scope jitters byte-identically.
     return Builder(
@@ -56,10 +60,10 @@ final class GlitchEffect implements PixelAnimationEffect {
         return Stack(
           alignment: Alignment.center,
           children: [
-            for (var i = 0; i < _slices; i++) _band(child, i, intensity, bias, noise),
+            for (var i = 0; i < _slices; i++) _band(child, i, strength, bias, noise),
             IgnorePointer(
               child: Opacity(
-                opacity: 0.6 * intensity,
+                opacity: 0.6 * strength,
                 child: ChromaticEffect(split).build(child, 0),
               ),
             ),

@@ -37,6 +37,38 @@ void main() {
   String read(String relative) => File(p.join(dir.path, relative)).readAsStringSync();
 
   group('initProject', () {
+    test(
+      'initializing an existing Flutter app preserves dependencies, assets, fonts and ignores',
+      () async {
+        File(p.join(dir.path, 'pubspec.yaml')).writeAsStringSync('''
+name: original_app
+environment:
+  sdk: ^3.13.0
+dependencies:
+  flutter: {sdk: flutter}
+  existing_package: ^2.0.0
+flutter:
+  assets:
+    - media/existing.png
+  fonts:
+    - family: Existing
+      fonts:
+        - asset: fonts/existing.ttf
+''');
+        File(p.join(dir.path, '.gitignore')).writeAsStringSync('private-data/\n');
+        expect(await scaffold(force: true), 0);
+        final pubspec = read('pubspec.yaml');
+        expect(pubspec, contains('name: original_app'));
+        expect(pubspec, contains('sdk: ^3.13.0'));
+        expect(pubspec, contains('existing_package: ^2.0.0'));
+        expect(pubspec, contains('media/existing.png'));
+        expect(pubspec, contains('family: Existing'));
+        expect(pubspec, contains('fluvie:'));
+        expect(pubspec, isNot(contains('flutter_test:')));
+        expect(pubspec, isNot(contains('custom_lint:')));
+        expect(read('.gitignore'), contains('private-data/'));
+      },
+    );
     test('writes exactly the project: a pubspec, a composition, and assets', () async {
       // A Fluvie project is a composition file, an assets/ folder and a
       // pubspec. No app, no main.dart, no capture harness, no registry, and no
@@ -68,7 +100,8 @@ void main() {
       final pubspec = read('pubspec.yaml');
       expect(pubspec, contains('name: ${packageNameFor(dir.path)}'));
       expect(pubspec, contains('fluvie: $fluvieDependencyVersion'));
-      expect(pubspec, contains('alchemist:'));
+      expect(pubspec, isNot(contains('alchemist:')));
+      expect(pubspec, contains('flutter_lints:'));
     });
 
     test('the pubspec declares no assets block: the CLI derives it per render', () async {
@@ -94,8 +127,15 @@ void main() {
       expect(read('.gitignore'), contains('.fluvie/'));
     });
 
-    test('analysis_options.yaml wires the custom_lint plugin', () async {
-      await scaffold();
+    test('analysis_options.yaml wires optional custom_lint only when requested', () async {
+      await initProject(
+        dir: dir,
+        fileName: 'example_video.dart',
+        force: false,
+        out: out,
+        err: err,
+        withLints: true,
+      );
 
       expect(read('analysis_options.yaml'), contains('custom_lint'));
     });
@@ -126,13 +166,17 @@ void main() {
       expect(out.toString(), contains('fluvie preview ./lib/example_video.dart'));
       expect(
         out.toString(),
-        contains('fluvie render ./lib/example_video.dart --out example_video.mp4'),
+        contains('fluvie render ./lib/example_video.dart'),
       );
     });
 
-    test('a re-run without --force changes nothing and asks for --force', () async {
+    test('a re-run without --force succeeds and preserves authored files byte for byte', () async {
       await scaffold();
-      final before = read(p.join('lib', 'example_video.dart'));
+      File(
+        p.join(dir.path, 'lib', 'example_video.dart'),
+      ).writeAsStringSync('// My authored video.\r\n');
+      final before = File(p.join(dir.path, 'lib', 'example_video.dart')).readAsBytesSync();
+      final pubspec = read('pubspec.yaml');
 
       final second = await initProject(
         dir: dir,
@@ -142,9 +186,10 @@ void main() {
         err: err = StringBuffer(),
       );
 
-      expect(second, 1);
-      expect(err.toString(), contains('--force'));
-      expect(read(p.join('lib', 'example_video.dart')), before);
+      expect(second, 0);
+      expect(err.toString(), isEmpty);
+      expect(File(p.join(dir.path, 'lib', 'example_video.dart')).readAsBytesSync(), before);
+      expect(read('pubspec.yaml'), pubspec);
     });
 
     test('--force overwrites an edited composition', () async {

@@ -1,3 +1,7 @@
 tags:
+  ffmpeg:
+    description: Native FFmpeg and ffplay integration tests; run with `melos run test:ffmpeg:flutter`.
   golden:
     description: Pixel-golden tests via Alchemist; run with `melos run test:goldens`.
+  e2e:
+    description: End-to-end integration tests that drive the app; run with `melos run test:e2e`.

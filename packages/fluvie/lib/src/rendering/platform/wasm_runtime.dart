@@ -22,3 +22,13 @@ abstract interface class WasmRuntime {
   /// Reads the file [name] back out of the virtual file system.
   Future<Uint8List> readFile(String name);
 }
+
+/// Optional lifecycle supported by the browser bridge. Kept separate so custom
+/// runtimes can state honestly whether they can terminate a running encode.
+abstract interface class WasmRuntimeLifecycle {
+  /// Stops the worker and releases its virtual filesystem. A later load starts fresh.
+  Future<void> terminate();
+
+  /// Removes one staged file from the worker filesystem after a completed job.
+  Future<void> deleteFile(String name);
+}

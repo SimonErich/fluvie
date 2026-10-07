@@ -24,7 +24,7 @@ curl -s -X POST http://localhost:8080/v1/renders \
 # Poll the job.
 curl -s http://localhost:8080/v1/renders/rnd_... \
   -H "Authorization: Bearer $API_TOKEN"
-# => {"id":"rnd_...","status":"succeeded","code":"Video build() { ... }","spec":{"fluvieSpec":1,"scenes":[...]},"video":{"downloadUrl":"http://localhost:8080/v1/files/rnd_.../video?token=..."}}
+# => {"id":"rnd_...","status":"succeeded","video":{"downloadUrl":"http://localhost:8080/v1/files/rnd_.../video?token=..."}}
 
 # Download the file.
 curl -L -o demo.mp4 "<the downloadUrl from above>"
@@ -58,7 +58,7 @@ Add `options`, `visibility`, and `ttl`:
 
 ```json
 {
-  "spec": { "fluvieSpec": 1, "scenes": [ /* ... */ ] },
+  "key": "demo",
   "options": { "format": "mp4", "aspect": "reels", "quality": "high", "poster": "1.5s" },
   "visibility": "private",
   "ttl": "48h"
@@ -68,6 +68,36 @@ Add `options`, `visibility`, and `ttl`:
 A `prompt` or `edit` request needs an AI key in the environment
 (`ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, or `MISTRAL_API_KEY`); without one the
 server answers `503`.
+
+The [server protocol reference](../reference/server-protocol.md) is exported from
+the shipped request serializer, server parser and MCP registry. Use it for a
+complete prompt request and current tool option values.
+
+For a Flutter or Dart client, depend on `fluvie_render_client` for web-safe HTTP
+requests, job polling and diagnostics without the server runtime. The older
+`fluvie_server/client.dart` import remains a compatibility export.
+
+Create an `ApiRenderClient` with your configured service URL and credentials,
+then send authored Dart without adding the server runtime to your application:
+
+<!-- code-excerpt "packages/fluvie_render_client/example/render_source.dart (render-source)" -->
+```dart
+import 'package:fluvie_render_client/fluvie_render_client.dart';
+
+/// Sends authored Dart to an already configured render service.
+Future<RenderJobView> renderSource(ApiRenderClient client, String dartSource) =>
+    client.renderAndWait(
+      ApiRenderRequest.code(dartSource, quality: 'high', poster: '3s'),
+    );
+```
+
+The compiled example polls to completion and returns a `RenderJobView` with its
+video and poster download links. Call `client.close()` when the client-owning
+scope ends. Use `validate` first for static diagnostics; rendering executes the
+submitted composition on the service. Prompt authoring requires the server's
+provider configuration. Assets must be available to that server, through its
+project or permitted URLs; a local path on the caller's machine is not uploaded
+by a code request. Use `uploadMedia` for explicit binary input uploads.
 
 ## The API
 
@@ -150,10 +180,11 @@ The example app renders either way:
 
 On-device rendering on mobile is supported by
 [fluvie_mobile_encoder](on-device-mobile-rendering.md): it drives Fluvie's capture
-loop in the running app and encodes with the platform's native hardware encoder,
-so nothing leaves the device. On the web,
+loop in the running app and encodes with the platform's native hardware encoder.
+On the web,
 [fluvie_web_encoder](on-device-web-rendering.md) does the same through ffmpeg.wasm:
-it captures and encodes the video on the page, so nothing leaves the browser.
+it captures and encodes the video on the page. Media loaders, generators and your
+application's sharing flow still determine other network traffic.
 
 ## Where to next
 

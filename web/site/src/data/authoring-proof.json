@@ -1,0 +1,523 @@
+{
+  "schemaVersion": 1,
+  "provider": "gemini",
+  "model": "gemini-2.5-flash",
+  "realProvider": true,
+  "cases": [
+    {
+      "id": "create",
+      "action": "generate",
+      "prompt": "Create a gentle 4-second video about fictional cat Milo playing with a red ball. Use assets/ball.png and assets/play.mp4 and assets/music.wav. The image and clip are synthetic red geometric fixtures, not photos of a cat. Use a 160 by 160 canvas at 30 fps, two readable scenes and a short title in 18px text. Use only these asset keys. Use a size object with width 160 and height 160. Keep the result four seconds long.",
+      "sourceText": "import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;\nimport 'package:fluvie/fluvie.dart';\n\nVideo build() {\n  return Video(\n    size: VideoSize(160, 160),\n    audio: [Audio.music('assets/music.wav', volume: 0.4, fadeIn: 500.ms, fadeOut: 500.ms)],\n    scenes: [\n      Scene(\n        duration: 1.5.seconds,\n        background: Background.gradient(\n          [Color(0xFF1A1A1A), Color(0xFF000000)],\n          begin: Alignment.topCenter,\n          end: Alignment.bottomCenter,\n        ),\n        children: [\n          ElementId(\n            id: 'title_text',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5),\n              child: Text(\n                'Milo and the Red Ball',\n                style: TextStyle(\n                  color: Color(0xFFFFFFFF),\n                  fontSize: 18,\n                  fontWeight: FontWeight.bold,\n                ),\n              ).animate([Animation.fadeIn(duration: 0.8.seconds, delay: 0.3.seconds)]),\n            ),\n          ),\n        ],\n      ),\n      Scene(\n        duration: 2.5.seconds,\n        background: Background.color(Color(0xFF1A1A1A)),\n        children: [\n          ElementId(\n            id: 'milo_play_clip',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5, width: 0.9, height: 0.9),\n              child: Clip.asset(\n                'assets/play.mp4',\n                fit: BoxFit.contain,\n                audio: ClipAudio.muted(),\n              ).animate([Animation.fadeIn(duration: 0.5.seconds)]),\n            ),\n          ),\n          ElementId(\n            id: 'red_ball_image',\n            child: Placed(\n              placement: Placement(x: 0.6, y: 0.6, width: 0.2, height: 0.2),\n              child: Image.asset('assets/ball.png').animate([\n                Animation.pop(duration: 0.4.seconds, delay: 0.2.seconds),\n                Animation.drift(delay: 0.6.seconds),\n              ]),\n            ),\n          ),\n        ],\n      ),\n    ],\n  );\n}\n",
+      "beforeText": null,
+      "elapsedMilliseconds": 80081,
+      "sourcePath": "create.dart",
+      "outputPath": "create.mp4",
+      "beforePath": null,
+      "proofPath": "create.proof.json",
+      "posterPath": "create.png",
+      "bundleSourcePath": "project/lib/benchmark_create_hmyag0afal1b083zm.dart",
+      "source": {
+        "byteLength": 1986,
+        "sha256": "fdf9555deee7d2135d7be0b26d414c083a434fac09ad1f628567205b3f0cedc1"
+      },
+      "output": {
+        "byteLength": 74724,
+        "sha256": "368a87ec7a80e025112c2dea8be454a884eb7d73d1cd7f86e06b01d1a47c24d8"
+      },
+      "sourceRevision": "a8892593e06f5e8c100cd500f0a5c4f996d62687c57da7bb440cece4a9c17f14",
+      "preserved": true,
+      "requiredSourceTextPresent": true,
+      "repeatableSelectedFrames": true,
+      "quality": {
+        "findings": [],
+        "scope": "Laid-out Flutter paragraphs at selected frames. Reading time uses the declared timing window. Custom painters, rasterized text and actual glyph font substitution are not inspected.",
+        "checks": [
+          "paragraph_bounds",
+          "declared_reading_window",
+          "bundled_font_families"
+        ],
+        "audio": {
+          "checked": true,
+          "peakDb": -25.977078,
+          "scope": "Full encoded audio; silence threshold -50 dB for 500 ms; peak warning at -0.05 dBFS.",
+          "findings": []
+        },
+        "checksComplete": true,
+        "strict": false,
+        "ok": true
+      },
+      "verification": {
+        "schemaVersion": 1,
+        "ok": true,
+        "strictDecode": true,
+        "observed": {
+          "container": "mov,mp4,m4a,3gp,3g2,mj2",
+          "codec": "h264",
+          "width": 160,
+          "height": 160,
+          "pixelFormat": "yuv420p",
+          "hasAlpha": false,
+          "hasAudio": true,
+          "durationSeconds": 4,
+          "declaredFrameCount": 120,
+          "frameCount": 120,
+          "averageFrameRate": "30/1",
+          "nominalFrameRate": "30/1",
+          "fps": 30,
+          "audio": [
+            {
+              "codec": "aac",
+              "channels": 1,
+              "channelLayout": "mono",
+              "sampleRate": "44100"
+            }
+          ]
+        },
+        "mismatches": []
+      },
+      "formats": []
+    },
+    {
+      "id": "pacing",
+      "action": "edit",
+      "prompt": "Make this video exactly six seconds long by lengthening its scenes. Keep its assets and canvas unchanged. Preserve the entry function and all existing custom code.",
+      "sourceText": "import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;\nimport 'package:fluvie/fluvie.dart';\n\nVideo build() {\n  return Video(\n    size: VideoSize(160, 160),\n    audio: [Audio.music('assets/music.wav', volume: 0.4, fadeIn: 500.ms, fadeOut: 500.ms)],\n    scenes: [\n      Scene(\n        duration: 2.5.seconds,\n        background: Background.gradient(\n          [Color(0xFF1A1A1A), Color(0xFF000000)],\n          begin: Alignment.topCenter,\n          end: Alignment.bottomCenter,\n        ),\n        children: [\n          ElementId(\n            id: 'title_text',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5),\n              child: Text(\n                'Milo and the Red Ball',\n                style: TextStyle(\n                  color: Color(0xFFFFFFFF),\n                  fontSize: 18,\n                  fontWeight: FontWeight.bold,\n                ),\n              ).animate([Animation.fadeIn(duration: 0.8.seconds, delay: 0.3.seconds)]),\n            ),\n          ),\n        ],\n      ),\n      Scene(\n        duration: 3.5.seconds,\n        background: Background.color(Color(0xFF1A1A1A)),\n        children: [\n          ElementId(\n            id: 'milo_play_clip',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5, width: 0.9, height: 0.9),\n              child: Clip.asset(\n                'assets/play.mp4',\n                fit: BoxFit.contain,\n                audio: ClipAudio.muted(),\n              ).animate([Animation.fadeIn(duration: 0.5.seconds)]),\n            ),\n          ),\n          ElementId(\n            id: 'red_ball_image',\n            child: Placed(\n              placement: Placement(x: 0.6, y: 0.6, width: 0.2, height: 0.2),\n              child: Image.asset('assets/ball.png').animate([\n                Animation.pop(duration: 0.4.seconds, delay: 0.2.seconds),\n                Animation.drift(delay: 0.6.seconds),\n              ]),\n            ),\n          ),\n        ],\n      ),\n    ],\n  );\n}\n",
+      "beforeText": "import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;\nimport 'package:fluvie/fluvie.dart';\n\nVideo build() {\n  return Video(\n    size: VideoSize(160, 160),\n    audio: [Audio.music('assets/music.wav', volume: 0.4, fadeIn: 500.ms, fadeOut: 500.ms)],\n    scenes: [\n      Scene(\n        duration: 1.5.seconds,\n        background: Background.gradient(\n          [Color(0xFF1A1A1A), Color(0xFF000000)],\n          begin: Alignment.topCenter,\n          end: Alignment.bottomCenter,\n        ),\n        children: [\n          ElementId(\n            id: 'title_text',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5),\n              child: Text(\n                'Milo and the Red Ball',\n                style: TextStyle(\n                  color: Color(0xFFFFFFFF),\n                  fontSize: 18,\n                  fontWeight: FontWeight.bold,\n                ),\n              ).animate([Animation.fadeIn(duration: 0.8.seconds, delay: 0.3.seconds)]),\n            ),\n          ),\n        ],\n      ),\n      Scene(\n        duration: 2.5.seconds,\n        background: Background.color(Color(0xFF1A1A1A)),\n        children: [\n          ElementId(\n            id: 'milo_play_clip',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5, width: 0.9, height: 0.9),\n              child: Clip.asset(\n                'assets/play.mp4',\n                fit: BoxFit.contain,\n                audio: ClipAudio.muted(),\n              ).animate([Animation.fadeIn(duration: 0.5.seconds)]),\n            ),\n          ),\n          ElementId(\n            id: 'red_ball_image',\n            child: Placed(\n              placement: Placement(x: 0.6, y: 0.6, width: 0.2, height: 0.2),\n              child: Image.asset('assets/ball.png').animate([\n                Animation.pop(duration: 0.4.seconds, delay: 0.2.seconds),\n                Animation.drift(delay: 0.6.seconds),\n              ]),\n            ),\n          ),\n        ],\n      ),\n    ],\n  );\n}\n",
+      "elapsedMilliseconds": 52838,
+      "sourcePath": "pacing.dart",
+      "outputPath": "pacing.mp4",
+      "beforePath": "pacing.before.dart",
+      "proofPath": "pacing.proof.json",
+      "posterPath": "pacing.png",
+      "bundleSourcePath": "project/lib/benchmark_pacing_hmyahbyttw172j36j.dart",
+      "source": {
+        "byteLength": 1986,
+        "sha256": "0a0a288111485d9796ddd55ae5abbe147189a7fb522261432d220196f2ca7cc9"
+      },
+      "output": {
+        "byteLength": 108263,
+        "sha256": "e979f0ab58f748dedb89d9baf4f705595b9126aea461c81ef388d23c2e408141"
+      },
+      "sourceRevision": "8f1ce024c9e5c21ad72d0c92a97f84372745cda573ea4b8c8689c1c45ae268ce",
+      "preserved": true,
+      "requiredSourceTextPresent": true,
+      "repeatableSelectedFrames": true,
+      "quality": {
+        "findings": [],
+        "scope": "Laid-out Flutter paragraphs at selected frames. Reading time uses the declared timing window. Custom painters, rasterized text and actual glyph font substitution are not inspected.",
+        "checks": [
+          "paragraph_bounds",
+          "declared_reading_window",
+          "bundled_font_families"
+        ],
+        "audio": {
+          "checked": true,
+          "peakDb": -25.977078,
+          "scope": "Full encoded audio; silence threshold -50 dB for 500 ms; peak warning at -0.05 dBFS.",
+          "findings": []
+        },
+        "checksComplete": true,
+        "strict": false,
+        "ok": true
+      },
+      "verification": {
+        "schemaVersion": 1,
+        "ok": true,
+        "strictDecode": true,
+        "observed": {
+          "container": "mov,mp4,m4a,3gp,3g2,mj2",
+          "codec": "h264",
+          "width": 160,
+          "height": 160,
+          "pixelFormat": "yuv420p",
+          "hasAlpha": false,
+          "hasAudio": true,
+          "durationSeconds": 6,
+          "declaredFrameCount": 180,
+          "frameCount": 180,
+          "averageFrameRate": "30/1",
+          "nominalFrameRate": "30/1",
+          "fps": 30,
+          "audio": [
+            {
+              "codec": "aac",
+              "channels": 1,
+              "channelLayout": "mono",
+              "sampleRate": "44100"
+            }
+          ]
+        },
+        "mismatches": []
+      },
+      "formats": []
+    },
+    {
+      "id": "custom_widget",
+      "action": "edit",
+      "prompt": "Change only the title text Milo plays to Milo rests. Preserve the complete BenchmarkBadge class byte-for-byte and keep its use in the scene.",
+      "sourceText": "// #docregion video\nimport 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;\nimport 'package:fluvie/fluvie.dart';\n\n/// Small authored fixture for measuring edits that preserve custom Flutter code.\nVideo build() => Video(\n  size: const VideoSize(160, 160),\n  scenes: [\n    Scene(duration: 3.seconds, background: Background.color(Colors.indigo),\n      children: [const Text('Milo rests', style: TextStyle(fontSize: 20)), const BenchmarkBadge()]),\n  ],\n);\n// #enddocregion video\n\n// #docregion custom-widget\n/// Handwritten Flutter widget retained byte-for-byte by the benchmark edit.\nfinal class BenchmarkBadge extends StatelessWidget {\n  /// Creates the fixture badge.\n  const BenchmarkBadge({super.key});\n\n  @override\n  Widget build(BuildContext context) => const Padding(\n    padding: EdgeInsets.all(8),\n    child: Text('Handwritten Flutter', style: TextStyle(fontSize: 12, color: Colors.amber)),\n  );\n}\n// #enddocregion custom-widget\n",
+      "beforeText": "// #docregion video\nimport 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;\nimport 'package:fluvie/fluvie.dart';\n\n/// Small authored fixture for measuring edits that preserve custom Flutter code.\nVideo build() => Video(\n  size: const VideoSize(160, 160),\n  scenes: [\n    Scene(duration: 3.seconds, background: Background.color(Colors.indigo),\n      children: [const Text('Milo plays', style: TextStyle(fontSize: 20)), const BenchmarkBadge()]),\n  ],\n);\n// #enddocregion video\n\n// #docregion custom-widget\n/// Handwritten Flutter widget retained byte-for-byte by the benchmark edit.\nfinal class BenchmarkBadge extends StatelessWidget {\n  /// Creates the fixture badge.\n  const BenchmarkBadge({super.key});\n\n  @override\n  Widget build(BuildContext context) => const Padding(\n    padding: EdgeInsets.all(8),\n    child: Text('Handwritten Flutter', style: TextStyle(fontSize: 12, color: Colors.amber)),\n  );\n}\n// #enddocregion custom-widget\n",
+      "elapsedMilliseconds": 47424,
+      "sourcePath": "custom_widget.dart",
+      "outputPath": "custom_widget.mp4",
+      "beforePath": "custom_widget.before.dart",
+      "proofPath": "custom_widget.proof.json",
+      "posterPath": "custom_widget.png",
+      "bundleSourcePath": "project/lib/benchmark_custom_widget_hmyai7fcblt0t13j.dart",
+      "source": {
+        "byteLength": 954,
+        "sha256": "c34482aa773edaee4bc6d3e3bc7a69b929a7bc9a2c3db8fb73d3017748f205b7"
+      },
+      "output": {
+        "byteLength": 5536,
+        "sha256": "c65a1297f83676e35ccfc12caddbec3dd811083321c8af7e84c3b7671f7bfbd3"
+      },
+      "sourceRevision": "cb635a37e7f928c2b88edd8d8cc006755bf5c448db7e8c7ed240426985fb568d",
+      "preserved": true,
+      "requiredSourceTextPresent": true,
+      "repeatableSelectedFrames": true,
+      "quality": {
+        "findings": [],
+        "scope": "Laid-out Flutter paragraphs at selected frames. Reading time uses the declared timing window. Custom painters, rasterized text and actual glyph font substitution are not inspected.",
+        "checks": [
+          "paragraph_bounds",
+          "declared_reading_window",
+          "bundled_font_families"
+        ],
+        "audio": {
+          "checked": false,
+          "applicable": false,
+          "reason": "This export has no declared audio stream.",
+          "findings": []
+        },
+        "checksComplete": true,
+        "strict": false,
+        "ok": true
+      },
+      "verification": {
+        "schemaVersion": 1,
+        "ok": true,
+        "strictDecode": true,
+        "observed": {
+          "container": "mov,mp4,m4a,3gp,3g2,mj2",
+          "codec": "h264",
+          "width": 160,
+          "height": 160,
+          "pixelFormat": "yuv420p",
+          "hasAlpha": false,
+          "hasAudio": false,
+          "durationSeconds": 3,
+          "declaredFrameCount": 90,
+          "frameCount": 90,
+          "averageFrameRate": "30/1",
+          "nominalFrameRate": "30/1",
+          "fps": 30,
+          "audio": []
+        },
+        "mismatches": []
+      },
+      "formats": []
+    },
+    {
+      "id": "captions",
+      "action": "edit",
+      "prompt": "Add Captions.fromSrt('assets/captions.srt') as this video's captions. Preserve existing scenes, assets and size. Use a custom CaptionStyle with TextStyle(fontSize: 14, color: Colors.white), a translucent dark background, and white highlight so captions fit the 160 pixel canvas.",
+      "sourceText": "import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;\nimport 'package:fluvie/fluvie.dart';\n\nconst _captionStyle = CaptionStyle(\n  textStyle: TextStyle(fontSize: 14, color: Colors.white),\n  background: Color(0x80000000),\n  highlight: Colors.white,\n);\n\nVideo build() {\n  return Video(\n    size: VideoSize(160, 160),\n    audio: [Audio.music('assets/music.wav', volume: 0.4, fadeIn: 500.ms, fadeOut: 500.ms)],\n    captions: Captions.fromSrt('assets/captions.srt', style: _captionStyle),\n    scenes: [\n      Scene(\n        duration: 2.5.seconds,\n        background: Background.gradient(\n          [Color(0xFF1A1A1A), Color(0xFF000000)],\n          begin: Alignment.topCenter,\n          end: Alignment.bottomCenter,\n        ),\n        children: [\n          ElementId(\n            id: 'title_text',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5),\n              child: Text(\n                'Milo and the Red Ball',\n                style: TextStyle(\n                  color: Color(0xFFFFFFFF),\n                  fontSize: 18,\n                  fontWeight: FontWeight.bold,\n                ),\n              ).animate([Animation.fadeIn(duration: 0.8.seconds, delay: 0.3.seconds)]),\n            ),\n          ),\n        ],\n      ),\n      Scene(\n        duration: 3.5.seconds,\n        background: Background.color(Color(0xFF1A1A1A)),\n        children: [\n          ElementId(\n            id: 'milo_play_clip',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5, width: 0.9, height: 0.9),\n              child: Clip.asset(\n                'assets/play.mp4',\n                fit: BoxFit.contain,\n                audio: ClipAudio.muted(),\n              ).animate([Animation.fadeIn(duration: 0.5.seconds)]),\n            ),\n          ),\n          ElementId(\n            id: 'red_ball_image',\n            child: Placed(\n              placement: Placement(x: 0.6, y: 0.6, width: 0.2, height: 0.2),\n              child: Image.asset('assets/ball.png').animate([\n                Animation.pop(duration: 0.4.seconds, delay: 0.2.seconds),\n                Animation.drift(delay: 0.6.seconds),\n              ]),\n            ),\n          ),\n        ],\n      ),\n    ],\n  );\n}\n",
+      "beforeText": "import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;\nimport 'package:fluvie/fluvie.dart';\n\nVideo build() {\n  return Video(\n    size: VideoSize(160, 160),\n    audio: [Audio.music('assets/music.wav', volume: 0.4, fadeIn: 500.ms, fadeOut: 500.ms)],\n    scenes: [\n      Scene(\n        duration: 2.5.seconds,\n        background: Background.gradient(\n          [Color(0xFF1A1A1A), Color(0xFF000000)],\n          begin: Alignment.topCenter,\n          end: Alignment.bottomCenter,\n        ),\n        children: [\n          ElementId(\n            id: 'title_text',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5),\n              child: Text(\n                'Milo and the Red Ball',\n                style: TextStyle(\n                  color: Color(0xFFFFFFFF),\n                  fontSize: 18,\n                  fontWeight: FontWeight.bold,\n                ),\n              ).animate([Animation.fadeIn(duration: 0.8.seconds, delay: 0.3.seconds)]),\n            ),\n          ),\n        ],\n      ),\n      Scene(\n        duration: 3.5.seconds,\n        background: Background.color(Color(0xFF1A1A1A)),\n        children: [\n          ElementId(\n            id: 'milo_play_clip',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5, width: 0.9, height: 0.9),\n              child: Clip.asset(\n                'assets/play.mp4',\n                fit: BoxFit.contain,\n                audio: ClipAudio.muted(),\n              ).animate([Animation.fadeIn(duration: 0.5.seconds)]),\n            ),\n          ),\n          ElementId(\n            id: 'red_ball_image',\n            child: Placed(\n              placement: Placement(x: 0.6, y: 0.6, width: 0.2, height: 0.2),\n              child: Image.asset('assets/ball.png').animate([\n                Animation.pop(duration: 0.4.seconds, delay: 0.2.seconds),\n                Animation.drift(delay: 0.6.seconds),\n              ]),\n            ),\n          ),\n        ],\n      ),\n    ],\n  );\n}\n",
+      "elapsedMilliseconds": 52006,
+      "sourcePath": "captions.dart",
+      "outputPath": "captions.mp4",
+      "beforePath": "captions.before.dart",
+      "proofPath": "captions.proof.json",
+      "posterPath": "captions.png",
+      "bundleSourcePath": "project/lib/benchmark_captions_hmyaiznt7b1wggy0z.dart",
+      "source": {
+        "byteLength": 2222,
+        "sha256": "90e1ee372dd711cf90ab2f715062e288352f534497b6cde55015e88640f6943d"
+      },
+      "output": {
+        "byteLength": 112298,
+        "sha256": "27a938a09f3ffc5fe7cabcce01428cbe5d2c664a0ce3e3219bc842e53036ae7f"
+      },
+      "sourceRevision": "9e00c2cf69b16a6920f5cbeead46e9afe6869ca9b5696fb4d549d02dcac6675b",
+      "preserved": true,
+      "requiredSourceTextPresent": true,
+      "repeatableSelectedFrames": true,
+      "quality": {
+        "findings": [],
+        "scope": "Laid-out Flutter paragraphs at selected frames. Reading time uses the declared timing window. Custom painters, rasterized text and actual glyph font substitution are not inspected.",
+        "checks": [
+          "paragraph_bounds",
+          "declared_reading_window",
+          "bundled_font_families"
+        ],
+        "audio": {
+          "checked": true,
+          "peakDb": -25.977078,
+          "scope": "Full encoded audio; silence threshold -50 dB for 500 ms; peak warning at -0.05 dBFS.",
+          "findings": []
+        },
+        "checksComplete": true,
+        "strict": false,
+        "ok": true
+      },
+      "verification": {
+        "schemaVersion": 1,
+        "ok": true,
+        "strictDecode": true,
+        "observed": {
+          "container": "mov,mp4,m4a,3gp,3g2,mj2",
+          "codec": "h264",
+          "width": 160,
+          "height": 160,
+          "pixelFormat": "yuv420p",
+          "hasAlpha": false,
+          "hasAudio": true,
+          "durationSeconds": 6,
+          "declaredFrameCount": 180,
+          "frameCount": 180,
+          "averageFrameRate": "30/1",
+          "nominalFrameRate": "30/1",
+          "fps": 30,
+          "audio": [
+            {
+              "codec": "aac",
+              "channels": 1,
+              "channelLayout": "mono",
+              "sampleRate": "44100"
+            }
+          ]
+        },
+        "mismatches": []
+      },
+      "formats": []
+    },
+    {
+      "id": "formats",
+      "action": "formats",
+      "prompt": "Export the same authored composition for square, reels and landscape. Keep its source identical.",
+      "sourceText": "import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;\nimport 'package:fluvie/fluvie.dart';\n\nconst _captionStyle = CaptionStyle(\n  textStyle: TextStyle(fontSize: 14, color: Colors.white),\n  background: Color(0x80000000),\n  highlight: Colors.white,\n);\n\nVideo build() {\n  return Video(\n    size: VideoSize(160, 160),\n    audio: [Audio.music('assets/music.wav', volume: 0.4, fadeIn: 500.ms, fadeOut: 500.ms)],\n    captions: Captions.fromSrt('assets/captions.srt', style: _captionStyle),\n    scenes: [\n      Scene(\n        duration: 2.5.seconds,\n        background: Background.gradient(\n          [Color(0xFF1A1A1A), Color(0xFF000000)],\n          begin: Alignment.topCenter,\n          end: Alignment.bottomCenter,\n        ),\n        children: [\n          ElementId(\n            id: 'title_text',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5),\n              child: Text(\n                'Milo and the Red Ball',\n                style: TextStyle(\n                  color: Color(0xFFFFFFFF),\n                  fontSize: 18,\n                  fontWeight: FontWeight.bold,\n                ),\n              ).animate([Animation.fadeIn(duration: 0.8.seconds, delay: 0.3.seconds)]),\n            ),\n          ),\n        ],\n      ),\n      Scene(\n        duration: 3.5.seconds,\n        background: Background.color(Color(0xFF1A1A1A)),\n        children: [\n          ElementId(\n            id: 'milo_play_clip',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5, width: 0.9, height: 0.9),\n              child: Clip.asset(\n                'assets/play.mp4',\n                fit: BoxFit.contain,\n                audio: ClipAudio.muted(),\n              ).animate([Animation.fadeIn(duration: 0.5.seconds)]),\n            ),\n          ),\n          ElementId(\n            id: 'red_ball_image',\n            child: Placed(\n              placement: Placement(x: 0.6, y: 0.6, width: 0.2, height: 0.2),\n              child: Image.asset('assets/ball.png').animate([\n                Animation.pop(duration: 0.4.seconds, delay: 0.2.seconds),\n                Animation.drift(delay: 0.6.seconds),\n              ]),\n            ),\n          ),\n        ],\n      ),\n    ],\n  );\n}\n",
+      "beforeText": "import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;\nimport 'package:fluvie/fluvie.dart';\n\nconst _captionStyle = CaptionStyle(\n  textStyle: TextStyle(fontSize: 14, color: Colors.white),\n  background: Color(0x80000000),\n  highlight: Colors.white,\n);\n\nVideo build() {\n  return Video(\n    size: VideoSize(160, 160),\n    audio: [Audio.music('assets/music.wav', volume: 0.4, fadeIn: 500.ms, fadeOut: 500.ms)],\n    captions: Captions.fromSrt('assets/captions.srt', style: _captionStyle),\n    scenes: [\n      Scene(\n        duration: 2.5.seconds,\n        background: Background.gradient(\n          [Color(0xFF1A1A1A), Color(0xFF000000)],\n          begin: Alignment.topCenter,\n          end: Alignment.bottomCenter,\n        ),\n        children: [\n          ElementId(\n            id: 'title_text',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5),\n              child: Text(\n                'Milo and the Red Ball',\n                style: TextStyle(\n                  color: Color(0xFFFFFFFF),\n                  fontSize: 18,\n                  fontWeight: FontWeight.bold,\n                ),\n              ).animate([Animation.fadeIn(duration: 0.8.seconds, delay: 0.3.seconds)]),\n            ),\n          ),\n        ],\n      ),\n      Scene(\n        duration: 3.5.seconds,\n        background: Background.color(Color(0xFF1A1A1A)),\n        children: [\n          ElementId(\n            id: 'milo_play_clip',\n            child: Placed(\n              placement: Placement(x: 0.5, y: 0.5, width: 0.9, height: 0.9),\n              child: Clip.asset(\n                'assets/play.mp4',\n                fit: BoxFit.contain,\n                audio: ClipAudio.muted(),\n              ).animate([Animation.fadeIn(duration: 0.5.seconds)]),\n            ),\n          ),\n          ElementId(\n            id: 'red_ball_image',\n            child: Placed(\n              placement: Placement(x: 0.6, y: 0.6, width: 0.2, height: 0.2),\n              child: Image.asset('assets/ball.png').animate([\n                Animation.pop(duration: 0.4.seconds, delay: 0.2.seconds),\n                Animation.drift(delay: 0.6.seconds),\n              ]),\n            ),\n          ),\n        ],\n      ),\n    ],\n  );\n}\n",
+      "elapsedMilliseconds": 103686,
+      "sourcePath": "formats.dart",
+      "outputPath": "formats.mp4",
+      "beforePath": "formats.before.dart",
+      "proofPath": "formats.proof.json",
+      "posterPath": "formats.png",
+      "bundleSourcePath": "project/lib/benchmark_formats_hmyajumhsa1gzt2j6.dart",
+      "source": {
+        "byteLength": 2222,
+        "sha256": "90e1ee372dd711cf90ab2f715062e288352f534497b6cde55015e88640f6943d"
+      },
+      "output": {
+        "byteLength": 112298,
+        "sha256": "27a938a09f3ffc5fe7cabcce01428cbe5d2c664a0ce3e3219bc842e53036ae7f"
+      },
+      "sourceRevision": "8f5ce041693f494e60f08357a7d474b96fb0b24a00bceb1a65e84c5818e636a7",
+      "preserved": true,
+      "requiredSourceTextPresent": true,
+      "repeatableSelectedFrames": true,
+      "quality": {
+        "findings": [],
+        "scope": "Laid-out Flutter paragraphs at selected frames. Reading time uses the declared timing window. Custom painters, rasterized text and actual glyph font substitution are not inspected.",
+        "checks": [
+          "paragraph_bounds",
+          "declared_reading_window",
+          "bundled_font_families"
+        ],
+        "audio": {
+          "checked": true,
+          "peakDb": -25.977078,
+          "scope": "Full encoded audio; silence threshold -50 dB for 500 ms; peak warning at -0.05 dBFS.",
+          "findings": []
+        },
+        "checksComplete": true,
+        "strict": false,
+        "ok": true
+      },
+      "verification": {
+        "schemaVersion": 1,
+        "ok": true,
+        "strictDecode": true,
+        "observed": {
+          "container": "mov,mp4,m4a,3gp,3g2,mj2",
+          "codec": "h264",
+          "width": 160,
+          "height": 160,
+          "pixelFormat": "yuv420p",
+          "hasAlpha": false,
+          "hasAudio": true,
+          "durationSeconds": 6,
+          "declaredFrameCount": 180,
+          "frameCount": 180,
+          "averageFrameRate": "30/1",
+          "nominalFrameRate": "30/1",
+          "fps": 30,
+          "audio": [
+            {
+              "codec": "aac",
+              "channels": 1,
+              "channelLayout": "mono",
+              "sampleRate": "44100"
+            }
+          ]
+        },
+        "mismatches": []
+      },
+      "formats": [
+        {
+          "aspect": "square",
+          "quality": {
+            "findings": [],
+            "scope": "Laid-out Flutter paragraphs at selected frames. Reading time uses the declared timing window. Custom painters, rasterized text and actual glyph font substitution are not inspected.",
+            "checks": [
+              "paragraph_bounds",
+              "declared_reading_window",
+              "bundled_font_families"
+            ],
+            "audio": {
+              "checked": true,
+              "peakDb": -25.977078,
+              "scope": "Full encoded audio; silence threshold -50 dB for 500 ms; peak warning at -0.05 dBFS.",
+              "findings": []
+            },
+            "checksComplete": true,
+            "strict": false,
+            "ok": true
+          },
+          "sourcePath": "formats_square.dart",
+          "outputPath": "formats_square.mp4",
+          "proofPath": "formats_square.proof.json",
+          "posterPath": "formats_square.png",
+          "output": {
+            "container": "mov,mp4,m4a,3gp,3g2,mj2",
+            "codec": "h264",
+            "width": 160,
+            "height": 160,
+            "pixelFormat": "yuv420p",
+            "hasAlpha": false,
+            "hasAudio": true,
+            "durationSeconds": 6,
+            "declaredFrameCount": 180,
+            "frameCount": 180,
+            "averageFrameRate": "30/1",
+            "nominalFrameRate": "30/1",
+            "fps": 30,
+            "audio": [
+              {
+                "codec": "aac",
+                "channels": 1,
+                "channelLayout": "mono",
+                "sampleRate": "44100"
+              }
+            ]
+          }
+        },
+        {
+          "aspect": "reels",
+          "quality": {
+            "findings": [],
+            "scope": "Laid-out Flutter paragraphs at selected frames. Reading time uses the declared timing window. Custom painters, rasterized text and actual glyph font substitution are not inspected.",
+            "checks": [
+              "paragraph_bounds",
+              "declared_reading_window",
+              "bundled_font_families"
+            ],
+            "audio": {
+              "checked": true,
+              "peakDb": -25.977078,
+              "scope": "Full encoded audio; silence threshold -50 dB for 500 ms; peak warning at -0.05 dBFS.",
+              "findings": []
+            },
+            "checksComplete": true,
+            "strict": false,
+            "ok": true
+          },
+          "sourcePath": "formats_reels.dart",
+          "outputPath": "formats_reels.mp4",
+          "proofPath": "formats_reels.proof.json",
+          "posterPath": "formats_reels.png",
+          "output": {
+            "container": "mov,mp4,m4a,3gp,3g2,mj2",
+            "codec": "h264",
+            "width": 90,
+            "height": 160,
+            "pixelFormat": "yuv420p",
+            "hasAlpha": false,
+            "hasAudio": true,
+            "durationSeconds": 6,
+            "declaredFrameCount": 180,
+            "frameCount": 180,
+            "averageFrameRate": "30/1",
+            "nominalFrameRate": "30/1",
+            "fps": 30,
+            "audio": [
+              {
+                "codec": "aac",
+                "channels": 1,
+                "channelLayout": "mono",
+                "sampleRate": "44100"
+              }
+            ]
+          }
+        },
+        {
+          "aspect": "landscape",
+          "quality": {
+            "findings": [],
+            "scope": "Laid-out Flutter paragraphs at selected frames. Reading time uses the declared timing window. Custom painters, rasterized text and actual glyph font substitution are not inspected.",
+            "checks": [
+              "paragraph_bounds",
+              "declared_reading_window",
+              "bundled_font_families"
+            ],
+            "audio": {
+              "checked": true,
+              "peakDb": -25.977078,
+              "scope": "Full encoded audio; silence threshold -50 dB for 500 ms; peak warning at -0.05 dBFS.",
+              "findings": []
+            },
+            "checksComplete": true,
+            "strict": false,
+            "ok": true
+          },
+          "sourcePath": "formats_landscape.dart",
+          "outputPath": "formats_landscape.mp4",
+          "proofPath": "formats_landscape.proof.json",
+          "posterPath": "formats_landscape.png",
+          "output": {
+            "container": "mov,mp4,m4a,3gp,3g2,mj2",
+            "codec": "h264",
+            "width": 160,
+            "height": 90,
+            "pixelFormat": "yuv420p",
+            "hasAlpha": false,
+            "hasAudio": true,
+            "durationSeconds": 6,
+            "declaredFrameCount": 180,
+            "frameCount": 180,
+            "averageFrameRate": "30/1",
+            "nominalFrameRate": "30/1",
+            "fps": 30,
+            "audio": [
+              {
+                "codec": "aac",
+                "channels": 1,
+                "channelLayout": "mono",
+                "sampleRate": "44100"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "bundle": {
+    "path": "project.fluvie.zip",
+    "byteLength": 1796928,
+    "sha256": "7a41d2e8fa8b5f71a2bdd9225682818f7eb9d1d4aee822670bad5132c1acad2d"
+  },
+  "visualQuality": "requires_human_review",
+  "scope": "A recorded authoring benchmark with synthetic geometry and tones. Source preservation, selected-frame repeatability and encoded output are checked. Source references do not prove semantic asset selection. Provider identity is recorded, not authenticated."
+}

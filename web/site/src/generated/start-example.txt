@@ -1,0 +1,16 @@
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
+import 'package:fluvie/fluvie.dart';
+
+Video build() => Video(
+  size: VideoSize.square,
+  scenes: [
+    Scene.centered(
+      duration: 4.seconds,
+      background: Background.color(const Color(0xFF0E9E8E)),
+      child: const Text(
+        'Hello, Fluvie',
+        style: TextStyle(fontSize: 64, color: Colors.white),
+      ).animate([Animation.fadeIn(), Animation.pop()]),
+    ),
+  ],
+);

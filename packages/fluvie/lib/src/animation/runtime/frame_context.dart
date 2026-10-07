@@ -8,6 +8,7 @@ import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/audio_band.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/rendering/runtime/frame_provider.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
 import 'package:fluvie/src/timing/time_scope_data.dart';
 import 'package:fluvie/src/timing/time_scope_provider.dart';
@@ -58,23 +59,32 @@ final class FrameContext {
   /// effect agree. Defaults to the const `ValueNoise` with no [NoiseScope].
   double noise(String seed) => NoiseScope.of(_context).valueForSeed(seed);
 
-  /// The analysed bass energy of [track] (or the master mix when `null`) at the
+  /// The analysed bass energy of [track] (or the default track when `null`) at the
   /// current frame — the headline reactive value.
   double audio(Anchor? track) => audioBand(track, AudioBand.bass);
 
-  /// The analysed energy of [band] on [track] (or the master mix when `null`)
+  /// The analysed energy of [band] on [track] (or the default track when `null`)
   /// at the current frame, read from the precomputed [ReactiveScope].
+  /// Native capture uses the first audible declared track as its default and
+  /// analyses normalized source energy before gain, fades or final mixing.
   ///
   /// Throws a [FluvieRenderException] in capture without a scope (a determinism
   /// violation); returns `0` in a live preview.
   double audioBand(Anchor? track, AudioBand band) {
+    // Builders participate in the real mount used to discover resources.
+    // Analysis is published before any ready frame can be painted.
+    if (PreparationScope.exposesOnlyGeometry(_context)) {
+      PreparationScope.requestAudioAnalysis(_context);
+      return 0;
+    }
     final table = ReactiveScope.tableFor(_context, track);
     if (table == null) {
       if (RenderModeContext.isCapture(_context)) {
         throw FluvieRenderException(
           'ctx.audioBand(AudioBand.${band.name}) cannot render in capture '
-          'without a precomputed BandTable. Mount a ReactiveScope and analyse '
-          'the audio track in the precompute pass before the frame loop.',
+          'without a precomputed BandTable. If this audio read appears only on '
+          'later frames, declare FrameBuilder(resources: CompositionResources( '
+          'requiresAudioAnalysis: true)) and a Video.audio or Scene.audio track.',
         );
       }
       return 0;

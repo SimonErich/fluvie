@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:fluvie/src/audio/runtime/analysis_pcm.dart';
 import 'package:fluvie/src/audio/runtime/ffmpeg_pcm_decoder.dart';
 import 'package:fluvie/src/audio/runtime/pcm_decoder.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
@@ -8,6 +9,7 @@ import 'package:fluvie/src/core/audio/dsp/fft.dart';
 import 'package:fluvie/src/core/audio/dsp/spectral_flux.dart';
 import 'package:fluvie/src/core/audio_band.dart';
 import 'package:fluvie/src/core/contracts/frequency_analyzer.dart';
+import 'package:fluvie/src/core/contracts/ranged_audio_analysis.dart';
 
 /// The real [FrequencyAnalyzer]: decode → per-hop FFT band sums → resampled,
 /// peak-normalized per-frame [BandTable], content-hash cached so a re-analyze
@@ -19,7 +21,7 @@ import 'package:fluvie/src/core/contracts/frequency_analyzer.dart';
 /// decode is the injected [PcmDecoder] (the default reads a committed WAV; the
 /// live path spawns ffmpeg), so everything from the PCM onward is pure and the
 /// analyse-twice→identical-table property holds.
-final class SpectralFrequencyAnalyzer implements FrequencyAnalyzer {
+final class SpectralFrequencyAnalyzer implements RangedFrequencyAnalyzer {
   /// Creates an analyzer decoding through [decoder] (defaults to the
   /// ffmpeg-backed [FfmpegPcmDecoder]).
   SpectralFrequencyAnalyzer({PcmDecoder decoder = const FfmpegPcmDecoder()})
@@ -29,28 +31,64 @@ final class SpectralFrequencyAnalyzer implements FrequencyAnalyzer {
 
   // Tables keyed by source cacheKey + fps + totalFrames, so a repeated analyze
   // over the same declaration skips the decode + DSP entirely.
-  final Map<String, BandTable> _cache = {};
+  final Map<String, RangedBandAnalysis> _cache = {};
 
   @override
-  Future<BandTable> analyze(
+  Future<BandTable> analyze(AudioSource source, {required int fps, required int totalFrames}) =>
+      _analyze(
+        source,
+        start: Duration.zero,
+        fps: fps,
+        totalFrames: totalFrames,
+        boundToSource: false,
+      ).then((value) => value.table);
+
+  @override
+  Future<RangedBandAnalysis> analyzeRange(
     AudioSource source, {
+    required Duration start,
     required int fps,
     required int totalFrames,
+  }) => _analyze(source, start: start, fps: fps, totalFrames: totalFrames, boundToSource: true);
+
+  Future<RangedBandAnalysis> _analyze(
+    AudioSource source, {
+    required Duration start,
+    required int fps,
+    required int totalFrames,
+    required bool boundToSource,
   }) async {
-    final key = '${source.cacheKey}|$fps|$totalFrames';
+    final key = '${source.cacheKey}|${start.inMicroseconds}|$fps|$totalFrames|$boundToSource';
     final cached = _cache[key];
     if (cached != null) return cached;
-    final pcm = await _decoder.decode(source);
+    final pcm = await decodeAnalysisPcm(
+      _decoder,
+      source,
+      fps: fps,
+      totalFrames: totalFrames,
+      start: start,
+    );
     final hops = _bandHops(pcm.samples, pcm.sampleRate);
     final table = BandTable.fromHops(
       hops,
       hopSize: SpectralFlux.defaultHopSize,
       sampleRate: pcm.sampleRate,
       fps: fps,
-      totalFrames: totalFrames,
+      totalFrames: boundToSource
+          ? totalFrames.clamp(0, (pcm.samples.length * fps / pcm.sampleRate).ceil())
+          : totalFrames,
     );
-    _cache[key] = table;
-    return table;
+    final result = (
+      table: table,
+      duration: Duration(
+        microseconds: (pcm.samples.length * 1000000 / pcm.sampleRate).round().clamp(
+          0,
+          (totalFrames * 1000000 / fps).round(),
+        ),
+      ),
+    );
+    _cache[key] = result;
+    return result;
   }
 
   /// Sums each 1024/512 Hann frame's magnitude spectrum into the three band

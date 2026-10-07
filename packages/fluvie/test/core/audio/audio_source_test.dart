@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/audio/audio.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
@@ -27,6 +29,14 @@ void main() {
       final source = AudioSource.network(Uri.parse('https://cdn.example.com/song.mp3'));
       expect((source as NetworkAudioSource).host, 'cdn.example.com');
     });
+
+    test('memory wraps verbatim bytes with an optional label', () {
+      final bytes = Uint8List.fromList([1, 2, 3]);
+      final source = AudioSource.memory(bytes, debugLabel: 'clap.wav');
+      expect(source, isA<MemoryAudioSource>());
+      expect((source as MemoryAudioSource).bytes, same(bytes));
+      expect(source.debugLabel, 'clap.wav');
+    });
   });
 
   group('AudioSource value equality', () {
@@ -55,6 +65,21 @@ void main() {
 
     test('an asset is never equal to a file with the same string', () {
       expect(const AudioSource.asset('a.mp3'), isNot(const AudioSource.file('a.mp3')));
+    });
+
+    test('memory equality is by byte-buffer identity plus label', () {
+      final bytes = Uint8List.fromList([1, 2, 3]);
+      final copy = Uint8List.fromList([1, 2, 3]);
+      expect(AudioSource.memory(bytes), AudioSource.memory(bytes));
+      expect(
+        AudioSource.memory(bytes).hashCode,
+        AudioSource.memory(bytes).hashCode,
+      );
+      expect(AudioSource.memory(bytes), isNot(AudioSource.memory(copy)));
+      expect(
+        AudioSource.memory(bytes, debugLabel: 'a'),
+        isNot(AudioSource.memory(bytes, debugLabel: 'b')),
+      );
     });
   });
 
@@ -88,6 +113,17 @@ void main() {
         isNot(const AudioSource.file('a.mp3').cacheKey),
       );
     });
+
+    test('memory keys by byte content, so a re-import shares its cache entry', () {
+      final bytes = Uint8List.fromList([9, 8, 7]);
+      final copy = Uint8List.fromList([9, 8, 7]);
+      expect(AudioSource.memory(bytes).cacheKey, AudioSource.memory(copy).cacheKey);
+      expect(AudioSource.memory(bytes).cacheKey, matches(RegExp(r'^[0-9a-f]{16}$')));
+      expect(
+        AudioSource.memory(bytes).cacheKey,
+        isNot(AudioSource.memory(Uint8List.fromList([7, 8, 9])).cacheKey),
+      );
+    });
   });
 
   group('AudioSource.toString', () {
@@ -97,6 +133,14 @@ void main() {
       expect(
         AudioSource.network(Uri.parse('https://h/a.mp3')).toString(),
         'AudioSource.network(https://h/a.mp3)',
+      );
+      expect(
+        AudioSource.memory(Uint8List.fromList([1, 2]), debugLabel: 'pop.wav').toString(),
+        'AudioSource.memory(pop.wav, 2 bytes)',
+      );
+      expect(
+        AudioSource.memory(Uint8List.fromList([1, 2])).toString(),
+        'AudioSource.memory(unnamed, 2 bytes)',
       );
     });
   });

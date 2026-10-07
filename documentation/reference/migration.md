@@ -5,34 +5,34 @@ surface consolidates them. There is now one motion type (`Animation`), one
 attachment (`.animate([...])`), and plain Flutter layout. This page maps each
 old name to its replacement.
 
-## 0.2.x to 0.3.0
+## 0.2.x to 0.3.x
 
-Nothing in the authoring surface changed. A `Video` you wrote for 0.2 builds
-unchanged in 0.3. What changed is the shape of a project around it.
+The `Video` and `Scene` authoring model remains familiar. The CLI now owns the
+preview and render support around that composition, with additional native APIs
+for clip transitions and clip-audio gain.
 
-A Fluvie project is now a directory holding a composition file, an `assets/`
-folder, and a `pubspec.yaml`. There is no app, no `lib/main.dart`, no capture
-harness, and no registry. `fluvie render` and `fluvie preview` take the `.dart`
-file directly and generate whatever they need, per invocation.
+A composition can live in an ordinary Flutter application or a smaller project
+holding a composition file, an `assets/` folder, and a `pubspec.yaml`. Neither a
+capture harness nor a registry is required. `fluvie render` and `fluvie preview`
+take the `.dart` file directly and prepare their package-owned support.
 
 ### Your existing project still works
 
-Nothing breaks on upgrade. `resolveProjectDir` still finds a project by its
-pubspec, and `fluvie render <key> --out <file>` is unchanged, so your committed
-harness and registry keep rendering exactly as they did. `fluvie list` still
-prints your keys. You can stop here.
+`resolveProjectDir` still finds a project by its pubspec, and the legacy
+`fluvie render <key> --out <file>` registry path remains available. `fluvie list`
+still prints your keys. Moving to file targets is optional.
 
 ### The recommended path
 
-Delete the machinery and render the file. For a project that looks like the 0.2
+Render the composition file directly. For a project that looks like the 0.2
 scaffold:
 
-1. **Move the composition to the project root** (or anywhere you like) and rename
-   its builder to `build`:
+1. **Keep the composition in `lib/`** (or anywhere you like) and rename its builder
+   to `build`:
 
    <!-- code-excerpt-ignore: a before/after of one signature, not a runnable composition -->
    ```dart
-   // lib/videos/intro.dart  ->  intro.dart
+   // lib/videos/intro.dart
    Video intro() { ... }     // before
    Video build() { ... }     // after
    ```
@@ -40,16 +40,11 @@ scaffold:
    Keep the old name if you prefer, and pass `--entry intro` on every render and
    preview instead.
 
-2. **Delete the three files you no longer own:**
-
-   ```sh
-   rm test/render/capture_harness_test.dart   # the CLI generates one per render
-   rm lib/main.dart                           # `fluvie preview` replaces the app
-   rm lib/videos/compositions.dart            # or wherever your registry lives
-   ```
-
-   Delete the widget test that pumped the app, too, if it only existed to prove
-   the app booted.
+2. **Retire rendering-only boilerplate.** The CLI supplies its own external
+   capture harness, so a legacy capture test and composition registry are no
+   longer required. Remove them only if nothing else uses them. An existing
+   Flutter application's `lib/main.dart` and application tests remain useful;
+   keep them when Fluvie is one feature of that app.
 
 3. **Render the file:**
 
@@ -58,12 +53,10 @@ scaffold:
    fluvie preview ./lib/intro.dart
    ```
 
-4. **Move your media under `assets/`** and drop the `flutter: assets:` block from
-   your pubspec. The CLI re-derives it from the asset tree on every render and
-   preview. It enumerates every subdirectory that holds files, which a
-   hand-written `assets/` entry does not: Flutter bundles a declared asset
-   directory non-recursively, so `assets/images/logo.png` was silently missing at
-   runtime unless you declared `assets/images/` yourself.
+4. **Keep media under `assets/`** for automatic nested discovery. Preserve
+   existing Flutter asset and font declarations. A normal Flutter `assets/`
+   entry is not recursive, so Fluvie discovers subdirectories when preparing
+   rendering resources without replacing unrelated application assets.
 
 5. **Drop the platform directories** (`android/`, `ios/`, `linux/`, `macos/`,
    `windows/`, `web/`) if the project existed only to render. `fluvie preview`
@@ -72,20 +65,23 @@ scaffold:
 
 ### What to know afterwards
 
-- **The frame cache is off by default for a file target.** The render digest keys
-  on the config and the composition key, never on the composition itself, so an
-  edited file with the same size and frame count would replay stale frames. Pass
-  `--cache` to opt in. On the key path the cache is still on, and `--no-cache`
-  still bypasses it.
-- **`fluvie init` takes only `--name`, `--dir`, and `--force`.** `--path`,
+- **The frame cache is on by default for a file target.** The CLI fingerprints
+  source code, resolved package code, project configuration, declared and
+  discovered assets, render options, and toolchain identity before reusing
+  frames. Use `--no-cache` for resources whose bytes can change outside those
+  inputs, such as a runtime network request.
+- **`fluvie init` merges into an existing Flutter project.** `--with-ai` and
+  `--with-lints` add optional packages; `--fluvie-path` selects a local checkout.
+  `--name`, `--dir`, and `--force` remain available. `--path`,
   `--render` / `--no-render`, and `--yes` / `-y` are gone. It is no longer
   interactive and it no longer runs `flutter create`, so there is nothing to say
   yes to.
-- **`fluvie preview` defaults to your desktop, not the browser.** A desktop
-  preview decodes any clip through FFmpeg; a browser is limited to what WebCodecs
-  supports, and ProRes is not on that list. Pass `-d chrome` for the browser.
-- **`renderVideo` is the entry point if you host renders yourself.** It replaces
-  hand-assembling the capture shell, the media pre-pass, and the audio staging.
+- **`fluvie preview` starts a browser URL by default.** Its local FFmpeg bridge
+  decodes source clips and audio, including ProRes alpha and WebM. Pass
+  `-d chrome` to open Chrome, or select an installed desktop device explicitly.
+- **`runFluvieRender` owns the CLI capture host.** A normal Dart entry needs no
+  consumer harness. Advanced hosts can call it directly; `renderVideo` remains
+  the lower level composition render entry for a custom integration.
   See [the rendering surface](rendering-surface.md).
 - **`RENDER_PROJECT` now means a Fluvie project**, a pubspec that depends on
   `fluvie`, rather than a project containing `test/render/capture_harness_test.dart`.

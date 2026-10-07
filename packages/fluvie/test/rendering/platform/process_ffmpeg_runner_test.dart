@@ -1,3 +1,4 @@
+import 'dart:ffi' show Abi;
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -105,9 +106,12 @@ void main() {
     test('falls back to the managed cache build when present', () async {
       final cacheRoot = Directory.systemTemp.createTempSync('fluvie_provider_cache_');
       addTearDown(() => cacheRoot.deleteSync(recursive: true));
-      final cached = File('${cacheRoot.path}/fluvie/ffmpeg/8.1/ffmpeg')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('stub');
+      final cached =
+          File(
+              '${cacheRoot.path}/fluvie/toolchains/8.1-2026-05-31-pair1/${Abi.current()}/bin/ffmpeg',
+            )
+            ..createSync(recursive: true)
+            ..writeAsStringSync('stub');
       stubProbe(cached.path);
 
       final provider = ProcessFfmpegRunner(

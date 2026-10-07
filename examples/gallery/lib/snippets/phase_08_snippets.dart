@@ -74,3 +74,27 @@ List<Image> imageConstructors(Uint8List bytes) => [
   Image.network('https://picsum.photos/seed/fluvie/800/800'),
   // #enddocregion image-constructors
 ];
+
+/// The four ways to name a clip, mirroring the image menu. A memory clip's
+/// bytes never touch disk, so its embedded audio cannot join the encoder
+/// mix; declare an `Audio` track for the sound instead.
+List<Clip> clipConstructors(Uint8List bytes) => [
+  // #docregion clip-constructors
+  Clip.asset('assets/fixtures/clip_1s.mp4'),
+  Clip.file('/captures/take_3.mp4'),
+  Clip.memory(bytes, debugLabel: 'imported.mp4'),
+  Clip.network(Uri.parse('https://cdn.example.com/promo.mp4')),
+  // #enddocregion clip-constructors
+];
+
+/// Retiming a clip. The rate scales how much source time each composition
+/// second spends, so the picture and the embedded audio move together; a
+/// negative rate plays the trim backwards and drops the audio, because no
+/// encoder filter here reverses a stream.
+List<Clip> clipSpeeds() => [
+  // #docregion clip-speed
+  Clip.asset('assets/fixtures/clip_1s.mp4', speed: 0.5),
+  Clip.asset('assets/fixtures/clip_1s.mp4', speed: 2),
+  Clip.asset('assets/fixtures/clip_1s.mp4', speed: -1),
+  // #enddocregion clip-speed
+];

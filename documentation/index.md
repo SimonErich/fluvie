@@ -13,6 +13,7 @@ you direct, Fluvie keeps continuity, and FFmpeg runs the projector.
   Start with [Installation](getting-started/installation.md), then
   [Start a project](getting-started/start-a-project.md): `fluvie init` scaffolds
   one, `fluvie preview` runs it live, `fluvie render` writes the file.
+- **Creating from local files or using an assistant?** [Create from local assets](getting-started/authoring-with-assets.md) walks through a fresh Flutter project, factual asset inventory, readable code, browser preview and MP4 output.
 - **Building something?** Reach for the task [guides](guides/animating-elements.md):
   animation, audio, charts, code scenes, theming, and export.
 - **Just need a recipe?** The [cookbook](cookbook.md) has short answers to one task each.

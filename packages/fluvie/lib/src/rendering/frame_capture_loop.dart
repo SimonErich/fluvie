@@ -3,6 +3,7 @@ import 'package:fluvie/src/rendering/capture/frame_capture_service.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
 import 'package:fluvie/src/rendering/encoding/frame_store.dart';
 import 'package:fluvie/src/rendering/io/render_sandbox.dart';
+import 'package:fluvie/src/rendering/render_cancellation.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
 
 /// Pumps the tree to frame `n` and returns once that frame is fully built —
@@ -49,15 +50,18 @@ Future<void> runFrameCaptureLoop({
   FrameHandler? onFrame,
   FrameStore? store,
   ProgressCallback? onProgress,
+  RenderCancellation? cancellation,
 }) async {
   if ((sink == null) == (onFrame == null)) {
     throw ArgumentError('Provide exactly one of sink or onFrame.');
   }
   final frameBytes = config.width * config.height * 4;
   final useStore = config.cacheEnabled && store != null;
+  Future<T> run<T>(Future<T> Function() operation) => cancellation?.run(operation) ?? operation();
   final end = config.startFrame + config.frameCount;
   for (var frame = config.startFrame; frame < end; frame++) {
-    final cached = useStore ? await store.lookup(digest, frame) : null;
+    cancellation?.throwIfCancelled();
+    final cached = useStore ? await run(() => store.lookup(digest, frame)) : null;
     final RawFrame raw;
     if (cached != null && cached.length == frameBytes) {
       raw = RawFrame(
@@ -67,23 +71,27 @@ Future<void> runFrameCaptureLoop({
         rgba: cached,
       );
     } else {
-      await pump(frame);
-      raw = await capture.capture(
-        boundaryKey: boundaryKey,
-        frameIndex: frame,
-        width: config.width,
-        height: config.height,
+      await run(() => pump(frame));
+      raw = await run(
+        () => capture.capture(
+          boundaryKey: boundaryKey,
+          frameIndex: frame,
+          width: config.width,
+          height: config.height,
+        ),
       );
-      if (useStore) await store.store(digest, frame, raw.rgba);
+      if (useStore) await run(() => store.store(digest, frame, raw.rgba));
     }
+    cancellation?.throwIfCancelled();
     if (onFrame != null) {
-      await onFrame(raw);
+      await run(() => onFrame(raw));
     } else {
       sink!.add(raw.rgba);
     }
     // Report after the frame is consumed (cache hit or fresh capture alike), so
     // a progress reader sees monotonically rising completion. Observational
     // only: it reads no clock and never changes a frame's bytes.
+    cancellation?.throwIfCancelled();
     onProgress?.call(frame - config.startFrame + 1, config.frameCount);
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:fluvie_cli/docs.dart';
 import 'package:fluvie_server/src/docs/doc_search_service.dart';
 import 'package:fluvie_server/src/mcp/mcp_tool.dart';
 
@@ -9,6 +10,15 @@ import 'package:fluvie_server/src/mcp/mcp_tool.dart';
 /// full-text search them, and read one in full. They need no render backend, so
 /// they are the whole tool set in docs mode and the base of it in build mode.
 List<McpTool> buildDocTools(DocSearchService docs) => [
+  McpTool(
+    name: 'get_authoring_context',
+    description:
+        'Start here when creating a video in a local Flutter project. Returns '
+        "the installed version's offline authoring guide, asset workflow, "
+        'compiled examples, preview/render commands, and API cheatsheet.',
+    inputSchema: const {'type': 'object', 'properties': <String, Object?>{}},
+    handler: (_) async => McpToolResult.text(authoringContext()),
+  ),
   McpTool(
     name: 'list_docs',
     description:

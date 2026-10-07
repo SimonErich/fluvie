@@ -4,35 +4,9 @@ import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.MediaMuxer
+import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
-/** One audio track to mix, as sent over the channel. */
-data class AudioTrackSpec(
-  val path: String,
-  val delayMs: Int,
-  val volume: Float,
-  val trimStartSeconds: Double?,
-  val trimEndSeconds: Double?,
-  val fadeInSeconds: Double?,
-  val fadeOutSeconds: Double?,
-  val fadeOutStartSeconds: Double,
-  val loop: Boolean,
-) {
-  companion object {
-    fun from(map: Map<*, *>): AudioTrackSpec = AudioTrackSpec(
-      path = map["path"] as String,
-      delayMs = (map["delayMs"] as Number).toInt(),
-      volume = (map["volume"] as Number).toFloat(),
-      trimStartSeconds = (map["trimStartSeconds"] as Number?)?.toDouble(),
-      trimEndSeconds = (map["trimEndSeconds"] as Number?)?.toDouble(),
-      fadeInSeconds = (map["fadeInSeconds"] as Number?)?.toDouble(),
-      fadeOutSeconds = (map["fadeOutSeconds"] as Number?)?.toDouble(),
-      fadeOutStartSeconds = (map["fadeOutStartSeconds"] as Number?)?.toDouble() ?: 0.0,
-      loop = map["loop"] as? Boolean ?: false,
-    )
-  }
-}
 
 /**
  * Decodes [tracks], mixes them into one stereo 44.1 kHz buffer (applying each
@@ -46,58 +20,36 @@ class AudioMixEncoder(
   private val tracks: List<AudioTrackSpec>,
   private val masterVolume: Float,
   private val durationSeconds: Double,
+  private val audioStartSeconds: Double = 0.0,
 ) {
-  fun encodeTo(outputPath: String) {
+  fun encodeTo(outputPath: String): Int {
     val totalFrames = (durationSeconds * SAMPLE_RATE).toInt()
     val mix = FloatArray(totalFrames * CHANNELS)
-    for (spec in tracks) mixOne(spec, mix, totalFrames)
-    encodeAac(mix, outputPath)
-  }
-
-  private fun mixOne(spec: AudioTrackSpec, mix: FloatArray, totalFrames: Int) {
-    val pcm = PcmAudioDecoder.decode(spec.path)
-    val gain = spec.volume * masterVolume
-    val sourceFrames = if (pcm.channels == 0) 0 else pcm.samples.size / pcm.channels
-    if (sourceFrames == 0) return
-
-    val trimStart = ((spec.trimStartSeconds ?: 0.0) * pcm.sampleRate).toInt()
-    val trimEnd = spec.trimEndSeconds?.let { (it * pcm.sampleRate).toInt() } ?: sourceFrames
-    val delayFrames = (spec.delayMs / 1000.0 * SAMPLE_RATE).toInt()
-    val fadeInFrames = ((spec.fadeInSeconds ?: 0.0) * SAMPLE_RATE).toInt()
-    val fadeOutFrames = ((spec.fadeOutSeconds ?: 0.0) * SAMPLE_RATE).toInt()
-    val fadeOutStart = (spec.fadeOutStartSeconds * SAMPLE_RATE).toInt()
-
-    var dst = delayFrames
-    var pos = trimStart
-    while (dst in 0 until totalFrames) {
-      if (pos >= trimEnd || pos >= sourceFrames) {
-        if (spec.loop && trimEnd > trimStart) {
-          pos = trimStart
-          continue
+    for (spec in tracks) PcmTrackMixer.mix(spec, PcmAudioDecoder.decode(spec.path), mix,
+      totalFrames, SAMPLE_RATE, CHANNELS, masterVolume, audioStartSeconds)
+    val selected = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC)
+    val codecName = selected.name
+    selected.release()
+    val delay = synchronized(primingByCodec) {
+      primingByCodec.getOrPut(codecName) {
+        val calibration = File(File(outputPath).parentFile, "fluvie_aac_calibration.m4a")
+        try {
+          encodeAac(AacDelayCalibration.signal(CHANNELS), calibration.path, codecName)
+          val decoded = PcmAudioDecoder.decode(calibration.path)
+          require(decoded.sampleRate == SAMPLE_RATE && decoded.channels == CHANNELS)
+          AacDelayCalibration.measure(decoded.samples, decoded.channels)
+        } finally {
+          calibration.delete()
         }
-        break
       }
-      val sourceFrame = (pos.toLong() * pcm.sampleRate / SAMPLE_RATE).toInt()
-      if (sourceFrame >= sourceFrames) break
-
-      var envelope = gain
-      val rel = dst - delayFrames
-      if (fadeInFrames > 0 && rel < fadeInFrames) envelope *= rel.toFloat() / fadeInFrames
-      if (fadeOutFrames > 0 && rel >= fadeOutStart) {
-        val into = rel - fadeOutStart
-        envelope *= (1f - into.toFloat() / fadeOutFrames).coerceIn(0f, 1f)
-      }
-      for (ch in 0 until CHANNELS) {
-        val sourceChannel = if (pcm.channels == 1) 0 else ch
-        val sample = pcm.samples[sourceFrame * pcm.channels + sourceChannel] / 32768f
-        mix[dst * CHANNELS + ch] += sample * envelope
-      }
-      dst++
-      pos++
     }
+    // Some codec implementations do not flush all delayed samples at EOS.
+    // Explicit silence drains priming plus two AAC blocks; elst crops the tail.
+    encodeAac(mix, outputPath, codecName, delay + 2048)
+    return delay
   }
 
-  private fun encodeAac(mix: FloatArray, outputPath: String) {
+  private fun encodeAac(mix: FloatArray, outputPath: String, codecName: String, paddingFrames: Int = 0) {
     val format = MediaFormat.createAudioFormat(
       MediaFormat.MIMETYPE_AUDIO_AAC,
       SAMPLE_RATE,
@@ -106,21 +58,22 @@ class AudioMixEncoder(
       setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC)
       setInteger(MediaFormat.KEY_BIT_RATE, 128_000)
     }
-    val codec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC)
+    val codec = MediaCodec.createByCodecName(codecName)
     codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
     codec.start()
     val muxer = MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
 
-    val pcm = ByteBuffer.allocate(mix.size * 2).order(ByteOrder.nativeOrder())
+    val pcm = ByteBuffer.allocate((mix.size + paddingFrames * CHANNELS) * 2).order(ByteOrder.nativeOrder())
     for (sample in mix) {
       pcm.putShort((sample.coerceIn(-1f, 1f) * 32767f).toInt().toShort())
     }
+    repeat(paddingFrames * CHANNELS) { pcm.putShort(0) }
     pcm.flip()
 
     val info = MediaCodec.BufferInfo()
     var trackIndex = -1
     var muxing = false
-    var presentationUs = 0L
+    var inputFrames = 0L
     var inputDone = false
     try {
       while (true) {
@@ -135,7 +88,7 @@ class AudioMixEncoder(
                 inIndex,
                 0,
                 0,
-                presentationUs,
+                inputFrames * 1_000_000L / SAMPLE_RATE,
                 MediaCodec.BUFFER_FLAG_END_OF_STREAM,
               )
               inputDone = true
@@ -143,8 +96,8 @@ class AudioMixEncoder(
               val slice = ByteArray(chunk)
               pcm.get(slice)
               buffer.put(slice)
-              codec.queueInputBuffer(inIndex, 0, chunk, presentationUs, 0)
-              presentationUs += (chunk / (2 * CHANNELS)).toLong() * 1_000_000L / SAMPLE_RATE
+              codec.queueInputBuffer(inIndex, 0, chunk, inputFrames * 1_000_000L / SAMPLE_RATE, 0)
+              inputFrames += chunk / (2 * CHANNELS)
             }
           }
         }
@@ -174,6 +127,7 @@ class AudioMixEncoder(
   }
 
   private companion object {
+    val primingByCodec = mutableMapOf<String, Int>()
     const val SAMPLE_RATE = 44100
     const val CHANNELS = 2
     const val TIMEOUT_US = 10_000L

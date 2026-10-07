@@ -1,167 +1,82 @@
-/// The preview app `fluvie init` writes to `lib/main.dart` in new projects.
-///
-/// `Video` has no wall-clock ticker, so the preview drives a `RenderController`
-/// from a `Ticker` and offers a play/pause button and a scrub slider. It uses
-/// only the public Fluvie API.
+/// The package-owned live preview adapter used in the external cached app.
 library;
 
-/// The source of the preview `lib/main.dart`.
-///
-/// [importLine] imports the composition; [functionName] is the builder; [title]
-/// is the window title.
+/// Creates a minimal shell around the public Fluvie preview widget.
 String previewAppSource({
   required String importLine,
   required String functionName,
   required String title,
-}) => _preview
+  bool localMediaBridge = false,
+}) => (localMediaBridge ? _preview : _simplePreview)
     .replaceFirst('{{IMPORT}}', importLine)
     .replaceFirst('{{FUNCTION}}', functionName)
-    .replaceFirst('{{TITLE}}', title);
+    .replaceFirst(
+      '{{TITLE}}',
+      title.replaceAll(r'\', r'\\').replaceAll("'", r"\'").replaceAll(r'$', r'\$'),
+    );
 
 const String _preview = r'''
-// A live preview for your Fluvie composition. Run it with `flutter run`.
-//
-// `Video` is driven by a frame index, not a wall clock, so this app owns a
-// `RenderController` and advances it from a `Ticker`. Drag the slider to scrub.
-//
-// `PreviewMediaScope` pre-decodes the composition's media so clips play here
-// exactly as they render. On web it also needs `fluvie_web_encoder`'s decoder
-// passed as `clipDecoder:`; on desktop it uses ffmpeg and needs nothing.
+// Generated Fluvie preview adapter. Edit the original composition instead.
+import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
+import 'package:flutter/services.dart';
+import 'package:fluvie/fluvie.dart';
+import 'package:fluvie_web_encoder/fluvie_web_encoder.dart';
+import 'package:http/http.dart' as http;
+{{IMPORT}}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  const endpointText = String.fromEnvironment('FLUVIE_PREVIEW_ENDPOINT');
+  const token = String.fromEnvironment('FLUVIE_PREVIEW_TOKEN');
+  const projectDir = String.fromEnvironment('FLUVIE_PROJECT_DIR');
+  final endpoint = endpointText.isEmpty ? null : Uri.parse(endpointText);
+  AssetBundle? assets = !kIsWeb && projectDir.isNotEmpty ? ProjectAssetBundle.fromProject(projectDir) : null;
+  if (kIsWeb && endpoint != null) {
+    final inventory = await http.get(endpoint.resolve('/assets'), headers: {'X-Fluvie-Token': token});
+    if (inventory.statusCode != 200) throw StateError('Could not load preview assets (${inventory.statusCode}).');
+    final keys = ((jsonDecode(inventory.body) as Map<String, dynamic>)['assets'] as List).cast<String>();
+    assets = ProjectAssetBundle(
+      assets: keys,
+      readAsset: (key) async {
+        final response = await http.get(endpoint.resolve('/assets').replace(queryParameters: {'path': key}), headers: {'X-Fluvie-Token': token});
+        if (response.statusCode != 200) throw StateError('Preview asset "$key" could not be loaded (${response.statusCode}).');
+        return ByteData.sublistView(response.bodyBytes);
+      },
+      fallback: rootBundle,
+    );
+  }
+  if (kIsWeb && endpoint != null) watchLocalPreviewReloads(endpoint: endpoint, sessionToken: token);
+  runApp(MaterialApp(
+    title: '{{TITLE}}',
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData.dark(useMaterial3: true),
+    home: VideoPreview.builder(
+      builder: {{FUNCTION}},
+      assetBundle: assets,
+      clipDecoder: kIsWeb && endpoint != null
+          ? createLocalFfmpegClipDecoder(endpoint: endpoint, sessionToken: token)
+          : null,
+      audio: kIsWeb && endpoint != null
+          ? createLocalPreviewAudioController(endpoint: endpoint, sessionToken: token)
+          : null,
+    ),
+  ));
+}
+''';
+
+const String _simplePreview = '''
 import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 {{IMPORT}}
 
-void main() => runApp(const FluviePreviewApp());
-
-/// The preview app shell.
-class FluviePreviewApp extends StatelessWidget {
-  /// Creates the preview app.
-  const FluviePreviewApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: '{{TITLE}}',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(useMaterial3: true),
-      home: const VideoPreview(builder: {{FUNCTION}}),
-    );
-  }
-}
-
-/// Plays a [Video] in a loop with a play/pause button and a scrub slider.
-class VideoPreview extends StatefulWidget {
-  /// Creates a preview for the composition [builder].
-  const VideoPreview({required this.builder, super.key});
-
-  /// Builds the composition to preview.
-  final Video Function() builder;
-
-  @override
-  State<VideoPreview> createState() => _VideoPreviewState();
-}
-
-class _VideoPreviewState extends State<VideoPreview> with SingleTickerProviderStateMixin {
-  late final Video _video = widget.builder();
-  final RenderController _controller = RenderController();
-  late final _ticker = createTicker(_onTick);
-  bool _playing = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _ticker.start();
-  }
-
-  void _onTick(Duration elapsed) {
-    final total = _video.totalFrames;
-    final frame = ((elapsed.inMicroseconds / 1e6) * _video.fps).floor() % total;
-    _controller.seek(frame);
-  }
-
-  void _togglePlay() {
-    setState(() {
-      _playing = !_playing;
-      _playing ? _ticker.start() : _ticker.stop();
-    });
-  }
-
-  @override
-  void dispose() {
-    _ticker.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ColoredBox(
-                color: const Color(0xFF14141C),
-                child: Center(
-                  child: RenderModeContext(
-                    mode: RenderMode.preview,
-                    child: RenderControllerScope(
-                      controller: _controller,
-                      child: AspectRatio(
-                        aspectRatio: _video.width / _video.height,
-                        child: FittedBox(
-                          child: SizedBox(
-                            width: _video.width.toDouble(),
-                            height: _video.height.toDouble(),
-                            // Decodes the composition's media up front, then
-                            // paints it through the same painters the render
-                            // uses, so a `Clip` plays here instead of showing
-                            // its placeholder. Clips decode at a proxy
-                            // resolution to bound memory; drop the scope (or
-                            // pass maxClipEdge: null) to preview full-res.
-                            child: PreviewMediaScope(composition: _video),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            AnimatedBuilder(
-              animation: _controller,
-              builder: (context, _) {
-                final total = _video.totalFrames;
-                final frame = _controller.frame.clamp(0, total - 1);
-                return Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(_playing ? Icons.pause : Icons.play_arrow),
-                      onPressed: _togglePlay,
-                    ),
-                    Expanded(
-                      child: Slider(
-                        value: frame.toDouble(),
-                        max: (total - 1).toDouble(),
-                        onChanged: (value) {
-                          if (_playing) _togglePlay();
-                          _controller.seek(value.round());
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: Text('${frame + 1} / $total'),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+void main() => runApp(MaterialApp(
+  title: '{{TITLE}}',
+  debugShowCheckedModeBanner: false,
+  theme: ThemeData.dark(useMaterial3: true),
+  home: VideoPreview.builder(builder: {{FUNCTION}}),
+));
 ''';

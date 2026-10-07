@@ -5,15 +5,15 @@ import 'dart:typed_data';
 import 'package:fluvie/src/core/hash/fnv1a.dart';
 import 'package:fluvie/src/media/runtime/user_cache_root.dart';
 
+part 'clip_frame_cache_eviction.dart';
+
 /// Persists extracted clip frames (raw RGBA) across runs, keyed by what
-/// actually determines the pixels, so an unchanged clip is decoded once ever
-/// instead of once per run.
+/// actually determines the pixels, so later runs can reuse an unchanged clip
+/// while its matching frames remain cached.
 ///
-/// The ffmpeg extractor spawns a process per frame, so a 106-frame clip costs
-/// ~106 process spawns on every cold run. That is the placeholder a live
-/// preview shows on each hot restart. Entries live under a stable user cache
-/// directory (never the system temp directory), so a hot restart, a later
-/// render, and a crashed run all share them.
+/// Decoding consumes CPU and IO even when frames are extracted in a batch.
+/// Entries live under a stable user cache directory, not the system temporary
+/// directory, so hot restarts, later renders and recovery runs can share them.
 ///
 /// **The key covers the decode, not just the source.** A preview decodes at a
 /// proxy bound (`maxClipDecodeEdge`) while a render decodes at full source
@@ -74,13 +74,19 @@ final class ClipFrameCache {
   /// The decode dimensions and the decoder are part of the key because they
   /// change the pixels: the same source decoded at a preview's proxy bound and
   /// at full render resolution are different rasters, and VP9 alpha survives
-  /// only through `libvpx-vp9`.
+  /// only through `libvpx-vp9`. [extractionIdentity] identifies the backend
+  /// implementation and build; changing it invalidates decoded pixels.
   String clipKey({
     required String contentHash,
     required int width,
     required int height,
     String? decoder,
-  }) => fnv1a64Hex(utf8.encode('$contentHash:$width:$height:${decoder ?? ''}'));
+    String? extractionIdentity,
+  }) => fnv1a64Hex(
+    utf8.encode(
+      jsonEncode(['clip-rgba-v2', contentHash, width, height, decoder, extractionIdentity]),
+    ),
+  );
 
   /// The cached RGBA bytes of [frame] under [clipKey], or `null` on a miss.
   ///
@@ -151,38 +157,7 @@ final class ClipFrameCache {
   /// Non-fatal by contract: a cache that cannot be swept (a concurrent run
   /// deleting the same key, a read-only root) must never fail a render, so
   /// every filesystem error here is swallowed.
-  Future<void> sweep() async {
-    try {
-      if (!root.existsSync()) return;
-      final entries = [
-        for (final entity in root.listSync())
-          if (entity is Directory) _measure(entity),
-      ]..sort((a, b) => a.usedAt.compareTo(b.usedAt));
-      var total = entries.fold(0, (sum, entry) => sum + entry.bytes);
-      for (final entry in entries) {
-        if (total <= maxBytes) return;
-        entry.dir.deleteSync(recursive: true);
-        total -= entry.bytes;
-      }
-      // coverage:ignore-start defensive arm reaching it needs a concurrent run deleting the same key or an unreadable root neither of which a unit test can stage
-    } on FileSystemException {
-      // Best effort: an unsweepable cache is over budget, not broken.
-    }
-    // coverage:ignore-end
-  }
-
-  /// One clip key's total bytes and newest mtime (its LRU recency).
-  _CacheEntry _measure(Directory dir) {
-    var bytes = 0;
-    var usedAt = DateTime.fromMillisecondsSinceEpoch(0);
-    for (final entity in dir.listSync()) {
-      if (entity is! File) continue;
-      final stat = entity.statSync();
-      bytes += stat.size;
-      if (stat.modified.isAfter(usedAt)) usedAt = stat.modified;
-    }
-    return _CacheEntry(dir, bytes, usedAt);
-  }
+  Future<void> sweep() => _sweep();
 
   File _frameFile(String clipKey, int frame) => File('${root.path}/$clipKey/$frame.rgba');
 
@@ -195,13 +170,4 @@ final class ClipFrameCache {
       );
     }
   }
-}
-
-/// One measured clip key directory: how much it holds and when it was last used.
-final class _CacheEntry {
-  const _CacheEntry(this.dir, this.bytes, this.usedAt);
-
-  final Directory dir;
-  final int bytes;
-  final DateTime usedAt;
 }

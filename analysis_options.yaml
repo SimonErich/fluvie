@@ -2,7 +2,7 @@
 # Per-package files include this and (for consumers) add the custom_lint plugin.
 include: package:very_good_analysis/analysis_options.yaml
 
-# One page width for the whole workspace (see CLAUDE.md).
+# One page width for the whole workspace (see CONTRIBUTING.md).
 formatter:
   page_width: 100
 
@@ -16,6 +16,9 @@ analyzer:
     # TODO/FIXME are forbidden by the pre-commit grep-gate, not the analyzer,
     # so a stray "TODO" substring never trips --fatal-infos.
     todo: ignore
+    # custom_lint 0.8 uses the legacy plugin API. The separate lint gate still
+    # executes every rule while its upstream migrates to the new plugin API.
+    analysis_options_deprecated_plugins: ignore
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"

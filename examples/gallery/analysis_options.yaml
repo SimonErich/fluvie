@@ -10,6 +10,9 @@ analyzer:
     # project and deletes after each render; never production code, never
     # committed (see .gitignore).
     - .fluvie_playground/**
+    - build/**
+    - web/**
+    - linux/**
 
 linter:
   rules:

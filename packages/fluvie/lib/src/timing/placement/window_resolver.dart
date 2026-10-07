@@ -1,3 +1,4 @@
+import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/core/time_range.dart';
 import 'package:fluvie/src/timing/time_scope_data.dart';
 
@@ -33,5 +34,18 @@ TimeScopeData elementScopeFor(TimeRange? window, TimeScopeData sceneScope) {
   return sceneScope.child(
     startFrame: resolved.start,
     durationFrames: resolved.end - resolved.start,
+  );
+}
+
+/// Expresses a nested element window on its registrar owner's clock.
+/// Painting resolves each child against its nearest enclosing window; the
+/// composition plan expects scene-relative endpoints. Flattening once keeps
+/// registration, introspection and media collection on the same frames.
+TimeRange? registrationWindowFor(TimeRange? window, TimeScopeData enclosing, TimeScopeData owner) {
+  if (enclosing == owner) return window;
+  final resolved = resolveElementWindow(window, enclosing);
+  return TimeRange(
+    Time.frames(resolved.start - owner.startFrame),
+    Time.frames(resolved.end - owner.startFrame),
   );
 }

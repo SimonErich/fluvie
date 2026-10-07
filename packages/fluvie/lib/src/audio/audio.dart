@@ -1,4 +1,5 @@
 import 'package:fluvie/src/core/anchor.dart';
+import 'package:fluvie/src/core/audio/audio_automation.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/time.dart';
@@ -23,30 +24,119 @@ final class Audio {
   /// only that range of the file, and [track] names this track so
   /// `Trigger.beat(track: ...)` can resolve against its analysed beat grid.
   const Audio.music(
-    this.source, {
+    String source, {
     this.volume = 1,
+    this.automation = const AudioAutomation(),
+    this.ownerStartFrame = 0,
+    this.ownerDurationFrames,
     this.fadeIn,
     this.fadeOut,
     this.loop = false,
     this.trim,
     this.track,
-  }) : at = null,
+    this.at,
+  }) : _source = source,
+       _typedSource = null,
+       _sfx = false;
+
+  /// A music bed over an already-typed [AudioSource] — the same fields as
+  /// [Audio.music], skipping the string classification.
+  ///
+  /// This is how audio that has no path-shaped string reaches the mix: an
+  /// [AudioSource.memory] (imported bytes that never touched disk) flows
+  /// through here to the encoder, which materializes the bytes itself.
+  const Audio.musicSource(
+    AudioSource source, {
+    this.volume = 1,
+    this.automation = const AudioAutomation(),
+    this.ownerStartFrame = 0,
+    this.ownerDurationFrames,
+    this.fadeIn,
+    this.fadeOut,
+    this.loop = false,
+    this.trim,
+    this.track,
+    this.at,
+  }) : _typedSource = source,
+       _source = null,
        _sfx = false;
 
   /// A one-shot sound effect fired [at] a trigger, at [volume].
-  const Audio.sfx(this.source, {this.at, this.volume = 1})
-    : fadeIn = null,
-      fadeOut = null,
-      loop = false,
-      trim = null,
-      track = null,
-      _sfx = true;
+  const Audio.sfx(
+    String source, {
+    this.at,
+    this.volume = 1,
+    this.automation = const AudioAutomation(),
+    this.ownerStartFrame = 0,
+    this.ownerDurationFrames,
+  }) : _source = source,
+       _typedSource = null,
+       fadeIn = null,
+       fadeOut = null,
+       loop = false,
+       trim = null,
+       track = null,
+       _sfx = true;
+
+  /// A one-shot sound effect over an already-typed [AudioSource] — the same
+  /// fields as [Audio.sfx], skipping the string classification (see
+  /// [Audio.musicSource]).
+  const Audio.sfxSource(
+    AudioSource source, {
+    this.at,
+    this.volume = 1,
+    this.automation = const AudioAutomation(),
+    this.ownerStartFrame = 0,
+    this.ownerDurationFrames,
+  }) : _typedSource = source,
+       _source = null,
+       fadeIn = null,
+       fadeOut = null,
+       loop = false,
+       trim = null,
+       track = null,
+       _sfx = true;
+
+  Audio._window(Audio original, this.ownerStartFrame, this.ownerDurationFrames)
+    : _source = original._source,
+      _typedSource = original._typedSource,
+      volume = original.volume,
+      automation = original.automation,
+      fadeIn = original.fadeIn,
+      fadeOut = original.fadeOut,
+      loop = original.loop,
+      trim = original.trim,
+      track = original.track,
+      at = original.at,
+      _sfx = original._sfx;
+
+  /// Associates a collected scene track with its composition window.
+  Audio inWindow(int startFrame, int durationFrames) =>
+      Audio._window(this, startFrame, durationFrames);
+
+  /// Composition start of the owning scene, or zero for a video track.
+  final int ownerStartFrame;
+
+  /// Owning scene duration, or null for the full video window.
+  final int? ownerDurationFrames;
+
+  final String? _source;
+
+  final AudioSource? _typedSource;
 
   /// Where the audio comes from: an asset path, file path, or URL.
-  final String source;
+  ///
+  /// A typed construction ([Audio.musicSource]/[Audio.sfxSource]) reads back
+  /// its source's string form; a memory source, which has no authored string,
+  /// reads as the stable `memory:<cacheKey>` label (diagnostics only — the
+  /// encoder consumes [audioSource], never this label).
+  String get source => _source ?? _sourceString(_typedSource!);
 
   /// Linear gain applied to the track; `1` plays the file as authored.
   final double volume;
+
+  /// Authored volume envelope, relative to this track's audible window.
+  final AudioAutomation automation;
 
   /// How long the track ramps in from silence; `null` starts at full volume.
   final Time? fadeIn;
@@ -64,8 +154,7 @@ final class Audio {
   /// reference it; `null` leaves the track unnamed.
   final Anchor? track;
 
-  /// When a sound effect fires; `null` on music, and on an sfx it defaults to
-  /// its owner's start.
+  /// When playback begins relative to its owner; null starts with the owner.
   final Trigger? at;
 
   final bool _sfx;
@@ -73,8 +162,10 @@ final class Audio {
   /// Whether this track is a one-shot [Audio.sfx] rather than a music bed.
   bool get isSfx => _sfx;
 
-  /// This track's [source] string resolved to a typed, validated
-  /// [AudioSource] by its shape:
+  /// This track's typed, validated [AudioSource].
+  ///
+  /// A typed construction returns its source verbatim; a string construction
+  /// classifies [source] by shape:
   ///
   /// - an `http`/`https` URL becomes an [AudioSource.network],
   /// - a path starting with `/` becomes an [AudioSource.file],
@@ -84,9 +175,20 @@ final class Audio {
   /// or a network URL has no host — the encoder must never be handed a blank or
   /// hostless `-i`.
   AudioSource get audioSource =>
-      audioSourceFromString(source, context: track == null ? null : "on track '$track'");
+      _typedSource ??
+      audioSourceFromString(_source!, context: track == null ? null : "on track '$track'");
 
   @override
   String toString() =>
       _sfx ? 'Audio.sfx($source, at: $at, volume: $volume)' : 'Audio.music($source)';
 }
+
+/// The string form of a typed [AudioSource], for [Audio.source] reads: the
+/// asset key, file path, or URL as authored, or `memory:<cacheKey>` for a
+/// memory source (which has no authored string).
+String _sourceString(AudioSource source) => switch (source) {
+  AssetAudioSource(:final name) => name,
+  FileAudioSource(:final path) => path,
+  NetworkAudioSource(:final url) => url.toString(),
+  MemoryAudioSource() => 'memory:${source.cacheKey}',
+};

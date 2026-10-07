@@ -19,6 +19,9 @@ export 'package:fluvie/rendering.dart'
 export 'src/clip_decoder.dart' show createWebClipDecoder;
 export 'src/download.dart' show downloadBytes;
 export 'src/fluvie_web_stage.dart' show FluvieWebStage;
+export 'src/local_ffmpeg_clip_decoder.dart';
+export 'src/local_preview_audio.dart';
+export 'src/local_preview_events.dart';
 export 'src/web_audio_materializer.dart'
     show BundleWebAudioMaterializer, WebAudioFetch, WebAudioMaterializer;
 export 'src/web_capture_host.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:fluvie/fluvie.dart' show Edge, Transition, TransitionKind;
+import 'package:fluvie/fluvie.dart' show Edge, Transition, TransitionKind, strategyFor;
 
 /// Renders the presenter-level blend between two slides, mapped from the
 /// authored [Transition].
@@ -37,6 +37,19 @@ final class SlideTransitionBlend extends StatelessWidget {
   Widget build(BuildContext context) {
     final curved = CurvedAnimation(parent: progress, curve: transition.ease);
     return switch (transition.kind) {
+      TransitionKind.custom => AnimatedBuilder(
+        animation: curved,
+        builder: (context, _) => Stack(
+          fit: StackFit.passthrough,
+          alignment: Alignment.center,
+          children: strategyFor(transition.customKind!).compose(
+            outgoing: outgoing,
+            incoming: incoming,
+            easedProgress: curved.value,
+            spec: transition,
+          ),
+        ),
+      ),
       TransitionKind.cut => incoming,
       TransitionKind.crossFade => _over(FadeTransition(opacity: curved, child: incoming)),
       TransitionKind.slide => _over(

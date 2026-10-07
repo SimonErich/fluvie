@@ -17,8 +17,19 @@ void main() {
 
   String text(McpToolResult result) => result.content.single['text']! as String;
 
-  test('exposes list_docs, search_docs, and get_doc', () {
-    expect(tools.keys, containsAll(['list_docs', 'search_docs', 'get_doc']));
+  test('exposes authoring context, list_docs, search_docs, and get_doc', () {
+    expect(
+      tools.keys,
+      containsAll(['get_authoring_context', 'list_docs', 'search_docs', 'get_doc']),
+    );
+  });
+
+  test('authoring context contains actual offline code and commands', () async {
+    final result = await tools['get_authoring_context']!.handler(const {});
+    expect(text(result), contains('Video build()'));
+    expect(text(result), contains('fluvie render ./lib/my_video.dart'));
+    expect(text(result), contains('Corpus SHA-256:'));
+    expect(result.isError, isFalse);
   });
 
   test('list_docs returns every page', () async {

@@ -113,11 +113,19 @@ Scene(
 The next scene shows the same block small in the corner. During the blend, an
 overlay paints the element travelling from the first rect to the second.
 
-The rule is the same `Anchor` instance in both adjacent scenes. Equality is
-identity, so two `Anchor('logo')` never pair. A shared element must appear in
-exactly two scenes that touch; anything else raises a typed error that names
-the anchor. Most elements take a `shared:` parameter that wraps them in a
-`SharedElement` for you; for a plain widget, wrap it yourself.
+The rule is the same `Anchor` instance in a **contiguous run** of scenes.
+Equality is identity, so two `Anchor('logo')` never pair. A pair is the
+shortest chain there is; a longer one morphs through every cut it crosses, and
+each boundary blends its own two ends. One scene alone is a hero with nothing
+to morph to, and a run with a gap in it is two morphs pretending to be one —
+both raise a typed error that names the anchor and its scenes. Most elements
+take a `shared:` parameter that wraps them in a `SharedElement` for you; for a
+plain widget, wrap it yourself.
+
+A morph is two elements made to look like one across a cut. When you want one
+element that genuinely *is* one for the whole video — a logo that never
+blinks — reach for an [overlay](authoring-with-specs.md) instead: it mounts
+once, outside every scene, and holds through every boundary.
 
 ## Camera basics
 
@@ -154,6 +162,59 @@ The four moves are `Camera.still()`, `Camera.push(...)`, `Camera.pull(...)`,
 and `Camera.pan(from:, to:)`. Each eases over its `over` window (the whole
 scene by default) and then holds. Because the shared element reads its rect off
 the live scene, the morph follows the camera automatically.
+
+## Transitions between clips inside one scene
+
+Use `ClipTransitionGroup` when two clips share a scene rather than representing
+whole scene boundaries. Give each clip an `ElementId`, put its `.show` window
+directly inside that marker, and name the two IDs in a `ClipTransition`:
+
+<!-- code-excerpt "examples/gallery/lib/snippets/authoring_snippets.dart (clip-transition)" -->
+```dart
+/// Blend two adjacent clips without serializing the composition.
+Scene twoClips(String outgoingAsset, String incomingAsset) => Scene(
+  duration: 4.seconds,
+  children: [
+    ClipTransitionGroup(
+      transitions: [
+        ClipTransition(
+          outgoing: 'playing',
+          incoming: 'resting',
+          transition: Transition.crossFade(10.frames),
+        ),
+      ],
+      children: [
+        ElementId(
+          id: 'playing',
+          lane: 'cat',
+          child: Clip.asset(outgoingAsset).show(from: 0.frames, to: 60.frames),
+        ),
+        ElementId(
+          id: 'resting',
+          lane: 'cat',
+          child: Clip.asset(incomingAsset).show(from: 60.frames, to: 120.frames),
+        ),
+      ],
+    ),
+  ],
+);
+```
+
+This example assumes the video's default 30 FPS. Both clips occupy the same
+`lane`; IDs must be unique, and each edge joins consecutive clips on that lane.
+The planner derives the blend window from the authored clip windows, including
+abutting clips. It also applies matching equal-power envelopes to their embedded
+audio. Native Flutter composition and `VideoSpec` use the same transition planner,
+so readable generated Dart keeps the spec's visual and audio timing.
+
+Preparation checks the actual mounted target, including clips created by normal
+`Builder`, `LayoutBuilder` or reusable Flutter widgets. Every referenced ID must
+contain a real `Clip`; a text or empty placeholder is not a clip transition
+target. Keep the clip mounted and gate its visibility with `.show()`.
+Targets must use independent clip windows. `Clip.shared` and `SharedElement`
+anchors inside a clip transition are refused with the target ID and remedy;
+use shared-element transitions across scenes when that is the desired motion.
+
 
 ## Where to next
 

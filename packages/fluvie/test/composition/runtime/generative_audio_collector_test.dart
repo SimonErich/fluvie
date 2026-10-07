@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/audio/generative_audio.dart';
@@ -71,5 +73,17 @@ void main() {
       ),
     );
     expect(tracks.single.source, 'https://cdn.example/beat.mp3');
+  });
+
+  test('a memory-backed produced audio source flows through with its bytes', () {
+    // Audio carries typed sources since 9.6, so a resolver producing bytes in
+    // memory folds in like any other source instead of throwing.
+    final produced = AudioSource.memory(Uint8List.fromList(const [1, 2]), debugLabel: 'm.mp3');
+    final tracks = collectAudioTracks(
+      _video(const [GenerativeAudio(source: _music, volume: 0.5)]),
+      generative: FakeGenerativeResolver(audio: {_music: produced}),
+    );
+    expect(tracks.single.audioSource, same(produced));
+    expect(tracks.single.volume, 0.5);
   });
 }

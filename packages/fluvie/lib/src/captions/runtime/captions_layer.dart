@@ -5,6 +5,7 @@ import 'package:fluvie/src/captions/runtime/caption_active_cue.dart';
 import 'package:fluvie/src/captions/runtime/caption_cue_view.dart';
 import 'package:fluvie/src/media/runtime/image_resolver_scope.dart';
 import 'package:fluvie/src/rendering/runtime/frame_provider.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
 import 'package:fluvie/src/theme/build_context_tokens.dart';
 import 'package:fluvie/src/timing/time_scope_provider.dart';
 
@@ -33,6 +34,9 @@ final class CaptionsLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (PreparationScope.exposesOnlyGeometry(context)) return const SizedBox.shrink();
+
+    PreparationScope.requirePrepared(context, captions.captionSource, 'caption');
     final resolver = ImageResolverScope.maybeOf(context);
     if (resolver == null) return const SizedBox.shrink();
     final scope = TimeScopeProvider.of(context);

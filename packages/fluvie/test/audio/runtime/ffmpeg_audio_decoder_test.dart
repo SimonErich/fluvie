@@ -4,7 +4,19 @@ library;
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluvie/src/audio/runtime/ffmpeg_audio_decoder.dart';
+import 'package:fluvie/fluvie.dart' show AudioBand, AudioSource;
+import 'package:fluvie/rendering.dart';
+import 'package:fluvie/src/rendering/preparation_audio_io.dart';
+
+final class _CountingDecoder implements PcmDecoder {
+  int calls = 0;
+
+  @override
+  Future<PcmAudio> decode(AudioSource source) {
+    calls++;
+    return const FfmpegPcmDecoder().decode(source);
+  }
+}
 
 void main() {
   group('FfmpegAudioDecoder (needs a real ffmpeg)', () {
@@ -16,6 +28,40 @@ void main() {
 
     tearDown(() {
       if (sandbox.existsSync()) sandbox.deleteSync(recursive: true);
+    });
+
+    test('default preparation derives beats and bands from one native tone decode', () async {
+      final executable = const FfmpegAudioDecoder().binaryPath;
+      final tone = File('${sandbox.path}/tone.wav');
+      final generated = await Process.run(executable, [
+        '-v',
+        'error',
+        '-f',
+        'lavfi',
+        '-i',
+        'sine=frequency=440:duration=0.5',
+        tone.path,
+      ]);
+      expect(generated.exitCode, 0, reason: '${generated.stderr}');
+      final decoder = _CountingDecoder();
+      final analysis = defaultPreparationAudio(decoder: decoder);
+      final source = AudioSource.file(tone.path);
+      try {
+        await analysis.beats.detect(source, fps: 30, totalFrames: 15);
+        final bands = await analysis.bands.analyze(source, fps: 30, totalFrames: 15);
+        expect(decoder.calls, 1);
+        expect(bands.totalFrames, 15);
+        expect(bands.energyAt(0, AudioBand.mid), greaterThan(0));
+        final defaults = defaultPreparationAudio();
+        try {
+          final defaultBands = await defaults.bands.analyze(source, fps: 30, totalFrames: 15);
+          expect(defaultBands, bands);
+        } finally {
+          defaults.dispose();
+        }
+      } finally {
+        analysis.dispose();
+      }
     });
 
     test('decodes a generated tone to non-empty mono PCM', () async {

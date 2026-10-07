@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie/rendering.dart';
@@ -63,13 +65,115 @@ class _TrackingResolver implements MediaResolver, DisposableResolver {
 
 Directory _sandbox() {
   final dir = Directory.systemTemp.createTempSync('mob_render_');
-  addTearDown(() => dir.deleteSync(recursive: true));
+  addTearDown(() {
+    if (dir.existsSync()) dir.deleteSync(recursive: true);
+  });
   return dir;
 }
 
 const Widget _composition = ColoredBox(color: Color(0xFF112233));
 
 void main() {
+  testWidgets('native poster selects the requested output picture after a source seek', (
+    tester,
+  ) async {
+    final sandbox = _sandbox();
+    final renderer = OnDeviceVideoRenderer(
+      encoder: FakeMobileVideoEncoder(),
+      hostFactory: (size) => _TesterCaptureHost(tester, size),
+      sandboxFactory: () async => sandbox,
+    );
+    await tester.runAsync(() async {
+      await renderer.renderRequest(
+        VideoRenderRequest(
+          width: 32,
+          height: 32,
+          fps: 12,
+          frameCount: 2,
+          startFrame: 1,
+          posterFrame: 0,
+          audio: false,
+          composition: Video(
+            width: 32,
+            height: 32,
+            fps: 12,
+            scenes: [
+              Scene(
+                duration: 10.frames,
+                children: [
+                  // Exercise the experimental frame-clock API in the capture regression.
+                  // ignore: experimental_member_use
+                  FrameBuilder(
+                    (context) => SizedBox.expand(
+                      child: ColoredBox(
+                        color: context.frame == 1
+                            ? const Color(0xff00ff00)
+                            : const Color(0xffff0000),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+      final codec = await ui.instantiateImageCodec(
+        await File('${sandbox.path}/poster.png').readAsBytes(),
+      );
+      final decoded = await codec.getNextFrame();
+      try {
+        final pixels = await decoded.image.toByteData();
+        expect(pixels!.buffer.asUint8List().take(4), [0, 255, 0, 255]);
+      } finally {
+        decoded.image.dispose();
+        codec.dispose();
+      }
+    });
+  });
+
+  testWidgets('mounted custom clips contribute embedded audio and exact request geometry', (
+    tester,
+  ) async {
+    final recorder = ui.PictureRecorder();
+    ui.Canvas(recorder).drawColor(const Color(0xff00ff00), BlendMode.src);
+    final image = await recorder.endRecording().toImage(4, 4);
+    addTearDown(image.dispose);
+    final encoder = FakeMobileVideoEncoder();
+    final materializer = _FakeMaterializer();
+    final renderer = OnDeviceVideoRenderer(
+      encoder: encoder,
+      hostFactory: (size) => _TesterCaptureHost(tester, size),
+      sandboxFactory: () async => _sandbox(),
+      mediaResolver: _EmbeddedClipResolver(image),
+      audioMaterializer: materializer,
+    );
+    await tester.runAsync(
+      () => renderer.renderRequest(
+        VideoRenderRequest(
+          composition: Video(
+            fps: 12,
+            scenes: [
+              Scene(
+                duration: 12.frames,
+                children: [Builder(builder: (_) => Clip.asset('cat.mp4'))],
+              ),
+            ],
+          ),
+          width: 100,
+          height: 80,
+          fps: 12,
+          frameCount: 2,
+        ),
+      ),
+    );
+    final encoded = encoder.requests.single;
+    expect(encoded.width, 100);
+    expect(encoded.height, 80);
+    expect(encoded.audioTracks.single.path, '/materialized/cat.mp4');
+    expect(materializer.materialized, ['cat.mp4']);
+  });
+
   testWidgets('captures a composition and encodes it to out.mp4', (tester) async {
     final sandbox = _sandbox();
     final encoder = FakeMobileVideoEncoder();
@@ -336,6 +440,104 @@ void main() {
       expect(req.audioMasterVolume, 1);
     });
 
+    testWidgets('audio outside the output or owning scene never reaches native composition', (
+      tester,
+    ) async {
+      final encoder = FakeMobileVideoEncoder();
+      final materializer = _FakeMaterializer();
+      final renderer = OnDeviceVideoRenderer(
+        encoder: encoder,
+        hostFactory: (size) => _TesterCaptureHost(tester, size),
+        sandboxFactory: () async => _sandbox(),
+        audioMaterializer: materializer,
+      );
+      final video = Video(
+        size: VideoSize.square,
+        audio: const [
+          Audio.music('audible.wav'),
+          Audio.music('at-end.wav', at: Trigger.at(Time.frames(6))),
+          Audio.music('after-end.wav', at: Trigger.at(Time.frames(7))),
+        ],
+        scenes: const [
+          Scene(
+            duration: Time.frames(3),
+            audio: [Audio.music('past-scene.wav', at: Trigger.at(Time.frames(3)))],
+            children: [SizedBox.shrink()],
+          ),
+          Scene(duration: Time.frames(3), children: [SizedBox.shrink()]),
+        ],
+      );
+      await tester.runAsync(
+        () => renderer.render(
+          composition: video,
+          aspect: Aspect.square,
+          duration: const Duration(milliseconds: 200),
+          longEdge: 64,
+          audio: true,
+        ),
+      );
+      expect(materializer.materialized, ['audible.wav']);
+      expect(encoder.requests.single.audioTracks.single.path, '/materialized/audible.wav');
+    });
+
+    testWidgets('a memory track writes its own bytes under its content hash', (tester) async {
+      final sandbox = _sandbox();
+      final encoder = FakeMobileVideoEncoder();
+      final materializer = _FakeMaterializer();
+      final renderer = OnDeviceVideoRenderer(
+        encoder: encoder,
+        hostFactory: (size) => _TesterCaptureHost(tester, size),
+        sandboxFactory: () async => sandbox,
+        audioMaterializer: materializer,
+      );
+      final bytes = Uint8List.fromList(const [11, 22, 33]);
+      final memory = AudioSource.memory(bytes, debugLabel: 'bed.mp3');
+
+      await tester.runAsync(
+        () => renderer.render(
+          composition: audioVideo(audio: [Audio.musicSource(memory, volume: 0.7)]),
+          aspect: Aspect.square,
+          duration: const Duration(milliseconds: 100),
+          longEdge: 64,
+          audio: true,
+        ),
+      );
+
+      // The string-keyed materializer is never asked for a source that has no
+      // string to resolve; the bytes land in the render sandbox themselves.
+      expect(materializer.materialized, isEmpty);
+      final track = encoder.requests.single.audioTracks.single;
+      expect(track.path, '${sandbox.path}/audio_${memory.cacheKey}');
+      expect(File(track.path).readAsBytesSync(), bytes);
+      expect(track.volume, 0.7);
+    });
+
+    testWidgets('materializes a declared bed without warnings', (tester) async {
+      final messages = <String>[];
+      final encoder = FakeMobileVideoEncoder();
+      final renderer = OnDeviceVideoRenderer(
+        onWarning: messages.add,
+        encoder: encoder,
+        hostFactory: (size) => _TesterCaptureHost(tester, size),
+        sandboxFactory: () async => _sandbox(),
+        audioMaterializer: _FakeMaterializer(),
+      );
+
+      await tester.runAsync(
+        () => renderer.render(
+          composition: audioVideo(audio: [const Audio.music('audio/song.mp3')]),
+          aspect: Aspect.square,
+          duration: const Duration(milliseconds: 100),
+          longEdge: 64,
+          audio: true,
+        ),
+      );
+
+      // A declared bed is never retimed, so this one survives untouched.
+      expect(encoder.requests.single.audioTracks, hasLength(1));
+      expect(messages, isEmpty);
+    });
+
     testWidgets('warns once when a Video has audio but audio is off', (tester) async {
       final messages = <String>[];
       final encoder = FakeMobileVideoEncoder();
@@ -419,4 +621,22 @@ class _FakeMaterializer implements MobileAudioMaterializer {
     materialized.add(source);
     return '/materialized/$source';
   }
+}
+
+class _EmbeddedClipResolver extends _TrackingResolver {
+  _EmbeddedClipResolver(this.image);
+  final ui.Image image;
+  static const ({double fps, int frameCount, bool hasAudio, int height, int width}) meta = (
+    fps: 12.0,
+    frameCount: 12,
+    width: 4,
+    height: 4,
+    hasAudio: true,
+  );
+  @override
+  Future<ClipMetadata> probeClip(MediaSource source) async => meta;
+  @override
+  ClipMetadata clipMetadataFor(MediaSource source) => meta;
+  @override
+  ui.Image decodedClipFrame(MediaSource source, int sourceFrame) => image;
 }

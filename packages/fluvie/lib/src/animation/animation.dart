@@ -144,6 +144,21 @@ final class Animation {
     this.label,
   }) : phase = phase ?? AnimationPhase.enter;
 
+  /// Returns the same preset and timing with a different progress curve.
+  /// This also makes the easing of an ambient preset explicit.
+  Animation withEase(Curve curve) => Animation.custom(
+    effect,
+    phase: phase,
+    duration: duration,
+    ease: curve,
+    spring: spring,
+    delay: delay,
+    at: at,
+    stagger: stagger,
+    repeat: repeat,
+    label: label,
+  );
+
   // --- Enter/exit presets — one-line delegations to builders. ---
 
   /// Fades in from fully transparent to the natural opacity — an enter.
@@ -668,7 +683,7 @@ final class Animation {
   /// `Animation.custom(ReactiveEffect(pulse, on, gain))`, scaling
   /// the element uniformly by `1 + energyAt(frame, on)·[gain]` from the
   /// precomputed band table — [min]/[max]/[period] no longer apply. [track]
-  /// scopes it to one `Audio.track` anchor; `null` reads the master mix. The
+  /// scopes it to one `Audio.track` anchor; `null` reads the default track. The
   /// reactive form requires a `ReactiveScope` in capture (the precompute pass).
   static Animation pulse({
     AudioBand? on,
@@ -696,7 +711,7 @@ final class Animation {
   /// it reads `energyAt(frame, [on])` from the precomputed band table and scales
   /// the child's Y axis by `1 + energy·[gain]` (so `gain: 1.5` reaches 150% of
   /// the natural height at a band peak). [track] scopes it to one `Audio.track`
-  /// anchor; `null` reads the master mix. It requires a `ReactiveScope` in
+  /// anchor; `null` reads the default track. It requires a `ReactiveScope` in
   /// capture — the analysis runs in the precompute pass before frame 0. The
   /// ambient tail ([delay], [at], [stagger], [repeat], [label]) forwards
   /// verbatim.

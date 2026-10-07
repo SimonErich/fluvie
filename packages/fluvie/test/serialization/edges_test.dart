@@ -1,4 +1,4 @@
-import 'package:flutter/animation.dart' show Curves;
+import 'package:flutter/animation.dart' show Threshold;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/errors/fluvie_spec_error.dart';
@@ -28,8 +28,8 @@ void main() {
     expect(table.ids, ['intro', 'outro']);
   });
 
-  test('encodeCurve rejects a curve outside the named eases', () {
-    expect(() => encodeCurve(Curves.easeOutQuart), throwsA(isA<FluvieSpecError>()));
+  test('encodeCurve rejects a curve outside named and cubic eases', () {
+    expect(() => encodeCurve(const Threshold(0.5)), throwsA(isA<FluvieSpecError>()));
   });
 
   test('decodeTime reports each malformed unit', () {

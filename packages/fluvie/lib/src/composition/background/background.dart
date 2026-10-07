@@ -43,7 +43,9 @@ final class Background extends StatelessWidget implements MediaCarrier {
   Background.color(Color color, {Key? key}) : this._(_ColorFill(color), key: key);
 
   /// A linear gradient through [colors], running [begin] → [end]
-  /// (top-left → bottom-right by default).
+  /// (top-left → bottom-right by default). Optional [stops] place each color
+  /// at an explicit 0..1 offset (one per color, non-decreasing); omitted, the
+  /// colors space evenly.
   ///
   /// Under an `Animation.gradientShift`, every base color lerps pairwise
   /// toward the shift's target list (which must have the same length).
@@ -51,15 +53,17 @@ final class Background extends StatelessWidget implements MediaCarrier {
     List<Color> colors, {
     Alignment begin = Alignment.topLeft,
     Alignment end = Alignment.bottomRight,
+    List<double>? stops,
     Key? key,
   }) : this._(
-         _LinearGradientFill(colors, begin: begin, end: end),
+         _LinearGradientFill(colors, begin: begin, end: end, stops: stops),
          key: key,
        );
 
   /// A center-out radial gradient through [colors]; shifts like
-  /// [Background.gradient].
-  Background.radial(List<Color> colors, {Key? key}) : this._(_RadialGradientFill(colors), key: key);
+  /// [Background.gradient], and takes the same optional per-color [stops].
+  Background.radial(List<Color> colors, {List<double>? stops, Key? key})
+    : this._(_RadialGradientFill(colors, stops: stops), key: key);
 
   /// A still image asset [source] (a bundle key), scaled by [fit].
   ///
@@ -71,11 +75,10 @@ final class Background extends StatelessWidget implements MediaCarrier {
 
   /// A video asset [source] (a bundle key), scaled to cover the canvas.
   ///
-  /// In capture the source is pre-resolved as a *clip* (probed and
-  /// frame-extracted before the frame loop) and painted through
-  /// `ClipPainter`, which resamples the source to the current composition frame
-  /// — the same path the `Clip` element uses. A preview paints a placeholder,
-  /// where determinism does not bind.
+  /// Composition preparation probes the source as a clip. Capture and
+  /// `VideoPreview` resolve the required source frames before each paint, then
+  /// `ClipPainter` reads them synchronously using the same resampling rule as
+  /// `Clip`. A bare widget without a prepared resolver shows a placeholder.
   Background.video(String source, {Key? key}) : this._(_VideoBackdrop(source), key: key);
 
   /// A deterministic grayscale value-noise texture; [scale] (> 0) multiplies

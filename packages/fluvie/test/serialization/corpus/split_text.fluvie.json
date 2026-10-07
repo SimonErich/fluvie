@@ -1,0 +1,65 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "120f",
+      "children": [
+        {
+          "type": "SplitText",
+          "text": "One frame at a time",
+          "by": "word",
+          "style": {
+            "fontSize": 42
+          },
+          "animate": [
+            {
+              "preset": "fadeIn",
+              "duration": "30f",
+              "stagger": {
+                "each": "4f"
+              },
+              "ease": {
+                "cubic": [
+                  0.2,
+                  0.7,
+                  0.8,
+                  0.3
+                ]
+              }
+            }
+          ],
+          "effects": [
+            {
+              "kind": "grade",
+              "exposure": {
+                "values": [
+                  0,
+                  1
+                ],
+                "positions": [
+                  "0f",
+                  "90f"
+                ],
+                "easings": [
+                  {
+                    "cubic": [
+                      0.15,
+                      0.7,
+                      0.8,
+                      0.2
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

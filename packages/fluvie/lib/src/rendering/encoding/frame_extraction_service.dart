@@ -27,7 +27,7 @@ abstract interface class FrameExtractionService {
   /// The decoded pixels of [source] at each index in [frameIndices], keyed by
   /// index and scaled to [width] x [height] — the batch the clip pre-pass uses.
   ///
-  /// The ffmpeg service extracts each via [extractFrame]; a platform decoder
+  /// The ffmpeg service uses bounded forward-decoding batches; a platform decoder
   /// (WebCodecs, `MediaCodec`, AVFoundation) overrides this with a single
   /// forward-decode pass, because seeking to a keyframe per frame is far slower.
   /// [decoder] carries the same meaning as on [extractFrame]; a backend that

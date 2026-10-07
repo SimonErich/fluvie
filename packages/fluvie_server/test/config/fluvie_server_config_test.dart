@@ -18,7 +18,7 @@ void main() {
       expect(config.api, isA<ServerConfig>());
       expect(config.host, '0.0.0.0');
       expect(config.port, 8080);
-      expect(config.docsDir, '/app/documentation');
+      expect(config.docsDir, 'bundled');
     });
 
     test('takes host and port from the API config when the API is enabled', () {

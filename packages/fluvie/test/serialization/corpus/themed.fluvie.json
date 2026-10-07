@@ -1,0 +1,58 @@
+{
+  "fluvieSpec": 1,
+  "size": { "width": 480, "height": 270 },
+  "fps": 30,
+  "theme": {
+    "palette": {
+      "accent": "#FF6C5CE7",
+      "ink": "#FFF5F6FA",
+      "surface": "#FF101018"
+    },
+    "typeScale": {
+      "heading": { "color": "#FFF5F6FA", "fontSize": 42.0, "fontWeight": "w700" },
+      "body": { "color": "#FFB2BEC3", "fontSize": 20.0 }
+    },
+    "spacing": { "gutter": 24.0, "inset": 12.0 },
+    "motion": { "duration": "12f", "ease": "out" }
+  },
+  "scenes": [
+    {
+      "duration": "90f",
+      "layout": "canvas",
+      "background": { "kind": "color", "color": { "token": "surface" } },
+      "children": [
+        {
+          "type": "Text",
+          "id": "el-title",
+          "text": "Design tokens",
+          "style": { "token": "heading" },
+          "transform": { "x": 0.5, "y": 0.3, "w": 0.9, "h": 0.3 },
+          "animate": [{ "preset": "fadeIn", "duration": "10f" }]
+        },
+        {
+          "type": "Text",
+          "id": "el-caption",
+          "text": "a literal field beats its token",
+          "style": { "token": "body", "fontSize": 26.0, "color": "#FFFFD166" },
+          "transform": { "x": 0.5, "y": 0.55, "w": 0.9, "h": 0.2 }
+        },
+        {
+          "type": "Box",
+          "id": "el-accent",
+          "color": { "token": "accent" },
+          "transform": { "x": 0.3, "y": 0.8, "w": 0.25, "h": 0.1 }
+        },
+        {
+          "type": "Box",
+          "id": "el-card",
+          "decoration": {
+            "color": "#FF1B1B24",
+            "cornerRadius": 10.0,
+            "border": { "color": { "token": "accent" }, "width": 2.0 }
+          },
+          "transform": { "x": 0.72, "y": 0.8, "w": 0.3, "h": 0.12 }
+        }
+      ]
+    }
+  ]
+}

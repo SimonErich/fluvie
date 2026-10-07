@@ -4,6 +4,7 @@
 // mobile and web renderers already have.
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
 import 'package:flutter_test/flutter_test.dart';
@@ -66,11 +67,47 @@ DesktopVideoRenderer _renderer(
 );
 
 void main() {
+  testWidgets('complete request preserves exact canvas, output range and export policy', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(100, 80)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final runner = _RecordingRunner();
+    final sandbox = Directory.systemTemp.createTempSync('fluvie_request_');
+    addTearDown(() {
+      if (sandbox.existsSync()) sandbox.deleteSync(recursive: true);
+    });
+    await tester.runAsync(
+      () => _renderer(tester, runner, sandbox).renderRequest(
+        VideoRenderRequest(
+          composition: _title(),
+          width: 100,
+          height: 80,
+          frameCount: 1,
+          startFrame: 1,
+          audio: false,
+          warnOnDroppedAudio: false,
+          export: const Export.mp4(crf: 19),
+          posterFrame: 0,
+        ),
+      ),
+    );
+    expect(File('${sandbox.path}/frames.rgba').lengthSync(), 100 * 80 * 4);
+    expect(runner.encodes.first, contains('100x80'));
+    expect(runner.encodes.first[runner.encodes.first.indexOf('-crf') + 1], '19');
+    expect(runner.encodes, hasLength(2));
+  });
+
   testWidgets('renders a composition to an MP4 file through the runner', (tester) async {
     _pinView(tester);
     final runner = _RecordingRunner();
     final sandbox = Directory.systemTemp.createTempSync('fluvie_desktop_test_');
-    addTearDown(() => sandbox.deleteSync(recursive: true));
+    addTearDown(() {
+      if (sandbox.existsSync()) sandbox.deleteSync(recursive: true);
+    });
 
     final phases = <RenderPhase>[];
     late File out;
@@ -92,11 +129,47 @@ void main() {
     expect(phases.last, RenderPhase.complete);
   });
 
+  testWidgets('raw Video audio and authored encoder options survive host mounting', (tester) async {
+    _pinView(tester);
+    final runner = _RecordingRunner();
+    final sandbox = Directory.systemTemp.createTempSync('fluvie_audio_delivery_');
+    addTearDown(() {
+      if (sandbox.existsSync()) sandbox.deleteSync(recursive: true);
+    });
+    final video = Video(
+      width: 32,
+      height: 32,
+      export: const Export.mp4(codec: ExportCodec.h265, crf: 21, preset: EncoderPreset.fast),
+      audio: [
+        Audio.musicSource(AudioSource.memory(Uint8List.fromList([1, 2, 3])), volume: 0.25),
+      ],
+      scenes: const [
+        Scene(duration: Time.frames(2), children: [Text('hi')]),
+      ],
+    );
+    await tester.runAsync(
+      () => _renderer(tester, runner, sandbox).render(
+        composition: video,
+        aspect: Aspect.square,
+        duration: const Duration(milliseconds: 66),
+        longEdge: 32,
+      ),
+    );
+    final args = runner.encodes.single;
+    expect(args, contains('libx265'));
+    expect(args[args.indexOf('-crf') + 1], '21');
+    expect(args[args.indexOf('-preset') + 1], 'fast');
+    expect(args[args.indexOf('-filter_complex') + 1], contains('volume=0.25'));
+    expect(args, isNot(contains('-an')));
+  });
+
   testWidgets('audio off on an audio-declaring Video warns once and stays silent', (tester) async {
     _pinView(tester);
     final runner = _RecordingRunner();
     final sandbox = Directory.systemTemp.createTempSync('fluvie_desktop_test_');
-    addTearDown(() => sandbox.deleteSync(recursive: true));
+    addTearDown(() {
+      if (sandbox.existsSync()) sandbox.deleteSync(recursive: true);
+    });
 
     final warnings = <String>[];
     await tester.runAsync(() async {
@@ -122,7 +195,9 @@ void main() {
     _pinView(tester);
     final runner = _RecordingRunner();
     final sandbox = Directory.systemTemp.createTempSync('fluvie_desktop_test_');
-    addTearDown(() => sandbox.deleteSync(recursive: true));
+    addTearDown(() {
+      if (sandbox.existsSync()) sandbox.deleteSync(recursive: true);
+    });
 
     final warnings = <String>[];
     await tester.runAsync(() async {
@@ -137,6 +212,38 @@ void main() {
     });
 
     expect(warnings, isEmpty);
+  });
+
+  testWidgets('capture cancellation removes the partial sandbox', (tester) async {
+    _pinView(tester);
+    final runner = _RecordingRunner();
+    final sandbox = Directory.systemTemp.createTempSync('fluvie_cancel_render_');
+    final token = RenderCancellation();
+    Object? error;
+    await tester.runAsync(() async {
+      try {
+        await DesktopVideoRenderer(
+          pumpWidget: tester.pumpWidget,
+          pumpFrame: () async {
+            token.cancel();
+            await tester.pump();
+          },
+          runner: runner,
+          sandboxFactory: () async => sandbox,
+          cancellation: token,
+        ).render(
+          composition: _title(),
+          aspect: Aspect.square,
+          duration: const Duration(milliseconds: 66),
+          longEdge: 32,
+        );
+      } on Object catch (caught) {
+        error = caught;
+      }
+    });
+    expect(error, isA<RenderCancelledException>());
+    expect(sandbox.existsSync(), isFalse);
+    expect(runner.encodes, isEmpty);
   });
 
   test('the contract is implementable from the barrels alone', () {

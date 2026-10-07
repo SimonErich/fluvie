@@ -17,7 +17,12 @@ on:
     branches: [main]
     paths:
       - web/site/**
+      - documentation/**
+      - tool/docs/**
+      - examples/gallery/lib/snippets/authoring_snippets.dart
       - packages/*/pubspec.yaml
+      - packages/fluvie_media/lib/**
+      - packages/fluvie_server/lib/**
       - examples/gallery/lib/lessons/**
       - .github/workflows/website.yml
   workflow_dispatch:
@@ -39,6 +44,8 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: web/site/package-lock.json
+      - name: Check committed generated documentation
+        run: node tool/docs/sync_reference.mjs --check
       - name: Build the static site
         working-directory: web/site
         run: |

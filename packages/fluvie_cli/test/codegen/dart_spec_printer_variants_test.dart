@@ -499,18 +499,20 @@ void main() {
         ),
         throwsA(isA<FormatException>()),
       );
+      // Custom strategies are validated by VideoSpec's runtime registry. The
+      // pure Dart printer preserves their names for registration by the host.
       expect(
-        () => printVideoSpecJson(
+        printVideoSpecJson(
           _wrap(
             [
               {'type': 'Text', 'text': 'x'},
             ],
             scene: {
-              'enter': {'kind': 'nope', 'duration': '1.0s'},
+              'enter': {'kind': 'custom-wipe', 'duration': '1.0s'},
             },
           ),
         ),
-        throwsA(isA<FormatException>()),
+        contains("Transition.custom('custom-wipe'"),
       );
       expect(
         () => printVideoSpecJson({

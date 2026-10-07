@@ -5,6 +5,7 @@ library;
 import 'package:flutter/widgets.dart'
     show BuildContext, GlobalKey, KeyedSubtree, State, StatefulWidget, Widget;
 import 'package:fluvie/src/animation/animation.dart';
+import 'package:fluvie/src/animation/runtime/animation_plan_adapter.dart';
 import 'package:fluvie/src/animation/runtime/local_schedule_resolver.dart';
 import 'package:fluvie/src/animation/runtime/registrar_binding.dart';
 import 'package:fluvie/src/animation/stagger/stagger_distributor.dart';
@@ -15,6 +16,7 @@ import 'package:fluvie/src/core/time_range.dart';
 import 'package:fluvie/src/core/trigger.dart';
 import 'package:fluvie/src/rendering/primitives/fade_box.dart';
 import 'package:fluvie/src/rendering/runtime/frame_provider.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
 import 'package:fluvie/src/timing/placement/window_resolver.dart';
 import 'package:fluvie/src/timing/schedule/element_schedule.dart';
 import 'package:fluvie/src/timing/schedule/resolved_schedule_scope.dart';
@@ -85,7 +87,7 @@ final class _MotionTargetState extends State<MotionTarget> {
   @override
   void didUpdateWidget(MotionTarget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.animations, widget.animations) ||
+    if (!sameAnimationTiming(oldWidget.animations, widget.animations) ||
         oldWidget.window != widget.window ||
         oldWidget.defaults != widget.defaults ||
         !identical(oldWidget.anchor, widget.anchor)) {
@@ -129,10 +131,13 @@ final class _MotionTargetState extends State<MotionTarget> {
     final child = _binding.isBound
         ? KeyedSubtree(key: _subtreeKey, child: widget.child)
         : widget.child;
-    if (schedule == null) {
+    if (schedule == null || PreparationScope.exposesOnlyGeometry(context)) {
       return WindowScope(
         window: widget.window,
-        child: FadeBox(opacity: 0, child: child),
+        child: FadeBox(
+          opacity: PreparationScope.snapshotTargetOf(context) == null ? 0 : 1,
+          child: child,
+        ),
       );
     }
     if (schedule.spans.length != widget.animations.length) {

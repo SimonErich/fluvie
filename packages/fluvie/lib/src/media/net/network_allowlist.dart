@@ -15,16 +15,23 @@ final class NetworkAllowlist {
   ///
   /// [schemes] defaults to `{'https'}` — `http` must be opted in explicitly.
   // coverage:ignore-line const ctor artifact allow deny behavior pinned by allowlist tests
-  const NetworkAllowlist({required this.hosts, this.schemes = const {'https'}})
-    : _allowAnyHost = false;
+  const NetworkAllowlist({
+    required this.hosts,
+    this.schemes = const {'https'},
+    this.origins = const {},
+  }) : _allowAnyHost = false;
 
-  const NetworkAllowlist._anyHost(this.schemes) : hosts = const {}, _allowAnyHost = true;
+  const NetworkAllowlist._anyHost(this.schemes, this.origins)
+    : hosts = const {},
+      _allowAnyHost = true;
 
   /// An allowlist that permits any host over [schemes] (defaults to https).
   ///
   /// Use sparingly: it disables host filtering. Scheme filtering still applies.
-  factory NetworkAllowlist.allowAny({Set<String> schemes = const {'https'}}) =>
-      NetworkAllowlist._anyHost(schemes);
+  factory NetworkAllowlist.allowAny({
+    Set<String> schemes = const {'https'},
+    Set<String> origins = const {},
+  }) => NetworkAllowlist._anyHost(schemes, origins);
 
   /// The hosts permitted to be fetched (exact match, case-sensitive).
   final Set<String> hosts;
@@ -32,11 +39,20 @@ final class NetworkAllowlist {
   /// The URL schemes permitted (lower-case, for example `https`).
   final Set<String> schemes;
 
+  /// Exact origins that may also be fetched, including their scheme and port.
+  /// A server uses this for its own signed uploads on local HTTP deployments.
+  final Set<String> origins;
+
   final bool _allowAnyHost;
 
   /// Throws a [FluvieRenderException] when [url] is not permitted; returns
   /// normally otherwise.
   void check(Uri url) {
+    if ((url.scheme == 'http' || url.scheme == 'https') &&
+        url.host.isNotEmpty &&
+        origins.contains(url.origin)) {
+      return;
+    }
     if (!schemes.contains(url.scheme)) {
       throw FluvieRenderException(
         'Disallowed URL scheme "${url.scheme}" for "$url". The network '

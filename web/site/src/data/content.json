@@ -12,8 +12,14 @@
     {
       "key": "fluvie_cli",
       "role": "the projectionist",
-      "line": "fluvie render ./lib/video.dart --out file.mp4. Headless, scriptable, no editor in sight.",
+      "line": "fluvie render ./lib/video.dart. Automatic tools, readable Flutter code, and an MP4.",
       "icon": "&#9654;"
+    },
+    {
+      "key": "fluvie_media",
+      "role": "the media librarian",
+      "line": "Probe real media and decode bounded frame windows, shared by authoring tools and native playback.",
+      "icon": "&#9676;"
     },
     {
       "key": "fluvie_lints",
@@ -40,15 +46,21 @@
       "icon": "&#9921;"
     },
     {
+      "key": "fluvie_render_client",
+      "role": "the remote control",
+      "line": "A small web-safe HTTP client for render jobs and diagnostics, without importing the server runtime.",
+      "icon": "&#9881;"
+    },
+    {
       "key": "fluvie_mobile_encoder",
       "role": "the on-device camera operator",
-      "line": "Render to MP4 on the phone itself, no FFmpeg and nothing leaves the device.",
+      "line": "Render to MP4 on the phone itself, no FFmpeg or render-server upload.",
       "icon": "&#9636;"
     },
     {
       "key": "fluvie_web_encoder",
       "role": "the in-browser camera operator",
-      "line": "Render to MP4 in the browser with ffmpeg.wasm, opt-in, nothing leaves the page.",
+      "line": "Render to MP4 in the browser with ffmpeg.wasm, opt-in, with local capture and encoding.",
       "icon": "&#9677;"
     }
   ],

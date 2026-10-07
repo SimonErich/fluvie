@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_ai/fluvie_ai.dart';
@@ -9,6 +11,21 @@ const _validSpec =
 
 void main() {
   group('LlmVideoAuthorService', () {
+    test('all visual evidence remains attached through schema repair', () async {
+      final first = AiImage(bytes: Uint8List.fromList([1]), description: 'cat.mp4 at 1.25s');
+      final second = AiImage(bytes: Uint8List.fromList([2]), description: 'kitten.mp4 at 0.5s');
+      final client = FakeAiClient(['bad JSON', _validSpec]);
+      await LlmVideoAuthorService(
+        client: client,
+      ).author('cat story', evidenceImages: [first, second]);
+      expect(client.requests, hasLength(2));
+      for (final request in client.requests) {
+        final images = request.messages.where((message) => message.image != null).toList();
+        expect(images.map((message) => message.image), [first, second]);
+        expect(images.first.text, 'cat.mp4 at 1.25s');
+        expect(images.last.text, 'kitten.mp4 at 0.5s');
+      }
+    });
     test('returns a spec when the model emits valid JSON', () async {
       final client = FakeAiClient([_validSpec]);
       final service = LlmVideoAuthorService(client: client);
@@ -126,6 +143,12 @@ void main() {
       expect(prompt, contains('fraction of the parent'));
       expect(prompt, contains('"kind": "gradient"'));
       expect(prompt, contains('centers its children'));
+      expect(prompt, contains('"textAlign"?'));
+      expect(prompt, contains('"transform":{"x":0.5'));
+      expect(prompt, contains('- Clip:'));
+      expect(prompt, contains('- Group:'));
+      expect(prompt, contains('"kind":"music"'));
+      expect(prompt, isNot(contains('There is no per-element x/y')));
     });
   });
 

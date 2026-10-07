@@ -5,11 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node ../../tool/docs/sync_reference.mjs && node ../../tool/benchmarks/verify_evidence.mjs && astro build",
     "preview": "astro preview",
     "check": "astro check"
   },
   "dependencies": {
-    "astro": "^6.4.8"
+    "astro": "^7.3.6"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@types/node": "22.20.0",
+    "typescript": "5.9.3"
   }
 }

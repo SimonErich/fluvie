@@ -1,0 +1,57 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "90f",
+      "layout": "canvas",
+      "background": {
+        "kind": "gradient",
+        "colors": ["#0B0B1E", "#6C5CE7", "#26D0CE"],
+        "stops": [0, 0.15, 1],
+        "begin": "topCenter",
+        "end": "bottomCenter"
+      },
+      "children": [
+        {
+          "type": "Box",
+          "decoration": {
+            "cornerRadius": 12,
+            "gradient": {
+              "colors": ["#FF6C5CE7", "#FF2EFF9A"],
+              "stops": [0.2, 0.9]
+            }
+          },
+          "transform": {
+            "x": 0.5,
+            "y": 0.5,
+            "w": 0.6,
+            "h": 0.3
+          }
+        }
+      ]
+    },
+    {
+      "duration": "60f",
+      "background": {
+        "kind": "radial",
+        "colors": ["#FFFFFF", "#1E1E3C"],
+        "stops": [0.1, 0.8]
+      },
+      "children": [
+        {
+          "type": "Text",
+          "text": "skewed stops",
+          "style": {
+            "color": "#F0F0F5",
+            "fontSize": 32
+          }
+        }
+      ]
+    }
+  ]
+}

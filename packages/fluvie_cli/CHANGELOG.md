@@ -3,6 +3,29 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- `workspace` and `session` commands for a shared native frame, inspection,
+  review and export session. Requests reuse one Flutter worker per source
+  revision and report startup and capture timings separately.
+- Configurable worker startup/request deadlines and session HTTP deadlines.
+- Text/audio quality reports with stable finding codes, explicit exceptions,
+  strict checks and visible unavailable measurements.
+- Portable `bundle create`, `inspect`, `unpack` and `replay` commands with file
+  identities, dependency vendoring, bounded extraction and enforced lockfiles.
+- Real-provider authoring benchmarks with source preservation, bounded edit
+  repair traces, verified exports and reproducible publication evidence.
+- Public workspace, worker, bundle and benchmark APIs for custom CLI hosts.
+
+### Changed
+
+- Managed file render adapters live outside consumer projects. Rendering no
+  longer requires a copied harness or changes to consumer manifests and locks.
+- Dart edits receive bounded, versioned context from the installed current API
+  documentation. Multiline authoring prompts retain their original text.
+
 ## [0.3.1] - 2026-07-16
 
 Lockstep release with the rest of the Fluvie workspace.

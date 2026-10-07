@@ -4,7 +4,7 @@
 // skips it; run with:
 //   flutter test --tags render test/perf/perf_harness_test.dart
 // Bounds are deliberately generous (CI-safe); the printed numbers are the
-// point — they land in PROGRESS.md.
+// point — the test reports them to stderr for the CI log.
 @Tags(['render'])
 library;
 
@@ -17,8 +17,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_presenter/fluvie_presenter.dart';
 import 'package:fluvie_presenter/src/shell/presenter_shell.dart';
-import 'package:fluvie_presenter/src/sidebar/preview_render_host.dart';
-import 'package:fluvie_presenter/src/sidebar/slide_preview_service.dart';
 
 Video _heavyDeck({required int slides, int stops = 4}) => Video(
   width: 640,

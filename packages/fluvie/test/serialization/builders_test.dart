@@ -14,8 +14,10 @@ import 'package:fluvie/src/serialization/background_spec.dart';
 import 'package:fluvie/src/serialization/element_spec.dart';
 import 'package:fluvie/src/serialization/scene_spec.dart';
 
-Animation _anim(Map<String, Object?> json) =>
-    buildAnimation(AnimationSpec.fromJson(json, AnchorTable()));
+Animation _anim(Map<String, Object?> json) {
+  final table = AnchorTable();
+  return buildAnimation(AnimationSpec.fromJson(json, table), table);
+}
 
 Widget _elem(Map<String, Object?> json) {
   final table = AnchorTable();
@@ -81,7 +83,7 @@ void main() {
         'repeat': {'forever': true},
         'label': 'hero',
       }, AnchorTable());
-      expect(buildAnimation(spec).label, 'hero');
+      expect(buildAnimation(spec, AnchorTable()).label, 'hero');
       expect(AnimationSpec.fromJson(spec.toJson(), AnchorTable()).toJson(), spec.toJson());
     });
 
@@ -250,6 +252,70 @@ void main() {
         throwsA(isA<FluvieSpecError>()),
       );
       expect(() => _bg(const {'kind': 'image'}), throwsA(isA<FluvieSpecError>()));
+    });
+
+    test('builds gradient and radial with explicit stop offsets', () {
+      expect(
+        _bg(const {
+          'kind': 'gradient',
+          'colors': ['#000000', '#FF0000', '#FFFFFF'],
+          'stops': [0, 0.15, 1],
+        }),
+        isA<Background>(),
+      );
+      expect(
+        _bg(const {
+          'kind': 'radial',
+          'colors': ['#000000', '#FFFFFF'],
+          'stops': [0.1, 0.8],
+        }),
+        isA<Background>(),
+      );
+    });
+
+    test('rejects malformed gradient stops with a located path', () {
+      Matcher throwsAt(List<String> path) =>
+          throwsA(isA<FluvieSpecError>().having((e) => e.path, 'path', path));
+      const colors = ['#000000', '#FFFFFF'];
+      expect(
+        () => _bg(const {'kind': 'gradient', 'colors': colors, 'stops': 'no'}),
+        throwsAt(const ['stops']),
+      );
+      expect(
+        () => _bg(const {
+          'kind': 'gradient',
+          'colors': colors,
+          'stops': [0, 0.5, 1],
+        }),
+        throwsAt(const ['stops']),
+        reason: 'the stops list must match the colors list in length',
+      );
+      expect(
+        () => _bg(const {
+          'kind': 'gradient',
+          'colors': colors,
+          'stops': [0, 'x'],
+        }),
+        throwsAt(const ['stops', '1']),
+      );
+      expect(
+        () => _bg(const {
+          'kind': 'radial',
+          'colors': colors,
+          'stops': [0, 1.5],
+        }),
+        throwsAt(const ['stops', '1']),
+        reason: 'offsets live inside 0..1',
+      );
+      expect(
+        () => _bg(const {
+          'kind': 'gradient',
+          'colors': colors,
+          'stops': [0.6, 0.4],
+        }),
+        throwsAt(const ['stops', '1']),
+        reason: 'offsets never decrease',
+      );
     });
   });
 

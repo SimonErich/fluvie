@@ -1,0 +1,56 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "360f",
+      "layout": "canvas",
+      "background": {
+        "kind": "color",
+        "color": "#101018"
+      },
+      "children": [
+        {
+          "id": "el-broll",
+          "type": "Clip",
+          "source": {"kind": "asset", "value": "fixtures/broll.mp4"},
+          "fit": "cover",
+          "transform": {"x": 0.5, "y": 0.35, "w": 0.6, "h": 0.5},
+          "show": {"from": "60f", "to": "195f"}
+        },
+        {
+          "id": "el-title",
+          "type": "Text",
+          "text": "Opening",
+          "style": {"fontSize": 28, "color": "#F5F5F7"},
+          "transform": {"x": 0.5, "y": 0.75},
+          "show": {"to": "60f"}
+        },
+        {
+          "id": "el-outro",
+          "type": "Text",
+          "text": "And out",
+          "style": {"fontSize": 22, "color": "#B9B9C3"},
+          "transform": {"x": 0.5, "y": 0.85},
+          "show": {"from": "300f"}
+        },
+        {
+          "id": "el-badge",
+          "type": "Box",
+          "color": "#6C5CE7",
+          "size": {"width": 0.2, "height": 0.12},
+          "transform": {"x": 0.82, "y": 0.15, "w": 0.2, "h": 0.12},
+          "show": {"from": "90f", "to": "270f"},
+          "animate": [
+            {"preset": "fadeIn", "duration": "12f"},
+            {"preset": "fadeOut", "duration": "12f"}
+          ]
+        }
+      ]
+    }
+  ]
+}

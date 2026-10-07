@@ -10,14 +10,20 @@ import 'package:fluvie/src/timing/time_scope_data.dart';
 /// [ClipAudio.fadeIn] (resolved against [fps]) becomes the fade-in seconds. A
 /// `ClipAudio.muted` clip contributes no node — its sound is dropped at source,
 /// never mixed and re-silenced.
-AudioTrackNode? clipAudioTrackNode(ClipAudio audio, {required String name, required int fps}) {
+AudioTrackNode? clipAudioTrackNode(
+  ClipAudio audio, {
+  required String name,
+  required int fps,
+  int windowFrames = 0,
+}) {
   if (audio.muted) return null;
   final fadeInFrames = audio.fadeIn.resolveFrames(
-    TimeScopeData(fps: fps, startFrame: 0, durationFrames: 0),
+    TimeScopeData(fps: fps, startFrame: 0, durationFrames: windowFrames),
   );
   return AudioTrackNode(
     name: name,
     volume: audio.volume,
+    volumeEnvelope: audio.automation.resolve(fps: fps, windowFrames: windowFrames),
     fadeInSeconds: fadeInFrames > 0 ? fadeInFrames / fps : null,
   );
 }

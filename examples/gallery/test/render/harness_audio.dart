@@ -3,11 +3,7 @@ import 'dart:io';
 import 'package:fluvie/rendering.dart';
 // The reactive pre-pass wiring is render infrastructure under `src/`: the WAV
 // reader and the PcmDecoder seam are off the authoring surface a lesson imports.
-import 'package:fluvie/src/audio/runtime/pcm_decoder.dart';
-import 'package:fluvie/src/audio/runtime/spectral_beat_detection_service.dart';
-import 'package:fluvie/src/audio/runtime/spectral_frequency_analyzer.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
-import 'package:fluvie/src/core/audio/dsp/wav_reader.dart';
 
 /// A [PcmDecoder] that reads a committed WAV file straight off disk with the
 /// in-house [readPcmWav] reader — no ffmpeg, so the reactive analysis runs in

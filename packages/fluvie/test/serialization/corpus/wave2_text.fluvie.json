@@ -1,0 +1,161 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "120f",
+      "layout": "canvas",
+      "background": {
+        "kind": "color",
+        "color": "#101018"
+      },
+      "children": [
+        {
+          "id": "el-headline",
+          "type": "Text",
+          "text": "Wave two",
+          "textAlign": "center",
+          "maxLines": 2,
+          "style": {
+            "fontSize": 48,
+            "color": "#F0F0F5"
+          },
+          "transform": {
+            "x": 0.5,
+            "y": 0.2,
+            "w": 0.8,
+            "h": 0.2
+          }
+        },
+        {
+          "id": "el-styled",
+          "type": "Text",
+          "spans": [
+            {
+              "text": "Built with "
+            },
+            {
+              "text": "Fluvie",
+              "link": "https://fluvie.dev",
+              "style": {
+                "color": "#6C5CE7",
+                "fontWeight": "bold"
+              }
+            }
+          ],
+          "style": {
+            "fontSize": 20,
+            "color": "#F0F0F5"
+          },
+          "transform": {
+            "x": 0.5,
+            "y": 0.32,
+            "w": 0.8,
+            "h": 0.1
+          }
+        },
+        {
+          "id": "el-typed",
+          "type": "Typewriter",
+          "text": "typed out one glyph at a time",
+          "speed": "3f",
+          "caret": true,
+          "style": {
+            "fontFamily": "monospace"
+          },
+          "transform": {
+            "x": 0.5,
+            "y": 0.5,
+            "w": 0.8,
+            "h": 0.2
+          }
+        },
+        {
+          "id": "el-notes",
+          "type": "Markdown",
+          "source": "# Agenda\n\n- codecs\n- presets",
+          "reveal": "30f",
+          "transform": {
+            "x": 0.5,
+            "y": 0.8,
+            "w": 0.8,
+            "h": 0.3
+          }
+        },
+        {
+          "id": "el-price",
+          "type": "Counter",
+          "to": 4999,
+          "variant": "currency",
+          "symbol": "\u20ac",
+          "ease": "out",
+          "reveal": "45f",
+          "transform": {
+            "x": 0.2,
+            "y": 0.65,
+            "w": 0.3,
+            "h": 0.1
+          }
+        },
+        {
+          "id": "el-share",
+          "type": "Counter",
+          "to": 0.87,
+          "variant": "percent",
+          "transform": {
+            "x": 0.8,
+            "y": 0.65,
+            "w": 0.3,
+            "h": 0.1
+          }
+        },
+        {
+          "id": "el-card",
+          "type": "Box",
+          "decoration": {
+            "color": "#2D3436",
+            "cornerRadius": 24,
+            "border": {
+              "color": "#6C5CE7",
+              "width": 2
+            },
+            "shadow": {
+              "color": "#80000000",
+              "blur": 16,
+              "offset": {
+                "x": 0,
+                "y": 8
+              }
+            }
+          },
+          "transform": {
+            "x": 0.5,
+            "y": 0.35,
+            "w": 0.4,
+            "h": 0.2
+          }
+        },
+        {
+          "id": "el-loop",
+          "type": "Clip",
+          "source": {
+            "kind": "asset",
+            "value": "loop.mp4"
+          },
+          "volume": 0.4,
+          "fadeIn": "12f",
+          "transform": {
+            "x": 0.5,
+            "y": 0.9,
+            "w": 0.3,
+            "h": 0.15
+          }
+        }
+      ]
+    }
+  ]
+}

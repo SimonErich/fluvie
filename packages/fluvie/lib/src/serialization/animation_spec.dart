@@ -6,40 +6,26 @@ import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/core/timing.dart';
 import 'package:fluvie/src/core/trigger.dart';
 import 'package:fluvie/src/serialization/anchor_table.dart';
+import 'package:fluvie/src/serialization/animation_catalog.dart';
 import 'package:fluvie/src/serialization/codecs/curve_codec.dart';
 import 'package:fluvie/src/serialization/codecs/motion_codec.dart';
 import 'package:fluvie/src/serialization/codecs/time_codec.dart';
 import 'package:fluvie/src/serialization/codecs/trigger_codec.dart';
 
-/// The preset names the spec can build, mapped to nothing — a set kept as a map
-/// key list so an unknown preset fails at parse time.
-const Set<String> knownAnimationPresets = {
-  'fadeIn',
-  'fadeOut',
-  'slideIn',
-  'slideOut',
-  'slideFadeIn',
-  'slideFadeOut',
-  'pop',
-  'scaleIn',
-  'scaleOut',
-  'blurIn',
-  'blurOut',
-  'grain',
-  'vignette',
-  'spin',
-  'drift',
-  'kenBurns',
-};
+export 'package:fluvie/src/serialization/animation_catalog.dart';
 
-/// The data form of one `.animate([...])` entry: either a named preset plus its
-/// arguments, or a raw `from`/`to`/`fromTo` keyframe animation, in both cases
-/// carrying the common timing tail (`duration`, `ease`, `spring`, `delay`,
-/// `at`, `stagger`, `repeat`, `label`).
+/// The data form of one `.animate([...])` entry: a named preset plus its
+/// arguments, a multi-stop `keyframes` animation, or a raw `from`/`to`/
+/// `fromTo` keyframe animation — in every case carrying the common timing
+/// tail (`duration`, `ease`, `spring`, `delay`, `at`, `stagger`, `repeat`,
+/// `label`).
 ///
 /// This is a pure data object: `buildAnimation` turns it into a real
 /// `Animation`. The reserved keys that make up the tail are never treated as
-/// preset arguments.
+/// preset arguments. In the `keyframes` form the stop positions live under
+/// `positions`, so the tail's `at` keeps meaning the start trigger — exactly
+/// like the Dart constructor, which renames its trigger parameter for the
+/// same reason.
 final class AnimationSpec {
   /// Creates an animation spec of [kind] with preset/raw [args] and the common
   /// timing tail.
@@ -60,24 +46,16 @@ final class AnimationSpec {
   /// [anchors].
   ///
   /// A `"preset"` key selects a named preset (validated against
-  /// [knownAnimationPresets]); otherwise a `from`/`to` keyframe selects the raw
-  /// `from`/`to`/`fromTo` form. Throws a [FluvieSpecError] (located at [path])
-  /// for an unknown preset or a node that is neither.
+  /// [knownAnimationPresets]); a `"keyframes"` list selects the multi-stop
+  /// keyframes form (with its optional `easings`, `positions`, and `phase`);
+  /// otherwise a `from`/`to` keyframe selects the raw `from`/`to`/`fromTo`
+  /// form. Throws a [FluvieSpecError] (located at [path]) for an unknown
+  /// preset or a node that is none of the three.
   factory AnimationSpec.fromJson(
     Map<String, Object?> json,
     AnchorTable anchors, {
     List<String> path = const [],
   }) {
-    const tailKeys = {
-      'duration',
-      'ease',
-      'spring',
-      'delay',
-      'at',
-      'stagger',
-      'repeat',
-      'label',
-    };
     final preset = json['preset'];
     final String kind;
     final args = <String, Object?>{};
@@ -87,10 +65,16 @@ final class AnimationSpec {
       }
       kind = preset;
       for (final entry in json.entries) {
-        if (entry.key != 'preset' && !tailKeys.contains(entry.key)) {
+        if (!reservedAnimationKeys.contains(entry.key)) {
           args[entry.key] = entry.value;
         }
       }
+    } else if (json.containsKey('keyframes')) {
+      kind = 'keyframes';
+      args['keyframes'] = json['keyframes'];
+      if (json.containsKey('easings')) args['easings'] = json['easings'];
+      if (json.containsKey('positions')) args['positions'] = json['positions'];
+      if (json.containsKey('phase')) args['phase'] = json['phase'];
     } else if (json.containsKey('from') && json.containsKey('to')) {
       kind = 'fromTo';
       args['from'] = json['from'];
@@ -103,7 +87,7 @@ final class AnimationSpec {
       args['to'] = json['to'];
     } else {
       throw FluvieSpecError(
-        'An animation needs a "preset" or a "from"/"to" keyframe',
+        'An animation needs a "preset", a "keyframes" list, or a "from"/"to" keyframe',
         path: path,
       );
     }
@@ -127,10 +111,26 @@ final class AnimationSpec {
     );
   }
 
-  /// The preset name (`fadeIn`, ...) or the raw kind (`from`/`to`/`fromTo`).
+  /// The keys every animation entry reads regardless of its preset: the
+  /// selector plus the common timing tail. Everything else is a preset
+  /// argument owned by the preset.
+  static const Set<String> reservedAnimationKeys = {
+    'preset',
+    'duration',
+    'ease',
+    'spring',
+    'delay',
+    'at',
+    'stagger',
+    'repeat',
+    'label',
+  };
+
+  /// The preset name (`fadeIn`, ...), the multi-stop `keyframes` kind, or the
+  /// raw kind (`from`/`to`/`fromTo`).
   final String kind;
 
-  /// The preset-specific (or raw-keyframe) arguments, stored verbatim.
+  /// The preset-specific (or keyframe-form) arguments, stored verbatim.
   final Map<String, Object?> args;
 
   /// The animation duration, or null to inherit the `Defaults` cascade.
@@ -160,9 +160,14 @@ final class AnimationSpec {
   /// Whether this is a raw `from`/`to`/`fromTo` animation (no preset name).
   bool get isRaw => kind == 'from' || kind == 'to' || kind == 'fromTo';
 
-  /// The JSON form: a `preset` (unless raw) plus [args] and the set tail fields.
+  /// Whether this is the multi-stop `keyframes` form; like the raw forms it is
+  /// self-naming, so [toJson] writes no `preset` key for it.
+  bool get isKeyframes => kind == 'keyframes';
+
+  /// The JSON form: a `preset` (unless the form is self-naming) plus [args]
+  /// and the set tail fields.
   Map<String, Object?> toJson() => {
-    if (!isRaw) 'preset': kind,
+    if (!isRaw && !isKeyframes) 'preset': kind,
     ...args,
     if (duration != null) 'duration': encodeTime(duration!),
     if (ease != null) 'ease': encodeCurve(ease!),

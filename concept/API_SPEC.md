@@ -3,7 +3,21 @@
 > The design reference for Fluvie's public API. Goal: **describe *what* the video
 > is — never compute *when* things happen.**
 
+This file records design intent and includes illustrative signatures; its Dart
+blocks are not the compiled documentation excerpt suite. For the current shipped
+API, use the [canonical guides](../documentation/README.md), their source-linked
+examples, and the public package exports. Changes to runtime preparation and
+backend capabilities can precede updates to the detailed design sections here.
+
 A [Decision log](#decision-log) at the end records the design choices behind the API.
+
+This document records design intent and includes schematic interfaces. For
+current runnable examples and platform requirements, use the compiled-excerpt
+[handbook](../documentation/README.md). Check the implementation when changing a
+contract; a signature sketch here is not a complete list of shipped parameters.
+The current CLI owns its capture host outside the consumer project, provisions
+FFmpeg and ffprobe together, and exposes installed-version authoring context
+through `fluvie docs --context`.
 
 ---
 
@@ -1295,7 +1309,8 @@ All variants under `Background.*`. A `Background` is also a normal element, so i
 ```dart
 Background.color(Colors.black)
 Background.gradient([Colors.red, Colors.green], begin: Alignment.topLeft, end: Alignment.bottomRight)
-Background.radial([Colors.white, Colors.blue])
+Background.gradient([Colors.red, Colors.green], stops: [0, 0.35])  // optional per-color 0..1 offsets
+Background.radial([Colors.white, Colors.blue], stops: [0.1, 0.8])
 Background.image('bg.jpg', fit: BoxFit.cover)
 Background.video('loop.mp4')
 Background.noise({double scale = 1})   Background.vhs()
@@ -1326,8 +1341,13 @@ Captions.words([CaptionWord('Hello', at: 0.0.seconds), CaptionWord('world', at: 
 
 CaptionStyle.tikTok()   CaptionStyle.subtitle()   CaptionStyle.karaoke()
 CaptionPosition.bottomThird()   CaptionPosition.topThird()   CaptionPosition.center()
-CaptionPosition.custom(Alignment alignment, {double safeArea})
+CaptionPosition.custom(Alignment alignment, {double safeArea, bool adaptiveSafeArea = false})
 ```
+
+Top/bottom presets use an adaptive safe inset: at most 64 logical pixels and
+one twelfth of the canvas's shorter side. Custom placement retains its exact
+inset unless `adaptiveSafeArea` is explicitly enabled. Caption typography stays
+explicit through `CaptionStyle`.
 
 ---
 
@@ -1366,7 +1386,7 @@ Animation.pulse({AudioBand? on, double gain = 1.0, Anchor? track, …})
     // Without on: — non-reactive sine pulse (original form; see §6).
 ```
 
-Both read from the precomputed band table set up during the precompute pass; `track` scopes to one `Audio.track` or reads the master mix if `null`. They require a `ReactiveScope` in capture.
+Both read from the precomputed band table set up during the precompute pass; `track` scopes to one `Audio.track` or reads the first audible declared track if `null`. The native analysis reads normalized source energy, without gain, fades, automation or the encoded mix. They require a `ReactiveScope` in capture.
 
 ### Spectrum visualizer
 
@@ -1376,7 +1396,7 @@ Both read from the precomputed band table set up during the precompute pass; `tr
 Bars({
   int count = 24,                       // how many bars
   AudioBand band = AudioBand.bass,      // which frequency band
-  Anchor? track,                        // which audio track (null = master mix)
+  Anchor? track,                        // null = first audible declared track
   double gain = 1.0,                    // multiplier on [0,1] energy
   Anchor? shared,                       // optional hero anchor
 });
@@ -1648,7 +1668,9 @@ for (final u in users) {
 }
 ```
 
-Combined with reproducible rendering (§22), identical props → identical bytes → cacheable. Render a
+Combined with reproducible rendering (§22), identical props and resource inputs
+describe the same authored timing and content. Byte identity additionally depends
+on the raster engine, platform, encoder, and settings. Render a
 template directly with `renderTemplate(template, props: …)` (§24). Two batteries-included templates ship
 ready to use: `TitleIntro` (with `TitleIntroProps`) and `StatHighlight` (with `StatHighlightProps`).
 
@@ -1670,7 +1692,9 @@ One contract fronts the platform renderers: `VideoRenderer<T>` (on `package:fluv
 with `render({composition, aspect, duration, fps, longEdge, audio, warnOnDroppedAudio, ...}) → T`.
 Its three symmetric arms are `DesktopVideoRenderer` (local FFmpeg → `File`), `OnDeviceVideoRenderer`
 (`fluvie_mobile_encoder`, hardware encoder → `File`), and `WebVideoRenderer` (`fluvie_web_encoder`,
-ffmpeg.wasm → bytes). All three run the same deterministic capture loop; only the encode edge differs.
+ffmpeg.wasm → bytes). They share frame-driven capture primitives, with different
+resource, audio, codec, and export capabilities. Audio defaults are specific to
+each renderer; select the policy explicitly for a custom adapter.
 
 Underneath, `renderVideo` is the one capture entry a host drives, over free functions that are the
 primitives the renderers (and the CLI) share. All return manifests encoding the ffmpeg arguments to
@@ -1680,11 +1704,14 @@ materialize the output; an `FfmpegRunner` executes them. A capture failure surfa
 #### `renderVideo(...)` — the one capture entry
 
 Captures a `Video` into `outDir` (`frames.rgba` + `manifest.json`, manifest last). It is the whole
-render, in order: resolve media (images, then clip frames), rasterize any `Snapshot` subtree
-(P12-SNAP), parse captions, analyse reactive audio, mount the capture shell (D-CaptureShell), then
-loop the frames. Everything is derived from the `Video` itself, so the caller passes no registry, no
+render, in order: mount the actual composition for resource and timing discovery,
+prepare images, effects, captions, reactive audio, and supported mounted snapshots,
+then prepare required clip pixels in bounded batches before pumping each frame.
+`CompositionResources` declares alternatives introduced only on later frames.
+Everything is derived from the `Video` itself, so the caller passes no registry, no
 media list, and no geometry. The host supplies only what it alone can: a pump, a view, and a real
-event loop. This is what the CLI's generated harness calls (decision 29).
+event loop. The CLI's package-owned host delegates to this capture path; its
+generated external adapter imports the composition builder and supplies the host.
 
 ```dart
 Future<RenderManifest> renderVideo({
@@ -2043,7 +2070,10 @@ abstract interface class FrameStore {
 }
 ```
 
-**`FrameCache`** — disk adapter (desktop/mobile only): keys are FNV-1a-64 hex (path-safe), rooted at `$TMPDIR/fluvie_frame_cache` by default. **Advisory:** the digest covers config + composition key + fluvie version, but not the composition's runtime code, so editing a composition under an unchanged key can serve stale frames until the digest moves or `--no-cache` bypasses it.
+**`FrameCache`** is the disk adapter (desktop/mobile only), rooted at
+`$TMPDIR/fluvie_frame_cache` by default. Its low-level digest covers config,
+composition identity, and library version. The managed CLI augments that identity
+with a source/resource fingerprint; a programmatic caller supplies its own.
 
 ### 27.10 Audio-mix resolution — encoder-neutral seam
 
@@ -2082,7 +2112,14 @@ String renderDigest({
 }) → fnv1a64Hex(jsonEncode({...}));
 ```
 
-Any change to config, key, or version produces a new digest, isolating cache entries across configurations, compositions, and library versions. The **frame cache key itself** is FNV-1a-64 over `digest:frameIndex`, so path-safe by construction. The cache is **advisory**: composition **code** changes under an unchanged key are not detected — stale frames stay in cache until the digest moves or a `--no-cache` run evicts them.
+Any change to config, key, or version produces a new digest, isolating cache
+entries across configurations, compositions, and library versions. The frame
+cache key itself is FNV-1a-64 over `digest:frameIndex`, so it is path-safe.
+The low-level cache cannot inspect runtime composition code. The managed CLI
+adds a content fingerprint for source, resolved dependencies, project resources,
+SDK, tools, and options to the composition key. Callers of programmatic renderers
+provide their own identity. Changing runtime inputs outside discovered resources
+requires explicit invalidation or `--no-cache`.
 
 ### 27.12 Three backends, one pipeline
 
@@ -2098,9 +2135,10 @@ All three share:
 - The same frame caching by content digest.
 - The same audio-mix timing math (FFmpeg nodes on desktop, `ResolvedAudioMix` on mobile/custom).
 
-Swapping the encoder changes where the encode runs, not the composition: all three drive the same
-deterministic capture loop and capture the same frames. The encoded file can differ between backends
-(hardware encoders vary); each backend's renders-twice proof holds on the same machine.
+The authored composition and frame clock are shared. Supported resource paths,
+audio policy, codecs, and export options vary by backend. Compare supported cases
+through rendered-frame and audio tests, rather than inferring complete parity from
+the common capture loop. Raster and encoded bytes can differ between backends.
 
 ### 27.13 Why complexity here is the right trade
 
@@ -2246,7 +2284,7 @@ The companion package `fluvie_ai` (Dart API) and the MCP server in `fluvie_serve
 
 ## 30. Ecosystem & rendering backends
 
-Fluvie's modular design separates authoring (which always stays light—just `package:fluvie`) from rendering, so you pick the backend that fits your constraints. All backends render the same `Video` spec deterministically; they differ only in where encoding happens and which FFmpeg strategy they use.
+Fluvie's modular design separates authoring from rendering, so you pick the backend that fits your constraints. Backends share the frame clock and timing model, but resource preparation, fonts, rasterization, audio discovery and codec support also differ. Consult the current mobile and browser capability guides rather than treating this design section as a parity guarantee.
 
 | Package | Role | Headline API | Guide |
 | --- | --- | --- | --- |
@@ -2257,6 +2295,15 @@ Fluvie's modular design separates authoring (which always stays light—just `pa
 | **fluvie_ai** | NL → deterministic `VideoSpec`; provider-agnostic LLM client. | `VideoAuthorService` / `LlmVideoAuthorService` | [AI and MCP](../documentation/guides/ai-and-mcp.md) |
 
 All rendering packages are optional; the core `package:fluvie` never pulls in FFmpeg, WASM, or server deps. See [Tooling](#28-tooling) for `fluvie_lints` (available in all environments).
+
+Browser clip hosts can load the bundled
+`assets/packages/fluvie_web_encoder/assets/clip_decoder.js` module. It supplies
+`FluvieClipDecoder` using a locally vendored `mp4box@0.5.4` demuxer at
+`vendor/mp4box/mp4box.all.min.js` relative to `document.baseURI`. Its probe
+preserves `hasAudio` alongside video metadata so embedded sound reaches the
+audio mix. Frame batches are bounded to 128 MiB and compressed decode queues
+are limited. Cache both scripts for offline use; see the package README for
+the host setup.
 
 ---
 
@@ -2351,3 +2398,60 @@ reference resolves.
 - Multiple audio tracks **layer/mix** by default.
 - `Animation.keyframes` stops are **evenly spaced** unless explicit `at:` times are given.
 - Spring **settle threshold** drives a spring's effective duration for windowing/chaining.
+
+
+## Preview audio, filmstrips and decorated captions
+
+`package:fluvie/rendering.dart` exports `TimelinePreviewAudioController`. Supply
+`mix: () => resolveAudioMix(video, clipMetaOf: ...)` after the preview resolver is
+ready, and a `PreviewAudioPlayerFactory` for platform I/O. Call `activate()` from
+a play gesture, `synchronize(position:, playing:, rate:)` from the canonical
+preview clock and `dispose()` with the preview session. Original clip tracks,
+source trims, delays, loops, time maps, gain envelopes and fades use the same
+resolved plan as encoding. Pending ticks coalesce; failed activation can retry.
+
+`clipThumbnails(resolver:, source:, count: 8, width: 96, height: 64)` samples real
+decoded source frames as bounded PNG bytes. It uses the preview's existing
+resolver/decoder and retains the resolver's ownership of original frames.
+
+Serializable `Text` supports intrinsic `maxWidth`, a `decoration` object with
+`color`/`cornerRadius`, and `padding` with `horizontal`/`vertical`. Its style
+supports `fontStyle: 'italic'` or `'normal'`, including JSON round trips and
+CLI-generated Dart. This lets an app preview and export the same caption pill
+without duplicating text layout in its widget UI. Fonts must be bundled in both
+the client and the render project.
+
+
+## Authoring workspace, quality and replay (0.3.1)
+
+The CLI owns `workspace <file.dart>` and its loopback HTTP session. `session`
+operates on the private descriptor. Frame, review, inspect and export use the
+same `RenderInvocation`/`runFluvieRender` implementation. `runFluvieWorker` mounts
+fresh composition resources per request while retaining its Flutter engine.
+Source revision changes retire the worker; stale results are rejected.
+
+Review adds sampled RenderParagraph overflow/reading-window/font observations
+and full-output FFmpeg silence/peak measurements. Findings are advisory unless
+strict quality is requested. Intentional exceptions remain recorded. Unsupported
+custom painting, semantic visual quality and cross-platform pixel identity are
+outside these measurements.
+
+`AudioAnalysisWindow` describes the resolved trim, placement and loop.
+`AudioWindowResolver` is an optional custom resolver capability.
+`RangedBeatDetectionService` and `RangedFrequencyAnalyzer` can decode intervals;
+`RangedBandAnalysis` carries actual duration for fractional-frame loop timing.
+Existing service/resolver interfaces remain valid. The native repository places
+analysis on the composition clock; the first audible declared track remains the
+default normalized track, rather than an analysis of the encoded master mix.
+
+`bundle create/inspect/unpack/replay` preserves readable Dart, assets, declared
+Flutter resources, locks, vendored path/Git dependencies, settings and provenance.
+Extraction validates paths, budgets, duplicate names and SHA-256 records before
+publication. Replay resolves with `--enforce-lockfile`. Integrity verification
+does not establish authorship or sandbox executable Dart.
+
+`benchmark` retains real provider/model identity, prompts, optional model traces,
+Dart before/after, preservation assertions, mounted review, encoded verification
+and timing. Visual quality remains a named human review. `DartEditService` uses
+the CLI's shared exact-range validator, repairs malformed replies within a fixed
+budget, and the CLI can repair compiler diagnostics before atomic publication.

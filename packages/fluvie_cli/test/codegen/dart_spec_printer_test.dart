@@ -201,6 +201,34 @@ void main() {
       expect(file, contains("Image.file('/tmp/a.png')"));
     });
 
+    test('bundle sources print as the asset form, keyed by their bundle path', () {
+      // A bundle value is relative to the .fluvie bundle; the printed program
+      // runs when the bundle's media folder ships as project assets.
+      final image = printVideoSpecJson(
+        _spec([
+          {
+            'type': 'Image',
+            'source': {'kind': 'bundle', 'value': 'media/photo.png'},
+          },
+        ]),
+      );
+      expect(image, contains("Image.asset('media/photo.png')"));
+
+      final clip = printVideoSpecJson(
+        _spec([
+          {
+            'type': 'Clip',
+            'source': {'kind': 'bundle', 'value': 'media/b-roll.mp4'},
+            'poster': {'kind': 'bundle', 'value': 'media/poster.png'},
+          },
+        ]),
+      );
+      expect(
+        clip,
+        contains("Clip.asset('media/b-roll.mp4', poster: MediaSource.asset('media/poster.png'))"),
+      );
+    });
+
     test('Counter with from, reveal and style', () {
       final code = printVideoSpecJson(
         _spec([
@@ -279,6 +307,37 @@ void main() {
           }),
         ),
         contains('Background.radial([Color(0xFF000000), Color(0xFFFFFFFF)])'),
+      );
+    });
+
+    test('gradient with stop offsets', () {
+      expect(
+        printVideoSpecJson(
+          sceneWith({
+            'kind': 'gradient',
+            'colors': ['#FF1A2980', '#FF6C5CE7', '#FF26D0CE'],
+            'stops': [0, 0.35, 1],
+          }),
+        ),
+        containsCode(
+          'Background.gradient([Color(0xFF1A2980), Color(0xFF6C5CE7), Color(0xFF26D0CE)], '
+          'stops: [0, 0.35, 1])',
+        ),
+      );
+    });
+
+    test('radial with stop offsets', () {
+      expect(
+        printVideoSpecJson(
+          sceneWith({
+            'kind': 'radial',
+            'colors': ['#FF000000', '#FFFFFFFF'],
+            'stops': [0.1, 0.8],
+          }),
+        ),
+        containsCode(
+          'Background.radial([Color(0xFF000000), Color(0xFFFFFFFF)], stops: [0.1, 0.8])',
+        ),
       );
     });
 
@@ -370,12 +429,13 @@ void main() {
       );
     });
 
-    test('ambient spin emits no duration or ease', () {
+    test('ambient spin preserves its curve override without a duration', () {
       final code = codeFor([
         {'preset': 'spin', 'period': '2.0s', 'duration': '5.0s', 'ease': 'smooth'},
       ]);
       expect(code, contains('Animation.spin(period: 2.seconds)'));
-      expect(code, isNot(contains('Ease.smooth')));
+      expect(code, contains('Animation.spin(period: 2.seconds).withEase(Ease.smooth)'));
+      expect(code, isNot(contains('duration: 5.seconds')));
     });
 
     test('raw fromTo with keyframes', () {

@@ -2,6 +2,8 @@ import 'package:fluvie_server/src/api/http/handlers/download_handler.dart';
 import 'package:fluvie_server/src/api/http/handlers/health_handler.dart';
 import 'package:fluvie_server/src/api/http/handlers/job_handler.dart';
 import 'package:fluvie_server/src/api/http/handlers/maintenance_handler.dart';
+import 'package:fluvie_server/src/api/http/handlers/media_handler.dart';
+import 'package:fluvie_server/src/api/http/handlers/project_handler.dart';
 import 'package:fluvie_server/src/api/http/handlers/render_handler.dart';
 import 'package:fluvie_server/src/api/http/handlers/root_handler.dart';
 import 'package:fluvie_server/src/api/http/handlers/schema_handler.dart';
@@ -43,11 +45,25 @@ Router buildRouter(ServerDependencies deps) {
   final validate = ValidateHandler(validator: deps.codeValidator);
   const root = RootHandler();
 
+  final media = MediaHandler(deps);
+  final project = ProjectHandler(deps);
   final api = bearerAuth(deps.config.apiToken);
   final cleanup = bearerAuth(deps.config.cleanupToken);
 
   return Router()
     ..get('/', root.index)
+    ..post('/v1/projects', _guard(api, project.create))
+    ..get('/v1/projects/<id>', (Request request) => project.get(request, _param(request, 'id')))
+    ..post(
+      '/v1/projects/<id>/duplicates',
+      (Request request) => project.reviewDuplicate(request, _param(request, 'id')),
+    )
+    ..post(
+      '/v1/projects/<id>/contributions',
+      (Request request) => project.contribute(request, _param(request, 'id')),
+    )
+    ..post('/v1/media', media.upload)
+    ..get('/v1/media/<id>', (Request request) => media.download(request, _param(request, 'id')))
     ..post('/v1/renders', _guard(api, render.create))
     ..post('/v1/validate', _guard(api, validate.validate))
     ..get('/v1/renders/<id>', _guard(api, (request) => job.get(request, _param(request, 'id'))))
@@ -57,6 +73,7 @@ Router buildRouter(ServerDependencies deps) {
     )
     ..post('/v1/maintenance/cleanup', _guard(cleanup, maintenance.cleanup))
     ..get('/v1/schema/video-spec', schema.get)
+    ..get('/v1/authz', _guard(api, health.live))
     ..get('/v1/healthz', health.live)
     ..get('/v1/readyz', health.ready);
 }

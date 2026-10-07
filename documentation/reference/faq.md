@@ -16,39 +16,42 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 
 ## Will my renders look the same each time?
 
-In capture mode the frame is the only clock: there is no wall-clock and no async
-work inside a frame, so a render is reproducible enough to cache and to golden
-test. Effects draw their randomness from seeded `noise(seed)` and `random(seed)`,
+In capture mode the frame is the only clock. Fluvie prepares required resources
+asynchronously before painting each frame; paint reads prepared values without
+wall-clock timing. This makes authored timing suitable for caching and golden
+tests when the inputs are stable. Effects draw their randomness from seeded `noise(seed)` and `random(seed)`,
 so a given seed reproduces the same sequence. Fluvie does not guarantee
 byte-identical output across machines or encoders.
 
 ## Do I need FFmpeg?
 
-Yes, for the encode. Fluvie captures frames itself, then hands them to FFmpeg to
-write the MP4, GIF, image sequence, or WebM. Put `ffmpeg` on your PATH, or pass
+Fluvie uses FFmpeg for native encoding, and the CLI provisions its tools
+automatically when needed. You can also put compatible tools on PATH or pass
 `--ffmpeg <path>` to the CLI.
 
-FFmpeg is the encoder because it covers every container Fluvie targets and runs
-the same way on every platform. Fluvie invokes it with an argument list, never a
-shell string, and uses bit-exact flags on a single thread so a given build
-always produces the same bytes.
+Fluvie invokes FFmpeg with an argument list, never a shell string. Its standard
+encode plan strips metadata and requests bit-exact, single-threaded encoding to
+reduce avoidable variation. Codec availability depends on the selected FFmpeg
+build; `fluvie doctor --json` reports its common encoders and decoders.
 
 ## Why does the same render produce a different MP4 on another machine?
 
-The encoded file depends on the FFmpeg build, and builds differ between
-platforms. On one machine the encoder is steady: bit-exact flags on one thread,
-so the same build produces the same file from the same frames. Across machines
-the bytes can differ even when the picture looks the same. See
+The encoded file depends on the FFmpeg build, codec, options, input bytes and
+capture environment, including Flutter's rasterizer and fonts. Keeping those
+fixed reduces variation, but the flags do not guarantee identical files for
+every codec or custom renderer. Across machines the bytes can differ even when
+the picture looks the same. Compare receipts to identify changed inputs. See
 [Exporting your video](../guides/exporting-your-video.md).
 
 ## My rendered text shows up as solid boxes. Why?
 
 That is Flutter's Ahem test font, which draws every glyph as a filled box, so a
 word looks like one bar. It means the real fonts were not loaded before the
-frames were captured. Fluvie's render pipeline (the CLI, the API, and the Docker
-image) loads the app fonts for you, so a normal render shows real text. The
-harness the CLI generates for each render does this itself, so you never wire it.
-If you host `renderVideo` yourself, load the app fonts and pass
+frames were captured. The managed CLI host loads the project's declared fonts
+and packaged fallback before capture, including server renders that use this
+host. An arbitrary API deployment, Docker image or custom render host is not
+automatically covered by that setup. If you host `renderVideo` yourself, load
+the app fonts and pass
 `defaultFontFamily` before you render.
 
 ## Should I render with Impeller?
@@ -71,9 +74,11 @@ encoded file, and leave it off otherwise.
 fluvie preview ./lib/my_video.dart
 ```
 
-Edit the file, save, and the preview redraws. It runs on your desktop by default,
-because a desktop preview decodes any clip through FFmpeg while a browser is
-limited to what WebCodecs supports. Pass `-d chrome` for the browser.
+Edit the file, save, and the preview redraws. The default starts a browser preview
+and prints its URL. A local authenticated bridge uses native FFmpeg to decode
+clips and audio, including source codecs the browser cannot decode itself. Pass
+`-d chrome` to open Chrome automatically, or choose an installed desktop device
+with `-d linux`, `-d macos`, or `-d windows`.
 
 ## What can I render today?
 
@@ -90,8 +95,8 @@ paint the cached image every frame. The element types and their painting are par
 v1, but the live headless-Chrome transport that captures the source is deferred.
 
 They are marked `@experimental`. To use them you inject a `SnapshotService` that
-provides the rasterized bytes; without one, a render of these elements raises a
-`FluvieSnapshotUnavailableError`. Their tests carry the `snapshot` tag and run
+provides the rasterized bytes; without one, resource preparation fails with an
+error naming the missing `SnapshotService`. Their tests carry the `snapshot` tag and run
 only where a live renderer is configured. See
 [Diagrams and web pages](../guides/diagrams-and-webviews.md).
 

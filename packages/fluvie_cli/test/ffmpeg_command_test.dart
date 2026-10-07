@@ -43,6 +43,9 @@ void main() {
     tmpRoot = Directory.systemTemp.createTempSync('fluvie_ffmpeg_cmd_');
     cache = FfmpegCache(abi: Abi.linuxX64, environment: {'XDG_CACHE_HOME': tmpRoot.path});
     runner = _MockRunner();
+    when(() => runner.run(any(), any())).thenAnswer(
+      (_) async => const ProcessRunResult(exitCode: 0, stdout: 'ffprobe version 8.1', stderr: ''),
+    );
     out = StringBuffer();
     err = StringBuffer();
   });
@@ -117,6 +120,9 @@ void main() {
       File(cache.binaryPath!)
         ..createSync(recursive: true)
         ..writeAsStringSync('stub');
+      File(cache.probePath!)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('stub');
       when(() => runner.run(cache.binaryPath!, const ['-version'])).thenAnswer(
         (_) async => const ProcessRunResult(
           exitCode: 0,
@@ -151,6 +157,9 @@ void main() {
       File(cache.binaryPath!)
         ..createSync(recursive: true)
         ..writeAsStringSync('stub');
+      File(cache.probePath!)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('stub');
       when(
         () => runner.run(cache.binaryPath!, const ['-version']),
       ).thenAnswer((_) async => const ProcessRunResult(exitCode: 0, stdout: '', stderr: ''));
@@ -161,6 +170,9 @@ void main() {
 
     test('notes a present-but-unrunnable binary', () async {
       File(cache.binaryPath!)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('stub');
+      File(cache.probePath!)
         ..createSync(recursive: true)
         ..writeAsStringSync('stub');
       when(
@@ -175,6 +187,9 @@ void main() {
   group('uninstall', () {
     test('removes an installed build', () async {
       File(cache.binaryPath!)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('stub');
+      File(cache.probePath!)
         ..createSync(recursive: true)
         ..writeAsStringSync('stub');
 

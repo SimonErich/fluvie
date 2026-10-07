@@ -42,8 +42,7 @@ List<String> assetDirEntries(String projectDir) {
 /// variant directory would be redundant.
 bool _isVariantDir(String dir) => RegExp(r'^\d+(\.\d+)?x$').hasMatch(p.basename(dir));
 
-/// Rewrites `flutter: assets:` in [projectDir]'s pubspec to exactly the
-/// directories that hold assets, returning whether the file changed.
+/// Adds discovered asset directories while preserving all existing declarations.
 ///
 /// The CLI owns this block: a project's asset tree is discovered per render, so
 /// adding `assets/images/` never needs a pubspec edit and can never be silently
@@ -56,27 +55,30 @@ bool syncAssetsBlock(String projectDir) {
   final doc = loadYaml(source);
   final flutter = doc is YamlMap ? doc['flutter'] : null;
   final existing = flutter is YamlMap ? flutter['assets'] : null;
-  final current = existing is YamlList ? existing.map((e) => '$e').toList() : const <String>[];
-  if (_sameEntries(current, entries) && (existing != null || entries.isEmpty)) return false;
+  final current = existing is YamlList ? existing.toList() : const <Object?>[];
+  final paths = current
+      .map(
+        (entry) => entry is String
+            ? entry
+            : entry is YamlMap
+            ? entry['path']
+            : null,
+      )
+      .toSet();
+  final additions = entries.where((entry) => !paths.contains(entry)).toList();
+  if (additions.isEmpty) return false;
 
   final editor = YamlEditor(source);
   if (doc is! YamlMap || doc['flutter'] == null) {
     if (entries.isEmpty) return false;
     editor.update(['flutter'], {'assets': entries});
-  } else if (entries.isEmpty) {
-    if (existing == null) return false;
-    editor.remove(['flutter', 'assets']);
+  } else if (existing is YamlList) {
+    for (final entry in additions) {
+      editor.appendToList(['flutter', 'assets'], entry);
+    }
   } else {
     editor.update(['flutter', 'assets'], entries);
   }
   file.writeAsStringSync(editor.toString());
-  return true;
-}
-
-bool _sameEntries(List<String> a, List<String> b) {
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
   return true;
 }

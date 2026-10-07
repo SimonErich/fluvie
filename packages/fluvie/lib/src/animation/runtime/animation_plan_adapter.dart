@@ -27,6 +27,26 @@ AnimationPlan toAnimationPlan(Animation animation) => AnimationPlan(
   label: animation.label,
 );
 
+/// Rebuilding a Flutter widget may recreate its animations without changing
+/// the timing plan. Visual effects can change independently of that plan.
+bool sameAnimationTiming(List<Animation> a, List<Animation> b) {
+  if (identical(a, b)) return true;
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    final left = toAnimationPlan(a[i]);
+    final right = toAnimationPlan(b[i]);
+    if (left.phase != right.phase ||
+        left.timing != right.timing ||
+        left.delay != right.delay ||
+        left.at != right.at ||
+        left.stagger != right.stagger ||
+        left.repeat != right.repeat) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /// The curve shaping [animation]'s progress at render time: its own `ease`
 /// when declared, else the [merged] cascade's, else [Ease.smooth].
 ///

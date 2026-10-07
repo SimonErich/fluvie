@@ -42,6 +42,8 @@
       writeFile: (name, bytes) => ffmpeg.writeFile(name, bytes),
       exec: (args) => ffmpeg.exec(args),
       readFile: (name) => ffmpeg.readFile(name),
+      deleteFile: (name) => ffmpeg.deleteFile(name),
+      terminate: async () => { ffmpeg.terminate(); loaded = null; },
     };
   </script>
 </head>

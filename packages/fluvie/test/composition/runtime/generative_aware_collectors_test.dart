@@ -52,6 +52,7 @@ void main() {
           _scene(const [GenerativeMedia(source: _vid)]),
         ],
         30,
+        sceneStartFrames: const [0],
         generative: _resolver(),
       );
       expect(plans, hasLength(1));
@@ -65,15 +66,20 @@ void main() {
           _scene(const [GenerativeMedia(source: _img)]),
         ],
         30,
+        sceneStartFrames: const [0],
         generative: _resolver(),
       );
       expect(plans, isEmpty);
     });
 
     test('without a resolver, a generated video is skipped', () {
-      final plans = collectClipPlans([
-        _scene(const [GenerativeMedia(source: _vid)]),
-      ], 30);
+      final plans = collectClipPlans(
+        [
+          _scene(const [GenerativeMedia(source: _vid)]),
+        ],
+        30,
+        sceneStartFrames: const [0],
+      );
       expect(plans, isEmpty);
     });
   });
@@ -86,6 +92,7 @@ void main() {
           _scene(const [GenerativeMedia(source: _vid)]),
         ],
         30,
+        sceneStartFrames: const [0, 30],
         generative: _resolver(),
       );
       expect(plans, hasLength(1));
@@ -100,6 +107,7 @@ void main() {
           _scene(const [GenerativeMedia(source: _vid, audio: ClipAudio.muted())]),
         ],
         30,
+        sceneStartFrames: const [0],
         generative: _resolver(),
       );
       expect(plans, isEmpty);
@@ -111,15 +119,20 @@ void main() {
           _scene(const [GenerativeMedia(source: _vid)]),
         ],
         30,
+        sceneStartFrames: const [0],
         generative: _resolver(hasAudio: false),
       );
       expect(plans, isEmpty);
     });
 
     test('without a resolver, a generated video contributes no audio', () {
-      final plans = collectClipAudioPlans([
-        _scene(const [GenerativeMedia(source: _vid)]),
-      ], 30);
+      final plans = collectClipAudioPlans(
+        [
+          _scene(const [GenerativeMedia(source: _vid)]),
+        ],
+        30,
+        sceneStartFrames: const [0],
+      );
       expect(plans, isEmpty);
     });
   });

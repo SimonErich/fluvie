@@ -10,17 +10,24 @@ environment:
 resolution: workspace
 
 dependencies:
+  archive: ^4.0.0
+  # Flutter's adaptive controls remain in the UI dependency's release kernel.
+  # Bundle their icon font as well as the app's Lucide icons.
+  cupertino_icons: ^1.0.8
   file_picker: ^11.0.2
   flutter:
     sdk: flutter
   flutter_riverpod: ^3.3.2
   fluvie: ^0.3.1
+  fluvie_cli: ^0.3.1
   fluvie_editor: ^0.3.1
   fluvie_presenter: ^0.3.1
+  fluvie_web_encoder: ^0.3.1
   obers_ui:
     git:
       url: https://github.com/SimonErich/obers_ui.git
       ref: 990286c9ac4cebe74ee36ece6fac82c2599896c1
+  pdf: ^3.12.0
   web: ^1.1.1
 
 dev_dependencies:
@@ -32,8 +39,10 @@ dev_dependencies:
     # A path (not hosted) constraint: the custom_lint plugin host replicates
     # this dependency and must resolve it without pub.dev.
     path: ../../packages/fluvie_lints
+  integration_test:
+    sdk: flutter
 
 flutter:
-  uses-material-design: false
+  uses-material-design: true
   assets:
     - assets/videos/

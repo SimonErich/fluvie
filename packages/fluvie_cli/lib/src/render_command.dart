@@ -1,16 +1,15 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:fluvie_cli/src/capture_process.dart' show resolveProjectDir;
 import 'package:fluvie_cli/src/cli_failure.dart';
 import 'package:fluvie_cli/src/export_flags.dart';
 import 'package:fluvie_cli/src/ffmpeg_gate.dart';
 import 'package:fluvie_cli/src/file_target.dart';
+import 'package:fluvie_cli/src/managed_harness.dart';
 import 'package:fluvie_cli/src/process_runner.dart';
-import 'package:fluvie_cli/src/project_assets.dart';
 import 'package:fluvie_cli/src/render_defines.dart';
 import 'package:fluvie_cli/src/render_pipeline.dart';
-import 'package:fluvie_cli/src/stage_harness.dart';
-import 'package:fluvie_cli/src/templates/file_harness_template.dart';
 import 'package:path/path.dart' as p;
 
 /// Creates the per-render temp sandbox; deleted after the render unless
@@ -43,7 +42,7 @@ final class RenderCommand {
   /// The `render` command's argument parser.
   static ArgParser buildParser() {
     final parser = ArgParser(usageLineLength: 80)
-      ..addOption('out', help: 'Path of the output file (required).')
+      ..addOption('out', help: 'Output path (default: build/fluvie/<composition>.mp4).')
       ..addOption('spec', help: 'Render a VideoSpec JSON file instead of a registry key.')
       ..addOption(
         'entry',
@@ -53,10 +52,8 @@ final class RenderCommand {
       ..addFlag(
         'cache',
         negatable: false,
-        help:
-            'Reuse cached frames when rendering a .dart file. Off by default: the '
-            'frame cache does not key on the composition, so an edit would replay '
-            'stale frames.',
+        hide: true,
+        help: 'Compatibility alias: local content caches are enabled by default.',
       );
     addSharedRenderOptions(parser);
     return parser;
@@ -81,16 +78,12 @@ final class RenderCommand {
       }
       key = args.rest.single;
     }
-    final outPath = args.option('out');
-    if (outPath == null || outPath.isEmpty) {
-      err.writeln('render needs --out <file>.\n\n${buildParser().usage}');
-      return 64;
-    }
     final int? frames;
     final ExportFlags flags;
     try {
       frames = validateFrames(args.option('frames'));
       flags = validateExportFlags(args);
+      validateRenderAdapters(args);
     } on UsageFailure catch (failure) {
       err.writeln(failure.message);
       return 64;
@@ -106,7 +99,19 @@ final class RenderCommand {
               project: args.option('project'),
             )
           : null;
-      if (target != null) syncAssetsBlock(target.projectDir);
+      final projectDir = target?.projectDir ?? resolveProjectDir(project: args.option('project'));
+      final rendererPath = args.option('renderer');
+      final renderer = rendererPath == null
+          ? null
+          : resolveFileTarget(
+              arg: rendererPath,
+              entry: args.option('renderer-entry') ?? 'buildRenderer',
+              project: projectDir,
+            );
+      final requestedOut = args.option('out');
+      final outPath = requestedOut == null || requestedOut.isEmpty
+          ? defaultRenderOutput(projectDir, hasSpec ? specPath : key, format: flags.format)
+          : requestedOut;
       return await captureThenEncode(
         runner: _runner,
         createSandbox: _createSandbox,
@@ -118,40 +123,25 @@ final class RenderCommand {
         frames: frames,
         flags: flags,
         extraDefines: extraDefines,
-        projectDirOverride: target?.projectDir,
-        // The frame cache keys on the config and the composition key, never on
-        // the composition itself, so an edited file with the same size and frame
-        // count would replay its old frames. Off unless asked for.
-        noCacheOverride: target == null ? null : !args.flag('cache'),
-        stage: target == null ? null : (projectDir) => _stageFor(target),
+        projectDirOverride: projectDir,
+        // Full local source/resource hashes invalidate the managed frame cache.
+        noCacheOverride: args.flag('no-cache'),
+        stage: target == null
+            ? null
+            : (projectDir) => stageManagedHarness(
+                projectDir: projectDir,
+                runner: _runner,
+                target: target,
+                renderer: renderer,
+              ),
         out: out,
         err: err,
         resolveFfmpeg: _resolveFfmpeg,
       );
     } on CliFailure catch (failure) {
+      if (args.flag('machine')) rethrow;
       err.writeln(failure.message);
       return 1;
     }
-  }
-
-  /// Stages the generated harness for [target] under the project's `.fluvie/`.
-  ///
-  /// The directory is deterministic (keyed to the target, not to the run) and
-  /// survives the render, so `flutter test`'s kernel cache hits when the same
-  /// composition is rendered again.
-  static StagedHarness _stageFor(FileTarget target) {
-    final slug = p
-        .relative(target.path, from: target.projectDir)
-        .replaceAll(RegExp('[^A-Za-z0-9]+'), '_');
-    final relativeDir = '.fluvie/$slug';
-    return stageHarness(
-      projectDir: target.projectDir,
-      relativeDir: relativeDir,
-      ephemeral: false,
-      harnessSource: fileHarnessSource(
-        targetImport: target.importFrom(p.join(target.projectDir, relativeDir)),
-        entry: target.entry,
-      ),
-    );
   }
 }

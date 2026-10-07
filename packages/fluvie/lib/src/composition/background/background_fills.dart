@@ -16,17 +16,19 @@ final class _ColorFill extends _BackgroundSpec {
 /// `Background.gradient`: a linear gradient that lerps toward an
 /// enclosing gradient shift's targets.
 final class _LinearGradientFill extends _BackgroundSpec {
-  const _LinearGradientFill(this.colors, {required this.begin, required this.end});
+  const _LinearGradientFill(this.colors, {required this.begin, required this.end, this.stops});
 
   final List<Color> colors;
   final Alignment begin;
   final Alignment end;
+  final List<double>? stops;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
       gradient: LinearGradient(
         colors: _shiftedColors(colors, GradientShiftScope.maybeOf(context)),
+        stops: stops,
         begin: begin,
         end: end,
       ),
@@ -37,15 +39,17 @@ final class _LinearGradientFill extends _BackgroundSpec {
 /// `Background.radial`: a center-out radial gradient that shifts like
 /// the linear one.
 final class _RadialGradientFill extends _BackgroundSpec {
-  const _RadialGradientFill(this.colors);
+  const _RadialGradientFill(this.colors, {this.stops});
 
   final List<Color> colors;
+  final List<double>? stops;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
       gradient: RadialGradient(
         colors: _shiftedColors(colors, GradientShiftScope.maybeOf(context)),
+        stops: stops,
       ),
     ),
   );

@@ -7,13 +7,16 @@ import 'dart:ui' as ui;
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
+import 'package:fluvie/src/elements/runtime/clip_resampler.dart';
 import 'package:fluvie/src/media/runtime/clip_frame_store.dart';
 import 'package:fluvie/src/media/runtime/image_resolve_cache.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
+import 'package:fluvie_media/fluvie_media.dart' show MediaTimeline;
 
 export 'package:fluvie/src/media/runtime/clip_frame_store.dart' show ClipFrameStore;
 
 part 'clip_resolve_cache_window.dart';
+part 'clip_resolve_cache_resolution.dart';
 
 /// The shared clip cache behind every [MediaResolver] that decodes video clips:
 /// probe a source once for its [ClipMetadata], extract the source frames a
@@ -38,6 +41,9 @@ part 'clip_resolve_cache_window.dart';
 mixin ClipResolveCache on ImageResolveCache {
   /// The probed metadata for each clip source, cached after the first probe.
   final Map<MediaSource, ClipMetadata> clipMeta = {};
+
+  /// Optional exact display clocks published by a probe or browser decoder.
+  final Map<MediaSource, MediaTimeline> clipTimelines = {};
 
   /// Decode-all mode only: every decoded frame, keyed by source-frame index.
   final Map<MediaSource, Map<int, ui.Image>> clipFrames = {};
@@ -68,10 +74,6 @@ mixin ClipResolveCache on ImageResolveCache {
   /// metadata to decode back).
   int? get maxClipDecodeEdge => null;
 
-  /// Frames extracted per store round-trip in streaming mode — small, so the
-  /// extraction never holds a whole clip's frames in memory at once.
-  static const int _extractChunk = 8;
-
   /// Probes [source] for its fps, frame count, and dimensions. Called at most
   /// once per source; [resolveClipMeta] caches the result.
   Future<ClipMetadata> probeClipSource(MediaSource source);
@@ -95,34 +97,6 @@ mixin ClipResolveCache on ImageResolveCache {
     return clipMeta[source] = await probeClipSource(source);
   }
 
-  /// [meta] with its dimensions scaled down to fit [maxClipDecodeEdge] (keeping
-  /// aspect, rounding each side to an even number decoders accept, never
-  /// upscaling) — what the extractor decodes at. Unchanged when there is no
-  /// bound or the source already fits.
-  ///
-  /// Only the dimensions move: fps, frame count, and the audio flag are probed
-  /// facts the resampler, trim bounds, and audio collector read.
-  ClipMetadata _boundedForDecode(ClipMetadata meta) {
-    final bound = maxClipDecodeEdge;
-    assert(bound == null || bound > 0, 'maxClipDecodeEdge must be positive; use null for no bound');
-    if (bound == null || bound <= 0 || meta.width <= 0 || meta.height <= 0) return meta;
-    final longEdge = math.max(meta.width, meta.height);
-    if (longEdge <= bound) return meta;
-    final scale = bound / longEdge;
-    int even(int value) {
-      final scaled = (value * scale).round();
-      return scaled.isOdd ? scaled - 1 : scaled;
-    }
-
-    return (
-      fps: meta.fps,
-      frameCount: meta.frameCount,
-      width: math.max(2, even(meta.width)),
-      height: math.max(2, even(meta.height)),
-      hasAudio: meta.hasAudio,
-    );
-  }
-
   /// Resolves [sourceFrames] of [source]: probes if needed, then in streaming
   /// mode extracts the missing frames in small chunks into the store, or in
   /// decode-all mode decodes them up front at the [maxClipDecodeEdge] bound.
@@ -131,31 +105,8 @@ mixin ClipResolveCache on ImageResolveCache {
   /// memory, and its store keeps raw bytes whose dimensions are read back from
   /// the metadata — so a bound there would decode the stored rasters at the
   /// wrong size.
-  Future<void> resolveClipFrames(MediaSource source, Iterable<int> sourceFrames) async {
-    final meta = await resolveClipMeta(source);
-    final store = clipFrameStore;
-    if (store == null) {
-      final frames = clipFrames.putIfAbsent(source, () => {});
-      final missing = [
-        for (final i in sourceFrames)
-          if (!frames.containsKey(i)) i,
-      ];
-      if (missing.isEmpty) return;
-      final extracted = await extractClipFrames(source, missing, _boundedForDecode(meta));
-      for (final entry in extracted.entries) {
-        frames[entry.key] = await _decodeRawFrame(source, entry.value);
-      }
-      return;
-    }
-    await _streamer.extractMissing(
-      source: source,
-      sourceFrames: sourceFrames,
-      meta: meta,
-      store: store,
-      extract: extractClipFrames,
-      chunkSize: _extractChunk,
-    );
-  }
+  Future<void> resolveClipFrames(MediaSource source, Iterable<int> sourceFrames) =>
+      _resolveClipFrames(source, sourceFrames);
 
   /// Records [source]'s composition→source frame mapping for the streaming
   /// decode-ahead (the `ClipFramePreparer.registerClipPlan` contract).
@@ -167,6 +118,10 @@ mixin ClipResolveCache on ImageResolveCache {
     required int compFps,
     required int trimStartFrames,
     required int trimEndFrames,
+    double trimStartOffsetFrames = 0,
+    double trimEndOffsetFrames = 0,
+    double speed = 1,
+    List<double>? sourceTimeMap,
   }) {
     _streamer.registerPlan(source, (
       windowStart: windowStart,
@@ -174,6 +129,10 @@ mixin ClipResolveCache on ImageResolveCache {
       compFps: compFps,
       trimStartFrames: trimStartFrames,
       trimEndFrames: trimEndFrames,
+      trimStartOffsetFrames: trimStartOffsetFrames,
+      trimEndOffsetFrames: trimEndOffsetFrames,
+      speed: speed,
+      sourceTimeMap: sourceTimeMap,
     ));
   }
 
@@ -182,18 +141,15 @@ mixin ClipResolveCache on ImageResolveCache {
   /// the store and evicting the least-recently-used beyond the window capacity.
   /// A no-op without a store or before any plan is registered.
   ///
-  /// It warms a frame for *every* registered clip, not just those whose scene is
-  /// on screen: a clip's painter rebuilds on every composition frame and the
-  /// resampler clamps an off-window frame to the clip's first or last source
-  /// frame, so an off-screen clip still reads a (clamped) frame that paint looks
-  /// up synchronously. Warming exactly what the painter resamples keeps the
-  /// streaming window a hit for every paint, matching the decode-all path.
+  /// Future windows need only probed geometry. Finished windows retain their
+  /// final visible picture so a direct seek into a held transition is exact.
   Future<void> prepareClipFramesForComposition(int compFrame) async {
     final store = clipFrameStore;
     if (store == null || !_streamer.hasPlans) return;
     await _streamer.prepareForComposition(
       compFrame: compFrame,
       meta: clipMeta,
+      timelines: clipTimelines,
       store: store,
       windowCapacity: clipWindowCapacity,
       debugOwner: '$runtimeType',
@@ -217,28 +173,13 @@ mixin ClipResolveCache on ImageResolveCache {
   /// The synchronous frame lookup paint uses: asserts the pre-pass ran, then
   /// returns the decoded frame (from the streaming window or the decode-all
   /// cache) or throws a typed error naming the missing [sourceFrame].
-  ui.Image decodedClipFrameLookup(MediaSource source, int sourceFrame) {
-    assertResolved('decodedClipFrame');
-    if (clipFrameStore == null) {
-      final image = clipFrames[source]?[sourceFrame];
-      if (image == null) {
-        throw FluvieRenderException(
-          '$runtimeType has no extracted clip frame $sourceFrame for "$source". '
-          'Was it included in the frames pre-resolved with preResolveClip?',
-        );
-      }
-      return image;
-    }
-    final image = _streamer.lookupDecoded(source, sourceFrame);
-    if (image == null) {
-      throw FluvieRenderException(
-        '$runtimeType has no clip frame $sourceFrame for "$source" in the decode '
-        'window. The capture loop must call prepareClipFrames(frame) before it '
-        'pumps a frame that paints this clip.',
-      );
-    }
-    return image;
-  }
+  ui.Image decodedClipFrameLookup(MediaSource source, int sourceFrame) =>
+      _decodedClipFrameLookup(source, sourceFrame);
+
+  /// Evicts decode-all preview frames outside the bounded ready window. Capture
+  /// does not call this; its planned frames remain exact for the whole render.
+  void retainPreviewClipFrames(Map<MediaSource, Set<int>> retained) =>
+      _retainPreviewClipFrames(retained);
 
   /// Disposes every decoded clip frame (decode-all cache and streaming window)
   /// and clears the per-clip state. Idempotent. The [clipFrameStore] itself is
@@ -250,6 +191,7 @@ mixin ClipResolveCache on ImageResolveCache {
       }
     }
     clipFrames.clear();
+    clipTimelines.clear();
     _streamer.dispose();
   }
 }

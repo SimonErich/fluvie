@@ -66,7 +66,7 @@ lesson.
 
 `Crew.astro` renders the package rows from `packages`; `Reel.astro` renders the
 gallery from `lessons` (it serialises them into a `gal-data` JSON tag that
-`landing.ts` reads to build the tiles). The headline count ("Eight MIT packages")
+`landing.ts` reads to build the tiles). The headline package count
 comes from `packageCountWord`.
 
 ## When a new lesson or example is added
@@ -84,8 +84,8 @@ A new `examples/gallery/lib/lessons/NN_*.dart` means a new gallery tile.
 
 ## When a package changes
 
-The package list reflects the published `packages/*` automatically (currently
-eight, including `fluvie_mobile_encoder` and `fluvie_web_encoder`).
+The package list reflects publishable `packages/*` automatically. The loader
+fails if the curated package copy omits a publishable package.
 
 - New package: add a `packages` entry to `content.json` (`key`, `role`, a one-line
   `line`, an `icon` HTML/SVG snippet, and `primary`/`badge` only for `fluvie`),
@@ -94,6 +94,42 @@ eight, including `fluvie_mobile_encoder` and `fluvie_web_encoder`).
 - Renamed or removed package: update or drop its entry. The build fails until the
   curated set matches disk.
 - Keep the brief's ecosystem list (`website-structure.md`) in step.
+
+## Keep examples tied to shipped behavior
+
+`tool/docs/sync_reference.mjs` generates the website Dart snippets, offline
+documentation and public protocol/capability JSON. Site builds use committed
+interface exports and need only Node. When changing a protocol or backend profile,
+refresh those exports from a resolved workspace:
+
+```sh
+node tool/docs/sync_reference.mjs --export-interfaces
+node tool/docs/sync_reference.mjs --export-interfaces --check
+node --test tool/docs/*.test.mjs
+```
+
+CI checks the live Dart exporters against these committed views. HTTP examples
+come from the client serializer and server request parser. MCP examples and option
+values come from the shipped tool registry. `Capabilities.astro` reads the same
+registry as backend preflight rather than maintaining its own support claims.
+
+The AI section plays a real compact video rendered from the compiled
+`website-promo` region in `examples/gallery/lib/snippets/authoring_snippets.dart`.
+Its source, captured poster and portable receipt live in `public/media/`. The
+source and binary hashes, canvas, frame count, FPS and duration are checked on
+every build. Changing the source requires a new render:
+
+```sh
+node tool/docs/render_marketing_example.mjs
+```
+
+This uses the package-owned CLI host and its normal automatic tool provisioning.
+Set `FLUVIE_FFMPEG` to use an explicit native executable. Full package fingerprints
+and render logs remain in ignored `build/marketing/`; the public receipt records
+the source and artifact identities, effective encoding settings and tool versions.
+It is a reproduction record, not a promise of identical encoder bytes on every
+platform. The prompt shown on the site is an example request; the checked-in
+composition is the exact source of its preview, not a claimed live model response.
 
 ## When copy or links change
 
@@ -144,7 +180,7 @@ Run before shipping a landing change:
 
 - [ ] `npm run build` is green (the data guardrail passes).
 - [ ] Voice pass: short sentences, second person, no em-dashes, no banned words.
-- [ ] All seven packages present and linked. Install version string current.
+- [ ] Every source-derived package is present and linked. Install version string current.
 - [ ] Every gallery tile has a caption, an `aria-label`, and a demo link.
 - [ ] All canonical links resolve (docs deep-links, demo, mcp, repo, pub.dev).
 - [ ] `prefers-reduced-motion` honored. Keyboard tab order and visible focus

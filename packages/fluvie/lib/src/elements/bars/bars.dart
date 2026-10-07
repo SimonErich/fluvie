@@ -20,7 +20,7 @@ import 'package:fluvie/src/theme/build_context_tokens.dart';
 /// The band's energy is spread across the bars by a fixed, deterministic
 /// sub-band profile (a golden-angle bump), so even many bars read as a spectrum
 /// rather than one flat block while staying stable across runs. [track]
-/// scopes it to one `Audio.track` anchor; `null` reads the master mix.
+/// scopes it to one `Audio.track` anchor; `null` reads the default track.
 ///
 /// ```dart
 /// Bars(count: 24, band: AudioBand.bass).animate([Animation.fadeIn()])
@@ -50,7 +50,7 @@ final class Bars extends StatelessWidget {
   /// The frequency band whose energy drives the bar heights.
   final AudioBand band;
 
-  /// The audio track this reacts to, or `null` for the master mix.
+  /// The audio track this reacts to, or `null` for the default track.
   final Anchor? track;
 
   /// The multiplier on the `[0, 1]` band energy.

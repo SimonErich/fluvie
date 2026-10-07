@@ -102,7 +102,139 @@ class _ThrowingDisposeHost extends _TesterHost {
   }
 }
 
+class _CancellableRuntime extends FakeWasmRuntime implements WasmRuntimeLifecycle {
+  int terminations = 0;
+
+  @override
+  Future<void> deleteFile(String name) async => files.remove(name);
+
+  @override
+  Future<void> terminate() async {
+    terminations++;
+    files.clear();
+  }
+}
+
 void main() {
+  testWidgets('a cancellable request preserves captured pixels and releases its resources', (
+    tester,
+  ) async {
+    final runtime = _CancellableRuntime();
+    final cancellation = RenderCancellation();
+    final frames = <Uint8List>[];
+    final progress = <RenderProgress>[];
+    late _TesterHost host;
+    final renderer = WebVideoRenderer(
+      encoder: WebVideoEncoder(runtime: runtime),
+      hostFactory: (size) => host = _TesterHost(tester, size),
+      frameEncoder: (rgba, width, height) async {
+        frames.add(Uint8List.fromList(rgba));
+        return rgba;
+      },
+    );
+
+    final output = await tester.runAsync(
+      () => renderer.renderRequest(
+        VideoRenderRequest(
+          composition: const ColoredBox(color: Color(0xff112233)),
+          width: 4,
+          height: 4,
+          fps: 2,
+          frameCount: 2,
+          audio: false,
+          cancellation: cancellation,
+          onProgress: progress.add,
+        ),
+      ),
+    );
+
+    expect(output, [0, 0, 0, 0x18, 0x66, 0x74, 0x79, 0x70]);
+    expect(frames, hasLength(2));
+    for (final frame in frames) {
+      expect(frame, hasLength(64));
+      expect(frame.sublist(40, 44), [0x11, 0x22, 0x33, 0xff]);
+    }
+    expect(progress.last.phase, RenderPhase.complete);
+    expect(host.disposed, isTrue);
+    expect(runtime.files, isEmpty);
+    await tester.runAsync(() async {
+      cancellation.cancel();
+      await Future<void>.delayed(Duration.zero);
+    });
+    expect(runtime.terminations, 0);
+  });
+
+  testWidgets('cancelling after a captured frame releases the host without encoding', (
+    tester,
+  ) async {
+    final runtime = _CancellableRuntime();
+    final cancellation = RenderCancellation();
+    final progress = <RenderProgress>[];
+    late _TesterHost host;
+    final renderer = WebVideoRenderer(
+      encoder: WebVideoEncoder(runtime: runtime),
+      hostFactory: (size) => host = _TesterHost(tester, size),
+      frameEncoder: _passthroughFrame,
+    );
+
+    await tester.runAsync(
+      () => expectLater(
+        renderer.renderRequest(
+          VideoRenderRequest(
+            composition: const ColoredBox(color: Color(0xff112233)),
+            width: 4,
+            height: 4,
+            fps: 2,
+            frameCount: 3,
+            audio: false,
+            cancellation: cancellation,
+            onProgress: (event) {
+              progress.add(event);
+              if (event.phase == RenderPhase.capturing && event.completedFrames == 1) {
+                cancellation.cancel();
+              }
+            },
+          ),
+        ),
+        throwsA(isA<RenderCancelledException>()),
+      ),
+    );
+
+    expect(progress.where((event) => event.phase == RenderPhase.capturing).last.completedFrames, 1);
+    expect(progress.any((event) => event.phase == RenderPhase.complete), isFalse);
+    expect(host.disposed, isTrue);
+    expect(runtime.files, isEmpty);
+    expect(runtime.lastArgs, isNull);
+  });
+
+  testWidgets('complete request preserves arbitrary geometry and numbered output prefix', (
+    tester,
+  ) async {
+    final runtime = FakeWasmRuntime();
+    final renderer = WebVideoRenderer(
+      encoder: WebVideoEncoder(runtime: runtime),
+      hostFactory: (size) => _TesterHost(tester, size),
+      frameEncoder: _passthroughFrame,
+    );
+    await tester.runAsync(
+      () => renderer.renderRequest(
+        VideoRenderRequest(
+          composition: const ColoredBox(color: Color(0xff112233)),
+          width: 100,
+          height: 80,
+          fps: 12,
+          frameCount: 2,
+          startFrame: 3,
+          audio: false,
+          export: const Export.mp4(crf: 19),
+        ),
+      ),
+    );
+    expect(runtime.files['frame_000000.png'], hasLength(100 * 80 * 4));
+    expect(runtime.files['frame_000001.png'], hasLength(100 * 80 * 4));
+    expect(runtime.lastArgs, contains('19'));
+  });
+
   testWidgets('captures a Video and encodes it to MP4 bytes', (tester) async {
     final runtime = FakeWasmRuntime();
     late _TesterHost host;
@@ -260,6 +392,44 @@ void main() {
     expect(materializer.requested, ['audio/song.wav']);
     expect(runtime.lastArgs, contains('-filter_complex'));
     expect(runtime.files.keys.any((name) => name.startsWith('audio_0_')), isTrue);
+  });
+
+  testWidgets('a memory audio track stages its own bytes; the materializer is never asked', (
+    tester,
+  ) async {
+    final runtime = FakeWasmRuntime();
+    final materializer = _FakeAudioMaterializer();
+    final renderer = WebVideoRenderer(
+      encoder: WebVideoEncoder(runtime: runtime),
+      hostFactory: (size) => _TesterHost(tester, size),
+      audioMaterializer: materializer,
+    );
+    final bedBytes = Uint8List.fromList(const [1, 2, 3, 4]);
+    final bed = AudioSource.memory(bedBytes, debugLabel: 'bed.mp3');
+    final video = Video(
+      size: VideoSize.square,
+      audio: [Audio.musicSource(bed, volume: 0.6)],
+      scenes: [
+        Scene(duration: 1.seconds, children: const [SizedBox.shrink()]),
+      ],
+    );
+
+    await tester.runAsync(
+      () => renderer.render(
+        composition: video,
+        aspect: Aspect.square,
+        duration: const Duration(milliseconds: 100),
+        longEdge: 48,
+        audio: true,
+      ),
+    );
+
+    // The imported bytes travel typed all the way into the wasm sandbox under
+    // their content hash; the string-keyed materializer never sees them.
+    expect(materializer.requested, isEmpty);
+    expect(runtime.files['audio_0_${bed.cacheKey}'], bedBytes);
+    expect(runtime.lastArgs, contains('-filter_complex'));
+    expect(runtime.lastArgs!.join(' '), contains('volume=0.6'));
   });
 
   testWidgets('a Video with audio but audio:false renders silent and warns once', (tester) async {

@@ -21,6 +21,18 @@ void main() {
   RenderConfig demo() => RenderConfig(width: 320, height: 240, frameCount: 48);
 
   group('VideoEncoderService.planEncodeArgs', () {
+    test('a nonzero picture range crops the final mix after authored fades and delay', () {
+      final plan = buildAudioMixPlan(const [AudioTrackNode(name: 'track.wav', delayMs: 500)]);
+      final args = service.planEncodeArgs(
+        RenderConfig(width: 32, height: 32, fps: 10, startFrame: 15, frameCount: 5),
+        audio: plan.tracks,
+        amix: plan.amix,
+      );
+      final graph = args[args.indexOf('-filter_complex') + 1];
+      expect(graph, contains('adelay=500'));
+      expect(graph, contains('atrim=start=1.5,asetpts=PTS-STARTPTS'));
+    });
+
     test('plans the golden argument array for the demo config', () {
       expect(service.planEncodeArgs(demo()), const [
         '-f',

@@ -1,0 +1,135 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "120f",
+      "layout": "canvas",
+      "background": {
+        "kind": "color",
+        "color": "#101018"
+      },
+      "children": [
+        {
+          "id": "el-badge",
+          "type": "Group",
+          "transform": {
+            "x": 0.32,
+            "y": 0.5,
+            "w": 0.5,
+            "h": 0.6
+          },
+          "children": [
+            {
+              "id": "el-card",
+              "type": "Box",
+              "decoration": {
+                "color": "#1B1B24",
+                "cornerRadius": 16
+              },
+              "transform": {
+                "x": 0.5,
+                "y": 0.5,
+                "w": 1.0,
+                "h": 1.0
+              }
+            },
+            {
+              "id": "el-title",
+              "type": "Text",
+              "text": "Grouped",
+              "style": {
+                "fontSize": 24,
+                "color": "#F0F0F5"
+              },
+              "transform": {
+                "x": 0.5,
+                "y": 0.24,
+                "w": 0.8,
+                "h": 0.2
+              }
+            },
+            {
+              "id": "el-inner",
+              "type": "Group",
+              "transform": {
+                "x": 0.5,
+                "y": 0.68,
+                "w": 0.8,
+                "h": 0.42
+              },
+              "children": [
+                {
+                  "id": "el-accent",
+                  "type": "Box",
+                  "color": "#6C5CE7",
+                  "transform": {
+                    "x": 0.3,
+                    "y": 0.5,
+                    "w": 0.4,
+                    "h": 0.6,
+                    "rotation": 12
+                  }
+                },
+                {
+                  "id": "el-hidden-nested",
+                  "type": "Box",
+                  "color": "#E6483F",
+                  "visible": false,
+                  "transform": {
+                    "x": 0.7,
+                    "y": 0.5,
+                    "w": 0.4,
+                    "h": 0.6
+                  }
+                }
+              ]
+            }
+          ],
+          "animate": [
+            {
+              "preset": "fadeIn",
+              "duration": "18f"
+            }
+          ]
+        },
+        {
+          "id": "el-empty",
+          "type": "Group",
+          "children": []
+        },
+        {
+          "id": "el-hidden-note",
+          "type": "Text",
+          "text": "hidden elements leave no trace",
+          "visible": false,
+          "transform": {
+            "x": 0.78,
+            "y": 0.5,
+            "w": 0.4,
+            "h": 0.2
+          }
+        },
+        {
+          "id": "el-caption",
+          "type": "Text",
+          "text": "One transform moves them all",
+          "style": {
+            "fontSize": 14,
+            "color": "#B2BEC3"
+          },
+          "transform": {
+            "x": 0.78,
+            "y": 0.85,
+            "w": 0.4,
+            "h": 0.12
+          }
+        }
+      ]
+    }
+  ]
+}

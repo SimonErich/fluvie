@@ -3,6 +3,15 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- Preserve caller-owned, pass-through audio files when `NativePcmDecoder` is
+  disposed. Only temporary inputs and PCM output owned by the decoder are removed.
+- Reject malformed native PCM output with a typed decode failure and clean up
+  partial output so a subsequent decode can retry safely.
+
 ## [0.3.1] - 2026-07-16
 
 Lockstep release with the rest of the Fluvie workspace.

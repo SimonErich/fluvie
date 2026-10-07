@@ -1,15 +1,23 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter/widgets.dart' as flutter;
+import 'package:flutter/widgets.dart';
+import 'package:fluvie/src/animation/keyframed_number.dart';
+import 'package:fluvie/src/core/contracts/clip_timeline_resolver.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/core/time_range.dart';
 import 'package:fluvie/src/elements/runtime/clip_frame_planner.dart';
 import 'package:fluvie/src/elements/runtime/clip_resampler.dart';
+import 'package:fluvie/src/elements/runtime/clip_speed_profile.dart';
 import 'package:fluvie/src/media/runtime/image_resolver_scope.dart';
+import 'package:fluvie/src/media/runtime/preview_clip_scope.dart';
+import 'package:fluvie/src/media/runtime/resolved_image.dart';
 import 'package:fluvie/src/rendering/runtime/frame_provider.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
 import 'package:fluvie/src/timing/time_scope_provider.dart';
+
+part 'clip_preview_placeholder.dart';
 
 /// Paints one pre-extracted clip frame: in capture it resamples the composition
 /// frame to a source frame and hands the cached `ui.Image` to a synchronous
@@ -32,8 +40,17 @@ import 'package:fluvie/src/timing/time_scope_provider.dart';
 /// 1.0, so nothing changes there.
 final class ClipPainter extends StatelessWidget {
   /// Paints [source] resampled per the current frame, scaled by [fit], honoring
-  /// [trim] in source space.
-  const ClipPainter({required this.source, this.trim, this.fit, super.key});
+  /// [trim] in source space and retimed by [speed]. [poster] stands in for
+  /// unresolved preview frames.
+  const ClipPainter({
+    required this.source,
+    this.trim,
+    this.fit,
+    this.poster,
+    this.speed = 1,
+    this.speedRamp,
+    super.key,
+  });
 
   /// The declared clip media, pre-extracted before the frame loop in capture.
   final MediaSource source;
@@ -45,8 +62,33 @@ final class ClipPainter extends StatelessWidget {
   /// How the frame scales into its box; `null` lets Flutter pick its default.
   final BoxFit? fit;
 
+  /// The still to show while preview frames are unresolved, or `null` for
+  /// the labelled placeholder.
+  final MediaSource? poster;
+
+  /// The playback rate handed to the resampler; `1` is source speed and a
+  /// negative rate plays the trim backwards.
+  final double speed;
+
+  /// Positive time-varying playback rate, integrated on the output clock.
+  final KeyframedNumber? speedRamp;
+
   @override
   Widget build(BuildContext context) {
+    if (PreparationScope.exposesOnlyGeometry(context)) {
+      final prepared = PreparationScope.resolverOf(context);
+      if (prepared != null) {
+        try {
+          final meta = prepared.clipMetadataFor(source);
+          return SizedBox(width: meta.width.toDouble(), height: meta.height.toDouble());
+        } on Object {
+          /* The first pass collects before metadata exists. */
+        }
+      }
+      return const SizedBox.shrink();
+    }
+
+    PreparationScope.requirePrepared(context, source, 'clip');
     final resolver = ImageResolverScope.maybeOf(context);
     if (resolver == null) {
       if (RenderModeContext.isCapture(context)) {
@@ -56,10 +98,21 @@ final class ClipPainter extends StatelessWidget {
           'collect pass (collectMediaSources) before the frame loop.',
         );
       }
+      final still = poster;
+      if (still != null) return ResolvedImage(source: still, fit: fit);
       return _ClipPreviewPlaceholder(source: source);
     }
     final meta = resolver.clipMetadataFor(source);
-    final image = resolver.decodedClipFrame(source, _resolveSourceFrame(context, meta));
+    final clock = FrameProvider.of(context).frame;
+    final window = TimeScopeProvider.of(context);
+    if (clock < window.startFrame || clock >= window.startFrame + window.durationFrames) {
+      return SizedBox(width: meta.width.toDouble(), height: meta.height.toDouble());
+    }
+    final requested = _resolveSourceFrame(context, meta);
+    final frame = RenderModeContext.isCapture(context)
+        ? requested
+        : PreviewClipScope.frameFor(context, source, requested);
+    final image = resolver.decodedClipFrame(source, frame);
     return flutter.RawImage(image: image, fit: fit, scale: _rasterScale(image.width, meta.width));
   }
 
@@ -76,76 +129,24 @@ final class ClipPainter extends StatelessWidget {
   int _resolveSourceFrame(BuildContext context, ClipMetadata meta) {
     final compFrame = FrameProvider.of(context).frame;
     final scope = TimeScopeProvider.of(context);
-    final bounds = resolveClipTrimBounds(trim, meta);
+    final resolver = ImageResolverScope.of(context);
+    final timeline = clipTimelineFor(resolver, source);
+    final bounds = resolveClipTrimBounds(trim, meta, timeline: timeline);
+    final offsets = resolveClipTrimOffsets(trim, meta, timeline: timeline);
     return resampleClipFrame(
       compFrame: compFrame,
       windowStart: scope.startFrame,
       compFps: scope.fps,
       srcFps: meta.fps,
+      timeline: timeline,
       trimStartFrames: bounds.start,
       trimEndFrames: bounds.end,
+      trimStartOffsetFrames: offsets.start - bounds.start,
+      trimEndOffsetFrames: offsets.end - bounds.end,
+      speed: speed,
+      sourceTimeMap: speedRamp == null
+          ? null
+          : integrateClipSpeedRamp(speedRamp!, fps: scope.fps, windowFrames: scope.durationFrames),
     );
   }
-}
-
-/// The live-preview stand-in for a [ClipPainter]: real frames exist only after
-/// the pre-resolve pass, so a preview shows a faint, labelled box that marks
-/// where the clip sits and how big its box is — what an author needs to
-/// position it.
-///
-/// It fills the box the layout gives it, but — like Flutter's own
-/// `RawImage`/`Image` when they have no intrinsic size — never demands infinite
-/// size: the [LimitedBox] collapses it to zero on any axis the parent left
-/// unbounded (which [ClipPainter]'s debug warning then explains) rather than
-/// asserting. A self-contained [Directionality] lets the label render without
-/// depending on an ambient text direction.
-class _ClipPreviewPlaceholder extends StatelessWidget {
-  const _ClipPreviewPlaceholder({required this.source});
-
-  /// The clip being stood in for, used only to label the placeholder.
-  final MediaSource source;
-
-  @override
-  Widget build(BuildContext context) {
-    return LimitedBox(
-      maxWidth: 0,
-      maxHeight: 0,
-      child: SizedBox.expand(
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: const Color(0x14FFFFFF),
-            border: Border.all(color: const Color(0x66FFFFFF), width: 2),
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-          ),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: Text(
-                  '▶  ${_label(source)}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color(0xE6FFFFFF),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    shadows: [Shadow(color: Color(0x99000000), blurRadius: 4)],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// A short human label for [source] — the file/asset basename, the URL's last
-  /// segment, or a memory clip's debug label.
-  String _label(MediaSource source) => switch (source) {
-    AssetSource(:final name) => name.split('/').last,
-    FileSource(:final path) => path.split(RegExp(r'[\\/]')).last,
-    NetworkSource(:final url) => url.pathSegments.isNotEmpty ? url.pathSegments.last : url.host,
-    MemorySource(:final debugLabel) => debugLabel ?? 'clip',
-  };
 }

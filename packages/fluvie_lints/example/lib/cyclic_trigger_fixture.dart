@@ -8,7 +8,5 @@ import 'package:fluvie/fluvie.dart';
 Widget build() {
   final loop = Anchor('loop');
   // expect_lint: cyclic_trigger
-  return const Box().animate([
-    Animation.fadeIn(at: Trigger.whenEnds(loop)),
-  ], anchor: loop);
+  return const Box().animate([Animation.fadeIn(at: Trigger.whenEnds(loop))], anchor: loop);
 }

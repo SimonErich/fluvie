@@ -3,6 +3,7 @@
 // for the collector; capture without pre-resolution throws a typed error;
 // shared: wraps a SharedElement; capture paints the resampled source frame.
 
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart' hide Animation, Clip, Image, Tween;
@@ -194,6 +195,37 @@ void main() {
       );
 
       expect(find.byType(SharedElement), findsNothing);
+    });
+  });
+
+  group('speed is a rate the engine can actually play', () {
+    test('a zero or non-finite rate is refused by every constructor', () {
+      // The spec decoder already refused these; the Dart parameter did not, and
+      // a zero rate reached the encoder's atempo staging, whose halving loop
+      // cannot converge on 0 — it spun building filter stages until the process
+      // died, after the whole capture had already run.
+      for (final bad in <double>[0, double.infinity, double.negativeInfinity, double.nan]) {
+        expect(
+          () => Clip.asset('a.mp4', speed: bad),
+          throwsA(isA<AssertionError>()),
+          reason: 'Clip.asset must refuse $bad',
+        );
+        expect(() => Clip.file('/a.mp4', speed: bad), throwsA(isA<AssertionError>()));
+        expect(
+          () => Clip.network(Uri.parse('https://x/a.mp4'), speed: bad),
+          throwsA(isA<AssertionError>()),
+        );
+        expect(
+          () => Clip.memory(Uint8List.fromList(const [1]), debugLabel: 'a.mp4', speed: bad),
+          throwsA(isA<AssertionError>()),
+        );
+      }
+    });
+
+    test('every rate that can be played is accepted', () {
+      for (final good in <double>[0.25, 0.5, 1, 2, 8, -1, -0.5]) {
+        expect(Clip.asset('a.mp4', speed: good).speed, good);
+      }
     });
   });
 }

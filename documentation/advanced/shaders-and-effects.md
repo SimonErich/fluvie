@@ -141,11 +141,23 @@ program is a GPU resource whose software-rasterizer fidelity varies by platform.
 Fluvie pins its shader goldens to the Linux baseline. The bundled `ripple.frag`
 ships with the package as a usable built-in and the test fixture.
 
-Two rules keep shaders deterministic. First, the program loads once before frame
-0, the same discipline media follows, so no frame ever waits on a load. A
-missing or invalid asset surfaces as a `FluvieRenderException` that names the
-asset. Second, every uniform is a `num` bound in iteration order, so the GLSL
-contract is stable from one render to the next.
+Two rules keep shaders capture-safe. First, the render pre-pass walks the
+composition, compiles every shader program it finds, and publishes them to the
+tree before frame 0, the same discipline media follows, so no frame ever waits
+on a load. A missing or invalid asset surfaces as a `FluvieRenderException` that
+names the asset, and it surfaces in the pre-pass rather than at paint. Second,
+every uniform is a `num` bound in iteration order, so the GLSL contract is
+stable from one render to the next.
+
+Each element gets its own shader instance derived from the shared program. That
+matters because a `FragmentShader` owns mutable uniform slots that paint
+rewrites every frame: two elements sharing one instance would overwrite each
+other's uniforms.
+
+A shader declared inside your own `StatelessWidget`'s `build` is invisible to
+the pre-pass, exactly as a `Clip` inside one is invisible to media collection.
+Declare it in the scene tree, or its first paint tells you the asset was never
+warmed.
 
 ## Writing your own effect
 

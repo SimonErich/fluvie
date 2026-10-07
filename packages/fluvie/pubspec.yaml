@@ -20,9 +20,11 @@ environment:
 resolution: workspace
 
 dependencies:
+  crypto: ^3.0.7
   flutter:
     sdk: flutter
   flutter_svg: ^2.0.0
+  fluvie_media: ^0.3.1
   highlight: ^0.7.0
   http: ^1.5.0
   intl: ^0.20.2
@@ -40,10 +42,13 @@ dev_dependencies:
     # this dependency and must resolve it without pub.dev.
     path: ../fluvie_lints
   mocktail: ^1.0.5
+  very_good_analysis: ^10.2.0
 
 flutter:
   uses-material-design: true
   shaders:
+    - shaders/color_curves.frag
+    - shaders/color_lut.frag
     - shaders/ripple.frag
   fonts:
     - family: JetBrains Mono
@@ -51,3 +56,16 @@ flutter:
         - asset: fonts/JetBrainsMono-Regular.ttf
         - asset: fonts/JetBrainsMono-Bold.ttf
           weight: 700
+
+    - family: Fluvie Sans
+      fonts:
+        - asset: fonts/Roboto-Regular.ttf
+        - asset: fonts/Roboto-Medium.ttf
+          weight: 500
+        - asset: fonts/Roboto-Bold.ttf
+          weight: 700
+        - asset: fonts/Roboto-Italic.ttf
+          style: italic
+        - asset: fonts/Roboto-BoldItalic.ttf
+          weight: 700
+          style: italic

@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:fluvie_cli/src/init_command.dart';
-import 'package:fluvie_cli/src/init_support.dart' show fluvieDependencyVersion;
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -65,7 +64,7 @@ void main() {
 
       expect(
         File(p.join(cwd.path, 'pubspec.yaml')).readAsStringSync(),
-        contains('fluvie: $fluvieDependencyVersion'),
+        contains('fluvie:'),
       );
     });
 
@@ -120,7 +119,7 @@ dependencies:
 
       expect(result.code, 0, reason: result.err);
       expect(File(p.join(cwd.path, 'lib', 'example_video.dart')).existsSync(), isTrue);
-      expect(result.out, contains('skipped pubspec.yaml (already exists)'));
+      expect(result.out, contains('pubspec.yaml (merged dependencies)'));
     });
   });
 
@@ -152,13 +151,17 @@ dependencies:
       expect(File(p.join(cwd.path, 'lib', 'example_video.dart')).existsSync(), isTrue);
     });
 
-    test('a re-run without --force changes nothing and asks for --force', () async {
+    test('repeated init succeeds and preserves handwritten composition bytes', () async {
       await runInit(const []);
+      final composition = File(p.join(cwd.path, 'lib', 'example_video.dart'))
+        ..writeAsStringSync('// handwritten widget and comments\n');
 
       final second = await runInit(const []);
 
-      expect(second.code, 1);
-      expect(second.err, contains('--force'));
+      expect(second.code, 0);
+      expect(second.err, isEmpty);
+      expect(second.out, contains('already configured'));
+      expect(composition.readAsStringSync(), '// handwritten widget and comments\n');
     });
 
     test('--force overwrites an edited composition', () async {

@@ -3,6 +3,14 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+- Add bounded, exact Dart source edits through the pure `source_edits.dart`
+  entry point, shared by CLI authoring and package-level AI edits.
+- Depend directly on `custom_lint_core` for analyzer contracts. The validator
+  is no longer mistaken for a custom-lint plugin when an AI package consumes it;
+  the real Fluvie rules still run during static validation.
+
 ## [0.3.1] - 2026-07-16
 
 Lockstep release with the rest of the Fluvie workspace.

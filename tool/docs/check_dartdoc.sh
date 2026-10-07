@@ -5,7 +5,16 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PACKAGES=(packages/fluvie packages/fluvie_presenter)
+PACKAGE_LIST="$(dart --packages="$REPO_ROOT/.dart_tool/package_config.json" \
+  "$REPO_ROOT/tool/workspace_inventory.dart" --root "$REPO_ROOT" --dartdoc)"
+PACKAGES=()
+while IFS= read -r package; do
+  if [[ -n "$package" ]]; then PACKAGES+=("$package"); fi
+done <<< "$PACKAGE_LIST"
+if [[ ${#PACKAGES[@]} -eq 0 ]]; then
+  echo "✗ docs:dartdoc — no production package API targets found."
+  exit 1
+fi
 OUT_DIR="$(mktemp -d)"
 LOG="$(mktemp)"
 

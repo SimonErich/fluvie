@@ -8,6 +8,7 @@ import 'package:fluvie/src/core/time_range.dart';
 import 'package:fluvie/src/elements/runtime/clip_painter.dart';
 import 'package:fluvie/src/media/runtime/generative_resolver_scope.dart';
 import 'package:fluvie/src/media/runtime/resolved_image.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
 
 /// Paints a produced visual [GenerativeSource] (image or video) — the
@@ -61,6 +62,11 @@ final class GenerativeMedia extends StatelessWidget implements GenerativeCarrier
 
   @override
   Widget build(BuildContext context) {
+    if (PreparationScope.exposesOnlyGeometry(context)) {
+      return placeholder ?? const SizedBox.shrink();
+    }
+
+    PreparationScope.requirePrepared(context, source, 'generative');
     final resolver = GenerativeResolverScope.maybeOf(context);
     if (resolver != null) {
       return switch (source.kind) {

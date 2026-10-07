@@ -23,11 +23,10 @@ Video build() => Video(
 );
 ''';
 
-  final diagnostics = await analyzer.analyze(snippet);
-  for (final diagnostic in diagnostics) {
-    stdout.writeln(
-      '${diagnostic.severity.name} at ${diagnostic.line}:${diagnostic.column} '
-      '${diagnostic.message}',
-    );
+  try {
+    final diagnostics = await analyzer.analyze(snippet);
+    diagnostics.forEach(stdout.writeln);
+  } finally {
+    await analyzer.dispose();
   }
 }

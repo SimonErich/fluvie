@@ -12,6 +12,8 @@ import 'package:fluvie/src/composition/box.dart';
 import 'package:fluvie/src/composition/photo_frame.dart';
 import 'package:fluvie/src/composition/runtime/media_collector.dart';
 import 'package:fluvie/src/composition/scene.dart';
+import 'package:fluvie/src/composition/transition/shared_element.dart';
+import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/core/media/snapshot_source.dart';
 import 'package:fluvie/src/core/snapshot/snapshot_viewport.dart';
@@ -51,6 +53,21 @@ void main() {
         _scene(children: [Image.asset('fixtures/swatch.png')]),
       ];
       expect(collectMediaSources(scenes), {_logo});
+    });
+
+    test('walks through a SharedElement wrapper to the carrier inside', () {
+      final scenes = [
+        _scene(
+          children: [
+            SharedElement(anchor: Anchor('hero'), child: Image.asset('fixtures/swatch.png')),
+          ],
+        ),
+      ];
+      expect(
+        collectMediaSources(scenes),
+        {_logo},
+        reason: 'wrapShared mounts a SharedElement around any element, media carriers included',
+      );
     });
 
     test('collects a Clip child (via the MediaCarrier marker)', () {

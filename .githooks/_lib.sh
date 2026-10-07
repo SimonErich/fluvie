@@ -44,7 +44,7 @@ PY
 }
 
 # Voice gate for staged documentation/ markdown: no em/en-dashes, no
-# marketing vocabulary (see CLAUDE.md "Documentation & the example lessons").
+# marketing vocabulary (see the documentation voice rules in CONTRIBUTING.md).
 DOCS_BANNED_WORDS='seamless|robust|leverage|effortless|supercharge|game-changer|elevate|unleash|delve|blazing|world-class|best-in-class'
 
 staged_docs_files() {
@@ -98,7 +98,7 @@ sys.stdout.write('\n'.join(out))
 PY
 }
 
-# Max lines allowed per Dart file (file-size budget; see CLAUDE.md).
+# Max lines allowed per Dart file (file-size budget; see CONTRIBUTING.md).
 MAX_FILE_LINES=200
 
 # Print staged added/copied/modified Dart files, one per line.

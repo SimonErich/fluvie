@@ -1,5 +1,8 @@
 import 'package:fluvie/src/audio/audio.dart';
 import 'package:fluvie/src/audio/encoding/sfx_trigger_resolver.dart';
+import 'package:fluvie/src/core/audio/audio_automation.dart';
+import 'package:fluvie/src/core/audio/audio_source.dart';
+import 'package:fluvie/src/core/audio/audio_time_map.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/timing/time_scope_data.dart';
 import 'package:meta/meta.dart';
@@ -17,25 +20,43 @@ final class ResolvedAudioTrack {
   /// Creates a resolved track over the authored [source].
   const ResolvedAudioTrack({
     required this.source,
+    this.audioSource,
     this.delayMs = 0,
     this.volume = 1,
+    this.volumeEnvelope = const [],
+    this.endSeconds,
     this.trimStartSeconds,
     this.trimEndSeconds,
     this.fadeInSeconds,
     this.fadeOutSeconds,
     this.fadeOutStartSeconds = 0,
     this.loop = false,
+    this.tempo = 1,
+    this.timeMap,
   });
 
   /// The audio source as authored: an asset key, a file path, or a URL. A
   /// custom encoder materializes it to a local file before decoding.
   final String source;
 
+  /// The authored source in typed form, when the resolution had one
+  /// (`resolveAudioMix` always threads it for declared tracks); `null` means
+  /// classify [source] by shape. This is how a memory source — whose [source]
+  /// is only the diagnostic `memory:<cacheKey>` label — carries its bytes to
+  /// the staging pass.
+  final AudioSource? audioSource;
+
   /// How far to shift the track later, in milliseconds (`0` plays at the start).
   final int delayMs;
 
   /// Linear gain applied to the track (`1` plays the file as authored).
   final double volume;
+
+  /// Resolved volume multipliers relative to the audible start.
+  final List<AudioVolumePoint> volumeEnvelope;
+
+  /// Exclusive composition end, for scene-scoped audio.
+  final double? endSeconds;
 
   /// Where playback begins in the source file, in seconds; `null` plays from 0.
   final double? trimStartSeconds;
@@ -51,6 +72,16 @@ final class ResolvedAudioTrack {
 
   /// When the fade-out begins, in seconds (only used with [fadeOutSeconds]).
   final double fadeOutStartSeconds;
+
+  /// The playback-rate multiplier the encoder must apply (`1` leaves the
+  /// stream alone), carried so a retimed clip's audio matches its picture.
+  ///
+  /// A custom encoder that ignores this will play a speed-ramped clip's audio
+  /// at the wrong rate; the FFmpeg mix compiles it into `atempo` stages.
+  final double tempo;
+
+  /// Integrated source clock for an authored clip speed ramp.
+  final AudioTimeMap? timeMap;
 
   /// Whether the track repeats to fill the render window.
   final bool loop;
@@ -85,28 +116,46 @@ ResolvedAudioTrack resolveAudioTrack(
   required int fps,
   required TimeScopeData scope,
 }) {
-  final resolvedTrim = track.trim?.resolveFrames(scope);
+  final owner = TimeScopeData(
+    fps: fps,
+    startFrame: 0,
+    durationFrames: track.ownerDurationFrames ?? scope.durationFrames,
+  );
+  final startSeconds = track.ownerStartFrame / fps;
+  final delayMs = (startSeconds * 1000).round() + _delayMs(track, owner, fps);
+  final audibleFrames =
+      (owner.durationFrames - (delayMs / 1000 * fps).round() + track.ownerStartFrame).clamp(
+        0,
+        owner.durationFrames,
+      );
+  final resolvedTrim = track.trim?.resolveFrames(owner);
   final trimStartSeconds = resolvedTrim == null ? null : resolvedTrim.start / fps;
   final trimEndSeconds = resolvedTrim == null ? null : resolvedTrim.end / fps;
-  final fadeOutSeconds = _seconds(track.fadeOut, scope, fps);
+  final fadeOutSeconds = _seconds(track.fadeOut, owner, fps);
   return ResolvedAudioTrack(
     source: track.source,
-    delayMs: track.isSfx ? _delayMs(track, scope, fps) : 0,
+    audioSource: track.audioSource,
+    delayMs: delayMs,
+    endSeconds: track.ownerDurationFrames == null
+        ? null
+        : startSeconds + owner.durationFrames / fps,
     volume: track.volume,
+    volumeEnvelope: track.automation.resolve(fps: fps, windowFrames: audibleFrames),
     trimStartSeconds: trimStartSeconds,
     trimEndSeconds: trimEndSeconds,
-    fadeInSeconds: _seconds(track.fadeIn, scope, fps),
+    fadeInSeconds: _seconds(track.fadeIn, owner, fps),
     fadeOutSeconds: fadeOutSeconds,
     fadeOutStartSeconds: fadeOutSeconds == null
         ? 0
-        : _fadeOutStart(
-            fadeOutSeconds: fadeOutSeconds,
-            windowSeconds: scope.durationFrames / fps,
-            // A looping bed fills the whole window; only a non-looping trim ends
-            // the audio sooner than the window does.
-            trimStartSeconds: track.loop ? null : trimStartSeconds,
-            trimEndSeconds: track.loop ? null : trimEndSeconds,
-          ),
+        : delayMs / 1000 +
+              _fadeOutStart(
+                fadeOutSeconds: fadeOutSeconds,
+                windowSeconds: audibleFrames / fps,
+                // A looping bed fills the whole window; only a non-looping trim ends
+                // the audio sooner than the window does.
+                trimStartSeconds: track.loop ? null : trimStartSeconds,
+                trimEndSeconds: track.loop ? null : trimEndSeconds,
+              ),
     loop: track.loop,
   );
 }

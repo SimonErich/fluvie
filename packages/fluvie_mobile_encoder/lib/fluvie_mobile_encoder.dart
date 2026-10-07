@@ -11,6 +11,7 @@
 /// frames never leave the device. `src/` stays private.
 library;
 
+// Native clip metadata/poster services for importers and custom previews.
 export 'package:fluvie/rendering.dart'
     show NetworkAllowlist, RenderPhase, RenderProgress, RenderProgressCallback, VideoRenderer;
 
@@ -25,6 +26,9 @@ export 'src/mobile_encode_request.dart';
 export 'src/mobile_encoder_providers.dart';
 export 'src/mobile_video_codec.dart';
 export 'src/mobile_video_encoder.dart';
+export 'src/native_frame_extraction_service.dart';
+export 'src/native_pcm_decoder.dart';
+export 'src/native_video_probe_service.dart';
 export 'src/network_audio_materializer.dart' show MobileAudioFetch, NetworkAudioMaterializer;
 export 'src/offscreen_capture_host.dart';
 export 'src/on_device_video_renderer.dart';

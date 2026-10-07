@@ -67,12 +67,24 @@ void main() {
       );
     });
 
-    test('an anchor in three or more scenes throws naming all of them', () {
+    test('an anchor in a contiguous run of three validates: it morphs through both cuts', () {
+      // The rule is contiguity, not a count. See shared_chain_test.dart for
+      // the full table.
       final registry = SharedElementRegistry();
       final logo = Anchor('logo');
       registry
         ..register(_handle(logo, 0))
         ..register(_handle(logo, 1))
+        ..register(_handle(logo, 2));
+
+      expect(() => registry.validate(4), returnsNormally);
+    });
+
+    test('two non-contiguous scenes throw, naming all of them', () {
+      final registry = SharedElementRegistry();
+      final logo = Anchor('logo');
+      registry
+        ..register(_handle(logo, 0))
         ..register(_handle(logo, 2));
       expect(
         () => registry.validate(4),
@@ -82,28 +94,10 @@ void main() {
             'message',
             allOf(
               contains('logo'),
+              contains('contiguous'),
               contains('scenes[0]'),
-              contains('scenes[1]'),
               contains('scenes[2]'),
             ),
-          ),
-        ),
-      );
-    });
-
-    test('two non-adjacent scenes throw the cross-one-boundary error', () {
-      final registry = SharedElementRegistry();
-      final logo = Anchor('logo');
-      registry
-        ..register(_handle(logo, 0))
-        ..register(_handle(logo, 2));
-      expect(
-        () => registry.validate(4),
-        throwsA(
-          isA<FluvieTimingError>().having(
-            (e) => e.message,
-            'message',
-            allOf(contains('logo'), contains('one boundary')),
           ),
         ),
       );

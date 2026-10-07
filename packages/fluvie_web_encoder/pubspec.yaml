@@ -25,6 +25,7 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   fluvie: ^0.3.1
+  fluvie_media: ^0.3.1
   http: ^1.5.0
   web: ^1.1.0
 
@@ -35,8 +36,12 @@ dev_dependencies:
   fluvie_lints:
     path: ../fluvie_lints
   mocktail: ^1.0.5
+  very_good_analysis: ^10.2.0
 
 flutter:
+  uses-material-design: true
+  assets:
+    - assets/clip_decoder.js
   plugin:
     platforms:
       web:

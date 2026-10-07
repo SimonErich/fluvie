@@ -20,6 +20,7 @@ import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/aspect.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
+import 'package:fluvie/src/core/quality.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:fluvie/src/core/time_extensions.dart';
 import 'package:fluvie/src/core/trigger.dart';
@@ -42,7 +43,7 @@ Widget _adaptiveSwatch() => Adaptive(
 
 /// Drives a render for [aspect] through the offline shell and returns the raw
 /// captured frames plus the size the render derived.
-Future<({Uint8List frames, int width, int height})> _render(
+Future<({Uint8List frames, int width, int height, Quality quality})> _render(
   WidgetTester tester, {
   required Widget composition,
   required Aspect aspect,
@@ -73,7 +74,12 @@ Future<({Uint8List frames, int width, int height})> _render(
   });
 
   final frames = File('${dir.path}/frames.rgba').readAsBytesSync();
-  return (frames: frames, width: result.config.width, height: result.config.height);
+  return (
+    frames: frames,
+    width: result.config.width,
+    height: result.config.height,
+    quality: result.config.quality,
+  );
 }
 
 void main() {
@@ -172,6 +178,43 @@ void main() {
         resolver: resolver(),
       );
       expect(a.ffmpegArgs, b.ffmpegArgs);
+    });
+  });
+
+  group('the encode quality reaches the render config', () {
+    testWidgets('a chosen quality is what the manifest encodes at', (tester) async {
+      // Without this the exporter's quality control would be inert: every
+      // render would encode at the RenderConfig default whatever the author
+      // picked, and nothing would say so.
+      final size = Aspect.square.sizeFor(32);
+      tester.view.physicalSize = ui.Size(size.width.toDouble(), size.height.toDouble());
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final dir = Directory.systemTemp.createTempSync('fluvie_render_quality_');
+      addTearDown(() => dir.deleteSync(recursive: true));
+
+      late final RenderAspectResult result;
+      await tester.runAsync(() async {
+        result = await render(
+          composition: _adaptiveSwatch(),
+          aspect: Aspect.square,
+          longEdge: 32,
+          frameCount: 2,
+          outDir: dir,
+          service: RenderService(capture: const RepaintBoundaryCaptureService()),
+          pumpWidget: tester.pumpWidget,
+          pumpFrame: () => tester.pump(),
+          quality: Quality.low,
+        );
+      });
+
+      expect(result.config.quality, Quality.low);
+    });
+
+    testWidgets('an unstated quality still encodes at the default', (tester) async {
+      final r = await _render(tester, composition: _adaptiveSwatch(), aspect: Aspect.square);
+      expect(r.quality, Quality.high);
     });
   });
 }

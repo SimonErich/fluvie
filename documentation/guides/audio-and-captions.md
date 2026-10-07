@@ -38,6 +38,26 @@ Both constructors take a `volume` that scales the track from 0.0 (silent) to 1.0
   `Trigger.at(Time)` for an absolute moment, or a beat or anchor trigger to pin it
   to the timeline.
 
+### Typed sources
+
+Both constructors classify their string by shape: a URL, an absolute file path,
+or an asset key. When the audio has no path-shaped string, for example bytes
+imported in the browser that never touched disk, build the track over a typed
+`AudioSource` instead:
+
+<!-- code-excerpt "examples/gallery/lib/snippets/phase_10_snippets.dart (audio-typed-sources)" -->
+```dart
+Audio.musicSource(AudioSource.memory(bytes, debugLabel: 'bed.mp3'), loop: true),
+Audio.sfxSource(AudioSource.memory(bytes), at: const Trigger.at(Time.seconds(2))),
+```
+
+`Audio.musicSource` and `Audio.sfxSource` take the same fields as their string
+twins and carry the source verbatim; the encoder materializes the bytes itself.
+`AudioSource.asset`, `AudioSource.file`, and `AudioSource.network` work here
+too, when you already hold a typed source. A memory track's `source` reads as a
+stable `memory:` label for diagnostics; the encoder consumes the typed source,
+never that label.
+
 The encoder mixes the tracks. Each track becomes one input with its own trim,
 delay, volume, and fade filters, and the encoder sums them with `amix` into the
 final soundtrack. A clip's own audio (`ClipAudio.included`) joins the mix as one
@@ -66,8 +86,11 @@ axis only, for a bar that stretches vertically with the band. `gain` scales how
 far the motion travels.
 
 Three bands are available: `AudioBand.bass`, `AudioBand.mid`, and
-`AudioBand.treble`. With no `track`, a reactive preset reads the master mix. Pass
-a `track` to read one specific audio track instead.
+`AudioBand.treble`. With no `track`, a reactive preset reads the first declared
+audible track. Pass a `track` to read one specific named audio track instead.
+Analysis follows that track's trim, placement and loop. The normalized source
+energies do not include its volume, fades, automation or the final mixed output;
+see [bounded audio analysis](../advanced/performance.md).
 
 The `Bars` element draws a frequency visualizer:
 
@@ -136,7 +159,27 @@ captions: Captions.words(
 
 ### Styles
 
-`CaptionStyle` sets the look. Three presets ship:
+`CaptionStyle` controls typography, the background and word highlights.
+
+For a small canvas, pass a custom style through `Captions.fromSrt(..., style:)`.
+Its background and highlight are Flutter `Color` values. The style belongs to
+the caption track; `Video` receives the track through `captions:`.
+The top/bottom placement presets cap their 64-pixel safe inset at one twelfth of
+the canvas's shorter side, so small canvases retain room for text. Custom
+positions keep their exact inset; opt into scaling with `adaptiveSafeArea: true`.
+Font sizes remain explicit, so choose a readable style for your output size.
+
+<!-- code-excerpt "examples/gallery/lib/authoring/benchmark_fixture.dart (custom-caption-style)" -->
+```dart
+/// A compact caption style for a small video canvas.
+const benchmarkCaptionStyle = CaptionStyle(
+  textStyle: TextStyle(fontSize: 14, color: Colors.white),
+  background: Color(0x80000000),
+  highlight: Colors.white,
+);
+```
+
+Three presets also ship:
 
 <!-- code-excerpt "examples/gallery/lib/snippets/phase_10_snippets.dart (caption-styles)" -->
 ```dart
@@ -244,6 +287,47 @@ animation to the first qualifying beat. Lesson 12 pops a brand chip on the music
 beat with `Animation.pop(at: Trigger.beat(track: music))`. Pass `every:` to fire
 on every second or fourth beat instead of every one.
 
+## Bounded reactive analysis on desktop
+
+Reactive beat and spectrum analysis decodes compressed audio before capture.
+The desktop default accepts at most 16 million mono samples at 44.1 kHz, about
+six minutes, and limits one FFmpeg decode to two minutes. Native diagnostics are
+bounded to 16 KiB. Cancellation, a timeout or an exhausted sample limit kills
+and reaps the owned decoder; an oversized track reports its source and remedy
+instead of allocating an unbounded analysis buffer. Audible playback and mixing
+are separate from this reactive analysis limit.
+
+Trim the analysis source when you only need a short section. A custom host can
+instead configure its own budget through the public rendering barrel:
+
+<!-- code-excerpt "examples/gallery/lib/snippets/audio_analysis_snippets.dart (desktop-analysis-limits)" -->
+```dart
+import 'package:fluvie/rendering.dart';
+
+/// A custom host shares this cancellation signal with its composition session.
+({BeatDetectionService beats, FrequencyAnalyzer bands}) boundedDesktopAnalysis(
+  RenderCancellation cancellation,
+) {
+  final decoder = FfmpegPcmDecoder(
+    decoder: const FfmpegAudioDecoder(
+      maxSamples: 32000000,
+      timeout: Duration(minutes: 4),
+    ),
+    whenCancelled: cancellation.whenCancelled,
+  );
+  return (
+    beats: SpectralBeatDetectionService(decoder: decoder),
+    bands: SpectralFrequencyAnalyzer(decoder: decoder),
+  );
+}
+```
+
+Use the returned `beats` and `bands` as `CompositionSession.beatDetector` and
+`CompositionSession.analyzer`, and give that session the same cancellation
+signal. Increasing the limit also increases PCM and DSP memory use. An injected
+`PcmDecoder` can supply a different preparation backend without changing your
+authored `Audio`, beat triggers or spectrum animations.
+
 ## Audio across platforms
 
 The same `Audio` you declare works on every renderer. The mix math
@@ -270,6 +354,11 @@ Notes:
 - The web has no file system, so a local file path is not a valid source there.
   Bundle the audio as an asset or serve it over an allowlisted URL.
 - Audio bytes are per-machine on every backend (FFmpeg builds differ).
+- Reactive beat and spectrum analysis is separate from audible mixing. Desktop
+  uses its PCM backend; the mobile renderer supplies bounded native PCM decoding
+  or accepts an injected `PcmDecoder`. The independently hosted browser renderer
+  still needs a suitable analysis backend. See the
+  [mobile analysis contract](on-device-mobile-rendering.md#current-composition-limits).
 
 ## Where to next
 

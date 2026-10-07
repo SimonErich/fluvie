@@ -7,40 +7,51 @@ import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 /// A fake satisfying the [ShaderLoader] contract without touching the asset
 /// bundle, so the unit path is independent of the WI-18 spike outcome.
 final class _FakeShaderLoader implements ShaderLoader {
-  _FakeShaderLoader(this._shader);
+  _FakeShaderLoader(this._program);
 
-  final ui.FragmentShader _shader;
+  final ui.FragmentProgram _program;
   String? lastAsset;
 
   @override
-  Future<ui.FragmentShader> load(String asset) async {
+  Future<ui.FragmentProgram> load(String asset) async {
     lastAsset = asset;
-    return _shader;
+    return _program;
   }
 }
 
 void main() {
-  test('the contract resolves a FragmentShader through a fake', () async {
-    late ui.FragmentShader shader;
+  test('the contract resolves a FragmentProgram through a fake', () async {
+    late ui.FragmentProgram program;
     await TestWidgetsFlutterBinding.ensureInitialized().runAsync(() async {
-      final program = await ui.FragmentProgram.fromAsset('shaders/ripple.frag');
-      shader = program.fragmentShader();
+      program = await ui.FragmentProgram.fromAsset('shaders/ripple.frag');
     });
-    final loader = _FakeShaderLoader(shader);
+    final loader = _FakeShaderLoader(program);
 
     final loaded = await loader.load('shaders/ripple.frag');
 
-    expect(loaded, same(shader));
+    expect(loaded, same(program));
     expect(loader.lastAsset, 'shaders/ripple.frag');
   });
 
+  test('two elements on one program each get their own shader', () async {
+    // The reason the seam yields a program: a FragmentShader owns mutable
+    // uniform slots that paint rewrites every frame, so sharing one instance
+    // across elements would let one element's uniforms reach the other's draw.
+    late ui.FragmentProgram program;
+    await TestWidgetsFlutterBinding.ensureInitialized().runAsync(() async {
+      program = await ui.FragmentProgram.fromAsset('shaders/ripple.frag');
+    });
+
+    expect(program.fragmentShader(), isNot(same(program.fragmentShader())));
+  });
+
   group('FragmentProgramShaderLoader (the real default)', () {
-    test('loads the bundled ripple shader', () async {
-      late ui.FragmentShader shader;
+    test('loads the bundled ripple program', () async {
+      late ui.FragmentProgram program;
       await TestWidgetsFlutterBinding.ensureInitialized().runAsync(() async {
-        shader = await const FragmentProgramShaderLoader().load('shaders/ripple.frag');
+        program = await const FragmentProgramShaderLoader().load('shaders/ripple.frag');
       });
-      expect(shader, isA<ui.FragmentShader>());
+      expect(program, isA<ui.FragmentProgram>());
     });
 
     test('a missing asset throws FluvieRenderException naming the asset', () async {

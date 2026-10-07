@@ -3,8 +3,8 @@ import 'package:fluvie_server/src/config/env_trim.dart';
 import 'package:fluvie_server/src/config/mcp_mode.dart';
 import 'package:meta/meta.dart';
 
-/// The default directory the documentation helper loads markdown from.
-const String defaultDocsDir = '/app/documentation';
+/// Selects the versioned offline corpus shipped inside the server binary.
+const String defaultDocsDir = 'bundled';
 
 /// The top-level server configuration, resolved once from the process
 /// environment by [FluvieServerConfig.fromEnv].
@@ -81,7 +81,7 @@ final class FluvieServerConfig {
   /// Listen port (default `8080`).
   final int port;
 
-  /// The directory the documentation helper loads markdown from.
+  /// A custom Markdown directory, or [defaultDocsDir] for the bundled corpus.
   final String docsDir;
 
   /// The render API config, or `null` when the API is disabled.

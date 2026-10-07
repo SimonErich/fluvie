@@ -1,0 +1,78 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "120f",
+      "layout": "canvas",
+      "background": {
+        "kind": "color",
+        "color": "#101018"
+      },
+      "children": [
+        {
+          "id": "el-slowmo",
+          "type": "Clip",
+          "source": {
+            "kind": "asset",
+            "value": "media/cam.mp4"
+          },
+          "trim": {
+            "from": "1s",
+            "to": "5s"
+          },
+          "speed": 0.5,
+          "fit": "cover",
+          "volume": 0.8,
+          "transform": {
+            "x": 0.05,
+            "y": 0.1,
+            "w": 0.42,
+            "h": 0.5
+          },
+          "fadeIn": "6f",
+          "fadeOut": "12f"
+        },
+        {
+          "id": "el-rewind",
+          "type": "Clip",
+          "source": {
+            "kind": "asset",
+            "value": "media/cam.mp4"
+          },
+          "speed": -1,
+          "fit": "contain",
+          "transform": {
+            "x": 0.53,
+            "y": 0.1,
+            "w": 0.42,
+            "h": 0.5
+          }
+        },
+        {
+          "id": "el-double",
+          "type": "Clip",
+          "source": {
+            "kind": "asset",
+            "value": "media/cam.mp4"
+          },
+          "speed": 2,
+          "show": {
+            "from": "30f",
+            "to": "90f"
+          },
+          "transform": {
+            "x": 0.29,
+            "y": 0.64,
+            "w": 0.42,
+            "h": 0.3
+          }
+        }
+      ]
+    }
+  ]
+}

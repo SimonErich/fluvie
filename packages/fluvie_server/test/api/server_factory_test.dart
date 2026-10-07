@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:fluvie_server/src/api/config/server_config.dart';
 import 'package:fluvie_server/src/api/jobs/file_job_store.dart';
 import 'package:fluvie_server/src/api/server_factory.dart';
@@ -20,6 +21,20 @@ void main() {
       expect(deps.config, same(config));
     });
 
+    test('reuses a supplied job store for queue and retention', () {
+      final config = serverConfigFromEnvironment({
+        'API_TOKEN': 'a',
+        'CLEANUP_TOKEN': 'c',
+        'LOCAL_STORAGE_DIR': '/tmp/fluvie-test',
+      });
+      final store = FileJobStore(Directory('/tmp/fluvie-injected-jobs'));
+      final deps = buildServerDependencies(
+        config,
+        jobStore: store,
+        mediaOrigin: Uri.parse('http://127.0.0.1:8080'),
+      );
+      expect(deps.jobStore, same(store));
+    });
     test('wires an S3FileStore for the s3 backend (no network on construction)', () {
       final config = serverConfigFromEnvironment({
         'API_TOKEN': 'a',
@@ -32,6 +47,9 @@ void main() {
       });
       final deps = buildServerDependencies(config);
       expect(deps.fileStore, isA<S3FileStore>());
+      expect((deps.fileStore as S3FileStore).proxyDownloads, isFalse);
+      final proxy = buildServerDependencies(config, proxyS3Downloads: true);
+      expect((proxy.fileStore as S3FileStore).proxyDownloads, isTrue);
     });
   });
 

@@ -4,9 +4,62 @@
 // slow source under a fast composition extracts each held frame once.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fluvie/src/core/time.dart';
+import 'package:fluvie/src/core/time_range.dart';
 import 'package:fluvie/src/elements/runtime/clip_frame_planner.dart';
+import 'package:fluvie_media/fluvie_media.dart';
 
 void main() {
+  test('variable-rate clips follow display timestamps for trims, rates and reverse', () {
+    final timeline = MediaTimeline.fromTimestamps([0, 100000, 600000], endTimeUs: 1000000);
+    expect(
+      planClipFrames(
+        windowStart: 0,
+        windowLength: 5,
+        compFps: 10,
+        srcFps: 3,
+        trimStartFrames: 0,
+        trimEndFrames: 3,
+        timeline: timeline,
+      ),
+      [0, 1],
+    );
+    expect(
+      planClipFrames(
+        windowStart: 0,
+        windowLength: 5,
+        compFps: 10,
+        srcFps: 3,
+        trimStartFrames: 0,
+        trimEndFrames: 3,
+        speed: 2,
+        timeline: timeline,
+      ),
+      [0, 1, 2],
+    );
+    expect(
+      planClipFrames(
+        windowStart: 0,
+        windowLength: 6,
+        compFps: 10,
+        srcFps: 3,
+        trimStartFrames: 0,
+        trimEndFrames: 3,
+        speed: -1,
+        timeline: timeline,
+      ),
+      [1, 2],
+    );
+    const meta = (fps: 3.0, frameCount: 3, width: 2, height: 2, hasAudio: true);
+    final offsets = resolveClipTrimOffsets(
+      const Time.seconds(0.2).to(const Time.seconds(0.6)),
+      meta,
+      timeline: timeline,
+    );
+    expect(offsets.start, closeTo(1.2, 1e-9));
+    expect(offsets.end, 2);
+  });
+
   test('1:1 fps with no trim needs one source frame per composition frame', () {
     final frames = planClipFrames(
       windowStart: 0,

@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie_editor/fluvie_editor.dart';
 import 'package:fluvie_editor/src/selection/selection_chrome.dart';
-import 'package:obers_ui/obers_ui.dart' show OiThemeData, OiThemeScope;
+import 'package:obers_ui/obers_ui.dart' show OiApp, OiThemeData;
 
 Map<String, Object?> _deck() => {
   'fluvieSpec': 1,
@@ -41,21 +41,19 @@ Future<(ProviderContainer, CanvasViewportController)> _pump(WidgetTester tester)
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: OiThemeScope(
-        data: OiThemeData.dark(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: SizedBox(
-              width: 320,
-              height: 180,
-              child: EditorCanvas(
-                document: EditorDocument.fromJson(_deck()),
-                slide: 0,
-                viewportController: viewport,
-                fitMargin: 0,
-                interactive: true,
-              ),
+      child: OiApp(
+        title: 'test',
+        theme: OiThemeData.dark(),
+        home: Center(
+          child: SizedBox(
+            width: 320,
+            height: 180,
+            child: EditorCanvas(
+              document: EditorDocument.fromJson(_deck()),
+              slide: 0,
+              viewportController: viewport,
+              fitMargin: 0,
+              interactive: true,
             ),
           ),
         ),

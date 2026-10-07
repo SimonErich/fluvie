@@ -56,12 +56,10 @@ final class _SlideSidebarState extends ConsumerState<SlideSidebar> {
     if (!_scroll.hasClients) return;
     final tileHeight = widget.width / widget.aspectRatio + 8;
     final target = (slide * tileHeight).clamp(0.0, _scroll.position.maxScrollExtent);
-    unawaited(
-      _scroll.animateTo(
-        target,
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-      ),
+    _scroll.animateTo(
+      target,
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
     );
   }
 

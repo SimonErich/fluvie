@@ -10,6 +10,12 @@ on:
     paths:
       - documentation/**
       - web/docs/**
+      - tool/docs/**
+      - packages/fluvie_cli/pubspec.yaml
+      - packages/fluvie_media/lib/**
+      - packages/fluvie_server/lib/**
+      - packages/fluvie_server/tool/export_protocol_reference.dart
+      - examples/gallery/lib/snippets/**
       - .github/workflows/docs.yml
   workflow_dispatch:
 
@@ -36,7 +42,10 @@ jobs:
           cache: npm
           cache-dependency-path: web/docs/package-lock.json
       - run: npm ci
+      - name: Check committed generated documentation
+        run: node ../../tool/docs/sync_reference.mjs --check
       - run: npm run build
+      - run: npm run check
       # Serve the custom domain from the Pages deploy.
       - run: echo "docs.fluvie.dev" > dist/CNAME
       - uses: actions/upload-pages-artifact@v3

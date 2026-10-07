@@ -23,6 +23,7 @@ dependencies:
   flutter:
     sdk: flutter
   fluvie: ^0.3.1
+  fluvie_validate: ^0.3.1
   http: ^1.5.0
   meta: ^1.16.0
   riverpod: ^3.3.2
@@ -34,3 +35,8 @@ dev_dependencies:
   fluvie_lints:
     path: ../fluvie_lints
   mocktail: ^1.0.5
+  very_good_analysis: ^10.2.0
+
+flutter:
+  # Match Fluvie's font assets when this package is the Flutter test host.
+  uses-material-design: true

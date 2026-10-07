@@ -22,8 +22,12 @@ final class VideoRegistrar {
     : _registrations = [for (var s = 0; s < sceneCount; s++) []];
 
   final List<List<ElementRegistration>> _registrations;
+  final List<ElementRegistration> _overlays = [];
   final Map<ElementRegistration, ElementSchedule> _schedules = {};
-  final Map<ElementRegistration, int> _sceneOf = {};
+  // The bucket a token was filed in, by reference rather than by index: an
+  // overlay is in no scene, and a sentinel index would be a number something
+  // else could do arithmetic on.
+  final Map<ElementRegistration, List<ElementRegistration>> _bucketOf = {};
   bool _resolved = false;
 
   /// Whether [resolveWith] has run for the current collect generation.
@@ -35,6 +39,9 @@ final class VideoRegistrar {
     for (final scene in _registrations) List<ElementRegistration>.unmodifiable(scene),
   ]);
 
+  /// The collected overlay tokens, in registration order. Unmodifiable.
+  List<ElementRegistration> get overlayRegistrations => List.unmodifiable(_overlays);
+
   /// The [CompositionRegistrar] facade for scene [sceneIndex] — a fresh
   /// instance per call (load-bearing: see the class docs).
   CompositionRegistrar forScene(int sceneIndex) {
@@ -42,8 +49,12 @@ final class VideoRegistrar {
       sceneIndex >= 0 && sceneIndex < _registrations.length,
       'forScene($sceneIndex) is out of range for ${_registrations.length} scenes.',
     );
-    return _SceneRegistrar(this, sceneIndex);
+    return _BucketRegistrar(this, _registrations[sceneIndex]);
   }
+
+  /// The [CompositionRegistrar] facade for the elements that belong to no
+  /// scene — a fresh instance per call, for the same reason [forScene] is.
+  CompositionRegistrar forOverlays() => _BucketRegistrar(this, _overlays);
 
   /// Stores the resolved [schedules] (keyed by token identity) and flips the
   /// registrar into resolved mode.
@@ -62,15 +73,19 @@ final class VideoRegistrar {
     _registrations
       ..clear()
       ..addAll([for (var s = 0; s < count; s++) []]);
+    _overlays.clear();
     _schedules.clear();
-    _sceneOf.clear();
+    _bucketOf.clear();
     _resolved = false;
   }
 
-  ElementSchedule? _register(int sceneIndex, ElementRegistration registration) {
+  ElementSchedule? _register(
+    List<ElementRegistration> bucket,
+    ElementRegistration registration,
+  ) {
     final resolved = _schedules[registration];
     if (resolved != null) {
-      _add(sceneIndex, registration); // Remount survival: re-list it.
+      _add(bucket, registration); // Remount survival: re-list it.
       return resolved;
     }
     if (_resolved) {
@@ -82,38 +97,36 @@ final class VideoRegistrar {
         'composition.',
       );
     }
-    _add(sceneIndex, registration);
+    _add(bucket, registration);
     return null;
   }
 
-  void _add(int sceneIndex, ElementRegistration registration) {
-    if (_sceneOf.containsKey(registration)) return; // Idempotent per token.
-    _sceneOf[registration] = sceneIndex;
-    _registrations[sceneIndex].add(registration);
+  void _add(List<ElementRegistration> bucket, ElementRegistration registration) {
+    if (_bucketOf.containsKey(registration)) return; // Idempotent per token.
+    _bucketOf[registration] = bucket;
+    bucket.add(registration);
   }
 
   void _unregister(ElementRegistration registration) {
-    final sceneIndex = _sceneOf.remove(registration);
-    if (sceneIndex == null) return;
-    _registrations[sceneIndex].remove(registration);
+    _bucketOf.remove(registration)?.remove(registration);
     // The schedule survives: a remount re-registers the same token.
   }
 }
 
-/// The thin per-scene [CompositionRegistrar] facade [VideoRegistrar.forScene]
-/// hands out.
-final class _SceneRegistrar implements CompositionRegistrar {
-  _SceneRegistrar(this._owner, this._sceneIndex);
+/// The thin per-bucket [CompositionRegistrar] facade [VideoRegistrar.forScene]
+/// and [VideoRegistrar.forOverlays] hand out.
+final class _BucketRegistrar implements CompositionRegistrar {
+  _BucketRegistrar(this._owner, this._bucket);
 
   final VideoRegistrar _owner;
-  final int _sceneIndex;
+  final List<ElementRegistration> _bucket;
 
   @override
   bool get isResolved => _owner.isResolved;
 
   @override
   ElementSchedule? register(ElementRegistration registration) =>
-      _owner._register(_sceneIndex, registration);
+      _owner._register(_bucket, registration);
 
   @override
   void unregister(ElementRegistration registration) => _owner._unregister(registration);

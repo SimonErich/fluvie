@@ -26,23 +26,78 @@ final class WebVideoEncoder {
   Future<Uint8List> encode({
     required RenderManifest manifest,
     required RenderSandbox sandbox,
+    RenderCancellation? cancellation,
   }) async {
-    await (_loading ??= _runtime.load());
-    for (final name in fileInputNames(manifest.ffmpegArgs)) {
-      // An `image2` `%0Nd` pattern (the bounded-memory PNG frame input) is not a
-      // single file: expand it to the per-frame files and copy each in.
-      final files = name.contains('%') ? expandImagePattern(name, manifest.frameCount) : [name];
-      for (final file in files) {
-        await _runtime.writeFile(file, await sandbox.readBytes(file));
+    cancellation?.throwIfCancelled();
+    final runtime = _runtime;
+    final lifecycle = runtime is WasmRuntimeLifecycle ? runtime as WasmRuntimeLifecycle : null;
+    if (cancellation != null && lifecycle == null) {
+      throw UnsupportedError(
+        'This FFmpeg runtime does not support cancellable renders. Install the lifecycle bridge.',
+      );
+    }
+    final staged = <String>{};
+    var terminated = false;
+    var finished = false;
+    Future<void>? terminating;
+    Future<Uint8List> run() async {
+      await (_loading ??= runtime.load());
+      cancellation?.throwIfCancelled();
+      for (final name in fileInputNames(manifest.ffmpegArgs)) {
+        final files = name.contains('%') ? expandImagePattern(name, manifest.frameCount) : [name];
+        for (final file in files) {
+          cancellation?.throwIfCancelled();
+          staged.add(file);
+          await runtime.writeFile(file, await sandbox.readBytes(file));
+        }
+      }
+      cancellation?.throwIfCancelled();
+      staged.add(manifest.outputFileName);
+      final exitCode = await runtime.exec(manifest.ffmpegArgs);
+      cancellation?.throwIfCancelled();
+      if (exitCode != 0) {
+        throw FluvieEncodeException('ffmpeg.wasm exited non-zero.', exitCode: exitCode);
+      }
+      final output = await runtime.readFile(manifest.outputFileName);
+      cancellation?.throwIfCancelled();
+      await sandbox.writeBytes(manifest.outputFileName, output);
+      return output;
+    }
+
+    try {
+      final operation = run();
+      return cancellation == null
+          ? await operation
+          : await Future.any<Uint8List>([
+              operation,
+              cancellation.whenCancelled.then((_) async {
+                if (finished) return Uint8List(0);
+                terminated = true;
+                _loading = null;
+                await (terminating ??= lifecycle!.terminate());
+                throw const RenderCancelledException();
+              }),
+            ]);
+    } on Object {
+      if (cancellation?.isCancelled ?? false) {
+        terminated = true;
+        _loading = null;
+        await (terminating ??= lifecycle!.terminate());
+      }
+      cancellation?.throwIfCancelled();
+      rethrow;
+    } finally {
+      finished = true;
+      if (!terminated && lifecycle != null) {
+        for (final name in staged) {
+          try {
+            await lifecycle.deleteFile(name);
+          } on Object {
+            // A failed encode may not have created an output.
+          }
+        }
       }
     }
-    final exitCode = await _runtime.exec(manifest.ffmpegArgs);
-    if (exitCode != 0) {
-      throw FluvieEncodeException('ffmpeg.wasm exited non-zero.', exitCode: exitCode);
-    }
-    final output = await _runtime.readFile(manifest.outputFileName);
-    await sandbox.writeBytes(manifest.outputFileName, output);
-    return output;
   }
 }
 

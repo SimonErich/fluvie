@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -19,8 +20,10 @@ import 'package:fluvie/src/rendering/capture/frame_capture_service.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
 import 'package:fluvie/src/rendering/capture/render_manifest.dart';
 import 'package:fluvie/src/rendering/capture/repaint_boundary_capture_service.dart';
+import 'package:fluvie/src/rendering/encoding/audio_graph_nodes.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/encoding/frame_cache.dart';
+import 'package:fluvie/src/rendering/render_cancellation.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
 import 'package:fluvie/src/rendering/render_service.dart';
 import 'package:fluvie/src/rendering/runtime/frame_provider.dart';
@@ -120,6 +123,34 @@ void main() {
   });
 
   group('RenderService.captureToDirectory', () {
+    test('cancellation interrupts blocked audio staging before publishing a manifest', () async {
+      final outDir = _tempDir('audio_cancel');
+      final cancellation = RenderCancellation();
+      final started = Completer<void>();
+      final blocked = Completer<void>();
+      final rendering = RenderService(capture: _CountingCapture()).captureToDirectory(
+        config: _config(frameCount: 1),
+        outDir: outDir,
+        pump: (_) async {},
+        boundaryKey: GlobalKey(),
+        compositionKey: 'cancel-audio',
+        cancellation: cancellation,
+        stageAudio: ({required resolver, required sandbox}) async {
+          started.complete();
+          await blocked.future;
+          return (nodes: <FfmpegAudioNode>[], amix: null);
+        },
+      );
+      await started.future;
+      final result = expectLater(
+        rendering.timeout(const Duration(seconds: 2)),
+        throwsA(isA<RenderCancelledException>()),
+      );
+      cancellation.cancel();
+      await result;
+      expect(File('${outDir.path}/manifest.json').existsSync(), isFalse);
+    });
+
     testWidgets('writes frames.rgba with exactly frameCount*w*h*4 bytes', (tester) async {
       final (_, key, pump) = await _mountDemoTree(tester);
       final outDir = _tempDir('len');

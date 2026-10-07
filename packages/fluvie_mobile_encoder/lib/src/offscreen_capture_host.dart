@@ -1,7 +1,3 @@
-// coverage:ignore-file drives the real Flutter engine a live RenderView manual
-// pipeline flushes, and toImage read-back) which runs only in a hosted app or an
-// on-device integration test, never under the unit-test binding; the orchestrator
-// logic is covered with a tester-backed CaptureHost instead.
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
@@ -46,12 +42,25 @@ final class OffscreenCaptureHost implements CaptureHost {
 
   @override
   Future<void> mount(Widget tree) async {
-    _pipelineOwner.rootNode = _renderView;
-    _renderView.prepareInitialFrame();
+    // Preparation and capture can mount successive shells on the same host.
+    // Initialize the view once and update the existing root element so the
+    // preparation tree is unmounted instead of orphaned.
+    if (_element == null) {
+      _pipelineOwner.rootNode = _renderView;
+      _renderView.prepareInitialFrame();
+    }
     _element = RenderObjectToWidgetAdapter<RenderBox>(
       container: _renderView,
       child: tree,
-    ).attachToRenderTree(_buildOwner);
+    ).attachToRenderTree(_buildOwner, _element);
+    await _flush();
+    // The composition's first build collects timing registrations. Its
+    // post-frame resolution must complete before frame zero is painted,
+    // independently of whether the visible app happens to receive vsync.
+    final binding = WidgetsBinding.instance;
+    final registered = binding.endOfFrame;
+    binding.scheduleWarmUpFrame();
+    await registered;
     await _flush();
   }
 
@@ -60,8 +69,18 @@ final class OffscreenCaptureHost implements CaptureHost {
 
   @override
   Future<void> dispose() async {
+    final element = _element;
+    if (element == null) return;
+    _element = RenderObjectToWidgetAdapter<RenderBox>(
+      container: _renderView,
+    ).attachToRenderTree(_buildOwner, element);
+    _buildOwner
+      ..buildScope(_element!)
+      ..finalizeTree();
     _pipelineOwner.rootNode = null;
     _element = null;
+    _renderView.dispose();
+    _pipelineOwner.dispose();
   }
 
   Future<void> _flush() async {

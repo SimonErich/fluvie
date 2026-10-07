@@ -1,6 +1,7 @@
 import 'dart:ffi' show Abi;
 
 import 'package:fluvie_cli/src/cli_failure.dart';
+import 'package:fluvie_media/fluvie_media.dart';
 
 /// How a downloaded FFmpeg asset is packaged.
 enum FfmpegArchiveFormat {
@@ -24,6 +25,8 @@ final class FfmpegAsset {
     required this.archiveBinaryPath,
     required this.sha256,
     required this.sizeBytes,
+    this.archiveProbePath,
+    this.probeAsset,
   });
 
   /// The frozen HTTPS URL of the archive to download.
@@ -41,10 +44,19 @@ final class FfmpegAsset {
 
   /// The exact archive size in bytes (a cheap guard checked before hashing).
   final int sizeBytes;
+
+  /// The companion ffprobe in this archive, when both tools ship together.
+  final String? archiveProbePath;
+
+  /// A separately pinned ffprobe archive (the macOS distributions).
+  final FfmpegAsset? probeAsset;
 }
 
 /// The cache-subdirectory label of the pinned FFmpeg build Fluvie provisions.
 const String pinnedFfmpegVersion = '8.1';
+
+/// Exact toolchain release identity, including the companion probe revision.
+const String pinnedFfmpegBuildId = managedFfmpegBuildId;
 
 /// A human-facing description of the pinned build, shown by `fluvie ffmpeg
 /// status` and the install log. Names the license flavor and the sources.
@@ -72,6 +84,7 @@ FfmpegAsset ffmpegAssetFor([Abi? target]) {
       url: '$_btbnBase/ffmpeg-n8.1.1-9-g58d4114d36-linux64-gpl-8.1.tar.xz',
       format: FfmpegArchiveFormat.tarXz,
       archiveBinaryPath: 'ffmpeg-n8.1.1-9-g58d4114d36-linux64-gpl-8.1/bin/ffmpeg',
+      archiveProbePath: 'ffmpeg-n8.1.1-9-g58d4114d36-linux64-gpl-8.1/bin/ffprobe',
       sha256: '0d14781b885c491f5c3b799cbe7d3a26ba8a7eb01935483185e31ea7d79c8cd3',
       sizeBytes: 142879584,
     ),
@@ -79,6 +92,7 @@ FfmpegAsset ffmpegAssetFor([Abi? target]) {
       url: '$_btbnBase/ffmpeg-n8.1.1-9-g58d4114d36-linuxarm64-gpl-8.1.tar.xz',
       format: FfmpegArchiveFormat.tarXz,
       archiveBinaryPath: 'ffmpeg-n8.1.1-9-g58d4114d36-linuxarm64-gpl-8.1/bin/ffmpeg',
+      archiveProbePath: 'ffmpeg-n8.1.1-9-g58d4114d36-linuxarm64-gpl-8.1/bin/ffprobe',
       sha256: 'e43b652753a7294d54e73e5d7d4040735cdad3c2f1439c4b2bbd6d275649ab31',
       sizeBytes: 123696464,
     ),
@@ -86,6 +100,7 @@ FfmpegAsset ffmpegAssetFor([Abi? target]) {
       url: '$_btbnBase/ffmpeg-n8.1.1-9-g58d4114d36-win64-gpl-8.1.zip',
       format: FfmpegArchiveFormat.zip,
       archiveBinaryPath: 'ffmpeg-n8.1.1-9-g58d4114d36-win64-gpl-8.1/bin/ffmpeg.exe',
+      archiveProbePath: 'ffmpeg-n8.1.1-9-g58d4114d36-win64-gpl-8.1/bin/ffprobe.exe',
       sha256: '7fe1bb1e76edf97b8ec9e84fb32b96d125d846135b6b9218af772f5af2bd9065',
       sizeBytes: 220667969,
     ),
@@ -95,6 +110,13 @@ FfmpegAsset ffmpegAssetFor([Abi? target]) {
       archiveBinaryPath: 'ffmpeg',
       sha256: 'e91df72a1ee7c26606f90dd2dd4dcccc6a75140ff9ea6fdd50faae828b82ba69',
       sizeBytes: 26037786,
+      probeAsset: FfmpegAsset(
+        url: 'https://evermeet.cx/ffmpeg/ffprobe-8.1.2.zip',
+        format: FfmpegArchiveFormat.zip,
+        archiveBinaryPath: 'ffprobe',
+        sha256: '399b93f0b9862f69767afa343e90c2f48d7e7958cadbb6deb76a012d0e3b7ce3',
+        sizeBytes: 25941651,
+      ),
     ),
     Abi.macosArm64 => const FfmpegAsset(
       url: 'https://www.osxexperts.net/ffmpeg81arm.zip',
@@ -102,6 +124,13 @@ FfmpegAsset ffmpegAssetFor([Abi? target]) {
       archiveBinaryPath: 'ffmpeg',
       sha256: 'ebb82529562b71170807bbc6b0e7eb4f0b13af8cbb0e085bb9e8f6fe709598ad',
       sizeBytes: 22547387,
+      probeAsset: FfmpegAsset(
+        url: 'https://www.osxexperts.net/ffprobe81arm.zip',
+        format: FfmpegArchiveFormat.zip,
+        archiveBinaryPath: 'ffprobe',
+        sha256: 'a6640a77d38a6f0527c5b597e599cb36a3427a6931444ed80bc62542421950a1',
+        sizeBytes: 22468272,
+      ),
     ),
     _ => throw CliFailure(
       'Fluvie has no pinned FFmpeg build for this platform ($abi). Install '

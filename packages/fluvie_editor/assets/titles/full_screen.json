@@ -1,0 +1,49 @@
+{
+  "id": "full_screen",
+  "name": "Full-screen headline",
+  "family": "Full screen",
+  "theme": {
+    "palette": {
+      "titleInk": "#F6F7FB",
+      "titleAccent": "#7C6EF6",
+      "titleSurface": "#18202F"
+    },
+    "typeScale": {
+      "titleHeadline": {
+        "fontSize": 54,
+        "fontWeight": "bold",
+        "color": "#F6F7FB"
+      },
+      "titleBody": {
+        "fontSize": 24,
+        "color": "#F6F7FB"
+      }
+    }
+  },
+  "children": [
+    {
+      "type": "SplitText",
+      "text": "Your next great story",
+      "by": "word",
+      "style": {
+        "token": "titleHeadline"
+      },
+      "textAlign": "center",
+      "transform": {
+        "x": 0.5,
+        "y": 0.5,
+        "w": 0.85,
+        "h": 0.72
+      },
+      "animate": [
+        {
+          "preset": "slideFadeIn",
+          "duration": "0.4r",
+          "stagger": {
+            "each": "0.04r"
+          }
+        }
+      ]
+    }
+  ]
+}

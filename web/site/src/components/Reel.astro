@@ -7,8 +7,8 @@ const gal = lessons.map((l) => [l.key, l.title, l.teaches, l.category, l.clip]);
     <div style="max-width:1180px; margin:0 auto;">
       <div style="max-width:760px;">
         <span style="display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.06em; color:var(--acc); border:1px solid var(--line); padding:6px 12px; border-radius:30px; background:#fff;"><span aria-hidden="true" style="color:var(--acc2);">[</span> 06 &middot; THE REEL WALL <span aria-hidden="true" style="color:var(--acc2);">]</span></span>
-        <h2 id="reel-h" class="flv-h2" style="font-family:'Sora',sans-serif; font-weight:800; font-size:40px; letter-spacing:-0.02em; line-height:1.08; margin:18px 0 0;">Twelve little films, each in one readable file.</h2>
-        <p style="font-size:17.5px; line-height:1.6; color:var(--soft); margin:18px 0 0;">Every clip below is a real Fluvie render: text and motion, scenes and transitions, charts that draw themselves, self-typing code, a beat-synced visualizer, captions, the lot. Click any tile to scrub it live.</p>
+        <h2 id="reel-h" class="flv-h2" style="font-family:'Sora',sans-serif; font-weight:800; font-size:40px; letter-spacing:-0.02em; line-height:1.08; margin:18px 0 0;">{lessons.length} runnable lessons, each in one readable file.</h2>
+        <p style="font-size:17.5px; line-height:1.6; color:var(--soft); margin:18px 0 0;">Explore text and motion, scene transitions, charts, code, visualizers and captions. These illustrated cards link to the demo; the runnable Dart sources live in the gallery.</p>
       </div>
 
       <div role="group" aria-label="Filter examples" style="display:flex; flex-wrap:wrap; gap:9px; margin-top:26px;">

@@ -8,6 +8,8 @@ import 'package:fluvie_server/src/api/render/render_runner.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
+import '../../support/mock_toolchain.dart';
+
 class _MockProcessRunner extends Mock implements ProcessRunner {}
 
 /// The absolutized FLUVIE_RENDER_SPEC_OUT path the runner passed as a define.
@@ -38,6 +40,7 @@ void main() {
 
   setUp(() {
     runner = _MockProcessRunner();
+    stubOutputProbe(runner);
     sandbox = Directory.systemTemp.createTempSync('fluvie_server_sandbox_');
     workDir = Directory.systemTemp.createTempSync('fluvie_server_work_');
     addTearDown(() {
@@ -50,6 +53,7 @@ void main() {
     renderProject: 'example',
     aiEnv: aiEnv,
     processRunner: runner,
+    resolveToolchain: mockToolchain(),
     createSandbox: () async => sandbox,
   );
 

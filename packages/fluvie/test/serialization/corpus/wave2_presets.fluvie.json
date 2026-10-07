@@ -1,0 +1,70 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "150f",
+      "background": {
+        "kind": "gradient",
+        "colors": ["#0B0B1E", "#1E1E3C"]
+      },
+      "children": [
+        {
+          "id": "el-headline",
+          "type": "Text",
+          "text": "Wave two",
+          "animate": [
+            {"preset": "color", "to": "#FFD166", "duration": "20f"},
+            {"preset": "gradientShift", "to": ["#101018", "#3C1E5A"], "duration": "40f"},
+            {"preset": "along", "path": "M 0 0 C 40 -60 120 -60 160 0", "orient": false, "duration": "30f"},
+            {"preset": "pulse", "on": "bass", "gain": 1.4, "track": "music"}
+          ]
+        },
+        {
+          "id": "el-plate",
+          "type": "Box",
+          "color": "#6C5CE7",
+          "animate": [
+            {"preset": "scanlines"},
+            {"preset": "chromatic", "px": 2},
+            {"preset": "bloom", "amount": 0.4},
+            {"preset": "parallax", "depth": 0.35},
+            {"preset": "shader", "asset": "shaders/ripple.frag", "uniforms": {"speed": 2}}
+          ]
+        },
+        {
+          "id": "el-meter",
+          "type": "Box",
+          "color": "#00B894",
+          "animate": [
+            {"preset": "scaleY", "on": "mid", "gain": 1.5, "track": "music"},
+            {"preset": "particles", "spec": {"kind": "confetti", "count": 40, "seed": "launch"}}
+          ]
+        },
+        {
+          "id": "el-hopper",
+          "type": "Box",
+          "color": "#FF7675",
+          "animate": [
+            {
+              "keyframes": [
+                {"opacity": 0, "y": 0.6},
+                {"opacity": 1, "y": -0.15},
+                {"y": 0}
+              ],
+              "easings": ["out", "smooth"],
+              "positions": ["0f", "10f", "24f"],
+              "phase": "enter",
+              "duration": "24f",
+              "at": "sceneStart"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

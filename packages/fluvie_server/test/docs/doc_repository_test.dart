@@ -52,10 +52,14 @@ void main() {
     expect(pages.single.body, '# Title\nline one\nline two');
   });
 
-  test('returns an empty corpus when the directory is missing', () {
+  test('fails clearly when a configured directory is missing', () {
     final missing = Directory('${root.path}/does-not-exist');
 
-    expect(FileDocRepository(missing).load(), isEmpty);
+    expect(() => FileDocRepository(missing).load(), throwsA(isA<FileSystemException>()));
+  });
+
+  test('fails clearly when a configured directory has no documentation', () {
+    expect(() => FileDocRepository(root).load(), throwsFormatException);
   });
 
   test('does not follow a symlink that points outside the docs root', () {

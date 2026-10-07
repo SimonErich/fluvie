@@ -213,7 +213,7 @@ void main() {
         expect(args, contains('-filter_complex'));
         final graph = args[args.indexOf('-filter_complex') + 1];
         expect(graph, contains('[1:a]asetpts=PTS-STARTPTS,volume=1[a0]'));
-        expect(graph, contains('[a0]amix=inputs=1:normalize=0,volume=1[aout]'));
+        expect(graph, contains('[a0]amix=inputs=1:normalize=0,volume=1[mixed];[mixed]apad[aout]'));
         final firstMap = args.indexOf('-map');
         expect(args.sublist(firstMap, firstMap + 4), ['-map', '0:v:0', '-map', '[aout]']);
         expect(args, contains('-shortest'));
@@ -232,8 +232,14 @@ void main() {
         expect(args.where((a) => a == '-i'), hasLength(3));
         final graph = args[args.indexOf('-filter_complex') + 1];
         expect(graph, contains('[1:a]asetpts=PTS-STARTPTS,volume=1[a0]'));
-        expect(graph, contains('[2:a]asetpts=PTS-STARTPTS,adelay=1000|1000,volume=1[a1]'));
-        expect(graph, contains('[a0][a1]amix=inputs=2:normalize=0,volume=1[aout]'));
+        expect(
+          graph,
+          contains('[2:a]asetpts=PTS-STARTPTS,adelay=1000|1000,asetpts=N/SR/TB,volume=1[a1]'),
+        );
+        expect(
+          graph,
+          contains('[a0][a1]amix=inputs=2:normalize=0,volume=1[mixed];[mixed]apad[aout]'),
+        );
         final firstMap = args.indexOf('-map');
         expect(args.sublist(firstMap, firstMap + 4), ['-map', '0:v:0', '-map', '[aout]']);
       });

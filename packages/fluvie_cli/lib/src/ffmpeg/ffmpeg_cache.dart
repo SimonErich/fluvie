@@ -9,14 +9,15 @@ import 'package:path/path.dart' as p;
 /// Pure path computation — no filesystem touch — so it is fully unit-testable
 /// for any target by injecting `abi` and `environment`. Existence checks and
 /// writes live in the provisioner. The layout is
-/// `<cacheRoot>/fluvie/ffmpeg/<version>/ffmpeg` (`ffmpeg.exe` on Windows),
+/// `<cacheRoot>/fluvie/toolchains/<build>/<abi>/bin/{ffmpeg,ffprobe}`
+/// (with `.exe` on Windows),
 /// where the cache root is `$XDG_CACHE_HOME` (or `~/.cache`) on Linux/macOS and
 /// `%LOCALAPPDATA%` on Windows. Every accessor is `null` when the platform's
 /// base directory cannot be resolved (no `HOME` / `LOCALAPPDATA`).
 final class FfmpegCache {
   /// Creates a cache resolver for [abi] (default: the host) and [environment]
   /// (default: the process environment), keyed under the [version] subfolder.
-  FfmpegCache({Map<String, String>? environment, Abi? abi, this.version = pinnedFfmpegVersion})
+  FfmpegCache({Map<String, String>? environment, Abi? abi, this.version = pinnedFfmpegBuildId})
     : _env = environment ?? Platform.environment,
       _abi = abi ?? Abi.current();
 
@@ -25,6 +26,9 @@ final class FfmpegCache {
 
   /// The version label used as the cache subdirectory.
   final String version;
+
+  /// ABI identity keeps different architectures from sharing executable files.
+  String get abiLabel => _abi.toString();
 
   bool get _isWindows => switch (_abi) {
     Abi.windowsArm64 || Abi.windowsIA32 || Abi.windowsX64 => true,
@@ -48,22 +52,31 @@ final class FfmpegCache {
   }
 
   /// The directory holding every Fluvie-managed FFmpeg version
-  /// (`<base>/fluvie/ffmpeg`), or `null` when the base cannot be resolved.
+  /// (`<base>/fluvie/toolchains`), or `null` when the base cannot be resolved.
   String? get rootDir {
     final base = _baseDir;
-    return base == null ? null : _ctx.join(base, 'fluvie', 'ffmpeg');
+    return base == null ? null : _ctx.join(base, 'fluvie', 'toolchains');
   }
 
   /// The directory holding the pinned build (`<rootDir>/<version>`).
   String? get versionDir {
     final root = rootDir;
-    return root == null ? null : _ctx.join(root, version);
+    return root == null ? null : _ctx.join(root, version, abiLabel);
   }
 
   /// The managed FFmpeg binary path (`ffmpeg`, or `ffmpeg.exe` on Windows).
   String? get binaryPath {
     final dir = versionDir;
     if (dir == null) return null;
-    return _ctx.join(dir, _isWindows ? 'ffmpeg.exe' : 'ffmpeg');
+    return _ctx.join(dir, 'bin', _isWindows ? 'ffmpeg.exe' : 'ffmpeg');
   }
+
+  /// The managed companion probe, always installed alongside FFmpeg.
+  String? get probePath {
+    final dir = versionDir;
+    return dir == null ? null : _ctx.join(dir, 'bin', _isWindows ? 'ffprobe.exe' : 'ffprobe');
+  }
+
+  /// Platform of the pinned release to install.
+  Abi get abi => _abi;
 }

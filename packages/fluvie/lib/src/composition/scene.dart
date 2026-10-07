@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/audio/audio.dart';
 import 'package:fluvie/src/composition/background/background.dart';
 import 'package:fluvie/src/composition/camera/camera.dart';
+import 'package:fluvie/src/composition/composition_resources.dart';
 import 'package:fluvie/src/composition/runtime/timeline_binder.dart';
 import 'package:fluvie/src/composition/timeline.dart';
 import 'package:fluvie/src/composition/timeline_schedule.dart';
@@ -37,6 +38,7 @@ final class Scene extends StatelessWidget {
     this.enter,
     this.exit,
     this.camera,
+    this.resources = const CompositionResources(),
     super.key,
   });
 
@@ -58,6 +60,7 @@ final class Scene extends StatelessWidget {
     Transition? enter,
     Transition? exit,
     Camera? camera,
+    CompositionResources resources = const CompositionResources(),
     Key? key,
   }) => Scene(
     duration: timeline.duration,
@@ -67,6 +70,7 @@ final class Scene extends StatelessWidget {
     enter: enter,
     exit: exit,
     camera: camera,
+    resources: resources,
     key: key,
     children: timeline is Timeline ? bindTimeline(timeline, children) : children,
   );
@@ -82,6 +86,7 @@ final class Scene extends StatelessWidget {
     Transition? enter,
     Transition? exit,
     Camera? camera,
+    CompositionResources resources = const CompositionResources(),
     Key? key,
   }) : this(
          duration: duration,
@@ -92,6 +97,7 @@ final class Scene extends StatelessWidget {
          enter: enter,
          exit: exit,
          camera: camera,
+         resources: resources,
          key: key,
        );
 
@@ -99,6 +105,9 @@ final class Scene extends StatelessWidget {
   /// scene durations define the video length, so a relative duration would
   /// be a fraction of itself.
   final Time duration;
+
+  /// Optional alternatives introduced by frame-dependent custom components.
+  final CompositionResources resources;
 
   /// The static backdrop behind [children], or `null` for none. It is
   /// simply the first Stack child — the same [Background] widget works as an

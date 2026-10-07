@@ -65,13 +65,55 @@ Widget pulsingChip(Anchor music) => FrameBuilder((ctx) {
 
 `ctx.audio(track)` returns the bass band. For the mid or treble band, call
 `ctx.audioBand(track, AudioBand.mid)` or `AudioBand.treble`. Pass `null` for the
-track to read the master mix. The energy comes from the per-frame band table the
-render shell analyses before frame 0, so it is a pure lookup at frame time.
+track to read the first audible declared track. The energy comes from the
+per-frame band table the render shell analyses before frame 0, so it is a pure
+lookup at frame time.
+These normalized source energies do not include gain, fades or the encoded mix.
 
 In capture without a precomputed reactive scope, `ctx.audio` and `ctx.audioBand`
 throw and name the band and the precompute pass, because reading live audio in a
-frame would break determinism. In a live preview they return `0`, so a builder
-still runs while you iterate.
+frame would break determinism. When an audio read first appears on a later
+frame, declare `requiresAudioAnalysis: true` in the builder's resources. This
+prepares the composition's declared audio tracks before frame zero. Live preview
+can return `0` when no analysis backend is available.
+
+## Resources that first appear later
+
+Normal reusable `StatelessWidget`, `Builder`, and `LayoutBuilder` components need
+no resource declarations: Fluvie mounts their real Flutter trees during
+preparation. A frame-dependent branch can hide a source until after preparation.
+Declare those alternatives on the component that owns them:
+
+<!-- code-excerpt "examples/gallery/lib/snippets/authoring_snippets.dart (dynamic-resources)" -->
+```dart
+/// Prepare an image whose widget first appears on a later video frame.
+Widget laterPhoto() => FrameBuilder(
+  (ctx) => ctx.frame < 60 ? const SizedBox.shrink() : Image.asset('assets/cat/later.png'),
+  resources: const CompositionResources(media: [MediaSource.asset('assets/cat/later.png')]),
+);
+```
+
+The image is ready before frame zero and appears at absolute video frame 60.
+`CompositionResources` can also live on `Video` or `Scene`; a reusable component
+can wrap its child in `CompositionResourceScope`. It accepts images, clips,
+generated media, snapshots, caption sources, and shader assets. A `ClipResource`
+includes its source, visible window, source trim, playback speed, and embedded
+audio policy so preparation uses the same playback plan as the widget.
+
+The `audio` field declares additional sources for analysis; it does not create
+audible tracks. Use `Video.audio` or `Scene.audio` for the soundtrack, and set
+`requiresAudioAnalysis` when a later branch reads `ctx.audio` or a reactive
+effect. An undeclared source that appears after preparation fails with its frame,
+source, and the declaration needed to prepare it.
+
+Resource declarations prepare bytes and metadata; they do not register new
+timing targets. Keep widgets with `.animate()` or `.show()` mounted during
+preparation, even when their visibility changes later. Introducing a new motion
+target after timing resolution fails. Hoisting its animation list alone does
+not make a previously absent target part of the timing plan.
+The error identifies the offending owner and frame and suggests unconditional
+mounting with `.show()` as the stable alternative. Managed capture raises it
+before accepting that frame; live preview forwards it to its `onError` owner.
 
 ## The one rule
 
@@ -85,6 +127,22 @@ cacheable and golden-stable as a preset. The frame is the only clock. Noise and
 audio are precomputed, never live. Given the same frame and the same scopes, your
 builder returns the same widget and paints the same pixels every time. Break the
 rule and the frame cache and the goldens stop agreeing.
+
+`fluvie validate lib/my_video.dart --json` and the optional `fluvie_lints`
+plugin warn about SDK wall-clock reads and unseeded randomness directly inside
+`Video`, `Scene` and `FrameBuilder` construction. The diagnostic is
+`nondeterministic_video`; it suggests frame-based inputs, a fixed timestamp or a
+seed. A generator stored in mutable state can still depend on seek order even
+when seeded. Prefer `ctx.noise('label-${ctx.frame}')`, or recreate a generator
+from a frame-derived seed instead of advancing one across builds.
+
+This static check does not follow external helpers or widget initialization.
+Run `fluvie review lib/my_video.dart --determinism` to compare sampled pixels
+after reverse seeks and a fresh mount. The managed harness invokes your entry
+function again, so initialization and factory choices are checked too. These
+are sampled checks on the current runtime; they do not prove every frame or
+guarantee identical pixels across Flutter engines, platforms or fonts. Dart's
+standard `ignore` directives are available for deliberate exceptions.
 
 ## Where to next
 

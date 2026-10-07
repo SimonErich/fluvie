@@ -1,11 +1,28 @@
+import 'dart:io';
+
 import 'package:args/args.dart';
+import 'package:fluvie_cli/src/assets_command.dart';
+import 'package:fluvie_cli/src/benchmark_command.dart';
+import 'package:fluvie_cli/src/bundle_command.dart';
+import 'package:fluvie_cli/src/cli_failure.dart';
+import 'package:fluvie_cli/src/cli_terminal.dart';
+import 'package:fluvie_cli/src/docs_command.dart';
+import 'package:fluvie_cli/src/doctor_command.dart';
 import 'package:fluvie_cli/src/edit_command.dart';
 import 'package:fluvie_cli/src/ffmpeg_command.dart';
+import 'package:fluvie_cli/src/frame_command.dart';
 import 'package:fluvie_cli/src/generate_command.dart';
 import 'package:fluvie_cli/src/init_command.dart';
+import 'package:fluvie_cli/src/inspect_command.dart';
 import 'package:fluvie_cli/src/list_command.dart';
 import 'package:fluvie_cli/src/preview_command.dart';
 import 'package:fluvie_cli/src/render_command.dart';
+import 'package:fluvie_cli/src/review_command.dart';
+import 'package:fluvie_cli/src/session_command.dart';
+import 'package:fluvie_cli/src/validate_command.dart';
+import 'package:fluvie_cli/src/workspace_command.dart';
+
+part 'cli_usage.dart';
 
 /// BSD `EX_USAGE`: the command line was used incorrectly.
 const int exitUsage = 64;
@@ -26,26 +43,56 @@ Future<int> run(
   FfmpegCommand? ffmpeg,
   InitCommand? init,
   PreviewCommand? preview,
+  DocsCommand docs = const DocsCommand(),
+  InspectCommand? inspect,
+  FrameCommand? frame,
+  DoctorCommand? doctor,
+  AssetsCommand? assets,
+  ValidateCommand? validate,
+  ReviewCommand? review,
 }) async {
+  final terminal = CliTerminal(
+    out: out,
+    err: err,
+    machine: args.contains('--machine'),
+    stage: args.isEmpty ? 'cli' : args.first,
+  );
+  final diagnostics = terminal.err;
   final parser = ArgParser()
     ..addFlag('help', abbr: 'h', negatable: false, help: 'Show this usage.')
     ..addCommand('init', InitCommand.buildParser())
     ..addCommand('render', RenderCommand.buildParser())
     ..addCommand('preview', PreviewCommand.buildParser())
+    ..addCommand('workspace', WorkspaceCommand.buildParser())
+    ..addCommand('session', SessionCommand.buildParser())
+    ..addCommand('bundle', BundleCommand.buildParser())
+    ..addCommand('benchmark', BenchmarkCommand.buildParser())
     ..addCommand('generate', GenerateCommand.buildParser())
     ..addCommand('edit', EditCommand.buildParser())
     ..addCommand('list', ListCommand.buildParser())
-    ..addCommand('ffmpeg', FfmpegCommand.buildParser());
+    ..addCommand('ffmpeg', FfmpegCommand.buildParser())
+    ..addCommand('docs', DocsCommand.buildParser())
+    ..addCommand('inspect', InspectCommand.buildParser())
+    ..addCommand('frame', FrameCommand.buildParser())
+    ..addCommand('doctor', DoctorCommand.buildParser())
+    ..addCommand('assets', AssetsCommand.buildParser())
+    ..addCommand('validate', ValidateCommand.buildParser())
+    ..addCommand('review', ReviewCommand.buildParser());
+  for (final subcommand in parser.commands.values) {
+    if (!subcommand.options.containsKey('help')) {
+      subcommand.addFlag('help', abbr: 'h', negatable: false, help: 'Show command usage.');
+    }
+  }
 
   final ArgResults results;
   try {
     results = parser.parse(args);
   } on FormatException catch (e) {
-    err
+    diagnostics
       ..writeln(e.message)
       ..writeln()
       ..writeln(_usage(parser));
-    return exitUsage;
+    return terminal.finish(exitUsage);
   }
 
   if (results.flag('help')) {
@@ -55,58 +102,52 @@ Future<int> run(
 
   final command = results.command;
   if (command == null) {
-    err.writeln(_usage(parser));
-    return exitUsage;
+    diagnostics.writeln(_usage(parser));
+    return terminal.finish(exitUsage);
   }
-  return switch (command.name) {
-    'init' => (init ?? InitCommand()).execute(command, out: out, err: err),
-    'preview' => (preview ?? PreviewCommand()).execute(command, out: out, err: err),
-    'list' => (list ?? ListCommand()).execute(command, out: out, err: err),
-    'generate' => (generate ?? GenerateCommand()).execute(command, out: out, err: err),
-    'edit' => (edit ?? EditCommand()).execute(command, out: out, err: err),
-    'ffmpeg' => (ffmpeg ?? FfmpegCommand()).execute(command, out: out, err: err),
-    _ => (render ?? RenderCommand()).execute(command, out: out, err: err),
-  };
+  if (command.flag('help')) {
+    out.writeln('fluvie ${command.name}\n\n${parser.commands[command.name]!.usage}');
+    return 0;
+  }
+  try {
+    final code = await switch (command.name) {
+      'init' => (init ?? InitCommand()).execute(command, out: out, err: diagnostics),
+      'preview' => (preview ?? PreviewCommand()).execute(command, out: out, err: diagnostics),
+      'workspace' => const WorkspaceCommand().execute(command, out: out, err: diagnostics),
+      'session' => const SessionCommand().execute(command, out: out, err: diagnostics),
+      'bundle' => const BundleCommand().execute(command, out: out, err: diagnostics),
+      'benchmark' => BenchmarkCommand().execute(command, out: out, err: diagnostics),
+      'list' => (list ?? ListCommand()).execute(command, out: out, err: diagnostics),
+      'generate' => (generate ?? GenerateCommand()).execute(command, out: out, err: diagnostics),
+      'edit' => (edit ?? EditCommand()).execute(command, out: out, err: diagnostics),
+      'ffmpeg' => (ffmpeg ?? FfmpegCommand()).execute(command, out: out, err: diagnostics),
+      'docs' => Future<int>.sync(() => docs.execute(command, out: out, err: diagnostics)),
+      'inspect' => (inspect ?? InspectCommand()).execute(command, out: out, err: diagnostics),
+      'frame' => (frame ?? FrameCommand()).execute(command, out: out, err: diagnostics),
+      'doctor' => (doctor ?? DoctorCommand()).execute(command, out: out, err: diagnostics),
+      'assets' => (assets ?? AssetsCommand()).execute(command, out: out, err: diagnostics),
+      'validate' => (validate ?? const ValidateCommand()).execute(
+        command,
+        out: out,
+        err: diagnostics,
+      ),
+      'review' => (review ?? ReviewCommand()).execute(command, out: out, err: diagnostics),
+      _ => (render ?? RenderCommand()).execute(command, out: out, err: diagnostics),
+    };
+    return terminal.finish(code);
+  } on CliFailure catch (failure) {
+    diagnostics.writeln(failure.message);
+    return terminal.finish(1, failure: failure);
+  } on FileSystemException catch (failure) {
+    diagnostics.writeln(
+      'Could not access "${failure.path ?? 'project files'}": ${failure.message}.',
+    );
+    return terminal.finish(1);
+  } on ProcessException catch (failure) {
+    diagnostics.writeln('Could not run "${failure.executable}": ${failure.message}.');
+    return terminal.finish(1);
+  } on FormatException catch (failure) {
+    diagnostics.writeln('Invalid input: ${failure.message}');
+    return terminal.finish(1);
+  }
 }
-
-String _usage(ArgParser parser) =>
-    '''
-fluvie - headless renderer for Fluvie compositions.
-
-Usage:
-  fluvie init [--name <name>] [--dir <project>]
-  fluvie preview <file.dart> [-d <device>]
-  fluvie render <file.dart> --out <file> [options]
-  fluvie render --spec <file.fluvie.json> --out <file> [options]
-  fluvie generate "<prompt>" --out <file> [--provider <name>] [options]
-  fluvie edit <file.fluvie.json> "<change>" --out <file> [options]
-  fluvie list [--project <dir>]
-  fluvie ffmpeg <install|path|status|uninstall>
-
-A Fluvie project is a composition file, an `assets/` folder, and a pubspec.
-`init` scaffolds one. `preview` runs it live with hot reload; `render` captures
-it under `flutter test` and encodes it with ffmpeg. Both take the .dart file
-directly and generate whatever they need, so there is no app or harness to
-maintain. A composition file exposes a top-level `Video build()` (`--entry`
-names another). `generate` authors a VideoSpec from a prompt with an LLM, writes
-it, and renders it; `edit` refines an existing spec. `list` prints the render
-keys of a project that still uses a registry. `ffmpeg` manages the FFmpeg build
-Fluvie downloads so renders work without a manual install.
-
-Init options:
-${InitCommand.buildParser().usage}
-
-Preview options:
-${PreviewCommand.buildParser().usage}
-
-Render options:
-${RenderCommand.buildParser().usage}
-
-Generate options:
-${GenerateCommand.buildParser().usage}
-
-List options:
-${ListCommand.buildParser().usage}
-
-Global options:
-${parser.usage}''';

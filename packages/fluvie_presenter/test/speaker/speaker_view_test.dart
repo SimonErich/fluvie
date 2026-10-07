@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_presenter/fluvie_presenter.dart';
-import 'package:fluvie_presenter/src/sidebar/slide_preview_frame.dart';
 import 'package:fluvie_presenter/src/speaker/speaker_next_preview.dart';
 import 'package:fluvie_presenter/src/speaker/speaker_view.dart';
 import 'package:obers_ui/obers_ui.dart' show OiThemeData, OiThemeScope;

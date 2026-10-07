@@ -15,8 +15,8 @@ abstract interface class DocRepository {
 /// A [DocRepository] backed by a directory of markdown files (`FLUVIE_DOCS_DIR`).
 ///
 /// Reads every `*.md` under [root] recursively, sorted by path so the corpus —
-/// and therefore search ranking — is deterministic. A missing directory yields
-/// an empty corpus rather than throwing, so a docs-disabled server still boots.
+/// and therefore search ranking — is deterministic. A missing or empty custom
+/// directory fails at startup rather than exposing silently empty MCP tools.
 final class FileDocRepository implements DocRepository {
   /// Creates a repository over [root].
   const FileDocRepository(this.root);
@@ -26,7 +26,9 @@ final class FileDocRepository implements DocRepository {
 
   @override
   List<DocPage> load() {
-    if (!root.existsSync()) return const [];
+    if (!root.existsSync()) {
+      throw FileSystemException('Documentation directory does not exist', root.path);
+    }
     final pages = <DocPage>[];
     // Do not follow symlinks: it avoids loops and keeps the corpus inside the
     // docs root, so a link can't expose a file from elsewhere on disk.
@@ -37,6 +39,9 @@ final class FileDocRepository implements DocRepository {
       pages.add(DocPage(path: path, title: _title(path, body), body: body));
     }
     pages.sort((a, b) => a.path.compareTo(b.path));
+    if (pages.isEmpty) {
+      throw FormatException('Documentation directory contains no Markdown pages: ${root.path}');
+    }
     return pages;
   }
 

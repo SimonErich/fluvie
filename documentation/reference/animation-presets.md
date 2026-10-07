@@ -80,7 +80,8 @@ They read a precomputed audio band table every frame, so they need a
 `ReactiveScope` and the analysis pass before frame 0 (the render pipeline sets
 this up for you). `on` picks the band (`AudioBand.bass`, `mid`, or `treble`),
 `gain` scales the response, and `track` scopes it to one `Audio.track` anchor
-(or the master mix when omitted).
+(or the first audible declared track when omitted). This reads normalized source
+energy; track gain, fades and the encoded mix do not change the analysis.
 
 | Preset | What it does |
 | --- | --- |

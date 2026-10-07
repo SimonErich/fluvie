@@ -1,0 +1,317 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "poster": "45f",
+  "export": {
+    "mode": "mp4",
+    "quality": "high"
+  },
+  "motionDefaults": {
+    "duration": "18f",
+    "ease": "smooth"
+  },
+  "transition": {
+    "kind": "crossFade",
+    "duration": "18f"
+  },
+  "scenes": [
+    {
+      "duration": "150f",
+      "layout": "canvas",
+      "background": {
+        "kind": "gradient",
+        "colors": ["#0B0B1E", "#1E1E3C"],
+        "begin": "topCenter",
+        "end": "bottomCenter"
+      },
+      "children": [
+        {
+          "id": "el-logo",
+          "type": "Box",
+          "color": "#6C5CE7",
+          "shared": "logo",
+          "transform": {
+            "x": 0.5,
+            "y": 0.32,
+            "w": 0.34,
+            "h": 0.34
+          },
+          "animate": [
+            {
+              "keyframes": [
+                {"opacity": 0, "y": 0.6, "scale": 0.8},
+                {"opacity": 1, "y": -0.1},
+                {"y": 0, "scale": 1}
+              ],
+              "easings": ["out", "smooth"],
+              "positions": ["0f", "12f", "26f"],
+              "phase": "enter",
+              "duration": "26f",
+              "at": "sceneStart"
+            }
+          ]
+        },
+        {
+          "id": "el-headline",
+          "type": "Text",
+          "spans": [
+            {
+              "text": "Built with "
+            },
+            {
+              "text": "Fluvie",
+              "link": "https://fluvie.dev",
+              "style": {
+                "color": "#6C5CE7",
+                "fontWeight": "bold"
+              }
+            }
+          ],
+          "style": {
+            "fontSize": 30,
+            "color": "#F0F0F5"
+          },
+          "transform": {
+            "x": 0.5,
+            "y": 0.62,
+            "w": 0.8,
+            "h": 0.14
+          },
+          "animate": [
+            {
+              "preset": "fadeIn",
+              "duration": "20f"
+            },
+            {
+              "preset": "float"
+            }
+          ]
+        },
+        {
+          "id": "el-b1",
+          "type": "Text",
+          "text": "Declare the video",
+          "transform": {
+            "x": 0.5,
+            "y": 0.78,
+            "w": 0.8,
+            "h": 0.1
+          },
+          "animate": [
+            {
+              "preset": "slideFadeIn",
+              "duration": "20f"
+            }
+          ]
+        },
+        {
+          "id": "el-b2",
+          "type": "Text",
+          "text": "Render it anywhere",
+          "transform": {
+            "x": 0.5,
+            "y": 0.88,
+            "w": 0.8,
+            "h": 0.1
+          },
+          "animate": [
+            {
+              "preset": "pop"
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "elements": ["el-b1"]
+        },
+        {
+          "elements": ["el-b2"],
+          "notes": {
+            "text": "Land the render-anywhere line.",
+            "highlights": ["anywhere"]
+          }
+        }
+      ],
+      "notes": {
+        "text": "Open on the logo, then walk the two claims.",
+        "highlights": ["declare", "render"]
+      }
+    },
+    {
+      "duration": "150f",
+      "layout": "canvas",
+      "enter": {
+        "kind": "slide",
+        "duration": "12f"
+      },
+      "exit": {
+        "kind": "wipe",
+        "duration": "12f"
+      },
+      "motionDefaults": {
+        "duration": "20f"
+      },
+      "background": {
+        "kind": "radial",
+        "colors": ["#1E1E3C", "#0B0B12"]
+      },
+      "children": [
+        {
+          "id": "el-logo-small",
+          "type": "Box",
+          "color": "#6C5CE7",
+          "shared": "logo",
+          "transform": {
+            "x": 0.12,
+            "y": 0.14,
+            "w": 0.12,
+            "h": 0.2
+          },
+          "animate": [
+            {
+              "preset": "fadeIn",
+              "duration": "12f"
+            }
+          ]
+        },
+        {
+          "id": "el-intro",
+          "type": "Text",
+          "text": "One spec, every surface",
+          "anchor": "intro",
+          "style": {
+            "fontSize": 24,
+            "color": "#F0F0F5"
+          },
+          "transform": {
+            "x": 0.6,
+            "y": 0.14,
+            "w": 0.7,
+            "h": 0.12
+          },
+          "animate": [
+            {
+              "preset": "blurIn",
+              "duration": "18f"
+            }
+          ]
+        },
+        {
+          "id": "el-site",
+          "type": "DeviceFrame",
+          "variant": "browser",
+          "url": "https://fluvie.dev",
+          "child": {
+            "type": "Markdown",
+            "source": "# Fluvie\n\nDeclare the video.",
+            "reveal": "30f",
+            "animate": [
+              {
+                "preset": "fadeIn",
+                "duration": "20f"
+              }
+            ]
+          },
+          "transform": {
+            "x": 0.32,
+            "y": 0.58,
+            "w": 0.55,
+            "h": 0.62
+          },
+          "animate": [
+            {
+              "preset": "slideFadeIn",
+              "duration": "15f",
+              "at": {
+                "kind": "whenEnds",
+                "anchor": "intro"
+              }
+            }
+          ]
+        },
+        {
+          "id": "el-meter",
+          "type": "Box",
+          "color": "#00B894",
+          "transform": {
+            "x": 0.82,
+            "y": 0.62,
+            "w": 0.18,
+            "h": 0.5
+          },
+          "animate": [
+            {
+              "preset": "scaleY",
+              "on": "bass",
+              "gain": 1.5,
+              "track": "music"
+            },
+            {
+              "preset": "vignette"
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "elements": ["el-meter"],
+          "notes": {
+            "highlights": ["audio-reactive"]
+          }
+        }
+      ],
+      "notes": {
+        "text": "Demo the site frame, then reveal the meter."
+      }
+    },
+    {
+      "duration": "120f",
+      "background": {
+        "kind": "color",
+        "color": "#0E0E14"
+      },
+      "children": [
+        {
+          "id": "el-count",
+          "type": "Counter",
+          "to": 42,
+          "reveal": "1s",
+          "style": {
+            "fontSize": 64,
+            "color": "#FFD166"
+          },
+          "animate": [
+            {
+              "preset": "scaleIn",
+              "duration": "16f"
+            }
+          ]
+        },
+        {
+          "id": "el-signoff",
+          "type": "Typewriter",
+          "text": "fluvie render final.mp4",
+          "speed": "3f",
+          "caret": true,
+          "style": {
+            "fontFamily": "monospace"
+          },
+          "animate": [
+            {
+              "preset": "fadeIn",
+              "duration": "10f"
+            }
+          ]
+        }
+      ],
+      "notes": {
+        "text": "Close on the render command."
+      }
+    }
+  ]
+}

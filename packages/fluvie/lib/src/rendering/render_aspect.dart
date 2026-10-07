@@ -1,82 +1,55 @@
-// fluvie:large-file-ok: the canonical multi-aspect render entry; one public render() plus its private audio-mix helper
+import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/widgets.dart' show GlobalKey, Widget;
+import 'package:flutter/widgets.dart' show Widget;
 import 'package:fluvie/src/audio/encoding/audio_mix_staging.dart';
-import 'package:fluvie/src/composition/runtime/aspect_scope.dart';
 import 'package:fluvie/src/composition/runtime/audio_collector.dart';
 import 'package:fluvie/src/composition/runtime/clip_plan_collector.dart'
     show ClipAudioPlan, collectClipAudioPlans;
 import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/aspect.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
-import 'package:fluvie/src/core/contracts/clip_frame_preparer.dart';
+import 'package:fluvie/src/core/contracts/beat_detection_service.dart';
+import 'package:fluvie/src/core/contracts/frequency_analyzer.dart';
 import 'package:fluvie/src/core/contracts/generative_resolver.dart'
     show GenerativeProgress, GenerativeResolver;
 import 'package:fluvie/src/core/contracts/media_resolver.dart' show MediaResolver;
+import 'package:fluvie/src/core/contracts/snapshot_service.dart';
 import 'package:fluvie/src/core/defaults.dart';
-import 'package:fluvie/src/rendering/capture/capture_shell.dart';
+import 'package:fluvie/src/core/export.dart';
+import 'package:fluvie/src/core/quality.dart';
+import 'package:fluvie/src/media/render_resolver_scope.dart';
 import 'package:fluvie/src/rendering/capture/render_manifest.dart';
 import 'package:fluvie/src/rendering/clip_audio_staging.dart';
 import 'package:fluvie/src/rendering/collect_composition_media.dart';
+import 'package:fluvie/src/rendering/composition_capture_host.dart';
+import 'package:fluvie/src/rendering/composition_session.dart';
 import 'package:fluvie/src/rendering/no_generative_resolver.dart';
-import 'package:fluvie/src/rendering/pre_resolve_clips.dart';
+import 'package:fluvie/src/rendering/no_media_resolver.dart' show NoMediaResolver;
+import 'package:fluvie/src/rendering/prepared_composition.dart';
+import 'package:fluvie/src/rendering/render_cancellation.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
+import 'package:fluvie/src/rendering/render_host_callbacks.dart';
 import 'package:fluvie/src/rendering/render_service.dart';
-import 'package:fluvie/src/rendering/runtime/render_controller.dart';
+import 'package:fluvie/src/rendering/video_render_request.dart';
 
-/// Mounts [tree] (the full capture shell) into the host's element tree before
-/// the frame loop starts. A widget test passes `tester.pumpWidget`; the CLI
-/// passes its binding's pump.
-typedef ShellMount = Future<void> Function(Widget tree);
+export 'render_host_callbacks.dart';
 
-/// Pumps the host one frame after the controller seeks, so the just-seeked
-/// frame is fully built before its pixels are read. A widget test passes
-/// `() => tester.pump()`; the CLI passes its binding's pump.
-typedef ShellFramePump = Future<void> Function();
+part 'render_aspect_audio.dart';
 
-/// What [render] returns: the captured `manifest` and the `config` whose width
-/// and height were re-derived from `Aspect.sizeFor` for the rendered aspect.
+/// The captured manifest and its resolved canvas, clock and output range.
 typedef RenderAspectResult = ({RenderManifest manifest, RenderConfig config});
 
-/// Renders [composition] for a single [aspect] — the canonical multi-aspect
-/// entry.
+/// Prepares and captures an ordinary Flutter composition using one mounted session.
 ///
-/// It re-derives the canvas size from `aspect.sizeFor(longEdge)` (ignoring any
-/// size the composition declares for itself), mounts an [AspectScope] over the
-/// composition so every `Adaptive` and `AspectScope.of(context)` branch lays out
-/// for this aspect, builds the production [buildCaptureShell] around it, and runs the
-/// shell once through [RenderService.captureToDirectory]. Timing and animations
-/// resolve identically across aspects — the same plan resolves; only layout
-/// branches — so the per-aspect renders share a clock and differ only in shape.
+/// [request] preserves exact canvas pixels and an authored capture range. Without
+/// it, [aspect] and [longEdge] select the canvas. Mounted Video export/poster
+/// settings and embedded clip audio are resolved before capture. In-process
+/// Snapshot children are frozen in their original layout and timing scopes.
 ///
-/// This is distinct from [RenderService.render], the instance method that
-/// captures and encodes one fixed-size composition: [render] is the free
-/// function that re-derives the size per aspect and drives that same service.
-/// (It is also distinct from `renderTemplate`, which renders a parameterized
-/// `VideoTemplate` — Dart has no overloading, so each is its own free function.)
-///
-/// The host owns the pumping mechanics through [pumpWidget] and [pumpFrame],
-/// which keeps this offline and gate-runnable (the example and goldens pass a
-/// `flutter_test` pump; the CLI passes its binding's). To encode the result, run
-/// the returned manifest's ffmpeg args through an `FfmpegRunner`.
-///
-/// When [composition] is a [Video] that declares `Audio`, its tracks are staged
-/// into the encoder mix by default: the resulting
-/// file is **not silent**. Pass [stageAudio] (with [audioSources]) to override
-/// the default — for example when the audio-bearing `Video` is wrapped in
-/// another widget the auto-collect cannot reach. A `Video` with no audio (or a
-/// non-`Video` composition) stages nothing, so the encoder's `-an` path stands.
-///
-/// Pass a [resolver] to render declared media: its sources are collected from
-/// [composition] and pre-resolved before the first pump, and it is mounted as
-/// the `ImageResolverScope` the elements paint from. A null [resolver] keeps the
-/// media-less path (a composition that declares an `Image`/`Clip` then throws a
-/// `FluvieRenderException` naming the missing pre-resolution).
-///
-/// Each [aspect] re-derives its size from [longEdge] and renders independently,
-/// so the same [composition] renders the same frames for that aspect; the encode
-/// arg array, including the mix, is built from the plan.
+/// The host supplies Flutter pumps and optionally [runAsync] for test bindings.
+/// An injected resolver stays caller-owned; the default scoped resolver is
+/// released here. [stageAudio] overrides automatic authored-track mixing.
 Future<RenderAspectResult> render({
   required Widget composition,
   required Aspect aspect,
@@ -85,10 +58,20 @@ Future<RenderAspectResult> render({
   required RenderService service,
   required ShellMount pumpWidget,
   required ShellFramePump pumpFrame,
+  ShellRunAsync runAsync = runAsyncDirectly,
   int longEdge = VideoDefaults.longEdge,
   int fps = VideoDefaults.fps,
+  Quality? quality,
+  Export? export,
   String compositionKey = 'render',
   bool cacheEnabled = false,
+  VideoRenderRequest? request,
+  RenderCancellation? cancellation,
+  BeatDetectionService? beatDetector,
+  FrequencyAnalyzer? analyzer,
+  SnapshotService? snapshotService,
+  ProgressCallback? onProgress,
+  FutureOr<void> Function(PreparedComposition prepared, VideoRenderRequest request)? onPrepared,
   AudioMixStager? stageAudio,
   Iterable<AudioSource>? audioSources,
   MediaResolver? resolver,
@@ -96,137 +79,79 @@ Future<RenderAspectResult> render({
   void Function(GenerativeProgress progress)? onGenerativeProgress,
 }) async {
   final size = aspect.sizeFor(longEdge);
-  final config = RenderConfig(
-    width: size.width,
-    height: size.height,
-    fps: fps,
-    frameCount: frameCount,
-    cacheEnabled: cacheEnabled,
+  final effective =
+      request ??
+      VideoRenderRequest(
+        composition: composition,
+        width: size.width,
+        height: size.height,
+        fps: fps,
+        frameCount: frameCount,
+        aspect: aspect,
+        quality: quality,
+        export: export,
+      );
+  final authored = effective.composition;
+  cancellation ??= effective.cancellation;
+  final scope = resolverScope(
+    resolver ?? (service.media is NoMediaResolver ? null : service.media),
+    whenCancelled: cancellation?.whenCancelled,
   );
-  // Pre-resolve declared and generated media before reading audio: generation
-  // produces the files, the media pre-pass warms the decode cache, and the clip
-  // pre-pass probes each clip — so the audio collector below knows which clips
-  // actually carry an audio track. A null resolver is a media-less render.
-  if (resolver != null) {
-    await generative.generateAll(
-      collectCompositionGenerative(composition),
-      onProgress: onGenerativeProgress,
+  final active = scope.resolver;
+  final session = CompositionSession(
+    composition: authored,
+    clipLookaheadFrames: 15,
+    resolver: active,
+    generative: generative,
+    onGenerativeProgress: onGenerativeProgress,
+    hostFps: effective.fps,
+    hostFrameCount: effective.startFrame + effective.frameCount,
+    cancellation: cancellation,
+    beatDetector: beatDetector,
+    analyzer: analyzer,
+    snapshotService: snapshotService,
+  );
+  final host = CompositionCaptureHost(session: session, request: effective);
+  try {
+    await host.prepare(
+      mount: pumpWidget,
+      pump: pumpFrame,
+      runAsync: runAsync,
+      onPrepared: onPrepared,
     );
-    await resolver.preResolveAll(collectCompositionMedia(composition, generative: generative));
-    await preResolveCompositionClips(
-      composition: composition,
-      resolver: resolver,
-      totalFrames: frameCount,
+    final resolved = host.request;
+    final config = resolved.config.copyWith(cacheEnabled: cacheEnabled);
+    final audio = _audioFor(
+      session.video ?? authored,
+      explicitStager: stageAudio,
+      explicitSources: audioSources,
+      fps: resolved.fps,
+      totalFrames: session.prepared.totalFrames,
       generative: generative,
+      resolver: active,
+      mountedClipPlans: session.clipAudioPlans,
     );
-  }
-  // The encoder audio mix: an explicit stager wins; otherwise a `Video`
-  // composition's own `Audio` tracks (plus any generated audio and a clip's
-  // embedded audio) are collected and staged so a public `render(video, aspect:)`
-  // of an audio composition is not silent.
-  final audio = _audioFor(
-    composition,
-    explicitStager: stageAudio,
-    explicitSources: audioSources,
-    fps: fps,
-    totalFrames: frameCount,
-    generative: resolver != null ? generative : null,
-    resolver: resolver,
-  );
-  final controller = RenderController();
-  final boundaryKey = GlobalKey();
-  final shell = buildCaptureShell(
-    composition: AspectScope(aspect: aspect, child: composition),
-    boundaryKey: boundaryKey,
-    controller: controller,
-    resolver: resolver,
-    generativeResolver: generative,
-  );
-  final preparer = resolver != null && resolver is ClipFramePreparer
-      ? resolver as ClipFramePreparer
-      : null;
-  // Warm the first frame's clip window before the tree mounts: the initial
-  // pumpWidget builds at frame 0, before the capture loop's first decode-ahead,
-  // so without this the first build's synchronous clip lookup would miss (that
-  // build is not captured — the loop re-pumps frame 0 — but it would still throw).
-  await preparer?.prepareClipFrames(0);
-  await pumpWidget(shell.tree);
-  final manifest = await service.captureToDirectory(
-    config: config,
-    outDir: outDir,
-    pump: (frame) async {
-      // Decode-ahead: a streaming resolver warms just the clip frames this
-      // composition frame paints before the tree builds, so paint's
-      // synchronous clip lookup is a hit without holding every frame in memory.
-      await preparer?.prepareClipFrames(frame);
-      controller.seek(frame);
-      shell.mountedSnapshotScope?.resetCursor();
-      await pumpFrame();
-    },
-    boundaryKey: boundaryKey,
-    compositionKey: '$compositionKey-${aspect.name}',
-    audioSources: audio.audioSources,
-    stageAudio: audio.stageAudio,
-  );
-  return (manifest: manifest, config: config);
-}
-
-/// Resolves the encoder audio mix for [composition]: an explicit
-/// [explicitStager]/[explicitSources] pair wins; otherwise a [Video]
-/// composition's declared `Audio` tracks are collected and turned into a
-/// [stageAudioMix] closure against [fps]/[totalFrames] (so `Audio.sfx(at:)`
-/// resolves its `adelay`). A non-`Video` or track-less composition yields
-/// `(null, const [])`, so the encoder's `-an` path is unchanged.
-({AudioMixStager? stageAudio, Iterable<AudioSource> audioSources}) _audioFor(
-  Widget composition, {
-  required AudioMixStager? explicitStager,
-  required Iterable<AudioSource>? explicitSources,
-  required int fps,
-  required int totalFrames,
-  GenerativeResolver? generative,
-  MediaResolver? resolver,
-}) {
-  if (explicitStager != null) {
-    return (stageAudio: explicitStager, audioSources: explicitSources ?? const []);
-  }
-  if (composition is! Video) return (stageAudio: null, audioSources: const []);
-  final tracks = collectAudioTracks(composition, generative: generative);
-  // Only clips that actually carry an audio track join the mix (each was probed
-  // above); a silent clip would otherwise fail the encoder's `[N:a]` map.
-  final clipPlans = resolver == null
-      ? const <ClipAudioPlan>[]
-      : collectClipAudioPlans(
-          composition.scenes,
-          fps,
-          generative: generative,
-        ).where((plan) => resolver.clipMetadataFor(plan.source).hasAudio).toList();
-  if (tracks.isEmpty && clipPlans.isEmpty) {
-    return (stageAudio: null, audioSources: const []);
-  }
-  return (
-    stageAudio: ({required resolver, required sandbox}) async {
-      // A clip's embedded audio (including a generated video's) is staged from
-      // the clip's video file and joins the same amix as the declared tracks.
-      final clipNodes = await stageClipAudio(
-        plans: clipPlans,
-        resolver: resolver,
-        sandbox: sandbox,
-        fps: fps,
-        totalFrames: totalFrames,
+    late final RenderManifest manifest;
+    await runAsync(() async {
+      manifest = await service.captureToDirectory(
+        config: config,
+        outDir: outDir,
+        pump: (frame) => host.pumpFrame(frame, pumpFrame),
+        boundaryKey: host.boundaryKey,
+        compositionKey: '$compositionKey-${aspect.name}',
+        audioSources: audio.audioSources,
+        stageAudio: audio.stageAudio,
+        mediaResolver: active,
+        export: resolved.export,
+        posterFrame: resolved.posterFrame,
+        cancellation: cancellation,
+        onProgress: onProgress,
       );
-      final plan = await stageAudioMix(
-        tracks: tracks,
-        resolver: resolver,
-        sandbox: sandbox,
-        fps: fps,
-        totalFrames: totalFrames,
-        extraNodes: clipNodes,
-      );
-      return (nodes: plan.tracks, amix: plan.amix);
-    },
-    audioSources: {
-      ...collectAudioSources(composition, generative: generative),
-      for (final plan in clipPlans) clipAudioSourceFor(plan.source),
-    },
-  );
+      return null;
+    });
+    return (manifest: manifest, config: config);
+  } finally {
+    host.dispose();
+    await scope.dispose();
+  }
 }

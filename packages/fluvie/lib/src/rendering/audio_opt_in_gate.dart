@@ -1,8 +1,13 @@
 import 'package:flutter/widgets.dart' show Widget;
 import 'package:fluvie/src/audio/encoding/resolved_audio_track.dart';
+import 'package:fluvie/src/composition/runtime/clip_plan_collector.dart';
 import 'package:fluvie/src/composition/video.dart';
+import 'package:fluvie/src/core/contracts/media_resolver.dart';
 import 'package:fluvie/src/core/export.dart';
+import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/rendering/audio_mix_resolution.dart';
+import 'package:fluvie/src/rendering/collect_composition_media.dart';
+import 'package:fluvie_media/fluvie_media.dart' show MediaTimeline;
 
 /// The one audio-drop policy the on-device and in-browser renderers share.
 ///
@@ -15,6 +20,10 @@ import 'package:fluvie/src/rendering/audio_mix_resolution.dart';
 ///
 /// With the opt-in on and an MP4 target, returns the [ResolvedAudioMix] the
 /// renderer stages into its encoder.
+///
+/// [clipMetadata] rides through to `resolveAudioMix`, which needs it to place a
+/// **trimmed** clip's embedded audio; call this after the clip pre-pass so
+/// `MediaResolver.clipMetadataFor` can answer.
 ResolvedAudioMix? gateOptInAudio({
   required Widget composition,
   required bool encode,
@@ -24,9 +33,20 @@ ResolvedAudioMix? gateOptInAudio({
   required void Function(String message) warnSink,
   required String platformLabel,
   Export? export,
+  ClipMetadata? Function(MediaSource source)? clipMetadata,
+  List<ClipAudioPlan>? mountedClipPlans,
+  MediaTimeline? Function(MediaSource source)? clipTimeline,
 }) {
-  if (composition is! Video) return null;
-  final mix = resolveAudioMix(video: composition, fps: fps, totalFrames: frameCount);
+  final video = compositionVideo(composition);
+  if (video == null) return null;
+  final mix = resolveAudioMix(
+    video: video,
+    fps: fps,
+    totalFrames: frameCount,
+    clipMetadata: clipMetadata,
+    clipTimeline: clipTimeline,
+    mountedClipPlans: mountedClipPlans,
+  );
   if (mix.isEmpty) return null;
   if (!encode) {
     if (warn) {

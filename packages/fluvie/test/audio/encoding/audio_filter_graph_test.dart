@@ -65,7 +65,7 @@ void main() {
       const node = AudioTrackNode(name: 't.wav', delayMs: 1500);
       expect(
         node.filterChain(inputIndex: 1, label: 'a0'),
-        '[1:a]asetpts=PTS-STARTPTS,adelay=1500|1500,volume=1[a0]',
+        '[1:a]asetpts=PTS-STARTPTS,adelay=1500|1500,asetpts=N/SR/TB,volume=1[a0]',
       );
     });
 
@@ -119,7 +119,89 @@ void main() {
       expect(node.filterChain(inputIndex: 1, label: 'a0'), isNot(contains('aloop')));
     });
 
+    test('atempo retimes the source before adelay places it', () {
+      // adelay pads the head with silence. Retiming after that pad would speed
+      // the silence up too, so a clip delayed 2s at 2x would open its audio at
+      // 1s — a second before its picture.
+      const node = AudioTrackNode(name: 't.wav', delayMs: 2000, tempo: 2);
+
+      final chain = node.filterChain(inputIndex: 0, label: 'a0');
+
+      expect(chain.indexOf('atempo'), lessThan(chain.indexOf('adelay')));
+      expect(
+        chain,
+        '[0:a]asetpts=PTS-STARTPTS,atempo=2,adelay=2000|2000,asetpts=N/SR/TB,volume=1[a0]',
+      );
+    });
+
+    test('an atempo chain multiplies out to the rate at every stage count', () {
+      // Each stage is bounded to ffmpeg's 0.5..2.0, so the product — not any
+      // single stage — has to equal the rate.
+      for (final rate in <double>[0.1, 0.25, 0.3, 0.5, 1.5, 2, 2.5, 3, 4, 5, 8]) {
+        final chain = AudioTrackNode(
+          name: 't.wav',
+          tempo: rate,
+        ).filterChain(inputIndex: 0, label: 'a0');
+        final stages = RegExp(
+          'atempo=([0-9.]+)',
+        ).allMatches(chain).map((match) => double.parse(match.group(1)!)).toList();
+        expect(stages, isNotEmpty, reason: 'rate $rate must emit at least one stage');
+        for (final stage in stages) {
+          expect(stage, inInclusiveRange(0.5, 2.0), reason: 'rate $rate stage out of range');
+        }
+        final product = stages.reduce((a, b) => a * b);
+        expect(product, closeTo(rate, 1e-9), reason: 'rate $rate lost its value in staging');
+      }
+    });
+
+    test('a delayed fade-in ramps the audio, not the silence in front of it', () {
+      // adelay pads the head with real silence and afade measures st from the
+      // start of its own input, so a fade at st=0 ramps the padding and the
+      // clip enters at full volume. The fade has to start where the clip does.
+      const node = AudioTrackNode(name: 't.wav', delayMs: 5000, fadeInSeconds: 0.5);
+
+      expect(
+        node.filterChain(inputIndex: 0, label: 'a0'),
+        contains('afade=t=in:st=5:d=0.5'),
+      );
+    });
+
+    test('an undelayed fade-in still starts at zero', () {
+      expect(
+        const AudioTrackNode(
+          name: 't.wav',
+          fadeInSeconds: 0.5,
+        ).filterChain(inputIndex: 0, label: 'a0'),
+        contains('afade=t=in:st=0:d=0.5'),
+      );
+    });
+
+    test('a rate that cannot be staged is refused, never looped over', () {
+      // 0 / 0.5 is 0, so the halving loop would never converge: the chain
+      // builder would spin at full CPU growing a list until the process died,
+      // after the whole capture had already run. Non-finite rates diverge the
+      // same way, and NaN escapes both guards to emit a literal atempo=NaN.
+      for (final bad in <double>[0, -1, double.infinity, double.nan]) {
+        expect(
+          () => AudioTrackNode(name: 't.wav', tempo: bad).filterChain(inputIndex: 0, label: 'a0'),
+          throwsA(isA<ArgumentError>()),
+          reason: 'tempo $bad must fail loudly rather than hang the encoder',
+        );
+      }
+    });
+
+    test('rate 1 emits no atempo at all, so every existing graph is unchanged', () {
+      // The default rate, spelled out: every pre-existing pinned chain in this
+      // file depends on an unretimed track emitting nothing here.
+      expect(
+        const AudioTrackNode(name: 't.wav').filterChain(inputIndex: 0, label: 'a0'),
+        isNot(contains('atempo')),
+      );
+    });
+
     test('the full chain orders atrim, asetpts, adelay, volume, fades', () {
+      // The fade-in starts at 0.5s, not 0: adelay pads 500ms of silence in
+      // front, and a ramp at 0 would fade that padding instead of the audio.
       const node = AudioTrackNode(
         name: 't.wav',
         delayMs: 500,
@@ -132,8 +214,8 @@ void main() {
       );
       expect(
         node.filterChain(inputIndex: 3, label: 'a2'),
-        '[3:a]atrim=start=1:end=9,asetpts=PTS-STARTPTS,adelay=500|500,volume=0.8,'
-        'afade=t=in:st=0:d=1,afade=t=out:st=7:d=1.5[a2]',
+        '[3:a]atrim=start=1:end=9,asetpts=PTS-STARTPTS,adelay=500|500,asetpts=N/SR/TB,volume=0.8,'
+        'afade=t=in:st=0.5:d=1,afade=t=out:st=7:d=1.5[a2]',
       );
     });
   });

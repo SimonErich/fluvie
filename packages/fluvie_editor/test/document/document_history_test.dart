@@ -96,6 +96,94 @@ void main() {
     });
   });
 
+  group('SetTransformsCommand', () {
+    const stepOne = SetTransformsCommand(
+      transforms: {
+        'el-a': {'x': 0.1, 'y': 0.1},
+        'el-b': {'x': 0.6, 'y': 0.6},
+      },
+      mergeGroup: 'nudge',
+    );
+    const stepTwo = SetTransformsCommand(
+      transforms: {
+        'el-a': {'x': 0.2, 'y': 0.2},
+        'el-b': {'x': 0.7, 'y': 0.7},
+      },
+      mergeGroup: 'nudge',
+    );
+
+    test('writes every transform as one step, undone as one', () {
+      final history = _history()..dispatch(stepOne);
+      expect(history.document.elementJson('el-a')?['transform'], {'x': 0.1, 'y': 0.1});
+      expect(history.document.elementJson('el-b')?['transform'], {'x': 0.6, 'y': 0.6});
+      final affected = history.undo();
+      expect(affected, {'el-a', 'el-b'});
+      expect(history.document.elementJson('el-a')?['transform'], {'x': 0.5, 'y': 0.5});
+      expect(history.document.elementJson('el-b')?.containsKey('transform'), isFalse);
+      expect(history.canUndo, isFalse);
+    });
+
+    test('a nudge run coalesces into one step', () {
+      final history = _history()
+        ..dispatch(stepOne)
+        ..dispatch(stepTwo);
+      expect(history.document.elementJson('el-a')?['transform'], {'x': 0.2, 'y': 0.2});
+      history.undo();
+      expect(history.document.elementJson('el-a')?['transform'], {'x': 0.5, 'y': 0.5});
+      expect(history.canUndo, isFalse);
+    });
+
+    test('an ungrouped commit never merges with a nudge run', () {
+      final history = _history()
+        ..dispatch(stepOne)
+        ..dispatch(
+          const SetTransformsCommand(
+            transforms: {
+              'el-a': {'x': 0.9, 'y': 0.9},
+            },
+          ),
+        )
+        ..undo();
+      expect(history.document.elementJson('el-a')?['transform'], {'x': 0.1, 'y': 0.1});
+      expect(history.canUndo, isTrue);
+    });
+
+    test('nudges of different selections never merge', () {
+      final history = _history()
+        ..dispatch(
+          const SetTransformsCommand(
+            transforms: {
+              'el-a': {'x': 0.1, 'y': 0.1},
+            },
+            mergeGroup: 'nudge',
+          ),
+        )
+        ..dispatch(
+          const SetTransformsCommand(
+            transforms: {
+              'el-b': {'x': 0.6, 'y': 0.6},
+            },
+            mergeGroup: 'nudge',
+          ),
+        )
+        ..undo();
+      expect(history.document.elementJson('el-b')?.containsKey('transform'), isFalse);
+      expect(history.document.elementJson('el-a')?['transform'], {'x': 0.1, 'y': 0.1});
+    });
+
+    test('the label names one element or counts many', () {
+      expect(
+        const SetTransformsCommand(
+          transforms: {
+            'el-a': {'x': 0.1, 'y': 0.1},
+          },
+        ).label,
+        'Move el-a',
+      );
+      expect(stepOne.label, 'Move 2 elements');
+    });
+  });
+
   group('the command set', () {
     test('insert keeps its minted id stable across undo and redo', () {
       final history = _history();
@@ -130,7 +218,73 @@ void main() {
     test('every command names its label and affected ids', () {
       expect(const SetTransformCommand(id: 'x', transform: {}).label, isNotEmpty);
       expect(const RemoveElementCommand(id: 'x').affectedIds, {'x'});
+      expect(const RemoveElementCommand(id: 'x').label, contains('x'));
+      expect(const ReorderElementCommand(id: 'x', to: 0).label, contains('x'));
+      expect(const SetElementMetaCommand(id: 'x', meta: {}).label, contains('x'));
       expect(const AddSceneCommand(scene: {}).affectedIds, isEmpty);
+      expect(const AddSceneCommand(scene: {}).label, isNotEmpty);
+      expect(const RemoveSceneCommand(index: 0).label, isNotEmpty);
+      expect(const RemoveSceneCommand(index: 0).affectedIds, isEmpty);
+      expect(const ReorderSceneCommand(from: 0, to: 1).label, isNotEmpty);
+      expect(const ReorderSceneCommand(from: 0, to: 1).affectedIds, isEmpty);
     });
+
+    test('redoLabel names the step waiting to replay', () {
+      final history = _history()
+        ..dispatch(const SetTransformCommand(id: 'el-a', transform: {'x': 0.1, 'y': 0.1}))
+        ..undo();
+      expect(history.redoLabel, 'Move el-a');
+    });
+  });
+  inspectorCommandSuite();
+}
+
+// The inspector's scene/deck commands and its coalescing element edits.
+void inspectorCommandSuite() {
+  test('UpdateSceneCommand round-trips through undo', () {
+    final history = _history()
+      ..dispatch(
+        const UpdateSceneCommand(
+          index: 0,
+          patch: {
+            'background': {'kind': 'color', 'color': '#101018'},
+          },
+        ),
+      );
+    expect(history.document.sceneJson(0)['background'], {'kind': 'color', 'color': '#101018'});
+    expect(history.undoLabel, 'Edit slide');
+    history.undo();
+    expect(history.document.sceneJson(0).containsKey('background'), isFalse);
+  });
+
+  test('UpdateVideoCommand round-trips through undo', () {
+    final history = _history()..dispatch(const UpdateVideoCommand(patch: {'fps': 60}));
+    expect(history.document.toJson()['fps'], 60);
+    history.undo();
+    expect(history.document.toJson()['fps'], 30);
+  });
+
+  test('a slider stream of element patches coalesces via mergeGroup', () {
+    final history = _history();
+    for (var i = 1; i <= 4; i++) {
+      history.dispatch(
+        ReplaceElementCommand(
+          id: 'el-a',
+          element: {
+            'type': 'Text',
+            'text': 'a',
+            'style': {'fontSize': 20 + i},
+          },
+          mergeGroup: 'style-drag',
+        ),
+      );
+    }
+    expect(
+      (history.document.elementJson('el-a')!['style']! as Map)['fontSize'],
+      24,
+    );
+    history.undo();
+    expect(history.document.elementJson('el-a')!.containsKey('style'), isFalse);
+    expect(history.canUndo, isFalse);
   });
 }

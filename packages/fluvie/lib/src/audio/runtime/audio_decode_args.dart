@@ -8,14 +8,24 @@ import 'package:fluvie/src/audio/encoding/audio_filter_graph.dart';
 /// DSP on it. The name is gated by [validateAudioName] so it can never escape
 /// the sandbox or be parsed as a flag; the mono/44100 shape is fixed so the
 /// analysis is reproducible across machines.
-List<String> audioDecodeArgs(String name) => [
-  '-i',
-  validateAudioName(name),
-  '-f',
-  'f32le',
-  '-ac',
-  '1',
-  '-ar',
-  '44100',
-  '-',
-];
+List<String> audioDecodeArgs(String name, {Duration? start, Duration? duration}) {
+  if (start != null && start.isNegative || duration != null && duration <= Duration.zero) {
+    throw ArgumentError('Audio decoding requires a non-negative start and positive duration.');
+  }
+  return [
+    if (start != null && start > Duration.zero) ...[
+      '-ss',
+      (start.inMicroseconds / 1000000).toStringAsFixed(6),
+    ],
+    '-i',
+    validateAudioName(name),
+    if (duration != null) ...['-t', (duration.inMicroseconds / 1000000).toStringAsFixed(6)],
+    '-f',
+    'f32le',
+    '-ac',
+    '1',
+    '-ar',
+    '44100',
+    '-',
+  ];
+}

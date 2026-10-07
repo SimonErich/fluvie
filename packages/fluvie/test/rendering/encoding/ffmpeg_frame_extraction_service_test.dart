@@ -22,7 +22,7 @@ void main() {
 
   setUp(() {
     runner = _MockProcessRunner();
-    service = FfmpegFrameExtractionService(runner: runner);
+    service = FfmpegFrameExtractionService(runner: runner, binaryPath: 'ffmpeg');
   });
 
   /// Stubs the runner to write [bytes] to the rawvideo output file the service
@@ -55,6 +55,8 @@ void main() {
       '-v',
       'error',
       '-nostdin',
+      '-protocol_whitelist',
+      'file',
       '-i',
       '/clips/intro.mp4',
       '-vf',
@@ -110,10 +112,12 @@ void main() {
                 ),
               ).captured.single
               as List<String>;
-      expect(args.sublist(0, 7), [
+      expect(args.sublist(0, 9), [
         '-v',
         'error',
         '-nostdin',
+        '-protocol_whitelist',
+        'file',
         '-c:v',
         'libvpx-vp9',
         '-i',
@@ -122,8 +126,8 @@ void main() {
       expect(args.indexOf('-c:v'), lessThan(args.indexOf('-i')));
     });
 
-    test('reaches every frame of a batch extraction', () async {
-      stubRunWriting(Uint8List(2 * 1 * 4));
+    test('decodes the batch with the selected decoder in one process', () async {
+      stubRunWriting(Uint8List(2 * 2 * 1 * 4));
 
       await service.extractFrames(
         Uri.file('/clips/cat.webm'),
@@ -136,7 +140,7 @@ void main() {
       final calls = verify(
         () => runner.run(any(), captureAny(), workingDirectory: any(named: 'workingDirectory')),
       ).captured.cast<List<String>>();
-      expect(calls, hasLength(2));
+      expect(calls, hasLength(1));
       for (final args in calls) {
         expect(args, containsAllInOrder(const ['-c:v', 'libvpx-vp9', '-i']));
       }
@@ -182,7 +186,7 @@ void main() {
   });
 
   test('extractFrames returns a RawFrame per requested index', () async {
-    stubRunWriting(Uint8List(2 * 1 * 4));
+    stubRunWriting(Uint8List(2 * 2 * 1 * 4));
 
     final frames = await service.extractFrames(
       Uri.file('/clips/a.mp4'),

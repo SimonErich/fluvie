@@ -12,22 +12,18 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test(
-    'every rule fixture fulfils its // expect_lint marker',
-    () async {
-      final result = await Process.run('dart', [
-        'run',
-        'custom_lint',
-      ], workingDirectory: Directory.current.path);
-      expect(
-        result.exitCode,
-        0,
-        reason:
-            'custom_lint failed on the fixtures:\n'
-            '${result.stdout}\n${result.stderr}',
-      );
-      expect(result.stdout, contains('No issues found!'));
-    },
-    timeout: const Timeout(Duration(minutes: 5)),
-  );
+  test('every rule fixture fulfils its // expect_lint marker', () async {
+    final result = await Process.run('dart', [
+      'run',
+      'custom_lint',
+    ], workingDirectory: Directory.current.path);
+    expect(
+      result.exitCode,
+      0,
+      reason:
+          'custom_lint failed on the fixtures:\n'
+          '${result.stdout}\n${result.stderr}',
+    );
+    expect(result.stdout, contains('No issues found!'));
+  }, timeout: const Timeout(Duration(minutes: 5)));
 }

@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "generate_video",
+    "arguments": {
+      "prompt": "A 4-second teal title card saying Hello, Fluvie.",
+      "format": "mp4",
+      "aspect": "reels"
+    }
+  }
+}

@@ -12,7 +12,14 @@ final assetBundleProvider = Provider<AssetBundle>((ref) => rootBundle);
 /// The network safety gate consulted before any media fetch; defaults to a
 /// host-open, https-only allowlist and is overridable to a strict set.
 final networkAllowlistProvider = Provider<NetworkAllowlist>(
-  (ref) => NetworkAllowlist.allowAny(),
+  (ref) {
+    const origin = String.fromEnvironment('FLUVIE_MEDIA_ORIGIN');
+    return NetworkAllowlist.allowAny(
+      origins: {
+        if (origin.isNotEmpty) Uri.parse(origin).origin,
+      },
+    );
+  },
 );
 
 /// The per-kind byte source the media resolver resolves over; web-safe (the
@@ -50,3 +57,6 @@ final clipFrameStreamingProvider = Provider<bool>((ref) => true);
 /// held in memory (~8.3 MB per full-HD frame) while the app is running. It moves
 /// resolution only: fps, frame count, and resampling are untouched.
 final clipDecodeMaxEdgeProvider = Provider<int?>((ref) => null);
+
+/// Cancellation signal for native resource preparation owned by a render host.
+final mediaCancellationProvider = Provider<Future<void>?>((ref) => null);

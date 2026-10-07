@@ -1,3 +1,6 @@
+// FramePump and ProgressCallback now live in the dart:io-free frame_capture_loop
+// so the capture loop is shared by the desktop, mobile, and web backends;
+// re-export them so existing render_service importers keep seeing them.
 import 'dart:convert';
 import 'dart:io';
 
@@ -16,11 +19,10 @@ import 'package:fluvie/src/rendering/encoding/video_encoder_service.dart';
 import 'package:fluvie/src/rendering/frame_capture_loop.dart';
 import 'package:fluvie/src/rendering/io/file_render_sandbox.dart';
 import 'package:fluvie/src/rendering/no_media_resolver.dart';
+import 'package:fluvie/src/rendering/render_cancellation.dart';
 import 'package:fluvie/src/rendering/render_config.dart';
+import 'package:fluvie/src/rendering/render_output_intent.dart';
 
-// FramePump and ProgressCallback now live in the dart:io-free frame_capture_loop
-// so the capture loop is shared by the desktop, mobile, and web backends;
-// re-export them so existing render_service importers keep seeing them.
 export 'package:fluvie/src/rendering/frame_capture_loop.dart' show FramePump, ProgressCallback;
 
 /// The encoder audio lanes a render contributes: the per-track [FfmpegAudioNode]s
@@ -80,12 +82,18 @@ final class RenderService {
     Iterable<MediaSource> mediaSources = const [],
     Iterable<AudioSource> audioSources = const [],
     AudioMixStager? stageAudio,
+    MediaResolver? mediaResolver,
     Export? export,
     int? posterFrame,
     ProgressCallback? onProgress,
+    RenderCancellation? cancellation,
   }) async {
-    await media.preResolveAll(mediaSources);
-    await media.preResolveAudio(audioSources);
+    final resolver = mediaResolver ?? media;
+    cancellation?.throwIfCancelled();
+    await (cancellation?.run(() => resolver.preResolveAll(mediaSources)) ??
+        resolver.preResolveAll(mediaSources));
+    await (cancellation?.run(() => resolver.preResolveAudio(audioSources)) ??
+        resolver.preResolveAudio(audioSources));
     final digest = renderDigest(
       config: config,
       compositionKey: compositionKey,
@@ -95,7 +103,8 @@ final class RenderService {
     await sandbox.create();
     final lanes = stageAudio == null
         ? const (nodes: <FfmpegAudioNode>[], amix: null)
-        : await stageAudio(resolver: media, sandbox: outDir);
+        : await (cancellation?.run(() => stageAudio(resolver: resolver, sandbox: outDir)) ??
+              stageAudio(resolver: resolver, sandbox: outDir));
     final sink = sandbox.openFrames(VideoEncoderService.framesFileName);
     try {
       await runFrameCaptureLoop(
@@ -107,10 +116,12 @@ final class RenderService {
         capture: _capture,
         store: _cache == null ? null : FrameCacheStore(_cache),
         onProgress: onProgress,
+        cancellation: cancellation,
       );
     } finally {
       await sink.close();
     }
+    cancellation?.throwIfCancelled();
     final manifest = RenderManifest(
       width: config.width,
       height: config.height,
@@ -119,6 +130,7 @@ final class RenderService {
       framesFileName: VideoEncoderService.framesFileName,
       outputFileName: encoder.outputNameFor(export),
       renderDigest: digest,
+      outputIntent: renderOutputIntent(config, export, hasAudio: lanes.amix != null),
       ffmpegArgs: encoder.planEncodeArgs(
         config,
         audio: lanes.nodes,

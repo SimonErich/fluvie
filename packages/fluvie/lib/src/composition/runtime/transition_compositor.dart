@@ -7,6 +7,7 @@ import 'package:fluvie/src/composition/transition/transition_strategy.dart';
 import 'package:fluvie/src/core/transition.dart';
 import 'package:fluvie/src/rendering/runtime/frame_clamp.dart';
 import 'package:fluvie/src/rendering/runtime/frame_provider.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
 import 'package:fluvie/src/timing/placement/scene_offset_resolver.dart';
 
 /// The single frame reader of the composition shell: assigns every scene its
@@ -52,6 +53,19 @@ final class TransitionCompositor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (PreparationScope.isPreparing(context)) {
+      return Stack(
+        alignment: Alignment.center,
+        fit: StackFit.expand,
+        children: [
+          for (final scene in sceneShells)
+            Offstage(
+              offstage: PreparationScope.snapshotTargetOf(context) == null,
+              child: TransitionPhaseScope(phase: null, child: scene),
+            ),
+        ],
+      );
+    }
     final frame = FrameProvider.of(context).frame;
     final states = stageAt(frame: frame, offsets: offsets, transitions: transitions);
     final phase = _activePhase(states);
@@ -118,7 +132,7 @@ final class TransitionCompositor extends StatelessWidget {
       child: hold == null ? sceneShells[s] : FrameClamp(holdFrame: hold, child: sceneShells[s]),
     );
     final incoming = TransitionPhaseScope(phase: phase, child: sceneShells[s + 1]);
-    return strategyFor(spec.kind).compose(
+    return strategyFor(spec.customKind ?? spec.kind).compose(
       outgoing: outgoing,
       incoming: incoming,
       easedProgress: spec.ease.transform(state.progress),

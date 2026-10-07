@@ -95,6 +95,23 @@ void main() {
       expect(sent.model, isNull);
     });
 
+    test('retains the visual reference across text-only repair turns', () async {
+      final generator = _RecordingGenerator('repaired');
+      final image = AiImage(bytes: Uint8List.fromList([7, 8, 9]));
+      await generateViaTextGenerator(
+        generator,
+        AiRequest(
+          messages: [
+            AiMessage.user('edit this frame', image: image),
+            const AiMessage.assistant('invalid json'),
+            const AiMessage.user('repair the invalid output'),
+          ],
+        ),
+      );
+      expect(generator.lastRequest!.image!.bytes, [7, 8, 9]);
+      expect(generator.lastRequest!.prompt, 'repair the invalid output');
+    });
+
     test('wraps an AiException as an AiClientException with the same message', () async {
       final generator = _ThrowingGenerator(
         AiResponseException('the model declined', provider: 'claude'),
@@ -179,6 +196,22 @@ void main() {
   });
 
   group('aiClientFromEnv', () {
+    test('accepts a local Ollama endpoint and rejects a relative endpoint', () {
+      expect(
+        aiClientFromEnv(const {
+          'FLUVIE_AI_PROVIDER': 'ollama',
+          'FLUVIE_AI_ENDPOINT': 'http://127.0.0.1:11434/api/chat',
+        }),
+        isA<OllamaAiClient>(),
+      );
+      expect(
+        () => aiClientFromEnv(const {
+          'FLUVIE_AI_PROVIDER': 'ollama',
+          'FLUVIE_AI_ENDPOINT': '/api/chat',
+        }),
+        throwsA(isA<AiClientException>()),
+      );
+    });
     test('builds each provider', () {
       expect(
         aiClientFromEnv(const {'FLUVIE_AI_PROVIDER': 'claude', 'ANTHROPIC_API_KEY': 'k'}),

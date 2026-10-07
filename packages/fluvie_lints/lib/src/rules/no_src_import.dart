@@ -4,7 +4,7 @@ import 'package:analyzer/error/listener.dart' show DiagnosticReporter;
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
 /// Flags a `package:<other>/src/...` import, the single-barrel violation
-/// (CLAUDE.md: "Nothing imports another package's `src/`").
+/// (CONTRIBUTING.md: packages do not import another package's `src/`).
 ///
 /// The dart `implementation_imports` lint covers the same ground, but this rule
 /// ships the Fluvie message and a quick-fix that rewrites the import to the

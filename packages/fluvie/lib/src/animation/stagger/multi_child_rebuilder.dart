@@ -1,4 +1,16 @@
 import 'package:flutter/widgets.dart';
+import 'package:fluvie/src/animation/runtime/effect_stack.dart';
+import 'package:fluvie/src/composition/transition/shared_element.dart';
+
+/// A structural multi-child adapter for domain widgets such as SplitText.
+/// Distribution still uses the ordinary stagger schedule and frame builder.
+abstract interface class StaggerChildren {
+  /// The parts receiving the stagger, in declaration order.
+  List<Widget> get staggerChildren;
+
+  /// Rebuilds the same layout around the wrapped parts.
+  Widget withStaggerChildren(List<Widget> children);
+}
 
 /// The direct children of a supported multi-child stagger target, in
 /// declaration order — or `null` for anything else.
@@ -10,7 +22,10 @@ import 'package:flutter/widgets.dart';
 /// wraps its child in one under a composition registrar (identity across
 /// the collect passes), and stagger must keep seeing the container inside.
 List<Widget>? wrappableChildrenOf(Widget container) => switch (container) {
-  KeyedSubtree(:final child) => wrappableChildrenOf(child),
+  KeyedSubtree(:final child) ||
+  EffectStack(:final child) ||
+  SharedElement(:final child) => wrappableChildrenOf(child),
+  StaggerChildren(:final staggerChildren) => staggerChildren,
   Flex(:final children) || Wrap(:final children) || Stack(:final children) => children,
   _ => null,
 };
@@ -35,6 +50,17 @@ Widget? rebuildWithWrappedChildren(
     null => null,
     final rebuilt => KeyedSubtree(key: keyed.key, child: rebuilt),
   },
+  final EffectStack stack => switch (rebuildWithWrappedChildren(stack.child, wrap)) {
+    null => null,
+    final rebuilt => EffectStack(key: stack.key, effects: stack.effects, child: rebuilt),
+  },
+  final SharedElement shared => switch (rebuildWithWrappedChildren(shared.child, wrap)) {
+    null => null,
+    final rebuilt => SharedElement(key: shared.key, anchor: shared.anchor, child: rebuilt),
+  },
+  final StaggerChildren target => target.withStaggerChildren(
+    _wrapAll(target.staggerChildren, wrap),
+  ),
   final Flex flex => _rebuildFlex(flex, wrap),
   final Wrap wrapBox => _rebuildWrap(wrapBox, wrap),
   final Stack stack => _rebuildStack(stack, wrap),

@@ -13,7 +13,5 @@ Widget build() {
   // intro is attached, so its Trigger is fine.
   final intro = Anchor('intro');
   final waitForIntro = Trigger.whenStarts(intro);
-  return const Box().animate([
-    Animation.fadeIn(at: waitForIntro),
-  ], anchor: intro);
+  return const Box().animate([Animation.fadeIn(at: waitForIntro)], anchor: intro);
 }

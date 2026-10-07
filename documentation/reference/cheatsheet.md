@@ -5,7 +5,7 @@ render a composition file:
 
 ```sh
 fluvie preview ./lib/my_video.dart                      # live, hot-reloading
-fluvie render ./lib/my_video.dart --out my_video.mp4    # the file
+fluvie render ./lib/my_video.dart                      # build/fluvie/my_video.mp4
 ```
 
 From a clone of this repo, render a lesson by its key, because the gallery keeps
@@ -35,6 +35,8 @@ dart run packages/fluvie_cli/bin/fluvie.dart render 01_hello_video --out build/0
 | `Scene.sequence(timeline:, children:)` | duration from a `TimelineSchedule` |
 | `VideoSize.square / reels / story / hd / fourK` | canvas presets; `story` aliases `reels` |
 | `Transition.cut / crossFade / wipe / zoom / slide` | between-scene transitions |
+| `ClipTransitionGroup(children:, transitions:)` + `ElementId(id:, lane:, child:)` | native clip blends inside one scene |
+| `VideoPreview.builder(builder:)` | prepared Flutter preview, controls, and hot reload |
 
 ## Motion
 
@@ -77,8 +79,9 @@ Every preset, with exactly what it does and its defaults, is in
 | `Counter(to:, from:, reveal:, format:)` | frame-driven number tween, `intl`-formatted |
 | `Counter.currency / percent` | fixed-locale money and percentage presets |
 | `Image.asset / file / memory / network(url, fit:, frame:, shared:)` | a still, pre-resolved before frame 0 |
-| `Clip.asset / network(url, trim:, audio:, fit:, shared:)` | an embedded video |
-| `ClipAudio.included / muted` | a clip's audio policy |
+| `Clip.asset / file / memory / network(url, trim:, audio:, fit:, speed:, shared:)` | an embedded video, pre-resolved before frame 0 |
+| `ClipAudio.included(volume:, automation:, fadeIn:, fadeOut:) / muted` | a clip's audio policy, ramps anchored to its window |
+| `ClipAudio.scaledBy(gain)` | multiply gain while preserving automation, fades, and mute |
 | `Chart.bar / line / area / pie / donut / scatter` | data-driven charts that reveal from your data |
 | `Bars(...)` | a standalone bar set |
 | `Code(...) / CodeReveal(...)` | highlighted, typed code |
@@ -127,6 +130,7 @@ Every preset, with exactly what it does and its defaults, is in
 | --- | --- |
 | `Audio.music(source, volume:, fadeIn:, fadeOut:, loop:, trim:, track:)` | a music bed mixed under the frames |
 | `Audio.sfx(source, at:, volume:)` | a one-shot effect fired at a trigger |
+| `Audio.musicSource / sfxSource(AudioSource, ...)` | the same tracks over a typed source (`AudioSource.memory` for bytes that never touched disk) |
 | `Animation.pulse(on: AudioBand.bass) / scaleY(on:)` | reactive motion, analysed before frame 0 |
 | `Captions.fromSrt / fromVtt / words` | subtitle sources |
 | `CaptionStyle.subtitle / tikTok / karaoke`, `CaptionPosition.bottomThird / topThird / center / custom` | look and placement |
@@ -163,12 +167,27 @@ Every preset, with exactly what it does and its defaults, is in
 
 | Command | Notes |
 | --- | --- |
-| `fluvie init [--name] [--dir] [--force]` | scaffold a project: a composition file, `assets/`, a pubspec |
-| `fluvie preview <file.dart> [-d <device>]` | live preview with hot reload; defaults to this desktop |
-| `fluvie render <file.dart> --out <file>` | capture and encode; `--entry`, `--cache`, `--aspect`, `--quality`, `--format`, `--poster`, `--frames` |
-| `fluvie render <key> --out <file>` | the legacy registry path; `--no-cache` bypasses the cache |
-| `fluvie list` | the render keys of a project that still uses a registry |
-| `fluvie ffmpeg <install\|path\|status\|uninstall>` | manage the FFmpeg build Fluvie downloads |
+| `fluvie init [--name] [--dir] [--force]` | scaffold or merge a Flutter project; optional `--with-ai`, `--with-lints`, `--fluvie-path` |
+| `fluvie preview <file.dart> [-d <device>]` | browser URL and hot reload by default; automatic native media bridge; `-d chrome` opens Chrome |
+| `fluvie render <file.dart> [--out <file>]` | automatic output in `build/fluvie/`; authored export/poster/settings; `--entry`, `--no-cache`, `--aspect`, `--quality`, `--format`, `--poster`, `--frames` |
+| `fluvie render <file.dart> --machine` | JSON-line progress and final artifact receipt |
+| `fluvie render <key> --out <file>` | legacy registry path; `--no-cache` bypasses the cache |
+| `fluvie generate "<prompt>" [--dart-out <file>] [--no-render]` | AI spec and editable native Dart, with optional capture |
+| `fluvie edit <spec> "<change>" [--dart-out <file>] [--no-render]` | refine a saved spec and readable Dart |
+| `fluvie doctor --json` | read-only SDK, dependency, native pair, and codec diagnostics |
+| `fluvie assets [directory] --json` | recursive factual files/media/fonts/story notes; `--download-tools` explicitly warms missing tools |
+| `fluvie validate <file.dart> --json` | non-executing compiler and Fluvie lint diagnostics from the original file |
+| `fluvie review <file.dart> --determinism --json` | validation, mounted facts and sampled pictures; compares reverse seeks and fresh entry initialization |
+| `fluvie inspect <file.dart> --json` | compile and prepare the real composition; report its resolved timing |
+| `fluvie frame <file.dart> --frame <index> --json` | capture a reviewable PNG |
+| `fluvie docs [page] [--context] [--json]` | installed-version offline documentation and focused authoring context |
+| `fluvie list` | render keys of a registry project |
+| `fluvie ffmpeg <install\|path\|status\|uninstall>` | manage the pinned FFmpeg/ffprobe pair |
+
+`--toolchain managed` is the default; `--toolchain system` opts into PATH.
+`--ffmpeg`, `--ffprobe`, and `--no-download` select native tools explicitly.
+Render hosts can use `--renderer <file>` with `--renderer-entry <factory>`, or a
+complete custom `--harness <file>`; ordinary authoring needs neither.
 
 A composition file exposes a top-level `Video build()`; `--entry <name>` names
 another.
@@ -178,6 +197,7 @@ another.
 | Surface | Notes |
 | --- | --- |
 | `renderVideo(video:, outDir:, pumpWidget:, pumpFrame:, setViewSize:)` (`package:fluvie/rendering.dart`) | the one capture entry a host drives; derives geometry, media, audio, captions from the `Video` |
+| `runFluvieRender`, `RenderInvocation`, `RenderHostContext` | package-owned prepared host and optional renderer factory |
 | `runAsyncDirectly`, `SetViewSize`, `ShellRunAsync` | the host seams `renderVideo` takes |
 | `parseAspect / parseQuality / parseExportFormat / parsePosterTime` | CLI define strings to typed arguments |
 | `writeRenderProgress(file, completed, total)` | the progress file a supervising process polls |

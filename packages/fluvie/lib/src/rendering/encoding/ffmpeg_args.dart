@@ -1,9 +1,11 @@
+import 'package:fluvie/src/core/encoder_options.dart';
 import 'package:fluvie/src/core/export.dart';
 import 'package:fluvie/src/core/quality.dart';
 import 'package:fluvie/src/rendering/encoding/audio_graph_nodes.dart';
 import 'package:fluvie/src/rendering/encoding/export_args.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_filter_graph.dart';
 
+part 'ffmpeg_args_audio.dart';
 part 'ffmpeg_args_export.dart';
 
 /// Builds the complete FFmpeg encode invocation as a typed **argument
@@ -26,10 +28,8 @@ final class FfmpegArgsBuilder {
   List<String> _outputOptions = const [];
   List<FfmpegAudioNode> _audio = const [];
   FfmpegAudioMix? _amix;
+  double _audioStartSeconds = 0;
   String? _outputName;
-
-  /// The pad label the audio mix output binds to in the `-filter_complex` graph.
-  static const String _mixOutLabel = 'aout';
 
   /// Declares a raw RGBA8888 frame-stream input read from the
   /// sandbox-relative file [name], sized [width]x[height] at [fps].
@@ -82,10 +82,12 @@ final class FfmpegArgsBuilder {
   ///
   /// A non-empty [filters] graph is emitted as `-vf`. When [audio] nodes are
   /// present their inputs are appended after the video inputs and mapped
-  /// video-then-audio with `-shortest`; with no audio the output is `-an`.
+  /// video-then-audio with silence padding and `-shortest`, so video EOF sets
+  /// the output length even when the audio ends early; no audio emits `-an`.
   /// Nodes that contribute a `filterChain` are routed through `-filter_complex`
   /// and combined by [amix] into one AAC audio stream. May be
-  /// called once; a second call throws [StateError].
+  /// called once; a second call throws [StateError]. [audioStartSeconds] crops
+  /// the completed authored mix when the captured video begins partway through it.
   void setH264Output({
     required String name,
     required Quality quality,
@@ -93,20 +95,41 @@ final class FfmpegArgsBuilder {
     FfmpegFilterGraph? filters,
     List<FfmpegAudioNode> audio = const [],
     FfmpegAudioMix? amix,
+    double audioStartSeconds = 0,
+    ExportCodec codec = ExportCodec.h264,
+    int? crf,
+    int? bitRate,
+    EncoderPreset preset = EncoderPreset.medium,
+    ExportPixelFormat pixelFormat = ExportPixelFormat.yuv420p,
   }) {
+    Export.mp4(
+      codec: codec,
+      crf: crf,
+      bitRate: bitRate,
+      preset: preset,
+      pixelFormat: pixelFormat,
+    ).validate();
+    if (!audioStartSeconds.isFinite || audioStartSeconds < 0) {
+      throw ArgumentError.value(
+        audioStartSeconds,
+        'audioStartSeconds',
+        'must be finite and nonnegative',
+      );
+    }
+    _audioStartSeconds = audioStartSeconds;
     _beginOutput(name);
     _audio = List.unmodifiable(audio);
     _amix = amix;
     _outputOptions = [
       if (filters != null && !filters.isEmpty) ...['-vf', filters.serialize()],
       '-c:v',
-      'libx264',
+      if (codec == ExportCodec.h264) 'libx264' else 'libx265',
+      if (codec == ExportCodec.h265) ...['-x265-params', 'pools=none:frame-threads=1'],
       '-preset',
-      'medium',
-      '-crf',
-      '${_crfFor(quality)}',
+      preset.name,
+      if (bitRate != null) ...['-b:v', '$bitRate'] else ...['-crf', '${crf ?? _crfFor(quality)}'],
       '-pix_fmt',
-      'yuv420p',
+      pixelFormat.name,
       '-r',
       '$fps',
     ];
@@ -136,52 +159,6 @@ final class FfmpegArgsBuilder {
       '-threads',
       '1',
       outputName,
-    ];
-  }
-
-  /// The audio mapping tail: `-an` with no audio, a `-filter_complex` amix graph
-  /// when nodes contribute filter chains, or the legacy direct
-  /// `-map N:a` path for chain-less fixture nodes. [videoInputCount] is the
-  /// FFmpeg input index the first audio node was assigned.
-  List<String> _audioMapping(int videoInputCount) {
-    if (_audio.isEmpty) return const ['-an'];
-    final chains = <String>[];
-    final padLabels = <String>[];
-    for (var i = 0; i < _audio.length; i++) {
-      final label = 'a$i';
-      final chain = _audio[i].filterChain(inputIndex: videoInputCount + i, label: label);
-      if (chain == null) continue;
-      chains.add(chain);
-      padLabels.add(label);
-    }
-    if (chains.isEmpty) {
-      return [
-        '-map',
-        '0:v:0',
-        for (var i = 0; i < _audio.length; i++) ...[
-          '-map',
-          _audio[i].mapSpecifier(videoInputCount + i),
-        ],
-        '-shortest',
-      ];
-    }
-    final mix = _amix;
-    if (mix == null) {
-      throw StateError('audio track nodes need an FfmpegAudioMix; pass amix: to setH264Output.');
-    }
-    final graph = [...chains, mix.mixChain(labels: padLabels, outLabel: _mixOutLabel)].join(';');
-    return [
-      '-filter_complex',
-      graph,
-      '-map',
-      '0:v:0',
-      '-map',
-      '[$_mixOutLabel]',
-      '-c:a',
-      'aac',
-      '-b:a',
-      '192k',
-      '-shortest',
     ];
   }
 

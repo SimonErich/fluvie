@@ -49,7 +49,84 @@ void main() {
   test('the ambient-and-raw spec prints clean Dart', () async {
     await expectClean('ambient-and-raw', _ambientAndRaw);
   });
+
+  test('the effect-stack spec prints clean Dart', () async {
+    await expectClean('effect-stack', _effectStack);
+  });
 }
+
+/// Every spelling the effect printer has: the named factory, the spec form a
+/// disabled effect keeps, both keyframed forms (linear and eased), and the
+/// typed-object kinds (particles, shader with uniforms, glitch with an enum).
+final Map<String, Object?> _effectStack = {
+  'fluvieSpec': 1,
+  'scenes': [
+    {
+      'duration': '90f',
+      'children': [
+        {
+          'id': 'el-graded',
+          'type': 'Text',
+          'text': 'Graded',
+          'effects': [
+            {'kind': 'grain', 'amount': 0.35},
+            {'kind': 'bloom', 'amount': 0.2, 'enabled': false},
+            {
+              'kind': 'vignette',
+              'amount': {
+                'values': [0, 0.9],
+                'positions': ['0f', '90f'],
+              },
+            },
+            {
+              'kind': 'scanlines',
+              'spacing': 4,
+              'opacity': {
+                'values': [0.1, 0.6, 0.1],
+                'positions': ['0f', '45f', '90f'],
+                'easings': ['smooth', 'in'],
+              },
+            },
+            {
+              'kind': 'particles',
+              'particles': {'kind': 'confetti', 'count': 40, 'seed': 'launch'},
+            },
+            {
+              'kind': 'shader',
+              'asset': 'shaders/glow.frag',
+              'uniforms': {'strength': 0.6},
+            },
+            {'kind': 'glitch', 'from': 'right', 'reverse': true},
+            {
+              'kind': 'curves',
+              'curves': {
+                'master': [
+                  [0, 0],
+                  [0.4, 0.55],
+                  [1, 1],
+                ],
+              },
+              'intensity': 0.85,
+            },
+            {'kind': 'lut', 'asset': 'luts/warm.cube', 'intensity': 0.6},
+            {
+              'kind': 'grade',
+              'contrast': 1.2,
+              'temperature': 0.3,
+              'exposure': {
+                'values': [-1, 0.5],
+                'positions': ['0f', '90f'],
+              },
+            },
+          ],
+          'animate': [
+            {'preset': 'fadeIn', 'duration': '12f'},
+          ],
+        },
+      ],
+    },
+  ],
+};
 
 /// Multiple scenes; gradient and vhs backgrounds; Text+style, Box, Image.network,
 /// Counter; fadeIn with the full timing tail (duration/ease/delay/stagger/repeat),

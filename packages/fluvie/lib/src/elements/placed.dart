@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/composition/runtime/collectible_children.dart';
 import 'package:fluvie/src/core/placement.dart';
+import 'package:fluvie/src/elements/placed_overrides.dart';
 
 /// Positions [child] on the scene canvas by a fractional [Placement] — the
 /// widget behind the spec's `transform` key, and the layout home a canvas
@@ -22,10 +23,14 @@ import 'package:fluvie/src/core/placement.dart';
 /// ```
 final class Placed extends StatelessWidget implements CollectibleChildren {
   /// Lays [child] out at [placement] on the canvas.
-  const Placed({required this.placement, required this.child, super.key});
+  const Placed({required this.placement, required this.child, this.id, super.key});
 
   /// Where the child sits, in canvas fractions.
   final Placement placement;
+
+  /// The element id an editing tool addresses this placement by, or null for
+  /// an anonymous element. [PlacedOverrides] keys off it.
+  final String? id;
 
   /// The element being placed.
   final Widget child;
@@ -37,15 +42,21 @@ final class Placed extends StatelessWidget implements CollectibleChildren {
 
   @override
   Widget build(BuildContext context) {
+    final elementId = id;
+    final effective =
+        (elementId == null ? null : PlacedOverrides.of(context, elementId)) ?? placement;
     var content = child;
-    if (placement.rotation != 0) {
+    if (effective.rotation != 0) {
       content = Transform.rotate(
-        angle: placement.rotation * math.pi / 180,
+        angle: effective.rotation * math.pi / 180,
         child: content,
       );
     }
+    if (effective.opacity != 1) {
+      content = Opacity(opacity: effective.opacity, child: content);
+    }
     return CustomSingleChildLayout(
-      delegate: _PlacedLayout(placement),
+      delegate: _PlacedLayout(effective),
       child: content,
     );
   }

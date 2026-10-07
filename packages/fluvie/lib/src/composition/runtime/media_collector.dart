@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/composition/runtime/scene_tree_walk.dart';
 import 'package:fluvie/src/composition/scene.dart';
 import 'package:fluvie/src/core/contracts/generative_resolver.dart';
@@ -29,9 +30,13 @@ import 'package:fluvie/src/elements/snapshot/snapshot.dart';
 /// `GenerativeMedia` of a visual kind folds in as its produced file-backed
 /// `MediaSource`, so generated images and videos pre-resolve through the same
 /// pass as hand-written `Image`/`Clip`.
-Set<MediaSource> collectMediaSources(List<Scene> scenes, {GenerativeResolver? generative}) {
+Set<MediaSource> collectMediaSources(
+  List<Scene> scenes, {
+  GenerativeResolver? generative,
+  List<Widget> overlays = const [],
+}) {
   final sources = <MediaSource>{};
-  walkSceneTree(scenes, (widget) {
+  walkSceneTree(scenes, overlays: overlays, (widget) {
     if (widget is MediaCarrier) {
       final source = (widget as MediaCarrier).mediaSource;
       if (source != null) sources.add(source);
@@ -51,9 +56,12 @@ Set<MediaSource> collectMediaSources(List<Scene> scenes, {GenerativeResolver? ge
 /// the render harness can hand the result to `MediaResolver.preResolveSnapshots`
 /// before frame 0. The result is a `Set`, so the same diagram or page across
 /// scenes rasterizes once (the cache deduplicates by value equality).
-Set<SnapshotSource> collectSnapshotSources(List<Scene> scenes) {
+Set<SnapshotSource> collectSnapshotSources(
+  List<Scene> scenes, {
+  List<Widget> overlays = const [],
+}) {
   final sources = <SnapshotSource>{};
-  walkSceneTree(scenes, (widget) {
+  walkSceneTree(scenes, overlays: overlays, (widget) {
     if (widget is! MediaCarrier) return;
     final source = (widget as MediaCarrier).snapshotSource;
     if (source != null) sources.add(source);
@@ -73,9 +81,9 @@ Set<SnapshotSource> collectSnapshotSources(List<Scene> scenes) {
 /// `captureSnapshotChildren` (each `Snapshot.child` under the
 /// `ImageResolverScope`) before frame 0, then mounts the resulting
 /// `SnapshotCaptureScope` above the composition for the frame loop.
-List<Snapshot> collectSnapshots(List<Scene> scenes) {
+List<Snapshot> collectSnapshots(List<Scene> scenes, {List<Widget> overlays = const []}) {
   final snapshots = <Snapshot>[];
-  walkSceneTree(scenes, (widget) {
+  walkSceneTree(scenes, overlays: overlays, (widget) {
     if (widget is Snapshot) snapshots.add(widget);
   });
   return snapshots;

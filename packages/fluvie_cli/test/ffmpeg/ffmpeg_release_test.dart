@@ -62,6 +62,16 @@ void main() {
         expect(asset.url, startsWith('https://'));
         expect(asset.sha256, hasLength(64));
         expect(asset.sizeBytes, greaterThan(0));
+        final probe = asset.probeAsset;
+        if (probe == null) {
+          expect(asset.archiveProbePath, isNotNull);
+          expect(asset.archiveProbePath, contains('ffprobe'));
+        } else {
+          expect(probe.url, startsWith('https://'));
+          expect(probe.sha256, hasLength(64));
+          expect(probe.sizeBytes, greaterThan(0));
+          expect(probe.archiveBinaryPath, 'ffprobe');
+        }
       }
     });
 

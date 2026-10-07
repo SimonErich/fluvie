@@ -5,6 +5,7 @@ import 'package:test/test.dart';
 
 void main() {
   final analyzer = FluvieCodeAnalyzer(projectRoot: Directory.current);
+  tearDownAll(analyzer.dispose);
 
   Iterable<FluvieDiagnostic> errorsIn(List<FluvieDiagnostic> diagnostics) =>
       diagnostics.where((d) => d.severity == FluvieDiagnosticSeverity.error);
@@ -52,5 +53,42 @@ Video build() {
 ''');
 
     expect(diagnostics.any((d) => d.code == 'dangling_anchor'), isTrue);
+  });
+
+  test(
+    'original file preserves relative imports and refreshes edited code without scratch writes',
+    () async {
+      final directory = Directory('${Directory.current.path}/test/file_validation_fixture')
+        ..createSync();
+      final dependency = File('${directory.path}/helper.dart')
+        ..writeAsStringSync('int count() => 3;\n');
+      final file = File('${directory.path}/story.dart')
+        ..writeAsStringSync("import 'helper.dart';\nint total() => count();\n");
+      try {
+        expect(errorsIn(await analyzer.analyzeFile(file.path)), isEmpty);
+        file.writeAsStringSync("import 'helper.dart';\nint total() => missing();\n");
+        final diagnostics = await analyzer.analyzeFile(file.path);
+        final error = errorsIn(diagnostics).single;
+        expect(error.line, 2);
+        expect(error.toJson(), containsPair('code', 'UNDEFINED_FUNCTION'));
+        expect(error.toString(), contains('error at 2:'));
+        expect(
+          directory.listSync().map((entry) => entry.path).toList()..sort(),
+          [dependency.path, file.path]..sort(),
+        );
+      } finally {
+        directory.deleteSync(recursive: true);
+      }
+    },
+  );
+  test('simultaneous requests keep isolated diagnostics and recover after failure', () async {
+    final results = await Future.wait([
+      analyzer.analyze('int value() => 1;'),
+      analyzer.analyze('int value() => unknown();'),
+    ]);
+    expect(errorsIn(results.first), isEmpty);
+    expect(errorsIn(results.last), hasLength(1));
+    await expectLater(analyzer.analyzeFile('missing.dart'), throwsA(isA<FileSystemException>()));
+    expect(errorsIn(await analyzer.analyze('int value() => 2;')), isEmpty);
   });
 }

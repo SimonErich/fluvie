@@ -11,6 +11,7 @@ import 'package:fluvie/src/core/contracts/disposable_resolver.dart';
 import 'package:fluvie/src/core/contracts/frequency_analyzer.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
 import 'package:fluvie/src/core/contracts/snapshot_service.dart';
+import 'package:fluvie/src/core/errors/fluvie_capability_exception.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/core/media/snapshot_source.dart';
@@ -352,9 +353,10 @@ void main() {
       void expectsWeb(void Function() call, String needle) => expect(
         call,
         throwsA(
-          isA<FluvieRenderException>()
+          isA<FluvieCapabilityException>()
               .having((e) => e.message, 'message', contains(needle))
-              .having((e) => e.message, 'message', contains('not supported on web')),
+              .having((e) => e.host, 'host', 'the built-in browser media resolver')
+              .having((e) => e.message, 'remedy', contains('Supply a resolver')),
         ),
       );
 

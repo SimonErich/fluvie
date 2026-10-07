@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "path": "formats.dart",
+    "byteLength": 2222,
+    "sha256": "90e1ee372dd711cf90ab2f715062e288352f534497b6cde55015e88640f6943d"
+  },
+  "sourceFingerprint": "8f5ce041693f494e60f08357a7d474b96fb0b24a00bceb1a65e84c5818e636a7",
+  "output": {
+    "path": "formats.mp4",
+    "byteLength": 112298,
+    "sha256": "27a938a09f3ffc5fe7cabcce01428cbe5d2c664a0ce3e3219bc842e53036ae7f",
+    "media": {
+      "container": "mov,mp4,m4a,3gp,3g2,mj2",
+      "codec": "h264",
+      "width": 160,
+      "height": 160,
+      "pixelFormat": "yuv420p",
+      "hasAlpha": false,
+      "hasAudio": true,
+      "durationSeconds": 6,
+      "declaredFrameCount": 180,
+      "frameCount": 180,
+      "averageFrameRate": "30/1",
+      "nominalFrameRate": "30/1",
+      "fps": 30,
+      "audio": [
+        {
+          "codec": "aac",
+          "channels": 1,
+          "channelLayout": "mono",
+          "sampleRate": "44100"
+        }
+      ]
+    }
+  },
+  "capture": {
+    "schemaVersion": 1,
+    "width": 160,
+    "height": 160,
+    "fps": 30,
+    "frameCount": 180,
+    "framesFileName": "frames.rgba",
+    "outputFileName": "out.mp4",
+    "renderDigest": "659c8f4b5720d0b3",
+    "ffmpegArgs": [
+      "-f",
+      "rawvideo",
+      "-pix_fmt",
+      "rgba",
+      "-video_size",
+      "160x160",
+      "-framerate",
+      "30",
+      "-i",
+      "frames.rgba",
+      "-i",
+      "audio_0_ee8ff84951cc3838",
+      "-vf",
+      "format=pix_fmts=yuv420p",
+      "-c:v",
+      "libx264",
+      "-preset",
+      "medium",
+      "-crf",
+      "18",
+      "-pix_fmt",
+      "yuv420p",
+      "-r",
+      "30",
+      "-filter_complex",
+      "[1:a]asetpts=PTS-STARTPTS,volume=0.4,afade=t=in:st=0:d=0.5,afade=t=out:st=5.5:d=0.5[a0];[a0]amix=inputs=1:normalize=0,volume=1[mixed];[mixed]apad[aout]",
+      "-map",
+      "0:v:0",
+      "-map",
+      "[aout]",
+      "-c:a",
+      "aac",
+      "-b:a",
+      "192k",
+      "-shortest",
+      "-fflags",
+      "+bitexact",
+      "-flags:v",
+      "+bitexact",
+      "-map_metadata",
+      "-1",
+      "-threads",
+      "1",
+      "out.mp4"
+    ],
+    "outputIntent": {
+      "width": 160,
+      "height": 160,
+      "frameCount": 180,
+      "fps": 30,
+      "durationSeconds": 6,
+      "codec": "h264",
+      "container": "mp4",
+      "hasAudio": true,
+      "hasAlpha": false,
+      "pixelFormat": "yuv420p"
+    }
+  },
+  "reproduction": {
+    "command": "fluvie render formats.dart --out formats.mp4 --no-cache",
+    "flutter": "3.47.2",
+    "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+    "dart": "3.13.2",
+    "ffmpeg": "ffmpeg version n8.1.1-9-g58d4114d36-20260531 Copyright (c) 2000-2026 the FFmpeg developers",
+    "note": "Resource and timing replay is supported. Encoded bytes can vary across engines and platforms."
+  },
+  "poster": {
+    "path": "formats.png",
+    "byteLength": 2928,
+    "sha256": "4c62b7900726fa11d8b24be8910eb4012225849c6af7ed670eb763c1f42c0b8e"
+  }
+}

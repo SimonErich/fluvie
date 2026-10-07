@@ -41,6 +41,7 @@ final mediaResolverProvider = Provider<MediaResolver>((ref) {
   unawaited(ref.watch(staleTempSweeperProvider).sweep());
   return MediaRepository(
     loader: ref.watch(mediaBytesLoaderProvider),
+    whenCancelled: ref.watch(mediaCancellationProvider),
     probeService: ref.watch(videoProbeServiceProvider),
     frameExtractor: ref.watch(frameExtractionServiceProvider),
     clipFrameStore: ref.watch(clipFrameStreamingProvider) ? FileClipFrameStore() : null,

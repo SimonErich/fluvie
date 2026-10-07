@@ -25,7 +25,9 @@ void main() {
   ) async {
     late ui.FragmentShader shader;
     await tester.runAsync(() async {
-      shader = await const FragmentProgramShaderLoader().load('shaders/ripple.frag');
+      shader = (await const FragmentProgramShaderLoader().load(
+        'shaders/ripple.frag',
+      )).fragmentShader();
     });
     final effect = ShaderEffect(shaderName: 'shaders/ripple.frag', shader: shader);
 

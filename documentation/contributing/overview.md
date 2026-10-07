@@ -44,6 +44,10 @@ The gate is four steps, each its own melos script:
 Goldens run separately with `melos run test:goldens` on the Linux baseline. Run
 `melos` non-interactively with `CI=true` to avoid the prompt path.
 
+The analysis gate also checks that publishable packages carry the current
+workspace lint policy. Before a release, run the isolated
+[package release checks](package-release.md).
+
 ## The layering law
 
 Dependencies point down only, inside `packages/fluvie/lib/src/`:

@@ -46,6 +46,7 @@ class _FluvieWebStageState extends State<FluvieWebStage> {
   static _FluvieWebStageState? active;
 
   final ValueNotifier<Widget?> _slot = ValueNotifier<Widget?>(null);
+  bool _retired = false;
 
   @override
   void initState() {
@@ -56,23 +57,35 @@ class _FluvieWebStageState extends State<FluvieWebStage> {
   @override
   void dispose() {
     if (identical(active, this)) active = null;
+    _retired = true;
     _slot.dispose();
     super.dispose();
   }
 
+  /// Mounts [tree] in the hidden slot. A retired stage is never shown into:
+  /// [dispose] clears [active] first, so a host only ever binds a live one.
   Future<void> show(Widget tree, Size size) {
     _slot.value = SizedBox(width: size.width, height: size.height, child: tree);
     return pump();
   }
 
+  /// Builds one frame, or answers straight away once the stage is retired —
+  /// a stage that is gone will never deliver the frame a render still holds
+  /// its host for.
   Future<void> pump() {
+    if (_retired) return Future<void>.value();
     final completer = Completer<void>();
     WidgetsBinding.instance.addPostFrameCallback((_) => completer.complete());
     WidgetsBinding.instance.scheduleFrame();
     return completer.future;
   }
 
-  void hide() => _slot.value = null;
+  /// Empties the slot. A render outlives the stage when the app navigates
+  /// away mid-capture, and its teardown must not touch a disposed notifier.
+  void hide() {
+    if (_retired) return;
+    _slot.value = null;
+  }
 
   @override
   Widget build(BuildContext context) {

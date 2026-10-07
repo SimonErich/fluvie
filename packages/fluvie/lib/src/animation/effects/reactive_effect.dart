@@ -6,6 +6,7 @@ import 'package:fluvie/src/core/audio/band_table.dart';
 import 'package:fluvie/src/core/audio_band.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/rendering/runtime/frame_provider.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
 
 /// How a [ReactiveEffect] maps band energy to a transform.
@@ -96,6 +97,7 @@ class _ReactiveView extends StatelessWidget {
   /// The band energy at the current frame, or `0` for the neutral fallback —
   /// throwing only when a capture has no precomputed table.
   double _energy(BuildContext context, BandTable? table) {
+    if (PreparationScope.exposesOnlyGeometry(context)) return 0;
     if (table == null) {
       if (RenderModeContext.isCapture(context)) {
         throw FluvieRenderException(

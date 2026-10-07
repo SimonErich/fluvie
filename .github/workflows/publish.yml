@@ -21,7 +21,22 @@ on:
     tags: ["v[0-9]+.[0-9]+.[0-9]+"]
 
 jobs:
+  fluvie_media:
+    permissions:
+      id-token: write
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      working-directory: packages/fluvie_media
+
+  fluvie_render_client:
+    permissions:
+      id-token: write
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      working-directory: packages/fluvie_render_client
+
   fluvie:
+    needs: [fluvie_media]
     permissions:
       id-token: write # OIDC token for pub.dev
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
@@ -29,6 +44,7 @@ jobs:
       working-directory: packages/fluvie
 
   fluvie_cli:
+    needs: [fluvie_media, fluvie_validate]
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
@@ -43,7 +59,7 @@ jobs:
       working-directory: packages/fluvie_lints
 
   fluvie_ai:
-    needs: [fluvie]
+    needs: [fluvie, fluvie_validate]
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
@@ -59,7 +75,7 @@ jobs:
       working-directory: packages/fluvie_mobile_encoder
 
   fluvie_web_encoder:
-    needs: [fluvie]
+    needs: [fluvie, fluvie_media]
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
@@ -75,7 +91,7 @@ jobs:
       working-directory: packages/fluvie_validate
 
   fluvie_server:
-    needs: [fluvie_cli, fluvie_validate]
+    needs: [fluvie_cli, fluvie_render_client, fluvie_validate]
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1

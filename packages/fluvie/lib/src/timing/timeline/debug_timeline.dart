@@ -38,9 +38,10 @@ String debugTimeline(ResolvedTimeline timeline) {
   }
   String line(List<String> cells) => [
     for (var column = 0; column < widths.length; column++)
-      rightAligned[column]
-          ? cells[column].padLeft(widths[column])
-          : cells[column].padRight(widths[column]),
+      if (rightAligned[column])
+        cells[column].padLeft(widths[column])
+      else
+        cells[column].padRight(widths[column]),
   ].join(' | ');
 
   final buffer = StringBuffer()

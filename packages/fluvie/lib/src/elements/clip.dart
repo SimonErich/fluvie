@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart' show BoxFit, BuildContext, StatelessWidget, Widget;
+import 'package:fluvie/src/animation/keyframed_number.dart';
 import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/media/clip_audio.dart';
 import 'package:fluvie/src/core/media/media_carrier.dart';
@@ -11,16 +14,17 @@ import 'package:fluvie/src/elements/runtime/element_shared.dart';
 /// An embedded video — Fluvie's own widget under Flutter's familiar `Clip` name
 /// (the barrel hides Flutter's).
 ///
-/// A renderer must turn the source video into deterministic pixels *before*
-/// capture: Fluvie probes the clip and pre-extracts its needed frames in the
-/// pre-resolve pass, then paints the right one synchronously per composition
-/// frame. The composition frame is mapped to a source frame by the
+/// Fluvie probes the source during composition preparation, then resolves the
+/// required source frames before each capture or preview paint. Export hosts
+/// use bounded decode-ahead rather than holding the whole video in memory.
+/// Painting reads the prepared image synchronously. The composition frame is
+/// mapped to a source frame by the
 /// floor-resampling rule, so a slow source under a fast composition holds frames
 /// instead of skipping. A capture with no pre-resolution throws a
-/// `FluvieRenderException` naming the source; a live preview paints a
-/// placeholder, where determinism does not bind — wrap the composition in a
-/// `PreviewMediaScope` to run the same pre-pass and play the real frames there
-/// too.
+/// `FluvieRenderException` naming the source. `VideoPreview` prepares and plays
+/// real clip frames; a bare widget without a prepared resolver shows its poster
+/// or a labelled placeholder. `PreviewMediaScope` supplies the preparation
+/// lifecycle for custom preview hosts.
 ///
 /// ```dart
 /// Clip.asset('intro.mp4', trim: 2.seconds.to(7.seconds),
@@ -50,8 +54,13 @@ final class Clip extends StatelessWidget implements MediaCarrier {
     this.audio = const ClipAudio.included(),
     this.shared,
     this.fit,
+    this.poster,
+    this.speed = 1,
+    this.speedRamp,
     super.key,
-  }) : source = MediaSource.asset(name);
+  }) : assert(_isRate(speed), _rateMessage),
+       assert(speedRamp == null || speed == 1, 'Use speedRamp with the default scalar speed of 1.'),
+       source = MediaSource.asset(name);
 
   /// A remote video at [url]; only allowlisted hosts and schemes are fetched in
   /// capture.
@@ -61,11 +70,17 @@ final class Clip extends StatelessWidget implements MediaCarrier {
     this.audio = const ClipAudio.included(),
     this.shared,
     this.fit,
+    this.poster,
+    this.speed = 1,
+    this.speedRamp,
     super.key,
-  }) : source = MediaSource.network(url);
+  }) : assert(_isRate(speed), _rateMessage),
+       assert(speedRamp == null || speed == 1, 'Use speedRamp with the default scalar speed of 1.'),
+       source = MediaSource.network(url);
 
-  /// A video file on disk at [path] (must end in `.mp4`/`.mov`/`.webm` so the
-  /// clip path recognizes it). For a scoped-storage source the caller copies it
+  /// A video file on disk at [path]. Composition preparation identifies this
+  /// widget as a clip explicitly; the configured decoder determines which
+  /// containers it supports. For a scoped-storage source the caller copies it
   /// to a readable app-private path first.
   Clip.file(
     String path, {
@@ -73,8 +88,34 @@ final class Clip extends StatelessWidget implements MediaCarrier {
     this.audio = const ClipAudio.included(),
     this.shared,
     this.fit,
+    this.poster,
+    this.speed = 1,
+    this.speedRamp,
     super.key,
-  }) : source = MediaSource.file(path);
+  }) : assert(_isRate(speed), _rateMessage),
+       assert(speedRamp == null || speed == 1, 'Use speedRamp with the default scalar speed of 1.'),
+       source = MediaSource.file(path);
+
+  /// A video already in memory as raw encoded [bytes] (an imported file that
+  /// never touched disk). [debugLabel] gives it a useful name in diagnostics;
+  /// composition preparation identifies it as a clip even without a label.
+  /// Its embedded audio joins the
+  /// encoder mix like any other clip's: the bytes materialize to a temp file
+  /// the encoder reads, and the [audio] policy applies unchanged.
+  Clip.memory(
+    Uint8List bytes, {
+    String? debugLabel,
+    this.trim,
+    this.audio = const ClipAudio.included(),
+    this.shared,
+    this.fit,
+    this.poster,
+    this.speed = 1,
+    this.speedRamp,
+    super.key,
+  }) : assert(_isRate(speed), _rateMessage),
+       assert(speedRamp == null || speed == 1, 'Use speedRamp with the default scalar speed of 1.'),
+       source = MediaSource.memory(bytes, debugLabel: debugLabel);
 
   /// The declared media this clip plays — the key the collect pass gathers and
   /// the resolver pre-resolves.
@@ -105,9 +146,48 @@ final class Clip extends StatelessWidget implements MediaCarrier {
   /// How the frame scales into its box, or `null` for Flutter's default.
   final BoxFit? fit;
 
+  /// A still shown when no prepared clip resolver is available, or `null` for
+  /// the labelled placeholder. A capture
+  /// always paints real frames, so the poster never reaches a render.
+  final MediaSource? poster;
+
+  /// The playback rate: `1` plays at source speed, `0.5` at half, `2` at
+  /// double. A negative rate plays the [trim] backwards from its last frame.
+  ///
+  /// The rate retimes the picture and the embedded audio together.
+  ///
+  /// A reversed clip plays **no** audio: no filter in this graph reverses a
+  /// stream, and forward audio under backwards picture is worse than silence.
+  /// Declare an `Audio` track if a rewind needs sound. Positive scalar and
+  /// ramp speeds retime embedded audio on desktop, browser and native encoders.
+  final double speed;
+
+  /// Optional positive keyframed playback rate. The shared integrated source
+  /// clock keeps picture, extraction and embedded audio synchronized.
+  final KeyframedNumber? speedRamp;
+
   @override
   Widget build(BuildContext context) {
-    final Widget painted = ClipPainter(source: source, trim: trim, fit: fit);
+    final Widget painted = ClipPainter(
+      source: source,
+      trim: trim,
+      fit: fit,
+      poster: poster,
+      speed: speed,
+      speedRamp: speedRamp,
+    );
     return wrapShared(shared, painted);
   }
 }
+
+/// Whether [speed] is a rate a clip can actually play at.
+///
+/// Zero advances no source frames, so it is a still rather than a clip; a
+/// non-finite rate cannot be resampled or staged into `atempo` at all.
+bool _isRate(double speed) => speed != 0 && speed.isFinite;
+
+/// The message both the widget assert and the spec decoder report, so a rate
+/// refused in Dart reads the same as one refused in a document.
+const String _rateMessage =
+    'A clip speed is a non-zero, finite rate: 1 is source speed, 0.5 half, '
+    '2 double, and a negative rate plays the trim backwards.';

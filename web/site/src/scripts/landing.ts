@@ -4,16 +4,23 @@
 // only change from the original is that the
 // gallery data (GAL) is read from a build-rendered JSON element (#gal-data),
 // so the tiles come from the repo's lessons instead of a hardcoded array.
+import httpExample from '../generated/http-example.txt?raw';
+import mcpExample from '../generated/mcp-example.txt?raw';
+
 (function () {
   "use strict";
   var GRAD = "linear-gradient(120deg,#36E1FF,#1668E3 60%,#0B3FB0)";
-  var $ = function (s: string, r?: ParentNode) { return (r || document).querySelector(s); };
-  var $$ = function (s: string, r?: ParentNode) {
-    return Array.prototype.slice.call((r || document).querySelectorAll(s));
+  const $ = function <T extends Element = HTMLElement>(s: string, r?: ParentNode) {
+    return (r || document).querySelector<T>(s);
   };
+  const $$ = function (s: string, r?: ParentNode) {
+    return Array.from((r || document).querySelectorAll<HTMLElement>(s));
+  };
+  const stepTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
+  const hoverBound = new WeakSet<HTMLElement>();
 
   // ---- style-hover applier (mirrors the design runtime) ----
-  function parseStyle(text: string) {
+  function parseStyle(text: string | null) {
     var out: Record<string, string> = {};
     (text || "").split(";").forEach(function (decl) {
       var i = decl.indexOf(":");
@@ -59,7 +66,7 @@
   var nav = $("[data-flv-nav]");
   var prog = $("[data-flv-progress]");
   var hero = $("[data-flv-hero]");
-  var navLogo = $("#navLogo");
+  const navLogo = $<HTMLImageElement>("#navLogo");
   var navDark: boolean | null = null;
   function setNav(dark: boolean) {
     if (!nav) return;
@@ -84,7 +91,7 @@
     requestAnimationFrame(tick);
   }
   tick();
-  var logo = $("[data-flv-logo]"), whisper = $("[data-flv-whisper]");
+  const logo = $("[data-flv-logo]"), whisper = $("[data-flv-whisper]");
   if (logo && whisper) {
     logo.addEventListener("mouseenter", function () { whisper.style.opacity = "1"; });
     logo.addEventListener("mouseleave", function () { whisper.style.opacity = "0"; });
@@ -98,7 +105,7 @@
   }, { passive: true });
 
   // ---- hero scrubber ----
-  var heroRange = $("#heroRange"), heroTitle = $("#heroTitle"),
+  const heroRange = $<HTMLInputElement>("#heroRange"), heroTitle = $("#heroTitle"),
       heroStrip = $("#heroStrip"), heroFrameText = $("#heroFrameText");
   function renderHero(hf: number) {
     var op = Math.max(0, Math.min(1, (hf - 2) / 6));
@@ -122,10 +129,11 @@
   }
 
   // ---- copy: hero render + steps ----
-  var copyRenderBtn = $("#copyRenderBtn"), copyRenderMsg = $("#copyRenderMsg"), renderMsgTimer: number;
+  const copyRenderBtn = $("#copyRenderBtn"), copyRenderMsg = $("#copyRenderMsg");
+  let renderMsgTimer: ReturnType<typeof setTimeout>;
   if (copyRenderBtn) {
     copyRenderBtn.addEventListener("click", function () {
-      copyText(copyRenderBtn.getAttribute("data-cmd"));
+      copyText(copyRenderBtn.getAttribute("data-cmd") ?? "");
       if (copyRenderMsg) {
         copyRenderMsg.textContent = "Copied. Now run it.";
         clearTimeout(renderMsgTimer);
@@ -135,18 +143,18 @@
   }
   $$(".stepCopy").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var pre = btn.parentNode.querySelector("pre");
-      if (pre) copyText(pre.textContent);
+      var pre = btn.parentElement?.querySelector("pre");
+      if (pre) copyText(pre.textContent ?? "");
       var step = btn.getAttribute("data-step");
       var num = $('.stepNum[data-step="' + step + '"]');
       var icon = btn.querySelector("span");
       if (num) { num.style.color = "#fff"; num.style.background = "#1668E3"; num.style.borderColor = "#1668E3"; }
       if (icon) icon.innerHTML = "&#10003;";
-      clearTimeout(btn._t);
-      btn._t = setTimeout(function () {
+      clearTimeout(stepTimers.get(btn));
+      stepTimers.set(btn, setTimeout(function () {
         if (num) { num.style.color = "#1668E3"; num.style.background = "#EEF3FD"; num.style.borderColor = "#D8E5FE"; }
         if (icon) icon.innerHTML = "&#9112;";
-      }, 2000);
+      }, 2000));
     });
   });
 
@@ -191,7 +199,7 @@
   if (trigTabFluvie) trigTabFluvie.addEventListener("click", function () { setTrig(false); });
   setTrig(false);
 
-  var leverRange = $("#leverRange"), leverFill = $("#leverFill"), subFollowFill = $("#subFollowFill");
+  const leverRange = $<HTMLInputElement>("#leverRange"), leverFill = $("#leverFill"), subFollowFill = $("#subFollowFill");
   if (leverRange) {
     leverRange.addEventListener("input", function () {
       var v = parseInt(leverRange.value, 10);
@@ -204,7 +212,7 @@
   // ---- gallery: build tiles + filter ----
   // GAL is rendered at build time from the repo's lessons (see Reel.astro).
   var galEl = document.getElementById("gal-data");
-  var GAL = galEl ? JSON.parse(galEl.textContent || "[]") : [];
+  const GAL: [string, string, string, string, boolean][] = galEl ? JSON.parse(galEl.textContent || "[]") : [];
   var POSTERS = [
     "radial-gradient(120% 120% at 50% 35%,#16357f,#06070F)",
     "radial-gradient(120% 120% at 50% 35%,#13409a,#06070F)",
@@ -219,13 +227,11 @@
     var html = "";
     GAL.forEach(function (g, i) {
       if (filter !== "all" && g[3] !== filter) return;
-      var n = g[0], t = g[1], d = g[2], real = g[4], poster = POSTERS[i % POSTERS.length];
-      var badge = real
-        ? '<span aria-hidden="true" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;"><span style="font-family:\'Sora\'; font-weight:800; color:#fff; font-size:18px; animation:flvFadeScale 3.4s ease-in-out infinite; text-shadow:0 2px 20px rgba(124,243,255,0.5);">' + esc(t) + '</span></span>'
-          + '<span aria-hidden="true" style="position:absolute; top:10px; right:10px; font-size:9px; font-family:\'JetBrains Mono\'; color:#7CF3C2; padding:2px 7px; border:1px solid rgba(124,243,255,0.4); border-radius:5px;">LIVE CLIP</span>'
-        : '<span aria-hidden="true" style="position:absolute; bottom:10px; left:10px; display:inline-flex; align-items:center; gap:6px; font-size:10px; color:#cfe0ff; padding:3px 9px; background:rgba(0,0,0,0.45); border-radius:20px;"><svg width="9" height="9" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1l8 5-8 5z"></path></svg> play in demo</span>';
+      var n = g[0], t = g[1], d = g[2], poster = POSTERS[i % POSTERS.length];
+      var badge = '<span aria-hidden="true" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;"><span style="font-family:\'Sora\'; font-weight:800; color:#fff; font-size:18px;">' + esc(t) + '</span></span>'
+        + '<span aria-hidden="true" style="position:absolute; bottom:10px; left:10px; font-size:10px; color:#cfe0ff; padding:3px 9px; background:rgba(0,0,0,0.45); border-radius:20px;">open demo</span>';
       html +=
-        '<a href="https://demo.fluvie.dev/#' + n + '" aria-label="Lesson ' + n + ', ' + esc(t) + ', opens the live demo (external)" style="display:block; text-decoration:none; color:inherit; border-radius:16px; overflow:hidden; border:1px solid var(--line); background:#fff; box-shadow:0 1px 3px rgba(11,16,32,0.05); transition:transform .28s ease, box-shadow .28s ease, border-color .28s ease;" style-hover="transform:translateY(-4px); box-shadow:0 28px 56px -26px rgba(11,16,32,0.22); border-color:#BFE6FF;">'
+        '<a href="https://demo.fluvie.dev" aria-label="Lesson ' + n + ', ' + esc(t) + ', opens the demo; select this lesson there (external)" style="display:block; text-decoration:none; color:inherit; border-radius:16px; overflow:hidden; border:1px solid var(--line); background:#fff; box-shadow:0 1px 3px rgba(11,16,32,0.05); transition:transform .28s ease, box-shadow .28s ease, border-color .28s ease;" style-hover="transform:translateY(-4px); box-shadow:0 28px 56px -26px rgba(11,16,32,0.22); border-color:#BFE6FF;">'
         + '<div style="position:relative; aspect-ratio:16/10; background:' + poster + '; overflow:hidden; display:flex; align-items:center; justify-content:center;">'
         + '<span aria-hidden="true" style="font-family:\'Sora\'; font-weight:800; font-size:34px; color:rgba(255,255,255,0.16);">' + n + '</span>'
         + badge
@@ -241,8 +247,8 @@
   }
   function bindHover(root: ParentNode) {
     $$("[style-hover]", root).forEach(function (el) {
-      if (el._hoverBound) return;
-      el._hoverBound = true;
+      if (hoverBound.has(el)) return;
+      hoverBound.add(el);
       var hover = parseStyle(el.getAttribute("style-hover"));
       var keys = Object.keys(hover); if (!keys.length) return;
       var saved: Record<string, string> | null = null;
@@ -255,7 +261,7 @@
   buildGallery("all");
   $$(".filterBtn").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var f = btn.getAttribute("data-filter");
+      var f = btn.getAttribute("data-filter") ?? "all";
       $$(".filterBtn").forEach(function (b) {
         var on = b === btn;
         b.setAttribute("aria-pressed", on ? "true" : "false");
@@ -270,14 +276,15 @@
   // ---- seats ----
   var SEATS: Record<string, { forL: string; snip: string; cta: string; href: string; glyph: string }> = {
     live: { forL: "For the cold visitor", snip: "open https://demo.fluvie.dev", cta: "Open the live demo", href: "https://demo.fluvie.dev", glyph: "▶" },
-    cli:  { forL: "For your terminal", snip: "fluvie render ./lib/hello.dart --out hello.mp4", cta: "Read the CLI docs", href: "https://pub.dev/packages/fluvie_cli", glyph: "⎘" },
-    http: { forL: "Render from anywhere", snip: 'POST /render\n{ "video": "hello" }\n\n200 OK  →  hello.mp4', cta: "Self-host the API", href: "https://docs.fluvie.dev/guides/rendering-on-a-server", glyph: "⛁" },
-    mcp:  { forL: "Let an assistant shoot it", snip: 'tool: fluvie.render\n{ "key": "hello" }', cta: "Read the MCP guide", href: "https://docs.fluvie.dev/guides/ai-and-mcp", glyph: "⌘" }
+    cli:  { forL: "For your terminal", snip: "fluvie render ./lib/hello.dart", cta: "Read the CLI docs", href: "https://pub.dev/packages/fluvie_cli", glyph: "⎘" },
+    http: { forL: "Use your configured render server", snip: httpExample + '\n\n202 Accepted → job URL\nPoll until succeeded, then download.', cta: "Self-host the API", href: "https://docs.fluvie.dev/reference/server-protocol/", glyph: "⛁" },
+    mcp:  { forL: "Let an assistant use your configured MCP server", snip: mcpExample, cta: "Read the MCP guide", href: "https://docs.fluvie.dev/reference/server-protocol/", glyph: "⌘" }
   };
   var seatFor = $("#seatFor"), seatSnippet = $("#seatSnippet"), seatCta = $("#seatCta"), seatGlyph = $("#seatGlyph");
   $$(".seatBtn").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var k = btn.getAttribute("data-seat"), s = SEATS[k]; if (!s) return;
+      var k = btn.getAttribute("data-seat"); if (!k) return;
+      var s = SEATS[k]; if (!s) return;
       $$(".seatBtn").forEach(function (b) {
         var on = b === btn;
         b.setAttribute("aria-selected", on ? "true" : "false");
@@ -286,7 +293,10 @@
       });
       if (seatFor) seatFor.textContent = s.forL;
       if (seatSnippet) seatSnippet.textContent = s.snip;
-      if (seatCta) { seatCta.firstChild.nodeValue = s.cta + " "; seatCta.setAttribute("href", s.href); }
+      if (seatCta) {
+        if (seatCta.firstChild) seatCta.firstChild.nodeValue = s.cta + " ";
+        seatCta.setAttribute("href", s.href);
+      }
       if (seatGlyph) seatGlyph.textContent = s.glyph;
     });
   });

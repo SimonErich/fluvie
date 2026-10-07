@@ -58,6 +58,7 @@ VideoPlanResult buildVideoPlan({
   required int fps,
   required List<VideoSceneData> scenes,
   required List<List<ElementRegistration>> registrationsByScene,
+  List<ElementRegistration> overlays = const [],
   Defaults? videoDefaults,
   Defaults? themeDefaults,
   List<Transition?> boundaryTransitions = const [],
@@ -103,9 +104,32 @@ VideoPlanResult buildVideoPlan({
       ),
     );
   }
+  // The overlays: one plan each, in the same token map, so a token that
+  // registered as both a scene element and an overlay still trips the
+  // duplicate check above rather than resolving twice.
+  final overlayPlans = <ElementPlan>[];
+  for (var e = 0; e < overlays.length; e++) {
+    final registration = overlays[e];
+    if (elementsByToken.containsKey(registration)) {
+      throw ArgumentError(
+        'Registration token ${registration.debugOwner} appears both in a scene '
+        'and in the overlays — every element registers exactly one token.',
+      );
+    }
+    final element = ElementPlan(
+      ownerId: 'oe$e:${registration.debugOwner}',
+      anchor: registration.anchor,
+      window: registration.window,
+      animations: registration.animations,
+      defaults: registration.defaults,
+    );
+    overlayPlans.add(element);
+    elementsByToken[registration] = element;
+  }
   final plan = CompositionPlan(
     fps: fps,
     scenes: scenePlans,
+    overlays: overlayPlans,
     transitions: boundaryTransitions,
     defaults: videoDefaults,
     themeDefaults: themeDefaults,
@@ -135,6 +159,20 @@ VideoPlanResult buildVideoPlan({
         ),
       );
     }
+  }
+  for (final registration in overlays) {
+    final element = elementsByToken[registration]!;
+    schedules[registration] = ElementSchedule(
+      window: detailed.windows[element]!,
+      spans: List.unmodifiable(spansByElement[element] ?? const <ResolvedSpan>[]),
+      // No scene layer in the cascade: an overlay is in no scene, so there is
+      // no scene default for it to inherit.
+      defaults: mergeDefaultsChain(
+        element: registration.defaults,
+        video: videoDefaults,
+        theme: themeDefaults,
+      ),
+    );
   }
   return (plan: plan, schedules: schedules, timeline: detailed.timeline);
 }

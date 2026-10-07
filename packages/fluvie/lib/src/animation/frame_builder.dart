@@ -4,6 +4,8 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/animation/runtime/frame_context.dart';
+import 'package:fluvie/src/composition/composition_resource_scope.dart';
+import 'package:fluvie/src/composition/composition_resources.dart';
 import 'package:meta/meta.dart';
 
 /// The escape hatch: when no preset fits, drop to a builder with
@@ -28,12 +30,16 @@ import 'package:meta/meta.dart';
 @experimental
 final class FrameBuilder extends StatelessWidget {
   /// Creates a frame-driven builder that paints from a live [FrameContext].
-  const FrameBuilder(this.builder, {super.key});
+  const FrameBuilder(this.builder, {this.resources = const CompositionResources(), super.key});
 
   /// Called every frame with the resolved [FrameContext]; returns the widget to
   /// render for that frame.
   final Widget Function(FrameContext ctx) builder;
 
+  /// Alternatives hidden until a later frame, declared against this window.
+  final CompositionResources resources;
+
   @override
-  Widget build(BuildContext context) => builder(FrameContext(context));
+  Widget build(BuildContext context) =>
+      CompositionResourceScope(resources: resources, child: builder(FrameContext(context)));
 }

@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FLUTTER_VERSION: "3.44.0"
+  FLUTTER_VERSION: "3.47.2"
 
 # melos run scripts re-invoke `melos` for their exec/steps stages, so melos must
 # be on PATH (a plain `dart run melos` is not enough). Each job activates it and
@@ -39,8 +39,8 @@ jobs:
     strategy:
       matrix:
         # Linux is the determinism baseline; macOS gives a second Unix target.
-        # Windows is not a supported render platform (the lint and timing test
-        # harnesses are Unix-only), so it is left out of the matrix.
+        # The lint and timing test harnesses are Unix-only. This matrix does
+        # not establish Windows runtime or rendering acceptance.
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -76,11 +76,27 @@ jobs:
           dart pub global activate melos
           echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
       - run: melos bootstrap
+      - name: Provision the paired native tools for media coverage
+        shell: bash
+        run: |
+          dart --packages=.dart_tool/package_config.json packages/fluvie_cli/bin/fluvie.dart ffmpeg install
+          fluvie_test_ffmpeg="$(dart --packages=.dart_tool/package_config.json packages/fluvie_cli/bin/fluvie.dart ffmpeg path)"
+          fluvie_test_ffprobe="${fluvie_test_ffmpeg%/*}/ffprobe"
+          test -x "$fluvie_test_ffmpeg"
+          test -x "$fluvie_test_ffprobe"
+          {
+            printf 'FLUVIE_FFMPEG=%s\n' "$fluvie_test_ffmpeg"
+            printf 'FLUVIE_FFPROBE=%s\n' "$fluvie_test_ffprobe"
+            printf 'FLUVIE_TEST_NATIVE_MEDIA=1\n'
+          } >> "$GITHUB_ENV"
       - run: melos run coverage:check
+      - name: Derive coverage uploads from the workspace
+        id: coverage_inventory
+        run: echo "files=$(dart tool/workspace_inventory.dart --coverage-files)" >> "$GITHUB_OUTPUT"
       - uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: packages/fluvie/coverage/lcov.info,packages/fluvie_lints/coverage/lcov.info,packages/fluvie_validate/coverage/lcov.info,packages/fluvie_cli/coverage/lcov.info,packages/fluvie_server/coverage/lcov.info,packages/fluvie_ai/coverage/lcov.info,packages/fluvie_presenter/coverage/lcov.info,apps/slides/coverage/lcov.info
+          files: ${{ steps.coverage_inventory.outputs.files }}
         continue-on-error: true
 
   docs:
@@ -91,6 +107,13 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            web/docs/package-lock.json
+            web/site/package-lock.json
       - name: Set up melos
         shell: bash
         run: |
@@ -99,9 +122,25 @@ jobs:
       - run: melos bootstrap
       # Docs snippets must match their compiled sources, and every dart fence
       # must carry a code-excerpt directive.
+      - run: node --test tool/docs/*.test.mjs tool/benchmarks/*.test.mjs
+      - run: python3 tool/docs/check_site_links_test.py
+      - run: node tool/docs/sync_reference.mjs --export-interfaces --check
       - run: melos run docs:snippets:check
       - run: melos run docs:lint
-      - run: melos run docs --no-select
+      - run: melos run docs:dartdoc
+      - name: Build the documentation site
+        working-directory: web/docs
+        run: |
+          npm ci
+          npm run build
+          npm run check
+      - name: Build and check the marketing site
+        working-directory: web/site
+        run: |
+          npm ci
+          npm run build
+          npm run check
+          python3 ../../tool/docs/check_site_links.py dist --docs-root ../docs/dist
 
   pana:
     runs-on: ubuntu-latest
@@ -111,15 +150,18 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-      - run: dart pub global activate pana
-      # Fail if the pana score drops below this floor; raise it as the score improves.
-      - run: dart pub global run pana --no-warning --exit-code-threshold 40 packages/fluvie
+      - run: bash tool/verify_packages.sh "$FLUTTER_ROOT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: package-publishability
+          path: build/pana/
 
   smoke_render:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Ubuntu 24.04 ships ffmpeg 8.x (+ ffprobe), well over the >= 6.0 floor.
+      # Install the system pair; the render smoke checks the supported version floor.
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - uses: subosito/flutter-action@v2
         with:
@@ -168,6 +210,44 @@ jobs:
       - run: flutter build web --release
         working-directory: apps/slides
 
+  # Real shipped media bridges and compiled editor in three browser engines.
+  # Linux WebKit coverage does not replace Safari acceptance on Apple devices.
+  editor_browser_matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: browser-actions/setup-chrome@v2
+        id: browser-chrome
+      - run: flutter pub get
+      - run: bash apps/slides/tool/fetch_ffmpeg.sh
+      - run: flutter build web --release
+        working-directory: apps/slides
+      - name: Verify every referenced icon glyph in the release bundle
+        run: |
+          python3 -m venv "$RUNNER_TEMP/fluvie-font-check"
+          "$RUNNER_TEMP/fluvie-font-check/bin/pip" install -r tool/requirements-font-validation.txt
+          PYTHONDONTWRITEBYTECODE=1 "$RUNNER_TEMP/fluvie-font-check/bin/python" -m unittest discover -s tool -p test_verify_icon_fonts.py
+          "$RUNNER_TEMP/fluvie-font-check/bin/python" tool/verify_icon_fonts.py \
+            --app apps/slides --flutter-root "$FLUTTER_ROOT" \
+            --report build/release-hardening/browsers/icon-fonts.json
+      - run: node --test tool/test/browser*_test.mjs
+      - run: bash tool/verify_browser_matrix.sh --with-deps
+        env:
+          CHROME_EXECUTABLE: ${{ steps.browser-chrome.outputs.chrome-path }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: editor-browser-matrix
+          path: build/release-hardening/browsers/
+
   # Smoke-tests the demo web app (examples/gallery/) in headless Chrome: it builds, serves,
   # boots, lays out, and logs no uncaught error. Guards the web demo against build
   # and runtime regressions. Deterministic: no API or server is needed.
@@ -202,7 +282,7 @@ jobs:
           if-no-files-found: ignore
 
   # Optional integration lane: the ffmpeg-tagged suites against the real
-  # binaries. Advisory only; the required jobs above stay binary-free.
+  # binaries. Advisory only; native media coverage above uses the managed pair.
   ffmpeg_integration:
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -345,6 +425,62 @@ jobs:
           path: examples/mobile_purrfect/build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
 
+  # Real AVFoundation clip probe/extraction and encode coverage, including
+  # presentation-order/VFR/rotation fixtures and independently decoded output.
+  # This is a native simulator gate; physical-device throughput remains separate.
+  example_ios_media:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter pub get
+      - name: Create the disposable iOS example host
+        working-directory: examples/mobile_purrfect
+        run: flutter create --platforms=ios --org dev.fluvie --project-name mobile_purrfect --no-pub .
+      - name: Compile the production iOS app and native plugin
+        working-directory: examples/mobile_purrfect
+        run: flutter build ios --simulator --debug --no-codesign --no-pub
+      - name: Boot an installed iPhone simulator
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          devices = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '--json']))
+          phones = [d for group in devices['devices'].values() for d in group
+                    if d.get('isAvailable') and d['name'].startswith('iPhone')]
+          if not phones:
+              raise RuntimeError('No installed iPhone simulator runtime')
+          device = next((d for d in phones if d['state'] == 'Booted'), phones[0])
+          if device['state'] != 'Booted':
+              subprocess.run(['xcrun', 'simctl', 'boot', device['udid']], check=True)
+          subprocess.run(['xcrun', 'simctl', 'bootstatus', device['udid'], '-b'], check=True)
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write('SIMULATOR_UDID=' + device['udid'] + '\n')
+          PY
+      - name: Decode exact source frames on iOS
+        working-directory: examples/mobile_purrfect
+        run: flutter test --no-pub --no-uninstall -d "$SIMULATOR_UDID" integration_test/native_clip_reader_test.dart
+      - name: Render and re-import clips with native audio
+        working-directory: examples/mobile_purrfect
+        run: flutter test --no-pub --no-uninstall -d "$SIMULATOR_UDID" integration_test/native_media_acceptance_test.dart
+      - name: Independently verify retained iOS media
+        working-directory: examples/mobile_purrfect
+        run: |
+          brew list ffmpeg >/dev/null 2>&1 || brew install ffmpeg
+          bundle_id=$(plutil -extract CFBundleIdentifier raw -o - build/ios/iphonesimulator/Runner.app/Info.plist)
+          python3 tool/verify_ios_media.py --device "$SIMULATOR_UDID" --bundle-id "$bundle_id" \
+            --output ../../build/release-hardening/ios-artifacts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-native-media-acceptance
+          path: build/release-hardening/ios-artifacts/
+          if-no-files-found: ignore
+
   # Advisory: render fully in the browser with ffmpeg.wasm and assert the marker.
   example_web_browser_render:
     runs-on: ubuntu-latest
@@ -448,17 +584,11 @@ jobs:
         working-directory: examples/desktop_studio
         run: xvfb-run -a flutter test integration_test/render_flow_test.dart -d linux
 
-  # Render on-device on a headless Android emulator: KVM-accelerated, with the
-  # AVD snapshot cached so the second run boots fast and reliably (the canonical
-  # reactivecircus two-step pattern). `-noaudio` only silences the emulator's
-  # host audio device; the MP4's AAC track is still muxed by MediaCodec.
-  #
-  # Advisory only because the emulator's software H.264 encoder + audio mux is
-  # unverified from a dev box; once this is green on a real run, drop
-  # `continue-on-error` to make the on-device render a required gate.
+  # Required native Android acceptance: real encode/decode plus an independent
+  # FFmpeg pixel/PCM oracle. API35/default matches the locally verified image.
   example_mobile_render:
     runs-on: ubuntu-latest
-    continue-on-error: true
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -469,44 +599,39 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-      - name: Set up melos
-        shell: bash
-        run: |
-          dart pub global activate melos
-          echo "${PUB_CACHE:-$HOME/.pub-cache}/bin" >> "$GITHUB_PATH"
-      - run: melos bootstrap
+      - run: flutter pub get
+      - name: Install the independent media verifier
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Verify native timing and bounded MP4 metadata editing
+        working-directory: examples/mobile_purrfect/android
+        run: ./gradlew :fluvie_mobile_encoder:testDebugUnitTest --no-daemon --max-workers=2
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
             | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
-      - name: Cache the AVD snapshot
-        uses: actions/cache@v4
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-api34-google_apis-x86_64
-      - name: Create the AVD and warm a boot snapshot
-        if: steps.avd-cache.outputs.cache-hit != 'true'
+      - name: Verify native frame reading, render, and decoded media
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
-          target: google_apis
+          api-level: 35
+          target: default
           arch: x86_64
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          script: echo "AVD snapshot warmed."
-      - name: Render on the emulator and assert the MP4
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: google_apis
-          arch: x86_64
-          force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          cores: 2
+          ram-size: 2048M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -camera-back none
           disable-animations: true
           working-directory: examples/mobile_purrfect
-          script: flutter test integration_test/render_on_device_test.dart
+          script: |
+            mkdir -p ../../build/release-hardening
+            flutter test --no-pub --no-uninstall -d emulator-5554 integration_test/native_clip_reader_test.dart integration_test/native_media_acceptance_test.dart > ../../build/release-hardening/android-device.log 2>&1
+            cat ../../build/release-hardening/android-device.log
+            python3 tool/verify_android_media.py --serial emulator-5554 --output ../../build/release-hardening/android-artifacts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-native-media-acceptance
+          path: |
+            build/release-hardening/android-*.log
+            build/release-hardening/android-artifacts/
+            examples/mobile_purrfect/build/fluvie_mobile_encoder/test-results/testDebugUnitTest/
+          if-no-files-found: ignore

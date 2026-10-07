@@ -1,53 +1,125 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fluvie/src/audio/runtime/audio_decode_args.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
+import 'package:fluvie_media/native.dart' show MediaCancelledException, resolveMediaExecutable;
 
-/// Decodes one audio file to raw 32-bit-float mono PCM at 44.1 kHz by spawning
-/// a local FFmpeg binary with the pure [audioDecodeArgs] array.
+/// Decodes local audio to mono, little-endian float32 PCM at 44.1 kHz.
 ///
-/// This is the thin spawn glue over `dart:io`'s [Process.start]: the argument
-/// array is built and validated purely (and unit-tested) by [audioDecodeArgs];
-/// only the process plumbing lives here, behind a `// coverage:ignore` because
-/// it cannot run without a real binary (it is exercised by the `ffmpeg`-tagged
-/// integration test). The PCM stream is read off raw stdout (never the
-/// text-decoding `ProcessRunner`, which would corrupt binary samples) and
-/// returned as a little-endian [Float32List].
+/// Stdout is bounded by [maxSamples], stderr by 16 KiB, and the owned process
+/// is killed and reaped on cancellation, timeout or oversized output. Normal
+/// playback does not require this buffer; it is used for reactive analysis.
 final class FfmpegAudioDecoder {
-  /// Creates a decoder running `binaryPath` (default `ffmpeg` on `PATH`).
-  const FfmpegAudioDecoder({this.binaryPath = 'ffmpeg'});
+  /// Creates a decoder using an explicit, managed or PATH FFmpeg executable.
+  /// The default sample limit accepts about six minutes of audio.
+  const FfmpegAudioDecoder({
+    this._binaryPath,
+    this.maxSamples = 16000000,
+    this.timeout = const Duration(minutes: 2),
+  });
 
-  /// The FFmpeg binary this decoder spawns.
-  final String binaryPath;
+  final String? _binaryPath;
 
-  /// Spawns FFmpeg to decode the sandbox-relative [name] (resolved against
-  /// [workingDirectory]) to mono `f32le` PCM at 44.1 kHz.
+  /// Maximum samples buffered before allocating an analysis buffer.
+  final int maxSamples;
+
+  /// Maximum duration of one FFmpeg decode operation.
+  final Duration timeout;
+
+  /// Effective explicit, managed, or PATH executable.
+  String get binaryPath => resolveMediaExecutable('ffmpeg', explicit: _binaryPath);
+
+  /// Decodes sandbox-relative [name] against [workingDirectory].
   ///
-  /// Throws a [FluvieRenderException] on a non-zero exit. The returned samples
-  /// are reproducible per machine; the bytes themselves are the documented
-  /// per-machine exception (ffmpeg builds differ), but the analysis derived
-  /// from them is stable.
-  // coverage:ignore-start process glue it spawns the real ffmpeg binary so it runs only under the ffmpeg tagged integration suite never the unit gate
-  Future<Float32List> decode(String name, {required String workingDirectory}) async {
-    final args = audioDecodeArgs(name);
-    final process = await Process.start(binaryPath, args, workingDirectory: workingDirectory);
-    final stdoutBytes = BytesBuilder(copy: false);
-    final stdoutDone = process.stdout.forEach(stdoutBytes.add);
-    final stderr = await process.stderr.fold<List<int>>(
-      <int>[],
-      (acc, chunk) => acc..addAll(chunk),
-    );
-    final exitCode = await process.exitCode;
-    await stdoutDone;
-    if (exitCode != 0) {
-      throw FluvieRenderException(
-        'FFmpeg ("$binaryPath") exited $exitCode decoding audio "$name": '
-        '${String.fromCharCodes(stderr)}',
-      );
+  /// Throws [FluvieRenderException] with source context on decoder failure or
+  /// exhausted limits, and [MediaCancelledException] when its owner cancels.
+  /// PCM bytes can differ between FFmpeg builds; subsequent DSP is deterministic.
+  Future<Float32List> decode(
+    String name, {
+    required String workingDirectory,
+    Future<void>? whenCancelled,
+    Duration? start,
+    Duration? duration,
+  }) async {
+    if (maxSamples <= 0) throw ArgumentError.value(maxSamples, 'maxSamples', 'must be positive');
+    if (timeout <= Duration.zero) throw ArgumentError.value(timeout, 'timeout', 'must be positive');
+    final args = audioDecodeArgs(name, start: start, duration: duration);
+    Process? process;
+    Timer? timer;
+    Exception? failure;
+    var finished = false;
+    void stop(Exception error) {
+      if (finished || failure != null) return;
+      failure = error;
+      process?.kill(ProcessSignal.sigkill);
     }
-    final bytes = stdoutBytes.toBytes();
-    return bytes.buffer.asFloat32List(0, bytes.lengthInBytes ~/ 4);
-    // coverage:ignore-end
+
+    if (whenCancelled != null) {
+      unawaited(whenCancelled.then((_) => stop(const MediaCancelledException())));
+      await Future<void>.value();
+      if (failure != null) throw failure!;
+    }
+    final executable = binaryPath;
+    try {
+      final child = await Process.start(executable, args, workingDirectory: workingDirectory);
+      process = child;
+      if (failure != null) child.kill(ProcessSignal.sigkill);
+      timer = Timer(
+        timeout,
+        () => stop(
+          FluvieRenderException(
+            'FFmpeg ("$executable") timed out decoding audio "$name" after $timeout. '
+            'Check the source or increase FfmpegAudioDecoder.timeout.',
+          ),
+        ),
+      );
+      final output = BytesBuilder(copy: false);
+      final diagnostics = BytesBuilder(copy: false);
+      final stdoutDone = child.stdout.forEach((chunk) {
+        if (failure != null) return;
+        if (output.length + chunk.length > maxSamples * 4) {
+          stop(
+            FluvieRenderException(
+              'Audio "$name" exceeds $maxSamples PCM samples. Trim the analysis '
+              'source, inject a PcmDecoder, or increase FfmpegAudioDecoder.maxSamples.',
+            ),
+          );
+        } else {
+          output.add(chunk);
+        }
+      });
+      final stderrDone = child.stderr.forEach((chunk) {
+        final remaining = 16384 - diagnostics.length;
+        if (remaining > 0) diagnostics.add(chunk.take(remaining).toList());
+      });
+      final exitCode = await child.exitCode;
+      await Future.wait([stdoutDone, stderrDone]);
+      if (failure != null) throw failure!;
+      if (exitCode != 0) {
+        throw FluvieRenderException(
+          'FFmpeg ("$executable") exited $exitCode decoding audio "$name": '
+          '${utf8.decode(diagnostics.takeBytes(), allowMalformed: true)}',
+        );
+      }
+      final bytes = output.takeBytes();
+      if (bytes.length % 4 != 0) {
+        throw FluvieRenderException(
+          'FFmpeg returned an incomplete PCM sample decoding audio "$name".',
+        );
+      }
+      return bytes.buffer.asFloat32List(bytes.offsetInBytes, bytes.length ~/ 4);
+    } on ProcessException catch (error) {
+      throw FluvieRenderException(
+        'Could not start FFmpeg ("$executable") for audio "$name": $error',
+      );
+    } finally {
+      finished = true;
+      timer?.cancel();
+      process?.kill(ProcessSignal.sigkill);
+      await process?.exitCode;
+    }
   }
 }

@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:args/args.dart';
+import 'package:fluvie_cli/src/capture_process.dart' show isFluvieProject;
 import 'package:fluvie_cli/src/cli_failure.dart';
 import 'package:fluvie_cli/src/init_project.dart';
 import 'package:fluvie_cli/src/init_support.dart';
@@ -29,6 +32,13 @@ final class InitCommand {
       help: 'Composition file name, without the extension. Default: example_video.',
     )
     ..addOption('dir', help: 'Directory to scaffold into. Default: the working directory.')
+    ..addOption('fluvie-path', help: 'Use an unpublished local Fluvie package or checkout.')
+    ..addFlag(
+      'with-ai',
+      negatable: false,
+      help: 'Add fluvie_ai for built-in generation and editing.',
+    )
+    ..addFlag('with-lints', negatable: false, help: 'Add optional Fluvie editor lints.')
     ..addFlag('force', negatable: false, help: 'Overwrite files that already exist.');
 
   /// Runs the command; returns the exit code (`0` ok, `1` operational failure).
@@ -49,10 +59,35 @@ final class InitCommand {
         force: force,
         out: out,
         err: err,
+        fluviePath:
+            args.option('fluvie-path') ??
+            (isFluvieProject(dir.path) ? null : await installedFluviePath()),
+        withAi: args.flag('with-ai'),
+        withLints: args.flag('with-lints'),
       );
     } on CliFailure catch (failure) {
       err.writeln(failure.message);
       return 1;
     }
   }
+}
+
+/// Local path activation keeps an unpublished CLI and core on the same checkout.
+/// Hosted installations have no sibling core checkout and use the package version.
+Future<String?> installedFluviePath() async {
+  final uri = await Isolate.resolvePackageUri(Uri.parse('package:fluvie_cli/fluvie_cli.dart'));
+  if (uri == null || uri.scheme != 'file') return null;
+  final library = File.fromUri(uri);
+  final cliRoot = p.dirname(p.dirname(library.resolveSymbolicLinksSync()));
+  final marker = File(p.join(p.dirname(p.dirname(uri.toFilePath())), 'fluvie-source.json'));
+  if (marker.existsSync()) {
+    final metadata = jsonDecode(marker.readAsStringSync()) as Map<String, Object?>;
+    final source = metadata['sourceRoot'];
+    if (source is String) {
+      final core = p.join(source, 'packages', 'fluvie');
+      if (File(p.join(core, 'pubspec.yaml')).existsSync()) return core;
+    }
+  }
+  final core = p.join(p.dirname(cliRoot), 'fluvie');
+  return File(p.join(core, 'pubspec.yaml')).existsSync() ? core : null;
 }

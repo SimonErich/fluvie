@@ -1,0 +1,11 @@
+name: fluvie_media
+description: "Native media probing and bounded FFmpeg frame decoding for Fluvie tools, with Flutter-independent frame types."
+version: 0.3.1
+repository: https://github.com/SimonErich/fluvie/tree/main/packages/fluvie_media
+homepage: https://fluvie.dev
+environment:
+  sdk: ^3.12.0
+resolution: workspace
+dev_dependencies:
+  test: ^1.31.0
+  very_good_analysis: ^10.2.0

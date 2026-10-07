@@ -38,15 +38,17 @@ Future<void> main() async {
   final frame0 = await _swatch(0x2980B9); // blue: source frame 0
   final frame15 = await _swatch(0x27AE60); // green: source frame 15
   final frame9 = await _swatch(0xC0392B); // red: trimmed source frame 9
+  final frame7 = await _swatch(0xF39C12); // amber: half-speed lands here at 15
+  final frame29 = await _swatch(0x8E44AD); // violet: the last frame, read first
 
   final resolver = FakeMediaResolver(
     {_clip: (bytes: Uint8List(0), contentHash: 'x')},
     metadata: {_clip: const (fps: 30, frameCount: 30, width: 16, height: 16, hasAudio: false)},
     clipFrames: {
-      _clip: {0: frame0, 15: frame15, 9: frame9},
+      _clip: {0: frame0, 15: frame15, 9: frame9, 7: frame7, 29: frame29},
     },
   );
-  await resolver.preResolveClip(_clip, const [0, 15, 9]);
+  await resolver.preResolveClip(_clip, const [0, 15, 9, 7, 29]);
 
   Widget scoped(Widget child) => _ScopedResolver(resolver: resolver, child: child);
 
@@ -75,6 +77,19 @@ Future<void> main() async {
         trim: const Time.seconds(0.3).to(const Time.seconds(0.7)),
       ),
     ),
+  );
+  await goldenMotionFrames(
+    description: 'Clip: half speed reads source frame 7 at composition frame 15',
+    fileName: 'clip_half_speed',
+    frames: const [15],
+    subject: () => scoped(Clip.asset('fixtures/clip_1s.mp4', fit: BoxFit.cover, speed: 0.5)),
+  );
+
+  await goldenMotionFrames(
+    description: 'Clip: a reversed clip opens on its last source frame',
+    fileName: 'clip_reversed',
+    frames: const [0],
+    subject: () => scoped(Clip.asset('fixtures/clip_1s.mp4', fit: BoxFit.cover, speed: -1)),
   );
 }
 

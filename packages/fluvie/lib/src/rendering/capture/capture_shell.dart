@@ -1,8 +1,13 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
+import 'package:fluvie/src/animation/runtime/color_lookup_scope.dart';
 import 'package:fluvie/src/animation/runtime/reactive_scope_builder.dart';
+import 'package:fluvie/src/animation/runtime/warm_shader_scope.dart';
 import 'package:fluvie/src/composition/runtime/reactive_collector.dart';
 import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
+import 'package:fluvie/src/core/contracts/audio_window_resolver.dart';
 import 'package:fluvie/src/core/contracts/beat_grid.dart';
 import 'package:fluvie/src/core/contracts/generative_resolver.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
@@ -40,19 +45,22 @@ typedef CaptureShell = ({Widget tree, SnapshotCaptureScope? mountedSnapshotScope
 ///
 /// The shell is parameterized by the injected pre-pass results: the media
 /// [resolver] (pre-resolved before frame 0), the [snapshotScope] the snapshot
-/// pre-pass rasterized, and the [reactiveTracks] the reactive pre-pass analysed.
-/// It mounts each conditional scope only when it has something to carry, in this
-/// exact depth order:
+/// pre-pass rasterized, the [shaderPrograms] the shader pre-pass compiled, and
+/// the [reactiveTracks] the reactive pre-pass analysed. It mounts each
+/// conditional scope only when it has something to carry, in this exact depth
+/// order:
 ///
 /// ```text
 /// RenderModeContext(capture)
-///   > [SnapshotCaptureScope    when snapshotScope != null]
+///   > [SnapshotCaptureScope     when snapshotScope != null]
 ///     > RenderControllerScope
-///       > [ImageResolverScope  when resolver != null]
-///         > RepaintBoundary(boundaryKey)
-///           > [ReactiveScope   when reactiveTracks has a default source]
-///             > [BeatGridScope when the resolver has any beat grid]
-///               > composition
+///       > [GenerativeResolverScope when generativeResolver != null]
+///         > [ImageResolverScope  when resolver != null]
+///           > [WarmShaderScope   when shaderPrograms is not empty]
+///             > RepaintBoundary(boundaryKey)
+///               > [ReactiveScope   when reactiveTracks has a default source]
+///                 > [BeatGridScope when the resolver has any beat grid]
+///                   > composition
 /// ```
 ///
 /// The `RenderModeContext` is outermost (mounted in `RenderMode.capture`) so the
@@ -72,14 +80,24 @@ CaptureShell buildCaptureShell({
   GenerativeResolver? generativeResolver,
   SnapshotCaptureScope? snapshotScope,
   ReactiveTracks reactiveTracks = noReactiveTracks,
+  Map<String, ui.FragmentProgram> shaderPrograms = const {},
+  Map<String, ui.Image> colorLookups = const {},
 }) {
   // Innermost out: the composition wrapped in the per-frame audio scopes.
   var inner = composition;
   if (resolver != null) {
-    inner = _beatGridScopeFor(reactiveTracks, resolver, inner);
+    inner = beatGridScopeFor(reactiveTracks, resolver, inner);
     inner = reactiveScopeFor(reactiveTracks, resolver, inner);
   }
   Widget tree = RepaintBoundary(key: boundaryKey, child: inner);
+  // Above the boundary so a re-pumped tree keeps one warm set, and below the
+  // media scopes so the pre-pass results read in one consistent order.
+  if (shaderPrograms.isNotEmpty) {
+    tree = WarmShaderScope(programs: shaderPrograms, child: tree);
+  }
+  if (colorLookups.isNotEmpty) {
+    tree = ColorLookupScope(lookups: colorLookups, child: tree);
+  }
   if (resolver != null) {
     tree = ImageResolverScope(resolver: resolver, child: tree);
   }
@@ -107,7 +125,17 @@ CaptureShell buildCaptureShell({
 /// The default grid is the master track's; each `Audio.track` anchor maps to its
 /// own grid. A track whose analysis carried no beats (or a resolver that throws)
 /// is skipped, so a non-beat reactive track never mounts an empty scope.
-Widget _beatGridScopeFor(ReactiveTracks tracks, MediaResolver resolver, Widget child) {
+Widget beatGridScopeFor(ReactiveTracks tracks, MediaResolver resolver, Widget child) {
+  if (resolver is AudioWindowResolver && tracks.windows.isNotEmpty) {
+    return BeatGridScope(
+      defaultBeatGrid: (resolver as AudioWindowResolver).beatGridForWindow(tracks.windows.first),
+      trackBeatGrids: {
+        for (final entry in tracks.windowsByAnchor.entries)
+          entry.key: (resolver as AudioWindowResolver).beatGridForWindow(entry.value),
+      },
+      child: child,
+    );
+  }
   final defaultSource = tracks.defaultSource;
   final defaultGrid = defaultSource == null ? null : _gridOrNull(resolver, defaultSource);
   final trackGrids = <Anchor, BeatGrid>{};

@@ -279,6 +279,7 @@ void main() {
       );
     });
   });
+  opacitySuite();
 }
 
 /// Mounts a Video on the same scopes the render pipeline provides.
@@ -289,3 +290,56 @@ Widget _harness(Video video, RenderController controller) => RenderModeContext(
     child: Directionality(textDirection: TextDirection.ltr, child: video),
   ),
 );
+
+// The transform's opacity: serialized, built, and digest-relevant.
+void opacitySuite() {
+  test('opacity round-trips through the placement codec', () {
+    final placement = decodePlacement(const {'x': 0.5, 'y': 0.5, 'opacity': 0.4});
+    expect(placement.opacity, 0.4);
+    expect(encodePlacement(placement), const {'x': 0.5, 'y': 0.5, 'opacity': 0.4});
+    // The default stays out of the canonical form.
+    expect(
+      encodePlacement(decodePlacement(const {'x': 0.5, 'y': 0.5})),
+      const {'x': 0.5, 'y': 0.5},
+    );
+  });
+
+  testWidgets('Placed dims its child by the placement opacity', (tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Placed(
+              placement: Placement(x: 0.5, y: 0.5, width: 0.5, height: 0.5, opacity: 0.4),
+              child: ColoredBox(color: Color(0xFF00FF00)),
+            ),
+          ),
+        ),
+      ),
+    );
+    final opacity = tester.widget<Opacity>(find.byType(Opacity));
+    expect(opacity.opacity, 0.4);
+  });
+
+  testWidgets('full opacity mounts no Opacity widget', (tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Placed(
+              placement: Placement(x: 0.5, y: 0.5, width: 0.5, height: 0.5),
+              child: ColoredBox(color: Color(0xFF00FF00)),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(Opacity), findsNothing);
+  });
+}

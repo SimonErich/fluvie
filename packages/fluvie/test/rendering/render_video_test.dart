@@ -13,6 +13,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart' hide Image;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fluvie/src/animation/frame_builder.dart';
 import 'package:fluvie/src/composition/scene.dart';
 import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/aspect.dart';
@@ -34,6 +35,41 @@ Video _swatch({VideoSize size = const VideoSize(16, 16), int fps = 30}) => Video
     ),
   ],
 );
+
+class _SnapshotTint extends InheritedWidget {
+  const _SnapshotTint({required this.color, required super.child});
+  final Color color;
+  @override
+  bool updateShouldNotify(_SnapshotTint oldWidget) => color != oldWidget.color;
+}
+
+class _SnapshotClock extends StatefulWidget {
+  const _SnapshotClock({required this.onInit, super.key});
+  final VoidCallback onInit;
+  @override
+  State<_SnapshotClock> createState() => _SnapshotClockState();
+}
+
+class _SnapshotClockState extends State<_SnapshotClock> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onInit();
+  }
+
+  @override
+  Widget build(BuildContext context) => FrameBuilder(
+    (ctx) => ColoredBox(
+      color:
+          ctx.frame == 2 &&
+              ctx.scope.startFrame == 2 &&
+              context.dependOnInheritedWidgetOfExactType<_SnapshotTint>()?.color ==
+                  const Color(0xff00ff00)
+          ? const Color(0xff00ff00)
+          : const Color(0xffff0000),
+    ),
+  );
+}
 
 /// Drives one render through [renderVideo], returning its manifest, the raw
 /// captured frames, and any cache report.
@@ -131,6 +167,40 @@ void main() {
   });
 
   group('snapshots', () {
+    testWidgets(
+      'mounted snapshot retains GlobalKey, state, inherited data and inactive scene clock',
+      (
+        tester,
+      ) async {
+        var initializations = 0;
+        final video = Video(
+          size: const VideoSize(16, 16),
+          scenes: [
+            Scene(duration: 2.frames),
+            Scene(
+              duration: 2.frames,
+              children: [
+                Positioned.fill(
+                  child: _SnapshotTint(
+                    color: const Color(0xff00ff00),
+                    child: Snapshot(
+                      child: _SnapshotClock(
+                        key: GlobalKey(),
+                        onInit: () => initializations++,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+        final result = await _render(tester, video: video);
+        expect(initializations, 1);
+        expect(result.frames.sublist(16 * 16 * 4 * 2, 16 * 16 * 4 * 2 + 4), [0, 255, 0, 255]);
+        expect(tester.takeException(), isNull);
+      },
+    );
     testWidgets('a Snapshot over plain widgets rasterizes with no resolver', (tester) async {
       // The pre-pass must not be gated on the resolver: a Snapshot whose child is
       // plain widgets declares no MediaSource and no SnapshotSource, so nothing

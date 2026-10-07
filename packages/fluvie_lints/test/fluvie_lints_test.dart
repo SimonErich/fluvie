@@ -10,7 +10,7 @@ void main() {
       CustomLintConfigs.empty,
     );
 
-    test('declares exactly the nine Fluvie rules', () {
+    test('declares exactly the ten Fluvie rules', () {
       expect(plugin, isA<PluginBase>());
       final names = rules.map((r) => r.code.name).toSet();
       expect(
@@ -25,9 +25,10 @@ void main() {
           'animation_exceeds_window',
           'conflicting_keyframe_fields',
           'relative_outside_scope',
+          'nondeterministic_video',
         ]),
       );
-      expect(rules, hasLength(9));
+      expect(rules, hasLength(10));
     });
 
     test('every rule code name is unique', () {

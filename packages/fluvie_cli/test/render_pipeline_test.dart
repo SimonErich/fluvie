@@ -6,10 +6,14 @@ import 'package:fluvie_cli/src/export_flags.dart';
 import 'package:fluvie_cli/src/ffmpeg/ffmpeg_cache.dart';
 import 'package:fluvie_cli/src/ffmpeg/ffmpeg_provisioner.dart';
 import 'package:fluvie_cli/src/ffmpeg_gate.dart';
+import 'package:fluvie_cli/src/file_target.dart';
+import 'package:fluvie_cli/src/managed_harness.dart';
 import 'package:fluvie_cli/src/process_runner.dart';
+import 'package:fluvie_cli/src/render_command.dart';
 import 'package:fluvie_cli/src/render_pipeline.dart';
 import 'package:fluvie_cli/src/stage_harness.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 class _MockProcessRunner extends Mock implements ProcessRunner {}
@@ -116,6 +120,7 @@ void main() {
     String harnessPath = 'test/render/capture_harness_test.dart',
     StagedHarness Function(String projectDir)? stage,
     void Function(StringSink out) report = _noop,
+    String? cacheKey,
   }) => runRenderPipeline(
     runner: runner,
     createSandbox: () async => sandbox,
@@ -132,6 +137,7 @@ void main() {
     err: err,
     report: report,
     resolveFfmpeg: _hermeticResolve,
+    cacheKey: cacheKey,
   );
 
   test('probe -> capture -> encode -> wrote, exit 0, sandbox cleaned', () async {
@@ -143,6 +149,294 @@ void main() {
     expect(File(outPath).existsSync(), isTrue);
     expect(out.toString(), contains(outPath));
     expect(sandbox.existsSync(), isFalse);
+  });
+
+  test('explicit runtime identity invalidates the capture cache without source edits', () async {
+    stubHappyPath();
+    final args = RenderCommand.buildParser().parse(['demo', '--cache-key', 'remote-revision-2']);
+    expect(args.option('cache-key'), 'remote-revision-2');
+    final digests = <String>[];
+    for (final identity in ['revision-1', 'revision-1', 'revision-2']) {
+      await sandbox.create(recursive: true);
+      await run(cacheKey: identity);
+      final invocations = verify(
+        () => runner.run(
+          'flutter',
+          captureAny(),
+          workingDirectory: any(named: 'workingDirectory'),
+          environment: any(named: 'environment'),
+        ),
+      ).captured.cast<List<String>>();
+      digests.add(
+        invocations.last.firstWhere(
+          (arg) => arg.startsWith('--dart-define=FLUVIE_COMPOSITION_FINGERPRINT='),
+        ),
+      );
+    }
+    expect(digests[0], digests[1]);
+    expect(digests[2], isNot(digests[1]));
+  });
+
+  test('outside-lib target edits invalidate cached renders and retain entry selection', () async {
+    stubHappyPath();
+    final project = Directory.systemTemp.createTempSync('fluvie_pipeline_target_');
+    addTearDown(() => project.deleteSync(recursive: true));
+    File(p.join(project.path, 'pubspec.yaml')).writeAsStringSync('name: consumer\n');
+    File(p.join(project.path, '.dart_tool/package_config.json'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync(
+        jsonEncode({
+          'configVersion': 2,
+          'packages': [
+            for (final name in ['consumer', 'fluvie', 'flutter_test'])
+              {
+                'name': name,
+                'rootUri': Directory(
+                  name == 'consumer' ? project.path : p.join(project.path, 'packages', name),
+                ).uri.toString(),
+                'packageUri': 'lib/',
+                'languageVersion': '3.12',
+              },
+          ],
+        }),
+      );
+    final target = File(p.join(project.path, 'videos/cat.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync("String build() => 'cat';\nString alternate() => 'cat';\n");
+    final originalModified = target.lastModifiedSync();
+
+    Future<String> render(String entry, {File? source}) async {
+      final code = await runRenderPipeline(
+        runner: runner,
+        createSandbox: () async => sandbox,
+        options: (
+          ffmpegBinary: null,
+          projectDir: project.path,
+          noCache: false,
+          noDownload: true,
+          enableImpeller: false,
+          verbose: false,
+          keepTemp: true,
+        ),
+        key: 'cat',
+        outPath: outPath,
+        frames: null,
+        flags: _noFlags,
+        extraDefines: const {},
+        stage: (projectDir) => stageManagedHarness(
+          projectDir: projectDir,
+          runner: runner,
+          target: resolveFileTarget(
+            arg: (source ?? target).path,
+            entry: entry,
+            project: projectDir,
+          ),
+          cacheRoot: p.join(project.path, 'adapter-cache'),
+        ),
+        out: out,
+        err: err,
+        resolveFfmpeg: _hermeticResolve,
+      );
+      expect(code, 0, reason: err.toString());
+      final receipt =
+          jsonDecode(
+                File(p.join(p.dirname(outPath), 'demo.render.json')).readAsStringSync(),
+              )
+              as Map<String, Object?>;
+      return receipt['sourceFingerprint']! as String;
+    }
+
+    final first = await render('build');
+    expect(await render('build'), first, reason: 'unchanged input remains reproducible');
+    target
+      ..writeAsStringSync("String build() => 'dog';\nString alternate() => 'dog';\n")
+      ..setLastModifiedSync(originalModified);
+    final changed = await render('build');
+    expect(changed, isNot(first), reason: 'same-size source edits must invalidate cached frames');
+    expect(
+      await render('alternate'),
+      isNot(changed),
+      reason: 'entry selection remains part of identity',
+    );
+    expect(
+      await render('build'),
+      changed,
+      reason:
+          'staging another entry must not fingerprint cached generated adapters as authored source',
+    );
+    final external = Directory.systemTemp.createTempSync('fluvie_pipeline_external_');
+    addTearDown(() => external.deleteSync(recursive: true));
+    final externalTarget = File(p.join(external.path, 'cat.dart'))
+      ..writeAsStringSync("import 'helper.dart';\nString build() => title;\n");
+    File(p.join(external.path, 'helper.dart')).writeAsStringSync("const title = 'cat';\n");
+    await render('build', source: externalTarget);
+    final captureArgs =
+        verify(
+              () => runner.run(
+                'flutter',
+                captureAny(),
+                workingDirectory: any(named: 'workingDirectory'),
+              ),
+            ).captured.last
+            as List<String>;
+    expect(
+      captureArgs,
+      contains('--dart-define=FLUVIE_RENDER_NO_CACHE=true'),
+      reason: 'external relative source dependencies are outside the project fingerprint scope',
+    );
+  });
+
+  test(
+    'project-relative authoring inputs select media facts and invalidate changed notes',
+    () async {
+      final project = Directory.systemTemp.createTempSync('fluvie_pipeline_context_');
+      addTearDown(() => project.deleteSync(recursive: true));
+      File(p.join(project.path, 'pubspec.yaml')).writeAsStringSync('name: consumer\n');
+      final notes = File(p.join(project.path, 'story_assets/story.txt'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('Miso joined our family in 2020.');
+      File(p.join(project.path, 'story_assets/nested/cat.mov'))
+        ..createSync(recursive: true)
+        ..writeAsBytesSync([1, 2, 3]);
+      final specOut = p.join(project.path, 'authored.json');
+      final fingerprints = <String>[];
+      final contexts = <Map<String, Object?>>[];
+      when(
+        () => runner.run(
+          'flutter',
+          any(),
+          workingDirectory: any(named: 'workingDirectory'),
+          environment: any(named: 'environment'),
+        ),
+      ).thenAnswer((invocation) async {
+        final args = invocation.positionalArguments[1] as List<String>;
+        String define(String name) => args
+            .singleWhere((arg) => arg.startsWith('--dart-define=$name='))
+            .substring('--dart-define=$name='.length);
+        fingerprints.add(define('FLUVIE_COMPOSITION_FINGERPRINT'));
+        final context = File(define('FLUVIE_AI_CONTEXT_FILE')).readAsStringSync();
+        contexts.add(
+          jsonDecode(context.substring(context.indexOf('\n') + 1)) as Map<String, Object?>,
+        );
+        File(specOut).writeAsStringSync('{}');
+        return const ProcessRunResult(exitCode: 0, stdout: '', stderr: '');
+      });
+      var pairResolutions = 0;
+      Future<int> author() => runRenderPipeline(
+        runner: runner,
+        createSandbox: () async => sandbox,
+        options: (
+          ffmpegBinary: null,
+          projectDir: project.path,
+          noCache: false,
+          noDownload: true,
+          enableImpeller: false,
+          verbose: false,
+          keepTemp: true,
+        ),
+        key: '',
+        outPath: outPath,
+        frames: null,
+        flags: _noFlags,
+        extraDefines: {
+          'FLUVIE_AI_PROMPT': 'Tell our cat story',
+          'FLUVIE_RENDER_SPEC_OUT': specOut,
+          'FLUVIE_OPERATION': 'author',
+        },
+        authorAssetsDir: 'story_assets',
+        contextFiles: ['story_assets/story.txt'],
+        stage: (projectDir) => StagedHarness(
+          projectDir: projectDir,
+          dir: project,
+          harnessPath: 'external_adapter.dart',
+          ephemeral: false,
+        ),
+        resolveToolchain:
+            (
+              runner, {
+              binary,
+              probeBinary,
+              mode = 'managed',
+              allowDownload = true,
+              log = _drop,
+            }) async {
+              pairResolutions++;
+              return FfmpegToolchain(
+                ffmpegPath: p.join(project.path, 'unavailable-ffmpeg'),
+                ffprobePath: p.join(project.path, 'unavailable-ffprobe'),
+                build: 'fixture',
+                ffmpegVersion: 'fixture',
+                ffprobeVersion: 'fixture',
+              );
+            },
+        out: out,
+        err: err,
+      );
+
+      expect(await author(), 0);
+      expect(pairResolutions, 1, reason: 'media probing must use the project-relative asset root');
+      expect(contexts.single['totalAssets'], 2);
+      expect((contexts.single['notes']! as List).single, containsPair('path', notes.path));
+      notes.writeAsStringSync('Miso joined our family in 2021.');
+      expect(await author(), 0);
+      expect(
+        fingerprints.last,
+        isNot(fingerprints.first),
+        reason: 'selected context bytes are render inputs',
+      );
+    },
+  );
+
+  test('an encoded custom renderer receipt moves the artifact without encoding twice', () async {
+    stubHappyPath();
+    when(
+      () => runner.run('flutter', any(), workingDirectory: any(named: 'workingDirectory')),
+    ).thenAnswer((_) async {
+      final encoded = File('${sandbox.path}/encoded.mp4')..writeAsBytesSync([9, 8, 7]);
+      File('${sandbox.path}/render-result.json').writeAsStringSync(
+        jsonEncode({
+          'schemaVersion': 1,
+          'kind': 'encoded',
+          'filePath': encoded.path,
+          'outputIntent': {'width': 100, 'height': 80, 'codec': 'h264'},
+        }),
+      );
+      return const ProcessRunResult(exitCode: 0, stdout: '', stderr: '');
+    });
+    expect(await run(), 0);
+    expect(File(outPath).readAsBytesSync(), [9, 8, 7]);
+    final receiptPath = '${p.withoutExtension(outPath)}.render.json';
+    final receipt = jsonDecode(File(receiptPath).readAsStringSync()) as Map<String, Object?>;
+    expect(
+      receipt['capture'],
+      containsPair('outputIntent', {'width': 100, 'height': 80, 'codec': 'h264'}),
+    );
+    verifyNever(
+      () => runner.run('ffmpeg', _encodeArgs, workingDirectory: any(named: 'workingDirectory')),
+    );
+  });
+
+  test('a renderer receipt cannot move an artifact outside its workspace', () async {
+    stubHappyPath();
+    final outside = File(outPath)..writeAsBytesSync([1]);
+    when(
+      () => runner.run('flutter', any(), workingDirectory: any(named: 'workingDirectory')),
+    ).thenAnswer((_) async {
+      File('${sandbox.path}/render-result.json').writeAsStringSync(
+        jsonEncode({'schemaVersion': 1, 'kind': 'encoded', 'filePath': outside.path}),
+      );
+      return const ProcessRunResult(exitCode: 0, stdout: '', stderr: '');
+    });
+    await expectLater(
+      run(),
+      throwsA(
+        predicate((error) => error.toString().contains('inside its output workspace')),
+      ),
+    );
+    expect(outside.readAsBytesSync(), [1]);
+    verifyNever(
+      () => runner.run('ffmpeg', _encodeArgs, workingDirectory: any(named: 'workingDirectory')),
+    );
   });
 
   test('forwards a per-run environment to the capture (flutter test)', () async {

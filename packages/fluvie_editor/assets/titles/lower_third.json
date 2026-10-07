@@ -1,0 +1,66 @@
+{
+  "id": "lower_third",
+  "name": "Lower third",
+  "family": "Lower thirds",
+  "theme": {
+    "palette": {
+      "titleInk": "#F6F7FB",
+      "titleAccent": "#7C6EF6",
+      "titleSurface": "#18202F"
+    },
+    "typeScale": {
+      "titleHeadline": {
+        "fontSize": 54,
+        "fontWeight": "bold",
+        "color": "#F6F7FB"
+      },
+      "titleBody": {
+        "fontSize": 24,
+        "color": "#F6F7FB"
+      }
+    }
+  },
+  "children": [
+    {
+      "type": "Box",
+      "color": {
+        "token": "titleSurface"
+      },
+      "transform": {
+        "x": 0.3,
+        "y": 0.81,
+        "w": 0.48,
+        "h": 0.24
+      },
+      "animate": [
+        {
+          "preset": "slideFadeIn",
+          "duration": "0.4r"
+        }
+      ]
+    },
+    {
+      "type": "SplitText",
+      "text": "Speaker name",
+      "by": "word",
+      "style": {
+        "token": "titleBody"
+      },
+      "transform": {
+        "x": 0.3,
+        "y": 0.81,
+        "w": 0.43,
+        "h": 0.2
+      },
+      "animate": [
+        {
+          "preset": "slideFadeIn",
+          "duration": "0.4r",
+          "stagger": {
+            "each": "0.04r"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -11,15 +11,21 @@ import 'package:fluvie/src/rendering/platform/wasm_runtime.dart';
 /// that the browser harness page installs before tests run.
 WasmRuntime createWasmRuntime() => _WebWasmRuntime();
 
-final class _WebWasmRuntime implements WasmRuntime {
+final class _WebWasmRuntime implements WasmRuntime, WasmRuntimeLifecycle {
   JSObject get _bridge => globalContext.getProperty<JSObject>('FluvieFfmpeg'.toJS);
   Future<JSAny?> _call(String method, List<JSAny?> args) async =>
       _bridge.callMethodVarArgs<JSPromise<JSAny?>>(method.toJS, args).toDart;
   @override
+  Future<void> terminate() => _call('terminate', const []);
+  @override
+  Future<void> deleteFile(String name) => _call('deleteFile', [name.toJS]);
+  @override
   Future<void> load() => _call('load', const []);
   @override
   Future<void> writeFile(String name, Uint8List bytes) =>
-      _call('writeFile', [name.toJS, bytes.toJS]);
+      // ffmpeg.wasm transfers the buffer to its worker. Preserve cached source
+      // and sandbox bytes for retries, preview, and later queued renders.
+      _call('writeFile', [name.toJS, Uint8List.fromList(bytes).toJS]);
   @override
   Future<int> exec(List<String> args) async =>
       ((await _call('exec', [

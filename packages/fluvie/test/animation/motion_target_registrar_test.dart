@@ -24,6 +24,7 @@ import 'package:fluvie/src/timing/schedule/composition_registrar.dart';
 import 'package:fluvie/src/timing/schedule/composition_registrar_scope.dart';
 import 'package:fluvie/src/timing/schedule/element_schedule.dart';
 import 'package:fluvie/src/timing/schedule/resolved_schedule_scope.dart';
+import 'package:fluvie/src/timing/time_scope_data.dart';
 import 'package:fluvie/src/timing/video_scope.dart';
 
 const _squareKey = Key('square');
@@ -182,7 +183,8 @@ void main() {
       expect(tokens, hasLength(2));
       expect(tokens[0].debugOwner, 'MotionTarget'); // The outer show shell.
       expect(tokens[1].debugOwner, 'SizedBox'); // The inner animated target.
-      expect(tokens[1].window, same(tokens[0].window));
+      const scope = TimeScopeData(fps: 30, startFrame: 0, durationFrames: 60);
+      expect(tokens[1].window!.resolveFrames(scope), tokens[0].window!.resolveFrames(scope));
 
       // Resolve for real: the fade places inside the shown window 30..60.
       final result = buildVideoPlan(

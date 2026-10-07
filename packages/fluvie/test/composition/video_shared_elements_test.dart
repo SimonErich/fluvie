@@ -86,7 +86,9 @@ void main() {
       expect(probe.timingError, contains('one scene'));
     });
 
-    testWidgets('a three-scene anchor reports an error naming all three', (tester) async {
+    testWidgets('a three-scene chain validates and morphs through both cuts', (tester) async {
+      // A hero belongs to a contiguous run, of any length: it morphs through
+      // every cut it crosses rather than only the first.
       final logo = Anchor('logo');
       final video = Video(
         transition: Transition.crossFade(0.5.seconds),
@@ -98,12 +100,34 @@ void main() {
       );
       final probe = TimelineProbe();
       addTearDown(probe.dispose);
+
       await tester.pumpWidget(_harness(video, probe: probe));
       await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(probe.timingError, isNull);
+    });
+
+    testWidgets('a chain with a gap reports an error naming its scenes', (tester) async {
+      final logo = Anchor('logo');
+      final video = Video(
+        transition: Transition.crossFade(0.5.seconds),
+        scenes: [
+          _scene(2.seconds, hero: logo),
+          _scene(2.seconds),
+          _scene(2.seconds, hero: logo),
+        ],
+      );
+      final probe = TimelineProbe();
+      addTearDown(probe.dispose);
+
+      await tester.pumpWidget(_harness(video, probe: probe));
+      await tester.pump();
+
       expect(tester.takeException(), isNull);
       expect(
         probe.timingError,
-        allOf(contains('scenes[0]'), contains('scenes[1]'), contains('scenes[2]')),
+        allOf(contains('contiguous'), contains('scenes[0]'), contains('scenes[2]')),
       );
     });
 

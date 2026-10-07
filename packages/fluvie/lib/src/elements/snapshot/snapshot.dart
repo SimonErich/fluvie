@@ -1,10 +1,12 @@
-import 'package:flutter/widgets.dart' show BoxFit, BuildContext, Key, StatelessWidget, Widget;
 import 'package:flutter/widgets.dart' as flutter;
+import 'package:flutter/widgets.dart' show BoxFit, BuildContext, Key, StatelessWidget, Widget;
 import 'package:fluvie/src/composition/runtime/collectible_children.dart';
 import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/elements/runtime/element_shared.dart';
 import 'package:fluvie/src/elements/snapshot/runtime/snapshot_capture_scope.dart';
+import 'package:fluvie/src/elements/snapshot/runtime/snapshot_preparation_boundary.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
 
 /// Rasterizes an arbitrary Flutter subtree once before the frame loop and paints
@@ -69,6 +71,10 @@ final class Snapshot extends StatelessWidget implements CollectibleChildren {
 
   @override
   Widget build(BuildContext context) {
+    if (PreparationScope.isPreparing(context)) {
+      return SnapshotPreparationBoundary(snapshot: this, child: child);
+    }
+
     final scope = SnapshotCaptureScope.maybeOf(context);
     if (scope == null) {
       // A capture with no scope means the render shell never ran the Snapshot
@@ -83,7 +89,7 @@ final class Snapshot extends StatelessWidget implements CollectibleChildren {
           'pre-pass, so the live subtree would be re-rasterized every frame.',
         );
       }
-      return child;
+      return SnapshotPreparationBoundary(snapshot: this, child: child);
     }
     final captureKey = key != null
         ? SnapshotCaptureKey.keyed(key!)

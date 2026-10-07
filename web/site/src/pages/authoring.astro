@@ -1,0 +1,70 @@
+---
+import Base from '../layouts/Base.astro';
+import proof from '../data/authoring-proof.json';
+const media = '/media/authoring/';
+const labels: Record<string, string> = { create: 'Create from assets', pacing: 'Change the pacing',
+  custom_widget: 'Preserve handwritten Flutter', captions: 'Add captions', formats: 'Export three formats' };
+type ReviewFinding = {
+  code: string;
+  frame?: number;
+  startFrame?: number;
+  message: string;
+  remedy?: string;
+};
+type RecordedCase = (typeof proof.cases)[number];
+const cases: (Omit<RecordedCase, 'quality'> & {
+  quality: Omit<RecordedCase['quality'], 'findings'> & { findings: ReviewFinding[] };
+})[] = proof.cases;
+---
+<Base>
+  <main id="main" class="authoring">
+    <nav aria-label="Authoring navigation"><a href="/">Fluvie home</a><a href="https://docs.fluvie.dev/guides/authoring-benchmarks/">Run the benchmark</a></nav>
+    <header>
+      <p class="eyebrow">A recorded AI authoring run</p>
+      <h1>Prompt. Read the Dart. Edit. Watch.</h1>
+      <p>These prompts went through Fluvie’s ordinary generate, edit and review commands using {proof.provider} / {proof.model}. Every video links to its source and verified render evidence.</p>
+      <p>The fixture tells a fictional cat story using synthetic shapes and tones. Preservation, sampled repeatability and encoded output were checked. Creative quality still needs human review.</p>
+      <a href={media + 'benchmark.json'}>Download the recorded results</a>
+      <a href={media + proof.bundle.path}>Download the verified project and assets</a>
+    </header>
+    <nav class="cases" aria-label="Benchmark cases">{cases.map((task) => <a href={'#' + task.id}>{labels[task.id] ?? task.id}</a>)}</nav>
+    {cases.map((task) => <section id={task.id} aria-labelledby={task.id + '-heading'}>
+      <h2 id={task.id + '-heading'}>{labels[task.id] ?? task.id}</h2>
+      <p class="prompt">{task.prompt}</p>
+      <p>Recorded workflow: {(task.elapsedMilliseconds / 1000).toFixed(1)} seconds · encoded output verified · {task.repeatableSelectedFrames ? 'selected frames repeatable' : 'see evidence for repeatability scope'}.</p>
+      <div class="comparison">
+        {task.beforePath && <details><summary>Before: the original Dart</summary><pre tabindex="0"><code>{task.beforeText}</code></pre><a href={media + task.beforePath}>Download original source</a></details>}
+        <details open><summary>{task.beforePath ? 'After: the edited Dart' : 'The generated Dart'}</summary><pre tabindex="0"><code>{task.sourceText}</code></pre></details>
+      </div>
+      <video controls preload="none" width="320" height="320" poster={task.posterPath ? media + task.posterPath : undefined} aria-label={labels[task.id] + ' video'} src={media + task.outputPath}>
+        <a href={media + task.outputPath}>Download the video</a>
+      </video>
+      <div class="links"><a href={media + task.sourcePath}>Full source</a><a href={media + task.outputPath}>Video</a><a href={media + task.proofPath}>Source and output hashes</a></div>
+      {task.quality && <details><summary>Text and audio review</summary>
+        <p>{task.quality.scope}</p>
+        <p>{task.quality.checksComplete ? 'Applicable measurements completed.' : 'Some measurements were unavailable; inspect the report.'}</p>
+        {task.quality.findings.length ? <ul>{task.quality.findings.map((finding) => <li><strong>{finding.code}</strong> · frame {finding.frame ?? finding.startFrame} · {finding.message} {finding.remedy}</li>)}</ul> : <p>No findings in the sampled text and measured audio. Creative quality needs human review.</p>}
+      </details>}
+      <details><summary>Replay this source from the project bundle</summary><pre tabindex="0"><code>{'fluvie bundle unpack project.fluvie.zip --dir replay\ncd replay/project\nflutter pub get --enforce-lockfile\nfluvie render ' + task.bundleSourcePath.replace('project/', '')}</code></pre></details>
+      {task.formats.length > 0 && <div class="formats">{task.formats.map((format) => <figure>
+        <figcaption>{format.aspect} · {format.output.width} × {format.output.height}</figcaption>
+        <video controls preload="none" width={format.output.width} height={format.output.height}
+          poster={format.posterPath ? media + format.posterPath : undefined} aria-label={format.aspect + ' export'} src={media + format.outputPath}>
+          <a href={media + format.outputPath}>Download the video</a>
+        </video>
+        <a href={media + format.proofPath}>Verified export evidence</a>
+      </figure>)}</div>}
+    </section>)}
+    <footer><p>Each result records its source fingerprint, Flutter engine, Dart version and FFmpeg build. Resource and timing replay is supported; encoded bytes can vary across platforms and toolchains.</p><a href="https://docs.fluvie.dev/guides/portable-projects/">Package a replayable project</a></footer>
+  </main>
+</Base>
+<style>
+  .authoring{max-width:1100px;margin:auto;padding:40px 24px 80px;color:var(--ink);line-height:1.65}
+  nav,.links{display:flex;flex-wrap:wrap;gap:12px 24px}a{color:var(--acc);text-underline-offset:4px;min-height:44px;display:inline-flex;align-items:center}
+  header{padding:50px 0 24px;max-width:780px}h1,h2{font-family:Sora,sans-serif;line-height:1.2;letter-spacing:-.02em}h1{font-size:clamp(32px,5vw,56px)}h2{font-size:clamp(24px,3vw,36px)}
+  .eyebrow{font-family:'JetBrains Mono',monospace;color:var(--soft)}section{padding:44px 0;border-top:1px solid var(--line);scroll-margin-top:24px}
+  .prompt{padding:20px;background:var(--line);border-radius:12px;max-width:80ch}.comparison{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:20px;margin:24px 0}
+  details{min-width:0}summary{cursor:pointer;min-height:44px;font-weight:700}pre{padding:20px;border-radius:12px;background:var(--dark);color:#D7E7FF;font:14px/1.65 'JetBrains Mono',monospace;overflow:auto;max-height:36em}
+  video{max-width:100%;height:auto;max-height:420px;background:var(--dark);border-radius:12px;display:block}footer{padding-top:32px;border-top:1px solid var(--line);max-width:80ch}:is(a,summary,pre):focus-visible{outline:3px solid var(--acc);outline-offset:4px}
+  .formats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:24px}figure{margin:24px 0;min-width:0}figcaption{font-weight:700;margin-bottom:12px}header>a{margin-right:24px}
+</style>

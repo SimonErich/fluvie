@@ -1,0 +1,9 @@
+{
+  "fluvieSpec": 1,
+  "fps": 30,
+  "scenes": [{"duration": "90f", "children": [{
+    "id": "ramp", "type": "Clip", "source": {"kind": "asset", "value": "clip.mp4"},
+    "trim": {"from": "0s", "to": "2.25s"},
+    "speed": {"values": [1, 0.5], "positions": ["0r", "1r"], "easings": ["smooth"]}
+  }]}]
+}

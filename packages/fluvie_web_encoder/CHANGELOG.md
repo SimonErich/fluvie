@@ -3,6 +3,22 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Local FFmpeg preview adapters for clip decoding, audio playback and reload
+  notifications. These are separate from the default in-browser render path.
+
+### Fixed
+
+- Reject invalid preview frame dimensions before uploading source media, and
+  return an empty batch without an upload when no frames are requested.
+- Reject pending clip metadata and frame responses after their decoder has been
+  disposed, including callers sharing the same pending upload.
+- Return the disposable local decoder from `createLocalFfmpegClipDecoder` so
+  callers can release their preview session through its public interface.
+
 ## [0.3.1] - 2026-07-16
 
 Lockstep release with the rest of the Fluvie workspace.

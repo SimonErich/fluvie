@@ -19,9 +19,12 @@ typedef AudioByteLoader = Future<Uint8List> Function(String source);
 /// Each track's bytes (fetched through [loadBytes]) are written under the bare
 /// name `audio_<i>_<cacheKey>` the encoder `-i`s, then turned into one
 /// [AudioTrackNode] via [AudioTrackNode.fromResolved] (so delay, trim, gain,
-/// fade, and loop match every other backend). The cache key comes from
-/// [audioSourceFromString], so an in-browser render and a desktop render name the
-/// same track identically and the encode args stay byte-identical. [masterVolume]
+/// fade, and loop match every other backend). The cache key comes from the
+/// track's typed [ResolvedAudioTrack.audioSource] (falling back to
+/// [audioSourceFromString] over the string), so an in-browser render and a
+/// desktop render name the same track identically and the encode args stay
+/// byte-identical. A memory source writes its own bytes verbatim — [loadBytes]
+/// is never asked for a source that has no string to resolve. [masterVolume]
 /// scales the final mix. An empty list stages nothing and returns an empty plan,
 /// so the encoder's `-an` path is unchanged.
 Future<AudioMixPlan> stageResolvedAudioToSandbox({
@@ -33,8 +36,9 @@ Future<AudioMixPlan> stageResolvedAudioToSandbox({
   final nodes = <AudioTrackNode>[];
   for (var i = 0; i < tracks.length; i++) {
     final track = tracks[i];
-    final name = 'audio_${i}_${audioSourceFromString(track.source).cacheKey}';
-    final bytes = await loadBytes(track.source);
+    final source = track.audioSource ?? audioSourceFromString(track.source);
+    final name = 'audio_${i}_${source.cacheKey}';
+    final bytes = source is MemoryAudioSource ? source.bytes : await loadBytes(track.source);
     await sandbox.writeBytes(name, bytes);
     nodes.add(AudioTrackNode.fromResolved(track, name: name));
   }

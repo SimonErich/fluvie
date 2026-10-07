@@ -47,4 +47,4 @@ dev_dependencies:
   mocktail: ^1.0.5
 
 flutter:
-  uses-material-design: false
+  uses-material-design: true

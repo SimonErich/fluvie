@@ -11,33 +11,51 @@ import 'package:fluvie_ai/src/client/ollama_ai_client.dart';
 /// from `ANTHROPIC_API_KEY` / `GEMINI_API_KEY` / `MISTRAL_API_KEY` (Ollama needs
 /// none). Pass the environment in (e.g. `Platform.environment`) so this stays
 /// pure and testable.
+/// `FLUVIE_AI_ENDPOINT` optionally selects a full HTTP endpoint for a local
+/// Ollama server, compatible proxy or private provider gateway.
 ///
 /// Throws an [AiClientException] for an unknown provider or a missing key.
 AiClient aiClientFromEnv(Map<String, String> env) {
   final provider = env['FLUVIE_AI_PROVIDER'] ?? 'claude';
   final model = env['FLUVIE_AI_MODEL'];
+  final endpoint = _endpoint(env['FLUVIE_AI_ENDPOINT']);
   switch (provider) {
     case 'claude':
       return ClaudeAiClient(
         apiKey: _require(env, 'ANTHROPIC_API_KEY'),
         model: model ?? 'claude-opus-4-8',
+        endpoint: endpoint,
       );
     case 'gemini':
       return GeminiAiClient(
         apiKey: _require(env, 'GEMINI_API_KEY'),
         model: model ?? 'gemini-2.5-pro',
+        endpoint: endpoint,
       );
     case 'mistral':
       return MistralAiClient(
         apiKey: _require(env, 'MISTRAL_API_KEY'),
         model: model ?? 'mistral-large-latest',
+        endpoint: endpoint,
       );
     case 'ollama':
-      return OllamaAiClient(model: model ?? 'llama3.1');
+      return OllamaAiClient(model: model ?? 'llama3.1', endpoint: endpoint);
   }
   throw AiClientException(
     'Unknown FLUVIE_AI_PROVIDER "$provider"; expected claude, gemini, mistral, or ollama',
   );
+}
+
+Uri? _endpoint(String? value) {
+  if (value == null || value.isEmpty) return null;
+  final uri = Uri.tryParse(value);
+  if (uri == null ||
+      !uri.hasAuthority ||
+      uri.host.isEmpty ||
+      (uri.scheme != 'http' && uri.scheme != 'https')) {
+    throw AiClientException('FLUVIE_AI_ENDPOINT must be an absolute HTTP(S) endpoint URL.');
+  }
+  return uri;
 }
 
 String _require(Map<String, String> env, String key) {

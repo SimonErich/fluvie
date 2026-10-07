@@ -5,7 +5,7 @@ import 'package:fluvie/src/serialization/codecs/alignment_codec.dart';
 
 /// The keys a `transform` object reads. The single source of truth shared by
 /// the parser's unknown-property check and the schema.
-const Set<String> knownPlacementKeys = {'x', 'y', 'w', 'h', 'rotation', 'anchor'};
+const Set<String> knownPlacementKeys = {'x', 'y', 'w', 'h', 'rotation', 'opacity', 'anchor'};
 
 /// Reads a [Placement] from a `transform` object in [raw].
 ///
@@ -26,12 +26,14 @@ Placement decodePlacement(Object? raw, {List<String> path = const []}) {
   final w = raw['w'];
   final h = raw['h'];
   final rotation = raw['rotation'];
+  final opacity = raw['opacity'];
   return Placement(
     x: x.toDouble(),
     y: y.toDouble(),
     width: w is num ? w.toDouble() : null,
     height: h is num ? h.toDouble() : null,
     rotation: rotation is num ? rotation.toDouble() : 0,
+    opacity: opacity is num ? opacity.toDouble() : 1,
     anchor: raw['anchor'] == null
         ? Alignment.center
         : decodeAlignment(raw['anchor'], path: [...path, 'anchor']),
@@ -46,5 +48,6 @@ Map<String, Object?> encodePlacement(Placement placement) => {
   if (placement.width != null) 'w': placement.width,
   if (placement.height != null) 'h': placement.height,
   if (placement.rotation != 0) 'rotation': placement.rotation,
+  if (placement.opacity != 1) 'opacity': placement.opacity,
   if (placement.anchor != Alignment.center) 'anchor': encodeAlignment(placement.anchor),
 };

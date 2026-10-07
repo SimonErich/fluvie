@@ -5,19 +5,25 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:fluvie/src/audio/runtime/frame_list_beat_grid.dart';
 import 'package:fluvie/src/captions/parse/srt_parser.dart';
 import 'package:fluvie/src/captions/parse/vtt_parser.dart';
+import 'package:fluvie/src/core/audio/audio_analysis_window.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
 import 'package:fluvie/src/core/audio/band_table.dart';
+import 'package:fluvie/src/core/audio_band.dart';
 import 'package:fluvie/src/core/captions/caption_cue.dart';
 import 'package:fluvie/src/core/captions/caption_source.dart';
 import 'package:fluvie/src/core/captions/caption_word.dart';
+import 'package:fluvie/src/core/contracts/audio_window_resolver.dart';
 import 'package:fluvie/src/core/contracts/beat_detection_service.dart';
 import 'package:fluvie/src/core/contracts/beat_grid.dart';
 import 'package:fluvie/src/core/contracts/clip_frame_preparer.dart';
+import 'package:fluvie/src/core/contracts/clip_timeline_resolver.dart';
 import 'package:fluvie/src/core/contracts/disposable_resolver.dart';
 import 'package:fluvie/src/core/contracts/frequency_analyzer.dart';
 import 'package:fluvie/src/core/contracts/media_resolver.dart';
+import 'package:fluvie/src/core/contracts/ranged_audio_analysis.dart';
 import 'package:fluvie/src/core/contracts/snapshot_service.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/media/clip_source_kind.dart';
@@ -29,12 +35,19 @@ import 'package:fluvie/src/media/runtime/clip_frame_cache.dart';
 import 'package:fluvie/src/media/runtime/clip_resolve_cache.dart';
 import 'package:fluvie/src/media/runtime/image_resolve_cache.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
+import 'package:fluvie/src/rendering/encoding/frame_extraction_cache_identity.dart';
 import 'package:fluvie/src/rendering/encoding/frame_extraction_service.dart';
+import 'package:fluvie/src/rendering/encoding/frame_extraction_session.dart';
 import 'package:fluvie/src/rendering/encoding/video_probe_service.dart';
+import 'package:fluvie/src/rendering/render_cancellation.dart';
+import 'package:fluvie_media/fluvie_media.dart' show MediaTimeline;
 
 part 'media_repository_audio.dart';
+part 'media_repository_audio_windows.dart';
 part 'media_repository_captions.dart';
 part 'media_repository_clip.dart';
+part 'media_repository_clip_cache.dart';
+part 'media_repository_clip_session.dart';
 part 'media_repository_core.dart';
 part 'media_repository_snapshot.dart';
 
@@ -49,7 +62,12 @@ part 'media_repository_snapshot.dart';
 /// lookup, so no frame ever awaits media.
 final class MediaRepository
     with ImageResolveCache, ClipResolveCache
-    implements MediaResolver, DisposableResolver, ClipFramePreparer {
+    implements
+        MediaResolver,
+        DisposableResolver,
+        ClipFramePreparer,
+        ClipTimelineResolver,
+        AudioWindowResolver {
   /// Creates a repository over the byte [loader], with the [probeService] and
   /// [frameExtractor] the clip path needs (`null` until a clip is resolved).
   ///
@@ -62,7 +80,9 @@ final class MediaRepository
   ///
   /// Pass a [clipFrameCache] to serve extracted clip frames from a persistent,
   /// content-addressed cache across runs (both modes go through it); leave it
-  /// null to extract every frame afresh on every run.
+  /// null to extract every frame afresh on every run. Persistent reuse also
+  /// requires the extractor's [FrameExtractionCacheIdentity]; an unidentified
+  /// custom extractor remains usable and decodes afresh across repositories.
   MediaRepository({
     required this.loader,
     this.probeService,
@@ -70,7 +90,19 @@ final class MediaRepository
     this.clipFrameStore,
     this.clipFrameCache,
     this.maxClipDecodeEdge,
+    this.whenCancelled,
   });
+
+  /// Cancels native source decoder leases owned by this repository.
+  final Future<void>? whenCancelled;
+  final Completer<void> _released = Completer<void>();
+  final Map<
+    ({MediaSource source, int width, int height, String? decoder}),
+    Future<_FrameSessionLease>
+  >
+  _frameSessions = {};
+
+  final Set<_FrameSessionLease> _activeFrameSessions = {};
 
   /// The per-kind byte source feeding the cache.
   @override
@@ -98,6 +130,7 @@ final class MediaRepository
 
   /// Extracts clip frames; required to resolve clips.
   final FrameExtractionService? frameExtractor;
+  late final Future<String?> _extractionCacheIdentity = _resolveExtractionCacheIdentity();
 
   /// Local file paths the clip source was materialized to (the probe and the
   /// frame extractor both read by path). The metadata and frame caches live in
@@ -120,6 +153,8 @@ final class MediaRepository
   // [cacheKey]), and the caption layer the parsed cues. All are precomputed
   // before frame 0, so no frame ever awaits any of them.
   final Map<AudioSource, String> _audioPaths = {};
+  final Map<AudioAnalysisWindow, BeatGrid> _windowBeats = {};
+  final Map<AudioAnalysisWindow, BandTable> _windowBands = {};
   final Map<AudioSource, BeatGrid> _beatGrids = {};
   final Map<AudioSource, BandTable> _bandTables = {};
   final Map<String, ui.Image> _snapshots = {};
@@ -148,6 +183,9 @@ final class MediaRepository
     'decoded image',
     'Was it included in the collect pass before preResolveAll?',
   );
+
+  @override
+  MediaTimeline? clipTimelineFor(MediaSource source) => clipTimelines[source];
 
   @override
   Future<ClipMetadata> probeClip(MediaSource source) => resolveClipMeta(source);
@@ -221,6 +259,26 @@ final class MediaRepository
   }
 
   @override
+  Future<void> preResolveAudioWindows(
+    Iterable<AudioAnalysisWindow> windows, {
+    required BeatDetectionService beatDetector,
+    required FrequencyAnalyzer analyzer,
+  }) async {
+    await _resolveAudioWindows(windows, beatDetector: beatDetector, analyzer: analyzer);
+    markResolved();
+  }
+
+  @override
+  BeatGrid beatGridForWindow(AudioAnalysisWindow window) =>
+      _windowBeats[window] ??
+      (throw StateError('Prepare the audio window before reading its beats.'));
+
+  @override
+  BandTable bandTableForWindow(AudioAnalysisWindow window) =>
+      _windowBands[window] ??
+      (throw StateError('Prepare the audio window before reading its bands.'));
+
+  @override
   BeatGrid beatGridFor(AudioSource source) => _require(
     _beatGrids,
     source,
@@ -255,6 +313,15 @@ final class MediaRepository
 
   @override
   void dispose() {
+    if (!_released.isCompleted) _released.complete();
+    for (final session in _activeFrameSessions) {
+      unawaited(session.close());
+    }
+    _activeFrameSessions.clear();
+    for (final pending in _frameSessions.values) {
+      unawaited(pending.then((session) => session.close(), onError: (Object _, StackTrace _) {}));
+    }
+    _frameSessions.clear();
     disposeCachedImages();
     disposeClipFrames();
     // The store deletes itself synchronously before returning this future, so

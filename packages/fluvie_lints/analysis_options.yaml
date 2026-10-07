@@ -1,7 +1,7 @@
 # The lint package cannot consume itself via custom_lint; root strictness only.
-include: ../../analysis_options.yaml
+include: analysis_options.shared.yaml
 
-# Declared directly so the published package formats at width 100 standalone.
+# Keep the package entry point explicit; the generated include also carries this policy.
 formatter:
   page_width: 100
 

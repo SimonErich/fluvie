@@ -10,8 +10,16 @@ library;
 import 'dart:io';
 
 import 'package:fluvie_cli/src/ffmpeg/ffmpeg_cache.dart';
+import 'package:fluvie_cli/src/ffmpeg/ffmpeg_downloader.dart';
 import 'package:fluvie_cli/src/ffmpeg/ffmpeg_provisioner.dart';
 import 'package:test/test.dart';
+
+final class _LocalArchive implements FfmpegDownloader {
+  _LocalArchive(this.path);
+  final String path;
+  @override
+  Future<List<int>> download(String _) => File(path).readAsBytes();
+}
 
 void main() {
   test('downloads, verifies and installs the pinned build into a temp cache', () async {
@@ -19,7 +27,11 @@ void main() {
     addTearDown(() => tmp.deleteSync(recursive: true));
 
     final cache = FfmpegCache(environment: {'XDG_CACHE_HOME': tmp.path});
-    final provisioner = FfmpegProvisioner(cache: cache);
+    final archive = Platform.environment['FLUVIE_TEST_FFMPEG_ARCHIVE'];
+    final provisioner = FfmpegProvisioner(
+      cache: cache,
+      downloader: archive == null ? null : _LocalArchive(archive),
+    );
     final logs = <String>[];
 
     final path = await provisioner.install(log: logs.add);
@@ -33,6 +45,10 @@ void main() {
     final version = await Process.run(path, ['-version']);
     expect(version.exitCode, 0);
     expect(version.stdout.toString(), contains('ffmpeg version'));
+    final probeVersion = await Process.run(cache.probePath!, ['-version']);
+    expect(probeVersion.exitCode, 0);
+    expect(probeVersion.stdout.toString(), contains('ffprobe version'));
+    expect(File('${cache.versionDir}/toolchain.json').existsSync(), isTrue);
 
     // A second install is a no-op (idempotent, no re-download).
     final again = await provisioner.install();

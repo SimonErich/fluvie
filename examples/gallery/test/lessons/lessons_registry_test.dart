@@ -7,7 +7,6 @@ import 'package:fluvie/fluvie.dart';
 import 'package:fluvie/rendering.dart';
 // MotionTarget is internal; the registry test reaches into the tree to confirm
 // lesson 06 binds the pixel-fx overlay the doc demonstrates.
-import 'package:fluvie/src/animation/motion_target.dart';
 // The audio/caption collect passes are render infrastructure, off the authoring
 // barrel; the registry test reaches into src/ like the render harness to assert
 // lesson 10 declares the reactive audio + caption sources the pre-pass resolves.

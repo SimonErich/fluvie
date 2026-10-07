@@ -15,15 +15,33 @@ Uint8List extractFfmpegBinary({
   required FfmpegArchiveFormat format,
   required String innerPath,
 }) {
+  return extractFfmpegBinaries(
+    archiveBytes: archiveBytes,
+    format: format,
+    innerPaths: {innerPath},
+  )[innerPath]!;
+}
+
+/// Extracts only the named executables, decoding a shared archive once.
+Map<String, Uint8List> extractFfmpegBinaries({
+  required List<int> archiveBytes,
+  required FfmpegArchiveFormat format,
+  required Set<String> innerPaths,
+}) {
   final archive = switch (format) {
     FfmpegArchiveFormat.tarXz => TarDecoder().decodeBytes(XZDecoder().decodeBytes(archiveBytes)),
     FfmpegArchiveFormat.zip => ZipDecoder().decodeBytes(archiveBytes),
   };
+  final binaries = <String, Uint8List>{};
   for (final file in archive) {
-    if (file.isFile && file.name == innerPath) return file.content;
+    if (file.isFile && innerPaths.contains(file.name)) binaries[file.name] = file.content;
   }
-  throw CliFailure(
-    'The downloaded FFmpeg archive did not contain "$innerPath". '
-    'The pinned build may be corrupt; rerun `fluvie ffmpeg install --force`.',
-  );
+  final missing = innerPaths.difference(binaries.keys.toSet());
+  if (missing.isNotEmpty) {
+    throw CliFailure(
+      'The downloaded FFmpeg archive did not contain ${missing.join(', ')}. '
+      'The pinned build may be corrupt; rerun `fluvie ffmpeg install --force`.',
+    );
+  }
+  return binaries;
 }

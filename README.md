@@ -200,6 +200,8 @@ CI, on a server, or from an AI assistant.
 | --- | --- | --- |
 | [`fluvie`](packages/fluvie) | The library. Describe a video, render an MP4. | [![pub](https://img.shields.io/pub/v/fluvie.svg)](https://pub.dev/packages/fluvie) |
 | [`fluvie_cli`](packages/fluvie_cli) | Headless renderer. Capture with `flutter test`, encode with FFmpeg. | [![pub](https://img.shields.io/pub/v/fluvie_cli.svg)](https://pub.dev/packages/fluvie_cli) |
+| [`fluvie_media`](packages/fluvie_media) | Shared media metadata and bounded native frame decoding; no Flutter dependency. | [![pub](https://img.shields.io/pub/v/fluvie_media.svg)](https://pub.dev/packages/fluvie_media) |
+| [`fluvie_render_client`](packages/fluvie_render_client) | Web-safe render API requests, jobs and diagnostics without the server runtime. | [![pub](https://img.shields.io/pub/v/fluvie_render_client.svg)](https://pub.dev/packages/fluvie_render_client) |
 | [`fluvie_lints`](packages/fluvie_lints) | Lint rules that catch timing and layering mistakes. | [![pub](https://img.shields.io/pub/v/fluvie_lints.svg)](https://pub.dev/packages/fluvie_lints) |
 | [`fluvie_validate`](packages/fluvie_validate) | Check a `Video` snippet before you render it: the analyzer plus the lint rules, in-process, never executed. | [![pub](https://img.shields.io/pub/v/fluvie_validate.svg)](https://pub.dev/packages/fluvie_validate) |
 | [`fluvie_ai`](packages/fluvie_ai) | Author a video from a prompt. A model writes a spec. Built on [`ai_abstracted`](https://pub.dev/packages/ai_abstracted). | [![pub](https://img.shields.io/pub/v/fluvie_ai.svg)](https://pub.dev/packages/fluvie_ai) |
@@ -207,9 +209,15 @@ CI, on a server, or from an AI assistant.
 | [`fluvie_mobile_encoder`](packages/fluvie_mobile_encoder) | Render to MP4 fully on-device on Android and iOS, no FFmpeg. | [![pub](https://img.shields.io/pub/v/fluvie_mobile_encoder.svg)](https://pub.dev/packages/fluvie_mobile_encoder) |
 | [`fluvie_web_encoder`](packages/fluvie_web_encoder) | Render to MP4 fully in the browser with ffmpeg.wasm, opt-in. | [![pub](https://img.shields.io/pub/v/fluvie_web_encoder.svg)](https://pub.dev/packages/fluvie_web_encoder) |
 
+The workspace also contains two packages marked `publish_to: none`:
+[`fluvie_editor`](packages/fluvie_editor), the reusable editor widgets and models,
+and [`fluvie_presenter`](packages/fluvie_presenter), live scene presentation.
+That is eleven package directories, of which nine are configured for publishing;
+the published-version badges above do not describe unpushed checkout changes.
+
 ## Rendering modes by platform
 
-The same `Video` renders three ways. Pick by where the encode should run: on your
+Choose a backend for your `Video` by where the encode should run: on your
 own machine, on a server you call, or on the user's own device.
 
 | Platform | Local (FFmpeg binary) | Server API | On-device |
@@ -225,10 +233,10 @@ own machine, on a server you call, or on the user's own device.
 - **Server API** keeps the client thin: the app sends a spec, a render server runs
   FFmpeg, the app gets a file back. It works on every platform and keeps app
   bundles small. Use it when you do not want to ship an encoder.
-- **On-device** renders without a server, so the video never leaves the device.
+- **On-device** captures and encodes without uploading frames to a render server.
   Mobile uses the platform's native encoder; web uses ffmpeg.wasm. The frames are
-  captured by Fluvie's own pipeline, so they match a desktop render; only the
-  encode edge differs (see each guide for the trade-offs).
+  captured with Fluvie's shared timing engine. Rasterization, resource services
+  and codec support still differ; see each guide for its capability limits.
 
 **Combining platforms.** One Flutter app can run on mobile **and** web and render
 on-device on both: choose the renderer per platform behind a conditional import
@@ -236,9 +244,10 @@ on-device on both: choose the renderer per platform behind a conditional import
 `Video`. On the web you trade bundle size for the ffmpeg.wasm payload; choose the
 Server API instead to keep the bundle light.
 
-**Audio works everywhere too.** Declare `Audio.music`/`Audio.sfx` once and it
-mixes on every renderer — looping beds, fades, trims, and multi-track `amix` —
-with audio opt-in on-device. The web has no local-file source (bundle as an asset
+**Declared audio uses shared track timing.** `Audio.music`/`Audio.sfx` supports
+looping beds, fades and trims, with audio opt-in on-device. Native FFmpeg, wasm
+and platform encoders implement the mix differently; reactive analysis and
+embedded clip discovery have backend-specific limits. The web has no local-file source (bundle as an asset
 or fetch from an allowlisted URL). See the full
 [audio support by platform](https://docs.fluvie.dev/guides/audio-and-captions/#audio-across-platforms)
 table.

@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie_mobile_encoder/fluvie_mobile_encoder.dart';
-import 'package:fluvie_mobile_encoder/src/native_frame_extraction_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -129,7 +128,7 @@ void main() {
     expect(frame.rgba, everyElement(4));
   });
   test('extractFrames maps a missing platform implementation to a typed error', () async {
-    // No mock handler registered: the method is unimplemented, as on iOS.
+    // No mock handler registered: emulate a missing platform plugin.
     await expectLater(
       () => service.extractFrames(source, [0], width: 4, height: 4),
       throwsA(

@@ -11,6 +11,9 @@ final class StagedHarness {
     required this.dir,
     required this.harnessPath,
     required this.ephemeral,
+    this.packageConfigPath,
+    this.sourceFiles = const [],
+    this.generatedSourceDirectories = const [],
   });
 
   /// The project root the render runs under (the working directory for `flutter
@@ -27,6 +30,16 @@ final class StagedHarness {
   /// Whether [cleanup] deletes [dir].
   final bool ephemeral;
 
+  /// Explicit consumer package configuration for an external adapter.
+  final String? packageConfigPath;
+
+  /// Original authored inputs imported by this adapter, including targets
+  /// outside the consumer package's `lib/` directory.
+  final List<String> sourceFiles;
+
+  /// Adapter cache roots excluded from conservative authored-source scans.
+  final List<String> generatedSourceDirectories;
+
   /// Deletes [dir] when the staging was [ephemeral]; a no-op otherwise, and a
   /// no-op if it is already gone.
   void cleanup() {
@@ -38,8 +51,9 @@ final class StagedHarness {
 /// Writes [harnessSource] (plus any [extraFiles]) into `<projectDir>/<relativeDir>`
 /// and returns what `flutter test` needs to run it.
 ///
-/// The harness must live inside the project: `flutter test` resolves imports
-/// against the project's package config, and it statically imports the
+/// This legacy staging helper keeps server snippets inside their sandbox.
+/// Managed local renders stage outside the project and explicitly select its
+/// package configuration. Each adapter statically imports the
 /// composition under render so the tester JIT-compiles it. That static import is
 /// the only way to load arbitrary user code into a pre-built tester.
 ///

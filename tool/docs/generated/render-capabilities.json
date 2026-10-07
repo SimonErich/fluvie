@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "backends": [
+    {
+      "backend": "desktop",
+      "exportModes": [
+        "gif",
+        "imageSequence",
+        "mp4",
+        "transparent"
+      ],
+      "videoCodecs": [
+        "h264",
+        "h265"
+      ],
+      "pixelFormats": [
+        "yuv420p",
+        "yuv420p10le",
+        "yuv444p"
+      ],
+      "audio": true,
+      "snapshots": true,
+      "exactClipTiming": true,
+      "targetBitRate": true,
+      "crf": true,
+      "presets": true,
+      "evidence": [
+        "packages/fluvie/test/rendering/desktop_video_renderer_test.dart",
+        "packages/fluvie_media/test/frame_session_integration_test.dart",
+        "packages/fluvie/test/rendering/encoding/video_probe_service_test.dart",
+        "packages/fluvie/test/rendering/render_to_sandbox_test.dart"
+      ],
+      "notes": [
+        "Requires a Flutter capture host and a paired FFmpeg/ffprobe toolchain.",
+        "In-process Flutter Snapshot is prepared automatically; external browser snapshots require SnapshotService."
+      ]
+    },
+    {
+      "backend": "browser",
+      "exportModes": [
+        "gif",
+        "imageSequence",
+        "mp4",
+        "transparent"
+      ],
+      "videoCodecs": [
+        "h264",
+        "h265"
+      ],
+      "pixelFormats": [
+        "yuv420p",
+        "yuv420p10le",
+        "yuv444p"
+      ],
+      "audio": true,
+      "snapshots": true,
+      "exactClipTiming": false,
+      "targetBitRate": true,
+      "crf": true,
+      "presets": true,
+      "evidence": [
+        "packages/fluvie_web_encoder/test/web_video_renderer_test.dart",
+        "packages/fluvie/test/rendering/render_to_sandbox_test.dart"
+      ],
+      "notes": [
+        "Requires supported browser decoding and FFmpeg wasm.",
+        "Threaded wasm requires cross-origin isolation. Encoded bytes remain in browser memory."
+      ]
+    },
+    {
+      "backend": "mobile",
+      "exportModes": [
+        "mp4"
+      ],
+      "videoCodecs": [
+        "h264",
+        "h265"
+      ],
+      "pixelFormats": [
+        "yuv420p"
+      ],
+      "audio": true,
+      "snapshots": true,
+      "exactClipTiming": false,
+      "targetBitRate": true,
+      "crf": false,
+      "presets": false,
+      "evidence": [
+        "packages/fluvie_mobile_encoder/test/on_device_video_renderer_test.dart",
+        "packages/fluvie/test/rendering/render_to_sandbox_test.dart"
+      ],
+      "notes": [
+        "Requires an Android/iOS Flutter host and available device codecs.",
+        "Hardware decoding and encoding can vary by device."
+      ]
+    }
+  ]
+}

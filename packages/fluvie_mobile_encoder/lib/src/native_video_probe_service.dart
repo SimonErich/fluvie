@@ -7,12 +7,8 @@ import 'package:fluvie_mobile_encoder/src/mobile_channel.dart';
 
 /// A [VideoProbeService] backed by the platform: reads a clip's dimensions,
 /// frame count, and duration through the device (`MediaMetadataRetriever` on
-/// Android) over the mobile encoder channel, so it works on a real device
+/// Android, AVFoundation on iOS) over the mobile encoder channel, so it works on a real device
 /// where no ffmpeg/ffprobe binary is present.
-///
-/// On-device clip probing is Android-only today; iOS implements only encoding,
-/// so `probe` there throws a [FluvieMobileEncoderException] with code
-/// `unimplemented`.
 ///
 /// The reported dimensions are capped to [maxLongEdge] so a clip is decoded at
 /// most at the render's own resolution (it is composited into the render frame
@@ -44,7 +40,7 @@ final class NativeVideoProbeService implements VideoProbeService {
       });
     } on MissingPluginException {
       throw const FluvieMobileEncoderException(
-        'On-device clip probing is not available on this platform (Android only).',
+        'On-device clip probing is not available on this platform.',
         code: 'unimplemented',
       );
     } on PlatformException catch (error) {
@@ -60,16 +56,36 @@ final class NativeVideoProbeService implements VideoProbeService {
       );
     }
     final durationMs = (facts['durationMs'] as int?) ?? 0;
+    final durationUs = (facts['durationUs'] as num?)?.toDouble();
     final (width, height) = _capped(
       (facts['width'] as int?) ?? 0,
       (facts['height'] as int?) ?? 0,
     );
+    MediaTimeline? timeline;
+    if (facts['timeline'] case final Map<Object?, Object?> value) {
+      try {
+        timeline = MediaTimeline.fromJson(value.cast<String, Object?>());
+        if (timeline.frameCount != facts['frameCount']) {
+          throw const FormatException('Native frame count does not match its timestamp index.');
+        }
+      } on Object catch (error) {
+        throw FluvieMobileEncoderException(
+          'Invalid native video timeline: $error',
+          code: 'probe_failed',
+        );
+      }
+    }
     return VideoProbeResult(
+      timeline: timeline,
       codec: (facts['codec'] as String?) ?? 'h264',
       width: width,
       height: height,
       nbFrames: (facts['frameCount'] as int?) ?? 0,
-      durationSeconds: durationMs / 1000.0,
+      durationSeconds: durationUs == null
+          ? durationMs / 1000.0
+          : durationUs / Duration.microsecondsPerSecond,
+      declaredFps: (facts['fps'] as num?)?.toDouble(),
+      hasAudio: (facts['hasAudio'] as bool?) ?? false,
     );
   }
 

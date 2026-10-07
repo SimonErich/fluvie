@@ -1,24 +1,54 @@
 // fluvie:large-file-ok: the single exhaustive spec-to-preset dispatch; each case is one delegation
+import 'dart:ui' show Path;
+
+import 'package:flutter/animation.dart' show Curve;
+import 'package:flutter/painting.dart' show Alignment, Color;
 import 'package:fluvie/src/animation/animation.dart';
+import 'package:fluvie/src/core/anchor.dart';
+import 'package:fluvie/src/core/animation_phase.dart';
+import 'package:fluvie/src/core/audio_band.dart';
 import 'package:fluvie/src/core/edge.dart';
 import 'package:fluvie/src/core/errors/fluvie_spec_error.dart';
+import 'package:fluvie/src/core/keyframe.dart';
+import 'package:fluvie/src/core/svg_path.dart';
 import 'package:fluvie/src/core/time.dart';
+import 'package:fluvie/src/core/time_order.dart';
 import 'package:fluvie/src/core/trigger.dart';
+import 'package:fluvie/src/core/wipe_shape.dart';
+import 'package:fluvie/src/serialization/anchor_table.dart';
 import 'package:fluvie/src/serialization/animation_spec.dart';
+import 'package:fluvie/src/serialization/codecs/alignment_codec.dart';
+import 'package:fluvie/src/serialization/codecs/color_codec.dart';
+import 'package:fluvie/src/serialization/codecs/curve_codec.dart';
 import 'package:fluvie/src/serialization/codecs/enum_codec.dart';
 import 'package:fluvie/src/serialization/codecs/keyframe_codec.dart';
+import 'package:fluvie/src/serialization/codecs/particles_codec.dart';
 import 'package:fluvie/src/serialization/codecs/time_codec.dart';
+
+part 'animation_builder_args.dart';
+part 'animation_builder_keyframes.dart';
+part 'animation_builder_wave2.dart';
 
 /// Builds a real [Animation] from an [AnimationSpec].
 ///
-/// The spec's `at` already carries resolved (canonical) anchors, so no anchor
-/// table is needed here. Every preset in [knownAnimationPresets] and the raw
+/// The spec's `at` already carries resolved (canonical) anchors; [anchors] is
+/// the document's shared table, needed only by the reactive presets whose
+/// `track` argument names an `Audio.track` timeline. Every preset in
+/// [knownAnimationPresets], the multi-stop `keyframes` form, and the raw
 /// `from`/`to`/`fromTo` forms are handled.
-Animation buildAnimation(AnimationSpec spec) {
+Animation buildAnimation(AnimationSpec spec, AnchorTable anchors) {
+  final animation = _buildAnimation(spec, anchors);
+  final ease = spec.ease;
+  return ease == null || identical(animation.ease, ease) ? animation : animation.withEase(ease);
+}
+
+Animation _buildAnimation(AnimationSpec spec, AnchorTable anchors) {
   final at = spec.at ?? Trigger.auto;
   final delay = spec.delay ?? Time.zero;
   final args = spec.args;
   switch (spec.kind) {
+    case 'keyframes':
+      return _keyframesAnimation(spec);
     case 'fadeIn':
       return Animation.fadeIn(
         duration: spec.duration,
@@ -202,6 +232,83 @@ Animation buildAnimation(AnimationSpec spec) {
         repeat: spec.repeat,
         label: spec.label,
       );
+    case 'maskWipeIn':
+      return Animation.maskWipeIn(
+        shape: _wipeShape(args['shape']),
+        origin: _alignment(args['origin']),
+        duration: spec.duration,
+        ease: spec.ease,
+        spring: spec.spring,
+        delay: delay,
+        at: at,
+        stagger: spec.stagger,
+        repeat: spec.repeat,
+        label: spec.label,
+      );
+    case 'maskWipeOut':
+      return Animation.maskWipeOut(
+        shape: _wipeShape(args['shape']),
+        origin: _alignment(args['origin']),
+        duration: spec.duration,
+        ease: spec.ease,
+        spring: spec.spring,
+        delay: delay,
+        at: at,
+        stagger: spec.stagger,
+        repeat: spec.repeat,
+        label: spec.label,
+      );
+    case 'glitchIn':
+      return Animation.glitchIn(
+        from: _edge(args['from']) ?? Edge.left,
+        duration: spec.duration,
+        ease: spec.ease,
+        spring: spec.spring,
+        delay: delay,
+        at: at,
+        stagger: spec.stagger,
+        repeat: spec.repeat,
+        label: spec.label,
+      );
+    case 'glitchOut':
+      return Animation.glitchOut(
+        to: _edge(args['to']) ?? Edge.right,
+        duration: spec.duration,
+        ease: spec.ease,
+        spring: spec.spring,
+        delay: delay,
+        at: at,
+        stagger: spec.stagger,
+        repeat: spec.repeat,
+        label: spec.label,
+      );
+    case 'float':
+      return Animation.float(
+        amplitude: _double(args['amplitude']) ?? 0.04,
+        period: _timeOr(args['period'], const Time.seconds(2.5)),
+        seed: args['seed'] is String ? args['seed']! as String : null,
+        delay: delay,
+        at: at,
+        stagger: spec.stagger,
+        repeat: spec.repeat,
+        label: spec.label,
+      );
+    case 'pulse':
+      return Animation.pulse(
+        on: args['on'] == null
+            ? null
+            : decodeEnum(AudioBand.values, args['on'], 'band', path: const ['on']),
+        gain: _double(args['gain']) ?? 1.0,
+        track: _trackAnchor(args['track'], anchors),
+        min: _double(args['min']) ?? 0.97,
+        max: _double(args['max']) ?? 1.03,
+        period: _timeOr(args['period'], const Time.seconds(1.2)),
+        delay: delay,
+        at: at,
+        stagger: spec.stagger,
+        repeat: spec.repeat,
+        label: spec.label,
+      );
     case 'from':
       return Animation.from(
         decodeKeyframe(args['from']),
@@ -240,11 +347,16 @@ Animation buildAnimation(AnimationSpec spec) {
         label: spec.label,
       );
   }
-  // coverage:ignore-line unreachable AnimationSpec fromJson validates the kind before this dispatch
-  throw FluvieSpecError('Unknown animation kind "${spec.kind}"');
+  return _wave2Animation(spec, anchors);
 }
 
 Edge? _edge(Object? raw) => raw == null ? null : decodeEnum(Edge.values, raw, 'edge');
+
+WipeShape _wipeShape(Object? raw) =>
+    raw == null ? WipeShape.circle : decodeEnum(WipeShape.values, raw, 'shape');
+
+Alignment _alignment(Object? raw) =>
+    raw == null ? Alignment.center : decodeAlignment(raw, path: const ['origin']);
 
 double? _double(Object? raw) => raw is num ? raw.toDouble() : null;
 

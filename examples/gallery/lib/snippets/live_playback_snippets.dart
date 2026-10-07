@@ -11,26 +11,56 @@ import 'package:fluvie/fluvie.dart';
 /// A live player over a composition: the ticker drives the same frame clock
 /// capture steps, so what plays is what renders.
 // #docregion live-player
-Widget playLive(Video video) {
-  final playback = LivePlaybackController(fps: video.fps, totalFrames: video.totalFrames);
-  playback.play();
-  return LivePlayer(controller: playback, child: video);
+class PlayingVideo extends StatefulWidget {
+  const PlayingVideo({required this.video, this.previewMedia = false, super.key});
+
+  final Video video;
+  final bool previewMedia;
+
+  @override
+  State<PlayingVideo> createState() => _PlayingVideoState();
+}
+
+class _PlayingVideoState extends State<PlayingVideo> {
+  late LivePlaybackController playback;
+
+  @override
+  void initState() {
+    super.initState();
+    playback = createPlayback();
+  }
+
+  LivePlaybackController createPlayback() =>
+      LivePlaybackController(fps: widget.video.fps, totalFrames: widget.video.totalFrames)..play();
+
+  @override
+  void didUpdateWidget(PlayingVideo oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.video.fps != widget.video.fps ||
+        oldWidget.video.totalFrames != widget.video.totalFrames) {
+      playback.dispose();
+      playback = createPlayback();
+    }
+  }
+
+  @override
+  void dispose() {
+    playback.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => LivePlayer(
+    controller: playback,
+    child: widget.previewMedia ? PreviewMediaScope(composition: widget.video) : widget.video,
+  );
 }
 // #enddocregion live-player
 
 /// The same player with the composition's media pre-decoded, so a `Clip` paints
 /// real frames through the capture painter instead of its placeholder.
 // #docregion preview-media
-Widget playLiveWithMedia(Video video) {
-  final playback = LivePlaybackController(fps: video.fps, totalFrames: video.totalFrames);
-  playback.play();
-  return LivePlayer(
-    controller: playback,
-    // Clips decode at a 720px proxy resolution to bound memory; pass
-    // `maxClipEdge: null` for full source resolution.
-    child: PreviewMediaScope(composition: video),
-  );
-}
+Widget playLiveWithMedia(Video video) => PlayingVideo(video: video, previewMedia: true);
 // #enddocregion preview-media
 
 /// The playback surface: exact seeks, held states, and a segment that stops
@@ -68,3 +98,13 @@ Widget lateArrival({required bool revealed}) => LocalMotionScope(
   child: revealed ? const Text('surprise!').animate([Animation.fadeIn()]) : const SizedBox.shrink(),
 );
 // #enddocregion local-motion-scope
+
+/// A canvas editor's drag preview: per-element placement replacements over a
+/// built composition, without rebuilding it.
+// #docregion placed-overrides
+Widget dragPreview(Video video, Map<String, Placement> live, LivePlaybackController held) =>
+    LivePlayer(
+      controller: held,
+      child: PlacedOverrides(overrides: live, child: video),
+    );
+// #enddocregion placed-overrides

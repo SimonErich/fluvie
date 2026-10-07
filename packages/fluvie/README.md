@@ -8,10 +8,10 @@ when everything happens.
 [![license: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
 You import the Fluvie barrel for Fluvie's surface, and Flutter widgets with
-`hide Animation` so Fluvie's `Animation` wins:
+`hide Animation, Clip, Image, Tween` so Fluvie's `Animation` wins:
 
 ```dart
-import 'package:flutter/material.dart' hide Animation;
+import 'package:flutter/material.dart' hide Animation, Clip, Image, Tween;
 import 'package:fluvie/fluvie.dart';
 
 Video helloVideo() => Video(
@@ -60,11 +60,11 @@ See the
 dart pub add fluvie
 ```
 
-Rendering needs FFmpeg on your PATH. See the installation guide.
+The CLI provisions its encoding tools automatically in a user cache. See the installation guide.
 
 ## Documentation
 
-Full guides, the reference, and twelve runnable lessons live at
+Full guides, the reference, and runnable lessons live at
 [docs.fluvie.dev](https://docs.fluvie.dev). Start with getting started, then the
 guides.
 

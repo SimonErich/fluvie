@@ -21,8 +21,8 @@ final class FileTarget {
 
   /// This target's `package:` URI, or `null` when it does not live under `lib/`.
   ///
-  /// A file outside `lib/` has no package URI at all, so only an importer inside
-  /// the same package can reach it.
+  /// A file outside `lib/` uses a file URI; imports into `lib/` should still use
+  /// package URIs to preserve one identity for every library.
   String? get packageUri {
     final libDir = p.join(projectDir, 'lib');
     if (!p.isWithin(libDir, path)) return null;
@@ -40,12 +40,12 @@ final class FileTarget {
   /// `package:x/a.dart` and `../lib/a.dart` as different libraries, so its types
   /// would not match) and it trips `avoid_relative_lib_imports`.
   ///
-  /// Anywhere else the only identity is a relative path, which means only an
-  /// importer inside the same package can reach it: a relative import cannot
-  /// escape a package. The staged render harness lives in the project, so it can;
-  /// the preview app does not, which is why it requires [packageUri].
+  /// An external adapter can also import a file outside `lib/` by absolute URI.
   String importFrom(String fromDir) =>
       packageUri ?? p.url.joinAll(p.split(p.relative(path, from: fromDir)));
+
+  /// Canonical import for an adapter outside the source project.
+  String get externalImport => packageUri ?? File(path).uri.toString();
 }
 
 /// Whether [arg] names a composition file rather than a legacy registry key.
@@ -60,6 +60,9 @@ FileTarget resolveFileTarget({required String arg, required String entry, String
   // Normalized, so `./my_clip.dart` does not leave a `/.` segment in the project
   // path the CLI then prints and stages into.
   final path = p.normalize(p.absolute(arg));
+  if (!RegExp(r'^[A-Za-z_$][A-Za-z0-9_$]*$').hasMatch(entry)) {
+    throw CliFailure('Invalid entry "$entry": expected a top-level Dart function name.');
+  }
   if (!File(path).existsSync()) {
     throw CliFailure('No such composition file: "$arg".');
   }

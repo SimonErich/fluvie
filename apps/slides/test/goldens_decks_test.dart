@@ -5,7 +5,6 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie_presenter/fluvie_presenter.dart';
-import 'package:fluvie_presenter/src/sidebar/slide_preview_frame.dart';
 import 'package:slides/deck/deck_registry.dart';
 
 /// One representative slide per tutorial deck, settled at its final step —

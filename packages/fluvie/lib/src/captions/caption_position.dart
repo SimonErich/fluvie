@@ -14,17 +14,31 @@ import 'package:meta/meta.dart';
 @immutable
 final class CaptionPosition {
   /// The lower third of the canvas — the default caption placement.
-  const CaptionPosition.bottomThird() : alignment = const Alignment(0, 1 / 3), safeArea = 64;
+  /// Its inset adapts to small canvases, up to [safeArea] logical pixels.
+  const CaptionPosition.bottomThird()
+    : alignment = const Alignment(0, 1 / 3),
+      safeArea = 64,
+      adaptiveSafeArea = true;
 
   // coverage:ignore-start const ctor artifacts caption_values_coverage_test pins each preset alignment and safe area
   /// The upper third of the canvas.
-  const CaptionPosition.topThird() : alignment = const Alignment(0, -1 / 3), safeArea = 64;
+  const CaptionPosition.topThird()
+    : alignment = const Alignment(0, -1 / 3),
+      safeArea = 64,
+      adaptiveSafeArea = true;
 
   /// Dead center, with no safe-area inset.
-  const CaptionPosition.center() : alignment = Alignment.center, safeArea = 0;
+  const CaptionPosition.center()
+    : alignment = Alignment.center,
+      safeArea = 0,
+      adaptiveSafeArea = false;
 
   /// An explicit [alignment] with an optional [safeArea] inset.
-  const CaptionPosition.custom(this.alignment, {this.safeArea = 0});
+  const CaptionPosition.custom(
+    this.alignment, {
+    this.safeArea = 0,
+    this.adaptiveSafeArea = false,
+  });
   // coverage:ignore-end
 
   /// Where on the canvas the caption block aligns.
@@ -34,13 +48,22 @@ final class CaptionPosition {
   /// nearest canvas edge along the alignment axis.
   final double safeArea;
 
+  /// Caps [safeArea] at one twelfth of the canvas's shorter side.
+  /// Presets adapt automatically; custom positions keep an exact inset unless
+  /// explicitly opted in. Typography remains controlled by `CaptionStyle`.
+  final bool adaptiveSafeArea;
+
   @override
   bool operator ==(Object other) =>
-      other is CaptionPosition && other.alignment == alignment && other.safeArea == safeArea;
+      other is CaptionPosition &&
+      other.alignment == alignment &&
+      other.safeArea == safeArea &&
+      other.adaptiveSafeArea == adaptiveSafeArea;
 
   @override
-  int get hashCode => Object.hash(CaptionPosition, alignment, safeArea);
+  int get hashCode => Object.hash(CaptionPosition, alignment, safeArea, adaptiveSafeArea);
 
   @override
-  String toString() => 'CaptionPosition($alignment, safeArea: $safeArea)';
+  String toString() =>
+      'CaptionPosition($alignment, safeArea: $safeArea, adaptiveSafeArea: $adaptiveSafeArea)';
 }

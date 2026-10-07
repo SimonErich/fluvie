@@ -1,10 +1,13 @@
+---
+import Capabilities from './Capabilities.astro';
+---
   <!-- ============ 9 · PICK YOUR SEAT ============ -->
   <section data-section="seats" aria-labelledby="seats-h" style="position:relative; padding:90px 24px;">
     <div style="max-width:1180px; margin:0 auto;">
       <div style="max-width:720px;">
         <span style="display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.06em; color:var(--acc); border:1px solid var(--line); padding:6px 12px; border-radius:30px; background:#fff;"><span aria-hidden="true" style="color:var(--acc2);">[</span> 09 &middot; PICK YOUR SEAT <span aria-hidden="true" style="color:var(--acc2);">]</span></span>
         <h2 id="seats-h" class="flv-h2" style="font-family:'Sora',sans-serif; font-weight:800; font-size:40px; letter-spacing:-0.02em; line-height:1.08; margin:18px 0 0;">Same <span style="font-family:'JetBrains Mono'; font-size:30px; color:var(--acc);">Video</span>, four front doors.</h2>
-        <p style="font-size:17.5px; line-height:1.6; color:var(--soft); margin:18px 0 0;">Scrub it live in the browser. Render it from the CLI. Stand up your own render server. Or let an assistant shoot it for you. The engine is the same. Only the trigger changes.</p>
+        <p style="font-size:17.5px; line-height:1.6; color:var(--soft); margin:18px 0 0;">Scrub it live in the browser. Render it from the CLI. Stand up your own render server. Or let an assistant shoot it for you. These paths share the authoring model and timing engine; each backend has its own capabilities.</p>
       </div>
 
       <div style="margin-top:38px; border-radius:20px; border:1px solid rgba(255,255,255,0.08); background:#06070F; overflow:hidden; box-shadow:0 36px 70px -36px rgba(7,11,24,0.55);">
@@ -22,10 +25,10 @@
           </div>
           <div style="text-align:center;">
             <div id="seatGlyph" aria-hidden="true" style="display:inline-flex; width:120px; height:120px; align-items:center; justify-content:center; border-radius:20px; background:radial-gradient(circle at 50% 40%,#16357f,#06070F); border:1px solid rgba(255,255,255,0.1); font-size:48px; color:var(--acc2); box-shadow:0 24px 50px -24px rgba(0,0,0,0.6);">&#9654;</div>
-            <p style="font-family:'JetBrains Mono'; font-size:12px; color:var(--dtext); margin:20px auto 0; max-width:240px;">The same video, whichever door you use.</p>
+            <p style="font-family:'JetBrains Mono'; font-size:12px; color:var(--dtext); margin:20px auto 0; max-width:240px;">One composition, several rendering paths.</p>
           </div>
         </div>
       </div>
+      <Capabilities />
     </div>
   </section>
-

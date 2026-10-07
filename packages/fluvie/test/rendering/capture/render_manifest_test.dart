@@ -3,6 +3,24 @@ import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/rendering/capture/render_manifest.dart';
 
 void main() {
+  test('output verification intent survives the manifest without changing capture facts', () {
+    final manifest = RenderManifest(
+      width: 100,
+      height: 80,
+      fps: 30,
+      frameCount: 60,
+      framesFileName: 'frames.rgba',
+      outputFileName: 'out.gif',
+      renderDigest: 'proof',
+      ffmpegArgs: const ['out.gif'],
+      outputIntent: const {'codec': 'gif', 'hasAudio': false},
+    );
+    final restored = RenderManifest.fromJson(manifest.toJson());
+    expect(restored.outputIntent, {'codec': 'gif', 'hasAudio': false});
+    expect(restored.fps, 30);
+    expect(() => restored.outputIntent!['codec'] = 'h264', throwsUnsupportedError);
+  });
+
   RenderManifest demo() => RenderManifest(
     width: 320,
     height: 240,

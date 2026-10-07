@@ -1,0 +1,82 @@
+{
+  "fluvieSpec": 1,
+  "size": {"width": 640, "height": 360},
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "90f",
+      "layout": "canvas",
+      "background": {"kind": "color", "color": "#101018"},
+      "children": [
+        {
+          "id": "el-line",
+          "type": "Shape",
+          "kind": "line",
+          "from": {"x": 40, "y": 300},
+          "to": {"x": 240, "y": 300},
+          "color": "#6C5CE7",
+          "strokeWidth": 4,
+          "reveal": "12f"
+        },
+        {
+          "id": "el-rect",
+          "type": "Shape",
+          "kind": "rect",
+          "rect": {"x": 40, "y": 40, "w": 120, "h": 80}
+        },
+        {
+          "id": "el-circle",
+          "type": "Shape",
+          "kind": "circle",
+          "center": {"x": 320, "y": 90},
+          "radius": 40,
+          "color": "#2ECC8F"
+        },
+        {
+          "id": "el-path",
+          "type": "Shape",
+          "kind": "path",
+          "path": "M 420 40 L 520 40 Q 560 90 520 140 L 420 140 Z"
+        },
+        {
+          "id": "el-arrow",
+          "type": "Arrow",
+          "from": {"x": 80, "y": 200},
+          "to": {"x": 300, "y": 130},
+          "headLength": 18,
+          "animate": [{"preset": "maskWipeIn", "shape": "rect", "duration": "10f"}]
+        },
+        {
+          "id": "el-connector",
+          "type": "Connector",
+          "from": {"x": 360, "y": 250},
+          "to": {"x": 560, "y": 320},
+          "elbow": true,
+          "animate": [{"preset": "float", "amplitude": 0.05, "period": "2s"}]
+        },
+        {
+          "id": "el-photo",
+          "type": "Image",
+          "source": {"kind": "asset", "value": "fixtures/photo.png"},
+          "fit": "cover",
+          "cornerRadius": 12,
+          "crop": {"x": 0.1, "y": 0.1, "w": 0.8, "h": 0.8},
+          "frame": {"style": "card", "radius": 16, "elevation": 20},
+          "transform": {"x": 0.8, "y": 0.25, "w": 0.25, "h": 0.35, "opacity": 0.9},
+          "animate": [{"preset": "pulse", "min": 0.98, "max": 1.02}]
+        },
+        {
+          "id": "el-clip",
+          "type": "Clip",
+          "source": {"kind": "asset", "value": "fixtures/broll.mp4"},
+          "trim": {"from": "1s", "to": "4s"},
+          "fit": "cover",
+          "volume": 0.5,
+          "poster": {"kind": "asset", "value": "fixtures/poster.png"},
+          "transform": {"x": 0.2, "y": 0.75, "w": 0.3, "h": 0.3},
+          "animate": [{"preset": "glitchIn", "from": "left", "duration": "8f"}]
+        }
+      ]
+    }
+  ]
+}

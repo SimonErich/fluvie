@@ -1,0 +1,157 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "150f",
+      "layout": "canvas",
+      "background": {
+        "kind": "color",
+        "color": "#0E0E14"
+      },
+      "children": [
+        {
+          "id": "el-site",
+          "type": "DeviceFrame",
+          "variant": "browser",
+          "url": "https://fluvie.dev",
+          "child": {
+            "type": "Markdown",
+            "source": "# Fluvie\n\nDeclare the video.",
+            "reveal": "30f",
+            "transform": {
+              "x": 0.5,
+              "y": 0.5,
+              "w": 0.9,
+              "h": 0.9
+            },
+            "animate": [
+              {
+                "preset": "fadeIn",
+                "duration": "20f"
+              }
+            ]
+          },
+          "transform": {
+            "x": 0.32,
+            "y": 0.42,
+            "w": 0.55,
+            "h": 0.7
+          }
+        },
+        {
+          "id": "el-focus",
+          "type": "Spotlight",
+          "region": {
+            "x": 40,
+            "y": 30,
+            "w": 180,
+            "h": 120
+          },
+          "reveal": "18f",
+          "child": {
+            "type": "Image",
+            "source": {
+              "kind": "asset",
+              "value": "dashboard.png"
+            },
+            "fit": "cover"
+          },
+          "transform": {
+            "x": 0.78,
+            "y": 0.3,
+            "w": 0.4,
+            "h": 0.45
+          }
+        },
+        {
+          "id": "el-note",
+          "type": "Callout",
+          "label": "Active users",
+          "target": {
+            "x": 220,
+            "y": 130
+          },
+          "labelAt": {
+            "x": 24,
+            "y": 20
+          },
+          "color": "#6C5CE7",
+          "child": {
+            "type": "Box",
+            "decoration": {
+              "color": "#1B1B24",
+              "cornerRadius": 16
+            },
+            "animate": [
+              {
+                "preset": "pop"
+              }
+            ]
+          },
+          "transform": {
+            "x": 0.78,
+            "y": 0.78,
+            "w": 0.4,
+            "h": 0.38
+          }
+        },
+        {
+          "id": "el-frozen",
+          "type": "Snapshot",
+          "fit": "cover",
+          "child": {
+            "type": "Text",
+            "text": "frozen once",
+            "style": {
+              "fontSize": 24,
+              "color": "#F0F0F5"
+            }
+          },
+          "transform": {
+            "x": 0.32,
+            "y": 0.88,
+            "w": 0.5,
+            "h": 0.16
+          }
+        }
+      ]
+    },
+    {
+      "duration": "120f",
+      "children": [
+        {
+          "id": "el-chapter",
+          "type": "TitleCard",
+          "title": "Wrapped",
+          "subtitle": "One child each",
+          "reveal": "20f",
+          "child": {
+            "type": "Box",
+            "color": "#101018"
+          }
+        },
+        {
+          "id": "el-caption",
+          "type": "LowerThird",
+          "name": "Fluvie",
+          "title": "Wrapper elements",
+          "reveal": "12f",
+          "child": {
+            "type": "DeviceFrame",
+            "variant": "phone",
+            "notch": false,
+            "child": {
+              "type": "Mermaid",
+              "source": "graph TD; A-->B;"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import 'package:fluvie/src/core/anchor.dart';
 import 'package:fluvie/src/core/contracts/beat_grid.dart';
 import 'package:fluvie/src/core/defaults.dart';
 import 'package:fluvie/src/core/transition.dart';
+import 'package:fluvie/src/timing/plan/element_plan.dart';
 import 'package:fluvie/src/timing/plan/scene_plan.dart';
 import 'package:meta/meta.dart';
 
@@ -18,6 +19,7 @@ final class CompositionPlan {
   const CompositionPlan({
     required this.fps,
     required this.scenes,
+    this.overlays = const [],
     this.transitions = const [],
     this.defaults,
     this.themeDefaults,
@@ -31,6 +33,14 @@ final class CompositionPlan {
   /// The scenes in playback order; total duration is their sum minus the
   /// overlapping transition windows.
   final List<ScenePlan> scenes;
+
+  /// The elements that belong to no scene, on the whole composition's clock.
+  ///
+  /// Deliberately not in [scenes]: the offset resolver reads [scenes] to place
+  /// every boundary, so an overlay riding there would lengthen the composition
+  /// it is only supposed to sit on top of. Their windows resolve against the
+  /// root scope instead, which is what makes one of them span every cut.
+  final List<ElementPlan> overlays;
 
   /// The boundary transitions, one per adjacent scene pair (`null` = cut);
   /// the empty default means all-cut and resolves byte-identically to a plan
@@ -57,6 +67,7 @@ final class CompositionPlan {
   @override
   String toString() =>
       'CompositionPlan(fps: $fps, scenes: ${scenes.length}, '
+      'overlays: ${overlays.length}, '
       'transitions: ${transitions.length}, defaults: $defaults, '
       'defaultBeatGrid: $defaultBeatGrid, trackBeatGrids: ${trackBeatGrids.length})';
 }

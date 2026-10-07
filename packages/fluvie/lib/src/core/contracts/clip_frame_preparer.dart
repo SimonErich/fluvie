@@ -19,8 +19,11 @@ abstract interface class ClipFramePreparer {
   ///
   /// The clip is alive over `[windowStart, windowStart + windowLength)` in
   /// composition space at [compFps]; the trimmed source spans
-  /// `[trimStartFrames, trimEndFrames)`. The source fps comes from the clip's
-  /// already-probed metadata. Idempotent per source.
+  /// `[trimStartFrames, trimEndFrames)`, read at [speed] (negative plays it
+  /// backwards). The source fps comes from the clip's already-probed metadata.
+  ///
+  /// A source painted by more than one element registers once per window, and
+  /// re-registering an identical window is a no-op.
   void registerClipPlan({
     required MediaSource source,
     required int windowStart,
@@ -28,6 +31,10 @@ abstract interface class ClipFramePreparer {
     required int compFps,
     required int trimStartFrames,
     required int trimEndFrames,
+    double trimStartOffsetFrames,
+    double trimEndOffsetFrames,
+    double speed,
+    List<double>? sourceTimeMap,
   });
 
   /// Decodes (into the bounded window) the clip frames composition frame

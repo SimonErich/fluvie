@@ -3,9 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluvie/fluvie.dart' show LivePlaybackController;
+import 'package:fluvie/fluvie.dart' show LivePlaybackController, LivePlayer;
 import 'package:fluvie_editor/fluvie_editor.dart';
-import 'package:fluvie_editor/src/canvas/slide_deriver.dart';
 import 'package:fluvie_presenter/fluvie_presenter.dart' show LiveScenePlayer;
 import 'package:obers_ui/obers_ui.dart' show OiThemeData, OiThemeScope;
 
@@ -150,5 +149,79 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(controller.scale, lessThan(before));
+  });
+
+  testWidgets('the transport frame is the stage frame (the shared playhead)', (tester) async {
+    final doc = EditorDocument.fromJson(_deck());
+    final derived = SlideDeriver().derive(doc, 0);
+    final transport = SlideTransport(
+      fps: 30,
+      length: derived.totalFrames,
+      initialFrame: derived.settleFrame,
+    );
+    addTearDown(transport.dispose);
+    const key = Key('editor-canvas');
+    Widget host({SlideTransport? transport}) => OiThemeScope(
+      data: OiThemeData.dark(),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RepaintBoundary(
+            key: key,
+            child: SizedBox(
+              width: 320,
+              height: 180,
+              child: EditorCanvas(document: doc, slide: 0, fitMargin: 0, transport: transport),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(host());
+    await tester.pump();
+    await tester.pump();
+    final settled = await _bytes(tester, await _snapshot(tester, key));
+
+    // A transport holding the settle frame renders the same still.
+    await tester.pumpWidget(host(transport: transport));
+    await tester.pump();
+    await tester.pump();
+    expect(await _bytes(tester, await _snapshot(tester, key)), settled);
+
+    // A scrub to mid-entrance renders differently, frame-exactly from the
+    // transport's clock.
+    transport.seek(5);
+    await tester.pump();
+    await tester.pump();
+    final scrubbed = await _bytes(tester, await _snapshot(tester, key));
+    expect(scrubbed, isNot(settled));
+
+    // Seeking back settles the stage again.
+    transport.seek(derived.settleFrame);
+    await tester.pump();
+    await tester.pump();
+    expect(await _bytes(tester, await _snapshot(tester, key)), settled);
+  });
+
+  testWidgets('the canvas mounts the transport clock itself, never a copy', (tester) async {
+    final doc = EditorDocument.fromJson(_deck());
+    final transport = SlideTransport(fps: 30, length: 90);
+    addTearDown(transport.dispose);
+    await tester.pumpWidget(
+      OiThemeScope(
+        data: OiThemeData.dark(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            width: 320,
+            height: 180,
+            child: EditorCanvas(document: doc, slide: 0, fitMargin: 0, transport: transport),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final player = tester.widget<LivePlayer>(find.byType(LivePlayer));
+    expect(identical(player.controller, transport.controller), isTrue);
   });
 }

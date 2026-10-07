@@ -1,0 +1,111 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "audio": [
+    {
+      "kind": "music",
+      "source": {
+        "kind": "asset",
+        "value": "media/bed.mp3"
+      },
+      "volume": 0.6,
+      "lane": "a1"
+    },
+    {
+      "kind": "music",
+      "source": {
+        "kind": "asset",
+        "value": "media/scratch.mp3"
+      },
+      "lane": "a2"
+    },
+    {
+      "kind": "sfx",
+      "source": {
+        "kind": "asset",
+        "value": "media/whoosh.wav"
+      },
+      "at": {
+        "kind": "at",
+        "time": "20f"
+      },
+      "lane": "a1"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "v1",
+      "name": "Video 1"
+    },
+    {
+      "id": "v2",
+      "name": "Overlay",
+      "locked": true,
+      "height": 40
+    },
+    {
+      "id": "a1",
+      "name": "Music",
+      "kind": "audio",
+      "height": 56
+    },
+    {
+      "id": "a2",
+      "name": "Scratch",
+      "kind": "audio",
+      "muted": true
+    }
+  ],
+  "scenes": [
+    {
+      "duration": "120f",
+      "layout": "canvas",
+      "background": {
+        "kind": "color",
+        "color": "#101018"
+      },
+      "children": [
+        {
+          "id": "el-broll",
+          "type": "Clip",
+          "source": {
+            "kind": "asset",
+            "value": "media/cam.mp4"
+          },
+          "show": {
+            "from": "0f",
+            "to": "60f"
+          },
+          "transform": {
+            "x": 0.5,
+            "y": 0.5,
+            "w": 1,
+            "h": 1
+          },
+          "lane": "v1"
+        },
+        {
+          "id": "el-title",
+          "type": "Text",
+          "text": "Lanes",
+          "style": {
+            "fontSize": 48
+          },
+          "show": {
+            "from": "20f",
+            "to": "90f"
+          },
+          "transform": {
+            "x": 0.5,
+            "y": 0.8
+          },
+          "lane": "v2"
+        }
+      ]
+    }
+  ]
+}

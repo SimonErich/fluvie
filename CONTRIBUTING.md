@@ -35,6 +35,18 @@ render-integration tests.
    ships in `lib/src/fake/` and is exported from the barrel; a fake only this
    repository's tests use lives in `test/**/fakes/` next to its suite.
 
+## Architecture and docs
+
+- Dependencies flow from `core` to `timing` to feature layers. Diagnostics is a
+  leaf layer, and packages do not import another package's `src/` directory.
+- Keep rendering deterministic: use the frame index as the clock and seed any
+  randomness used by rendered output.
+- Write handbook examples in runnable gallery snippets and connect them with
+  `code-excerpt` directives. See
+  [documentation/contributing/overview.md](documentation/contributing/overview.md).
+- The shared analyzer config sets the Dart page width. Keep production files
+  within the repository's enforced size limits; tests can group related cases.
+
 ## Where things live
 
 - `packages/fluvie` — the library. `packages/fluvie_lints` — custom lints.

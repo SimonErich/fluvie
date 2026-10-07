@@ -12,6 +12,14 @@ void main() {
   const apiTokens = {'API_TOKEN': 'tok', 'CLEANUP_TOKEN': 'cleanup'};
 
   group('buildDocs', () {
+    test('default docs work offline without a repository checkout', () {
+      final config = FluvieServerConfig.fromEnv(const {'FLUVIE_ENABLE_API': 'false'});
+      final docs = buildDocs(config)!;
+      expect(docs.length, greaterThan(60));
+      expect(docs.get('getting-started/authoring-with-assets.md'), isNotNull);
+      expect(docs.search('local assets').first.path, 'getting-started/authoring-with-assets.md');
+    });
+
     test('loads the corpus when docs are enabled', () {
       final dir = Directory.systemTemp.createTempSync('fluvie_server_rt_');
       addTearDown(() => dir.deleteSync(recursive: true));

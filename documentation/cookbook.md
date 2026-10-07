@@ -5,7 +5,7 @@ task with the shortest path to a working result. For the full story behind a
 recipe, follow its guide link.
 
 If you would rather learn in order, start with
-[your first video](getting-started/your-first-video.md) and the twelve runnable
+[your first video](getting-started/your-first-video.md) and the runnable
 lessons in the example app.
 
 ## Text and motion

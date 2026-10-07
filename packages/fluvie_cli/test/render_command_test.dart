@@ -235,17 +235,23 @@ void main() {
         '--no-cache',
       ]);
 
-      verify(
-        () => runner.run('flutter', [
-          'test',
-          '--no-pub',
-          'test/render/capture_harness_test.dart',
-          '--dart-define=FLUVIE_RENDER_KEY=demo',
-          '--dart-define=FLUVIE_RENDER_OUT_DIR=${sandbox.path}',
-          '--dart-define=FLUVIE_RENDER_FRAMES=8',
-          '--dart-define=FLUVIE_RENDER_NO_CACHE=true',
-        ], workingDirectory: 'example'),
-      ).called(1);
+      final argv =
+          verify(
+                () => runner.run('flutter', captureAny(), workingDirectory: 'example'),
+              ).captured.single
+              as List<String>;
+      expect(argv.take(3), ['test', '--no-pub', 'test/render/capture_harness_test.dart']);
+      expect(argv, contains('--dart-define=FLUVIE_RENDER_KEY=demo'));
+      expect(argv, contains('--dart-define=FLUVIE_RENDER_OUT_DIR=${sandbox.path}'));
+      expect(argv, contains('--dart-define=FLUVIE_RENDER_FRAMES=8'));
+      expect(argv, contains('--dart-define=FLUVIE_RENDER_NO_CACHE=true'));
+      expect(
+        argv.any(
+          (arg) =>
+              RegExp(r'^--dart-define=FLUVIE_COMPOSITION_FINGERPRINT=[a-f0-9]{64}$').hasMatch(arg),
+        ),
+        isTrue,
+      );
     });
 
     test('without --project the example project is auto-discovered', () async {
@@ -363,6 +369,21 @@ dependencies:
     sdk: flutter
   fluvie: ^0.2.0
 ''');
+      File('${project.path}/.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          jsonEncode({
+            'configVersion': 2,
+            'packages': [
+              {'name': 'fluvie', 'rootUri': 'file:///unused/fluvie', 'packageUri': 'lib/'},
+              {
+                'name': 'flutter_test',
+                'rootUri': 'file:///unused/flutter_test',
+                'packageUri': 'lib/',
+              },
+            ],
+          }),
+        );
       composition = '${project.path}/example_video.dart';
       File(composition).writeAsStringSync('Video build() => throw 0;');
       addTearDown(() {
@@ -390,7 +411,9 @@ dependencies:
 
       expect(code, 0, reason: err.toString());
       final argv = capturedArgv();
-      expect(argv, contains('.fluvie/example_video_dart/harness_test.dart'));
+      expect(argv.any((a) => a.endsWith('/harness_test.dart')), isTrue);
+      expect(Directory('${project.path}/.fluvie').existsSync(), isFalse);
+      expect(argv, contains('--packages=${project.path}/.dart_tool/package_config.json'));
       expect(argv, isNot(contains('test/render/capture_harness_test.dart')));
     });
 
@@ -402,10 +425,10 @@ dependencies:
       await execute([composition, '--out', outPath]);
 
       final harness = File(
-        '${project.path}/.fluvie/example_video_dart/harness_test.dart',
+        capturedArgv().singleWhere((a) => a.endsWith('/harness_test.dart')),
       ).readAsStringSync();
-      expect(harness, contains("import '../../example_video.dart' as target;"));
-      expect(harness, contains('video: target.build(),'));
+      expect(harness, contains("import '${File(composition).uri}' as target;"));
+      expect(harness, contains('final video = target.build();'));
     });
 
     test('the staged harness survives the render, so the kernel cache hits again', () async {
@@ -417,7 +440,7 @@ dependencies:
       await execute([composition, '--out', outPath]);
 
       expect(
-        File('${project.path}/.fluvie/example_video_dart/harness_test.dart').existsSync(),
+        File(capturedArgv().singleWhere((a) => a.endsWith('/harness_test.dart'))).existsSync(),
         isTrue,
       );
     });
@@ -440,26 +463,25 @@ dependencies:
       await execute([composition, '--out', outPath, '--entry', 'introClipVideo']);
 
       expect(
-        File('${project.path}/.fluvie/example_video_dart/harness_test.dart').readAsStringSync(),
-        contains('video: target.introClipVideo(),'),
+        File(
+          capturedArgv().singleWhere((a) => a.endsWith('/harness_test.dart')),
+        ).readAsStringSync(),
+        contains('final video = target.introClipVideo();'),
       );
     });
 
-    test(
-      'the frame cache is off by default: an edited file must not replay stale frames',
-      () async {
-        // The cache keys on the config and the composition key, never on the
-        // composition itself, so an edited file with the same size and frame
-        // count would replay its old frames.
-        stubProbe();
-        stubCapture();
-        stubEncode();
-
-        await execute([composition, '--out', outPath]);
-
-        expect(capturedArgv(), contains('--dart-define=FLUVIE_RENDER_NO_CACHE=true'));
-      },
-    );
+    test('the cache includes a full input fingerprint by default', () async {
+      stubProbe();
+      stubCapture();
+      stubEncode();
+      await execute([composition, '--out', outPath]);
+      final argv = capturedArgv();
+      expect(argv, isNot(contains('--dart-define=FLUVIE_RENDER_NO_CACHE=true')));
+      expect(
+        argv.any((arg) => arg.startsWith('--dart-define=FLUVIE_COMPOSITION_FINGERPRINT=')),
+        isTrue,
+      );
+    });
 
     test('--cache opts back into the frame cache', () async {
       stubProbe();
@@ -483,7 +505,7 @@ dependencies:
       expect(capturedArgv(), contains('--dart-define=FLUVIE_RENDER_KEY=example_video.dart'));
     });
 
-    test('the pubspec assets block is synced before the render', () async {
+    test('render discovers assets without rewriting the pubspec', () async {
       stubProbe();
       stubCapture();
       stubEncode();
@@ -495,7 +517,7 @@ dependencies:
 
       expect(
         File('${project.path}/pubspec.yaml').readAsStringSync(),
-        contains('assets/images/'),
+        isNot(contains('assets/images/')),
       );
     });
 
@@ -584,12 +606,14 @@ dependencies:
       verifyNever(() => runner.run('ffmpeg', _encodeArgs, workingDirectory: sandbox.path));
     });
 
-    test('missing --out is a usage error (64)', () async {
-      final code = await execute(['demo']);
-
-      expect(code, 64);
-      expect(err.toString(), contains('--out'));
-      verifyNever(() => runner.run(any(), any()));
+    test('missing --out uses the project build/fluvie directory', () async {
+      stubProbe();
+      stubCapture();
+      stubEncode();
+      final projectDir = File(outPath).parent.path;
+      final code = await execute(['demo', '--project', projectDir]);
+      expect(code, 0, reason: err.toString());
+      expect(File('$projectDir/build/fluvie/demo.mp4').existsSync(), isTrue);
     });
 
     test('a missing key is a usage error (64)', () async {

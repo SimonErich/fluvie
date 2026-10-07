@@ -19,18 +19,20 @@ import 'package:fluvie_validate/fluvie_validate.dart';
 Future<void> main() async {
   final analyzer = FluvieCodeAnalyzer(projectRoot: Directory.current);
 
-  final diagnostics = await analyzer.analyze('''
+  try {
+    final diagnostics = await analyzer.analyze('''
 import 'package:fluvie/fluvie.dart';
 
 Video build() => Video(scenes: const []);
 ''');
 
-  if (diagnostics.isEmpty) {
-    stderr.writeln('No problems.');
-  } else {
-    for (final diagnostic in diagnostics) {
-      stderr.writeln(diagnostic);
+    if (diagnostics.isEmpty) {
+      stderr.writeln('No problems.');
+    } else {
+      diagnostics.forEach(stderr.writeln);
     }
+  } finally {
+    await analyzer.dispose();
   }
 }
 ```
@@ -38,3 +40,17 @@ Video build() => Video(scenes: const []);
 `projectRoot` is any directory whose package resolution can see `package:fluvie`
 (the workspace root works). This package backs the validate path in
 [fluvie_server](https://pub.dev/packages/fluvie_server) and the Fluvie Playground.
+
+Use `analyzeFile('lib/my_video.dart')` to validate an existing composition in
+place. Relative imports resolve from its original directory, file changes refresh
+in the reusable analysis context, and this path writes no scratch file.
+Diagnostics include 1-based locations, stable `toJson()` data, and readable
+`toString()` output. Call `dispose()` after the final request. The CLI exposes
+this through `fluvie validate lib/my_video.dart --json`.
+
+Fluvie warnings honor standard `ignore`, `ignore_for_file` and `type=lint`
+comment directives, including when analyzed programmatically. Text inside a
+string is never a directive. Compiler errors remain visible unless their own
+analyzer diagnostic is explicitly suppressed. The `nondeterministic_video`
+warning catches obvious clock and unseeded random reads in authored video code;
+runtime review checks sampled pixels across seeking and a fresh mount.

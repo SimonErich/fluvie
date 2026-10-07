@@ -17,7 +17,9 @@ import 'package:fluvie/src/core/media/media_source.dart' show MediaSource;
 /// file render and the in-browser sandbox render so the two never diverge.
 Set<MediaSource> collectCompositionMedia(Widget composition, {GenerativeResolver? generative}) {
   final video = compositionVideo(composition);
-  return video == null ? const {} : collectMediaSources(video.scenes, generative: generative);
+  return video == null
+      ? const {}
+      : collectMediaSources(video.scenes, generative: generative, overlays: video.overlays);
 }
 
 /// Every declared [GenerativeSource] in [composition]'s scenes, or an empty set
@@ -28,7 +30,9 @@ Set<MediaSource> collectCompositionMedia(Widget composition, {GenerativeResolver
 /// so a bare or wrapped `Video` resolves its generative declarations alike.
 Set<GenerativeSource> collectCompositionGenerative(Widget composition) {
   final video = compositionVideo(composition);
-  return video == null ? const {} : collectGenerativeSources(video.scenes);
+  return video == null
+      ? const {}
+      : collectGenerativeSources(video.scenes, overlays: video.overlays);
 }
 
 /// The first [Video] at or below [composition], descending only the transparent

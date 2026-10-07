@@ -102,6 +102,26 @@ void main() {
   });
 
   group('syncAssetsBlock', () {
+    test('structured asset declarations, comments and package assets survive merging', () {
+      writePubspec('''
+name: demo
+flutter:
+  assets:
+    # Keep the existing flavor-specific declaration.
+    - path: media/logo.png
+      flavors: [production]
+    - packages/other/images/badge.png
+''');
+      asset(p.join('assets', 'nested', 'cat.png'));
+      expect(syncAssetsBlock(project.path), isTrue);
+      final after = readPubspec();
+      expect(after, contains('path: media/logo.png'));
+      expect(after, contains('flavors: [production]'));
+      expect(after, contains('packages/other/images/badge.png'));
+      expect(after, contains('# Keep the existing flavor-specific declaration.'));
+      expect(after, contains('assets/nested/'));
+      expect(syncAssetsBlock(project.path), isFalse);
+    });
     test('adds the flutter: assets: block when the pubspec has no flutter section', () {
       writePubspec('name: demo\ndependencies:\n  fluvie: ^0.2.0\n');
       asset(p.join('assets', 'images', 'hero.png'));
@@ -129,7 +149,7 @@ flutter:
       expect(syncAssetsBlock(project.path), isTrue);
       final pubspec = readPubspec();
       expect(pubspec, contains('assets/images/'));
-      expect(pubspec, isNot(contains('assets/stale/')));
+      expect(pubspec, contains('assets/stale/'));
       // Everything the CLI does not own survives untouched.
       expect(pubspec, contains('name: demo'));
       expect(pubspec, contains('description: A Fluvie video project.'));
@@ -144,7 +164,7 @@ flutter:
       expect(readPubspec(), isNot(contains('assets')));
     });
 
-    test('an existing block is removed once the assets are gone', () {
+    test('an existing block is preserved when no new assets are discovered', () {
       writePubspec('''
 name: demo
 
@@ -154,9 +174,9 @@ flutter:
     - assets/images/
 ''');
 
-      expect(syncAssetsBlock(project.path), isTrue);
+      expect(syncAssetsBlock(project.path), isFalse);
       final pubspec = readPubspec();
-      expect(pubspec, isNot(contains('assets/images/')));
+      expect(pubspec, contains('assets/images/'));
       expect(pubspec, contains('uses-material-design: true'));
     });
 

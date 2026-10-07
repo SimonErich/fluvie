@@ -16,6 +16,7 @@ import 'package:fluvie/src/media/net/media_http_client.dart';
 import 'package:fluvie/src/media/net/network_allowlist.dart';
 import 'package:fluvie/src/media/runtime/clip_frame_cache.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
+import 'package:fluvie/src/rendering/encoding/frame_extraction_cache_identity.dart';
 import 'package:fluvie/src/rendering/encoding/frame_extraction_service.dart';
 import 'package:fluvie/src/rendering/encoding/video_probe_service.dart';
 
@@ -44,9 +45,12 @@ class _FakeProbe implements VideoProbeService {
 
 /// An extractor that paints each frame a per-index shade and records every
 /// frame it was asked for, at the size it was asked for.
-class _CountingExtractor implements FrameExtractionService {
+class _CountingExtractor implements FrameExtractionService, FrameExtractionCacheIdentity {
   final extracted = <int>[];
   final sizes = <String>{};
+
+  @override
+  Future<String?> get cacheIdentity async => 'counting-rgba-v1';
 
   @override
   Future<RawFrame> extractFrame(

@@ -7,3 +7,4 @@ library;
 
 export 'src/fluvie_code_analyzer.dart';
 export 'src/fluvie_diagnostic.dart';
+export 'src/source_edits.dart' show SourceEditException, applyDartSourceEdits;

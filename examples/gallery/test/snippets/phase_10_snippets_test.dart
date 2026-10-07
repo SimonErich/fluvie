@@ -2,6 +2,8 @@
 // page pulls these via code-excerpt markers, so a failing build here means a
 // doc would ship dead code.
 
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_example/snippets/phase_10_snippets.dart';
@@ -24,5 +26,13 @@ void main() {
   test('the caption-style and position menus list the presets', () {
     expect(captionStyles(), hasLength(3));
     expect(captionPositions(), hasLength(4));
+  });
+
+  test('the typed-source constructors carry their bytes to the mix', () {
+    final tracks = audioTypedSources(Uint8List.fromList([1, 2, 3]));
+    expect(tracks, hasLength(2));
+    expect(tracks.first.isSfx, isFalse);
+    expect(tracks.first.source, startsWith('memory:'), reason: 'the diagnostic label');
+    expect(tracks.last.isSfx, isTrue);
   });
 }

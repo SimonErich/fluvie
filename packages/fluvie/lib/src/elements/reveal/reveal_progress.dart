@@ -45,7 +45,7 @@ List<double> staggeredRevealProgress({
 }) => [
   for (final offset in offsets)
     if (perSegmentFrames <= 0)
-      (elapsed - offset >= 0) ? 1.0 : 0.0
+      if (elapsed - offset >= 0) 1.0 else 0.0
     else
       ((elapsed - offset) / perSegmentFrames).clamp(0.0, 1.0),
 ];

@@ -1,0 +1,2 @@
+# Isolated release verification only; not a Flutter runtime dependency.
+fonttools==4.65.0

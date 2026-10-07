@@ -1,12 +1,13 @@
-import 'package:flutter/painting.dart' show BoxFit;
+import 'package:flutter/painting.dart' show BoxFit, TextAlign;
+import 'package:fluvie/src/core/audio_band.dart' show AudioBand;
 import 'package:fluvie/src/serialization/background_spec.dart'
     show knownBackgroundKinds, knownBackgroundProps;
+import 'package:fluvie/src/serialization/effect_spec.dart';
 import 'package:fluvie/src/serialization/element_spec.dart'
     show knownElementProps, knownElementTypes;
 
-/// The `BoxFit` names a `fit` field accepts, derived from the enum so the schema
-/// cannot drift from the codec.
-final List<String> _boxFitNames = [for (final fit in BoxFit.values) fit.name];
+part 'video_spec_schema_element_props.dart';
+part 'video_spec_schema_effect_variants.dart';
 
 /// The per-type element `oneOf` for the schema's `element` def: one closed
 /// (`additionalProperties: false`) variant per element type, listing exactly the
@@ -21,13 +22,48 @@ List<Object?> backgroundVariants() => [
 
 /// The content props each element type requires, mirrored by the parser.
 const Map<String, Set<String>> _requiredElementProps = {
-  'Text': {'text'},
+  // A Text takes exactly one of `text` or `spans`; the parser enforces the
+  // exclusivity (like Chart's data shapes), so neither is schema-required.
+  'Text': {},
+  'SplitText': {'text'},
   'Box': {},
   'Image': {'source'},
   'Counter': {'to'},
+  'Shape': {'kind'},
+  'Arrow': {'from', 'to'},
+  'Connector': {'from', 'to'},
+  'Clip': {'source'},
+  'Typewriter': {'text'},
+  'Markdown': {'source'},
+  'Terminal': {'lines'},
+  'Code': {'source'},
+  'Chart': {'variant'},
+  'Mermaid': {'source'},
+  'WebView': {'uri', 'viewport'},
+  'Html': {'source', 'viewport'},
+  'Bars': {},
+  'LowerThird': {'name'},
+  'TitleCard': {'title'},
+  'Snapshot': {'child'},
+  'DeviceFrame': {'variant', 'child'},
+  'Callout': {'label', 'target', 'child'},
+  'Spotlight': {'region', 'child'},
+  // A Group's children list is required but may be empty (an empty group
+  // renders nothing).
+  'Group': {'children'},
 };
 
-Map<String, Object?> _elementDef(String type) => {
+/// Every element variant with `shared` removed: the overlay form.
+///
+/// An overlay already runs the whole video, so there is no boundary for it to
+/// morph across, and the parser refuses one that names a hero. A schema that
+/// still advertised the key would tell a constrained-decoding model the field
+/// is legal and then reject what it emitted.
+List<Object?> overlayElementVariants() => [
+  for (final type in knownElementTypes) _elementDef(type, shared: false),
+];
+
+Map<String, Object?> _elementDef(String type, {bool shared = true}) => {
   'type': 'object',
   'additionalProperties': false,
   'required': ['type', ..._requiredElementProps[type] ?? const <String>{}],
@@ -36,25 +72,21 @@ Map<String, Object?> _elementDef(String type) => {
     'id': {'type': 'string'},
     'transform': {r'$ref': r'#/$defs/transform'},
     'anchor': {'type': 'string'},
+    if (shared) 'shared': {'type': 'string'},
+    'visible': {'type': 'boolean'},
+    'show': {r'$ref': r'#/$defs/show'},
+    'lane': {r'$ref': r'#/$defs/laneRef'},
+    'effects': {
+      'type': 'array',
+      'items': {r'$ref': r'#/$defs/effect'},
+    },
     'animate': {
       'type': 'array',
       'items': {r'$ref': r'#/$defs/animation'},
     },
-    for (final prop in knownElementProps[type] ?? const <String>{}) prop: _elementPropSchema(prop),
+    for (final prop in knownElementProps[type] ?? const <String>{})
+      prop: _elementPropSchema(type, prop),
   },
-};
-
-Object _elementPropSchema(String prop) => switch (prop) {
-  'text' => {'type': 'string'},
-  'style' => {r'$ref': r'#/$defs/textStyle'},
-  'color' => {r'$ref': r'#/$defs/color'},
-  'size' => {r'$ref': r'#/$defs/size'},
-  'source' => {r'$ref': r'#/$defs/imageSource'},
-  'fit' => {'type': 'string', 'enum': _boxFitNames},
-  'to' => {'type': 'number'},
-  'from' => {'type': 'number'},
-  'reveal' => {r'$ref': r'#/$defs/time'},
-  _ => const <String, Object?>{},
 };
 
 /// The props each background kind requires, mirrored by the parser.
@@ -84,6 +116,10 @@ Object _backgroundPropSchema(String prop) => switch (prop) {
   'colors' => {
     'type': 'array',
     'items': {r'$ref': r'#/$defs/color'},
+  },
+  'stops' => {
+    'type': 'array',
+    'items': {'type': 'number', 'minimum': 0, 'maximum': 1},
   },
   'begin' => {r'$ref': r'#/$defs/alignment'},
   'end' => {r'$ref': r'#/$defs/alignment'},

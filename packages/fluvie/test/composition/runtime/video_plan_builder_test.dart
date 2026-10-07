@@ -356,4 +356,88 @@ void main() {
       expect(first.schedules[follower], second.schedules[follower]);
     });
   });
+
+  group('overlays', () {
+    test('resolve their window against the whole video, not a scene', () {
+      // 90 frames of video in two scenes. A scene child cannot name frame 80
+      // at all; an overlay can, because its scope is the video.
+      final token = ElementRegistration(
+        debugOwner: 'Logo',
+        window: const TimeRange(Time.frames(10), Time.frames(80)),
+      );
+
+      final result = buildVideoPlan(
+        fps: 30,
+        scenes: [_scene(60.frames), _scene(30.frames)],
+        registrationsByScene: [const <ElementRegistration>[], const <ElementRegistration>[]],
+        overlays: [token],
+      );
+
+      expect(result.schedules[token]!.window, const ResolvedSpan(10, 80));
+      expect(result.timeline.totalFrames, 90, reason: 'an overlay never lengthens the video');
+    });
+
+    test('take no scene default into their cascade, because they are in no scene', () {
+      final token = ElementRegistration(debugOwner: 'Logo');
+
+      final result = buildVideoPlan(
+        fps: 30,
+        scenes: [_scene(60.frames, defaults: const Defaults(ease: Ease.back))],
+        registrationsByScene: [const <ElementRegistration>[]],
+        overlays: [token],
+        videoDefaults: const Defaults(ease: Ease.linear),
+      );
+
+      expect(result.schedules[token]!.defaults.ease, Ease.linear);
+    });
+
+    test('an animation on one resolves against the video clock', () {
+      final token = ElementRegistration(debugOwner: 'Logo', animations: [_enter(10)]);
+
+      final result = buildVideoPlan(
+        fps: 30,
+        scenes: [_scene(60.frames), _scene(30.frames)],
+        registrationsByScene: [const <ElementRegistration>[], const <ElementRegistration>[]],
+        overlays: [token],
+      );
+
+      expect(result.schedules[token]!.spans, [const ResolvedSpan(0, 10)]);
+    });
+
+    test('a token registered as both a scene element and an overlay is refused', () {
+      // Every element registers exactly one token; two buckets holding the
+      // same one would resolve it twice and hand back whichever won.
+      final token = ElementRegistration(debugOwner: 'Logo');
+
+      expect(
+        () => buildVideoPlan(
+          fps: 30,
+          scenes: [_scene(60.frames)],
+          registrationsByScene: [
+            [token],
+          ],
+          overlays: [token],
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('an anchor on an overlay collides with a scene anchor exactly as two scene ones do', () {
+      final anchor = Anchor('hero');
+      final scened = ElementRegistration(debugOwner: 'Scened', anchor: anchor);
+      final overlaid = ElementRegistration(debugOwner: 'Overlaid', anchor: anchor);
+
+      expect(
+        () => buildVideoPlan(
+          fps: 30,
+          scenes: [_scene(60.frames)],
+          registrationsByScene: [
+            [scened],
+          ],
+          overlays: [overlaid],
+        ),
+        throwsA(isA<FluvieTimingError>()),
+      );
+    });
+  });
 }

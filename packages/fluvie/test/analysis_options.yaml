@@ -9,7 +9,10 @@
 # plugin is loaded into analysis (it is on CI, where the plugin now surfaces them
 # through analyze; it is not in every local run), so unrecognized_error_code is
 # demoted too, otherwise the overrides would themselves be flagged off CI.
-include: ../analysis_options.yaml
+# Inherit strictness directly instead of re-registering the legacy IDE plugin
+# in this nested options file. The standalone custom_lint gate still checks
+# the package and respects the test-only diagnostic overrides below.
+include: ../analysis_options.shared.yaml
 
 analyzer:
   errors:
@@ -20,3 +23,7 @@ analyzer:
     unused_anchor: ignore
     animation_exceeds_window: ignore
     unrecognized_error_code: ignore
+
+linter:
+  rules:
+    public_member_api_docs: true

@@ -12,7 +12,6 @@ import 'package:fluvie/fluvie.dart';
 import 'package:fluvie_presenter/fluvie_presenter.dart';
 import 'package:fluvie_presenter/src/shell/ui_state.dart';
 import 'package:fluvie_presenter/src/sidebar/overview_grid.dart';
-import 'package:fluvie_presenter/src/sidebar/slide_preview_service.dart';
 import 'package:fluvie_presenter/src/sidebar/slide_sidebar.dart';
 import 'package:obers_ui/obers_ui.dart' show OiThemeData, OiThemeScope;
 

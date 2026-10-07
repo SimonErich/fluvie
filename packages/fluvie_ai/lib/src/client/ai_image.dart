@@ -6,11 +6,14 @@ import 'package:meta/meta.dart';
 @immutable
 final class AiImage {
   /// Creates an image from raw encoded [bytes] of the given [mediaType].
-  const AiImage({required this.bytes, this.mediaType = 'image/png'});
+  const AiImage({required this.bytes, this.mediaType = 'image/png', this.description});
 
   /// The raw encoded image bytes (for example a PNG poster frame).
   final Uint8List bytes;
 
   /// The MIME type of [bytes]; defaults to `image/png`.
   final String mediaType;
+
+  /// Asset identity and source-time context accompanying this image, if known.
+  final String? description;
 }

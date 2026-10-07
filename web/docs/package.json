@@ -6,11 +6,18 @@
   "scripts": {
     "import": "node scripts/import-docs.mjs",
     "dev": "npm run import && astro dev",
-    "build": "npm run import && astro build",
+    "build": "node ../../tool/docs/sync_reference.mjs && npm run import && astro build",
+    "check": "node --test scripts/*.test.mjs && node ../../tool/docs/sync_reference.mjs --check && python3 ../../tool/docs/check_site_links.py dist",
     "preview": "astro preview"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.40.0",
-    "astro": "^6.4.8"
+    "@astrojs/markdown-remark": "^7.3.0",
+    "@astrojs/starlight": "^0.42.5",
+    "astro": "^7.3.6"
+  },
+  "overrides": {
+    "postcss-nested": {
+      "postcss-selector-parser": "^7.1.6"
+    }
   }
 }

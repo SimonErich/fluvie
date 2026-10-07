@@ -1,0 +1,14 @@
+{
+  "fluvieSpec": 1,
+  "fps": 30,
+  "size": {"width": 320, "height": 180},
+  "lanes": [{"id": "video"}],
+  "scenes": [{
+    "duration": "120f",
+    "children": [
+      {"id": "a", "type": "Clip", "lane": "video", "source": {"kind": "asset", "value": "a.mp4"}, "show": {"from": "0f", "to": "60f"}},
+      {"id": "b", "type": "Clip", "lane": "video", "source": {"kind": "asset", "value": "b.mp4"}, "show": {"from": "60f", "to": "120f"}}
+    ],
+    "transitions": [{"between": ["a", "b"], "kind": "crossFade", "duration": "10f"}]
+  }]
+}

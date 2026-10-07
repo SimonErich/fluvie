@@ -1,9 +1,10 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter/widgets.dart' as flutter;
+import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/media/media_source.dart';
 import 'package:fluvie/src/media/runtime/file_image.dart';
 import 'package:fluvie/src/media/runtime/image_resolver_scope.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
 
 /// Paints one pre-resolved [MediaSource]: a synchronous
@@ -31,6 +32,19 @@ final class ResolvedImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (PreparationScope.exposesOnlyGeometry(context)) {
+      final prepared = PreparationScope.resolverOf(context);
+      if (prepared != null) {
+        try {
+          return flutter.RawImage(image: prepared.decodedImageFor(source), fit: fit);
+        } on Object {
+          /* The first pass collects before decoding. */
+        }
+      }
+      return const SizedBox.shrink();
+    }
+
+    PreparationScope.requirePrepared(context, source, 'image');
     final resolver = ImageResolverScope.maybeOf(context);
     if (resolver != null) {
       return flutter.RawImage(image: resolver.decodedImageFor(source), fit: fit);

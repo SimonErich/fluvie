@@ -46,6 +46,8 @@ class _CountingBeatService implements BeatDetectionService {
 }
 
 class _CountingAnalyzer implements FrequencyAnalyzer {
+  _CountingAnalyzer({this.failFirst = false});
+  final bool failFirst;
   int calls = 0;
   @override
   Future<BandTable> analyze(
@@ -54,6 +56,7 @@ class _CountingAnalyzer implements FrequencyAnalyzer {
     required int totalFrames,
   }) async {
     calls++;
+    if (failFirst && calls == 1) throw StateError('Analysis failed.');
     return BandTable({
       AudioBand.bass: Float64List.fromList(List<double>.filled(totalFrames, 0.5)),
     });
@@ -72,6 +75,29 @@ void main() {
   final pcm = Uint8List.fromList(List.generate(64, (i) => i % 256));
 
   group('MediaRepository.preResolveReactive', () {
+    test('retries band-analysis failures without publishing an incomplete source', () async {
+      final repo = _repo(const {});
+      addTearDown(repo.dispose);
+      final source = AudioSource.memory(pcm);
+      final beats = _CountingBeatService();
+      final analyzer = _CountingAnalyzer(failFirst: true);
+      Future<void> prepare() => repo.preResolveReactive(
+        [source],
+        beatDetector: beats,
+        analyzer: analyzer,
+        fps: 30,
+        totalFrames: 20,
+      );
+      await expectLater(prepare(), throwsStateError);
+      await prepare();
+      expect(analyzer.calls, 2);
+      expect(repo.beatGridFor(source).firstBeatAtOrAfter(0), 10);
+      expect(repo.bandTableFor(source).energyAt(0, AudioBand.bass), 0.5);
+      await prepare();
+      expect(analyzer.calls, 2);
+      expect(beats.calls, 2);
+    });
+
     test('analyses each source into a beat grid and a band table', () async {
       final repo = _repo({'beat.wav': pcm});
       const source = AudioSource.asset('beat.wav');

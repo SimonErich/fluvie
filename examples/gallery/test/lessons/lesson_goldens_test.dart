@@ -31,13 +31,12 @@ import 'package:fluvie/src/composition/runtime/audio_collector.dart';
 import 'package:fluvie/src/composition/runtime/caption_collector.dart';
 import 'package:fluvie/src/composition/runtime/generative_collector.dart';
 import 'package:fluvie/src/composition/runtime/reactive_collector.dart';
-import 'package:fluvie/src/core/contracts/beat_grid.dart';
 import 'package:fluvie/src/core/media/snapshot_source.dart';
 import 'package:fluvie/src/media/media_bytes_loader.dart';
 import 'package:fluvie/src/media/media_repository.dart';
 import 'package:fluvie/src/media/net/media_http_client.dart';
 import 'package:fluvie/src/media/runtime/image_resolver_scope.dart';
-import 'package:fluvie/src/rendering/capture/beat_grid_scope.dart';
+import 'package:fluvie/src/rendering/capture/capture_shell.dart' show beatGridScopeFor;
 import 'package:fluvie_example/lessons/lessons.dart';
 import 'package:fluvie_example/lessons/poster_frame.dart';
 
@@ -126,13 +125,21 @@ Future<MediaResolver> _reactiveResolver(Video probe) async {
   if (captions != null) await repository.preResolveCaptions(captions);
   final tracks = collectReactiveTracks(probe);
   if (tracks.allSources.isNotEmpty) {
-    await repository.preResolveReactive(
-      tracks.allSources,
-      beatDetector: offlineBeatDetector(),
-      analyzer: offlineFrequencyAnalyzer(),
-      fps: probe.fps,
-      totalFrames: probe.totalFrames,
-    );
+    if (tracks.windows.isNotEmpty) {
+      await repository.preResolveAudioWindows(
+        tracks.windows,
+        beatDetector: offlineBeatDetector(),
+        analyzer: offlineFrequencyAnalyzer(),
+      );
+    } else {
+      await repository.preResolveReactive(
+        tracks.allSources,
+        beatDetector: offlineBeatDetector(),
+        analyzer: offlineFrequencyAnalyzer(),
+        fps: probe.fps,
+        totalFrames: probe.totalFrames,
+      );
+    }
   }
   return repository;
 }
@@ -150,41 +157,16 @@ MediaRepository _bundleRepository() => MediaRepository(
 /// Wraps [child] so a lesson paints its pre-resolved sources: an
 /// [ImageResolverScope] for media / snapshots / captions, a `ReactiveScope`
 /// (via [reactiveScopeFor]) over [probe]'s analysed band tables so the bars and
-/// the reactive badge show real energy, and a [BeatGridScope] over its analysed
+/// the reactive badge show real energy, and [beatGridScopeFor] over its analysed
 /// beat grids so a `Trigger.beat` lesson (12) resolves its beat-synced pop
 /// (decision D-BeatWiring) — exactly the scopes the capture shell mounts. A
 /// lesson with no [resolver] is left untouched.
 Widget _withMedia(MediaResolver? resolver, Video probe, Widget child) {
   if (resolver == null) return child;
   final tracks = collectReactiveTracks(probe);
-  final withBeat = _withBeatGrids(tracks, resolver, child);
+  final withBeat = beatGridScopeFor(tracks, resolver, child);
   final scoped = reactiveScopeFor(tracks, resolver, withBeat);
   return ImageResolverScope(resolver: resolver, child: scoped);
-}
-
-/// Wraps [child] in a [BeatGridScope] carrying the analysed beat grids for
-/// [tracks], or returns it unchanged when no track has a grid — the golden
-/// counterpart of the capture shell's beat-grid mount.
-Widget _withBeatGrids(ReactiveTracks tracks, MediaResolver resolver, Widget child) {
-  final defaultSource = tracks.defaultSource;
-  final defaultGrid = defaultSource == null ? null : _gridOrNull(resolver, defaultSource);
-  final trackGrids = <Anchor, BeatGrid>{};
-  for (final entry in tracks.byAnchor.entries) {
-    final grid = _gridOrNull(resolver, entry.value);
-    if (grid != null) trackGrids[entry.key] = grid;
-  }
-  if (defaultGrid == null && trackGrids.isEmpty) return child;
-  return BeatGridScope(defaultBeatGrid: defaultGrid, trackBeatGrids: trackGrids, child: child);
-}
-
-/// The analysed [BeatGrid] for [source], or `null` when the resolver has none (a
-/// reactive track analysed only for its band table carries no grid).
-BeatGrid? _gridOrNull(MediaResolver resolver, AudioSource source) {
-  try {
-    return resolver.beatGridFor(source);
-  } on Object {
-    return null;
-  }
 }
 
 /// The reactive resolver reads only bundled assets, so the network client is

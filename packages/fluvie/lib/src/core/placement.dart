@@ -24,6 +24,7 @@ final class Placement {
     this.width,
     this.height,
     this.rotation = 0,
+    this.opacity = 1,
     this.anchor = Alignment.center,
   });
 
@@ -42,6 +43,9 @@ final class Placement {
 
   /// Clockwise rotation around the element's center, in degrees.
   final double rotation;
+
+  /// The element's opacity, `0..1` (`1` is fully opaque).
+  final double opacity;
 
   /// Which point of the element sits at ([x], [y]).
   final Alignment anchor;
@@ -74,13 +78,14 @@ final class Placement {
       other.width == width &&
       other.height == height &&
       other.rotation == rotation &&
+      other.opacity == opacity &&
       other.anchor == anchor;
 
   @override
-  int get hashCode => Object.hash(x, y, width, height, rotation, anchor);
+  int get hashCode => Object.hash(x, y, width, height, rotation, opacity, anchor);
 
   @override
   String toString() =>
       'Placement(x: $x, y: $y, w: $width, h: $height, '
-      'rotation: $rotation, anchor: $anchor)';
+      'rotation: $rotation, opacity: $opacity, anchor: $anchor)';
 }

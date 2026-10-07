@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/audio/audio.dart';
 import 'package:fluvie/src/audio/generative_audio.dart';
 import 'package:fluvie/src/composition/runtime/scene_tree_walk.dart';
@@ -5,6 +6,7 @@ import 'package:fluvie/src/composition/scene.dart';
 import 'package:fluvie/src/composition/video.dart';
 import 'package:fluvie/src/core/audio/audio_source.dart';
 import 'package:fluvie/src/core/contracts/generative_resolver.dart';
+import 'package:fluvie/src/timing/time_scope_data.dart';
 
 /// Gathers every declared [Audio] track from [video] before the frame loop —
 /// a pure structural read over the constructor data, with no mounting and no
@@ -18,13 +20,21 @@ import 'package:fluvie/src/core/contracts/generative_resolver.dart';
 /// plan.
 ///
 /// When a [generative] resolver is given (after its `generateAll` ran), every
-/// `GenerativeAudio` in the scene tree folds in as a file-backed [Audio.music]
-/// track over its produced file, so generated music/speech/sound-effects mix
+/// `GenerativeAudio` in the scene tree folds in as an [Audio.musicSource]
+/// track over its produced source, so generated music/speech/sound-effects mix
 /// through the same pipeline as hand-written tracks.
 List<Audio> collectAudioTracks(Video video, {GenerativeResolver? generative}) => [
   ...video.audio,
-  for (final scene in video.scenes) ...scene.audio,
-  if (generative != null) ...collectGenerativeAudioTracks(video.scenes, generative),
+  for (var i = 0; i < video.scenes.length; i++)
+    for (final track in video.scenes[i].audio)
+      track.inWindow(
+        video.sceneStartFrames[i],
+        video.scenes[i].duration.resolveFrames(
+          TimeScopeData(fps: video.fps, startFrame: 0, durationFrames: video.totalFrames),
+        ),
+      ),
+  if (generative != null)
+    ...collectGenerativeAudioTracks(video.scenes, generative, overlays: video.overlays),
 ];
 
 /// The deduplicated set of [AudioSource]s every track in [video] needs: the
@@ -38,16 +48,22 @@ Set<AudioSource> collectAudioSources(Video video, {GenerativeResolver? generativ
   for (final track in collectAudioTracks(video, generative: generative)) track.audioSource,
 };
 
-/// Maps every [GenerativeAudio] in [scenes] to a file-backed [Audio.music] track
-/// over the file [generative] produced for it, carrying the widget's volume,
-/// fades, and loop. Walks the same tree as the media collectors.
-List<Audio> collectGenerativeAudioTracks(List<Scene> scenes, GenerativeResolver generative) {
+/// Maps every [GenerativeAudio] in [scenes] to an [Audio.musicSource] track
+/// over the source [generative] produced for it, carrying the widget's volume,
+/// fades, and loop. Walks the same tree as the media collectors. The produced
+/// [AudioSource] flows through typed, so a resolver returning bytes in memory
+/// mixes exactly like one returning a file.
+List<Audio> collectGenerativeAudioTracks(
+  List<Scene> scenes,
+  GenerativeResolver generative, {
+  List<Widget> overlays = const [],
+}) {
   final tracks = <Audio>[];
-  walkSceneTree(scenes, (widget) {
+  walkSceneTree(scenes, overlays: overlays, (widget) {
     if (widget is! GenerativeAudio) return;
     tracks.add(
-      Audio.music(
-        _audioPath(generative.audioFor(widget.source)),
+      Audio.musicSource(
+        generative.audioFor(widget.source),
         volume: widget.volume,
         fadeIn: widget.fadeIn,
         fadeOut: widget.fadeOut,
@@ -57,11 +73,3 @@ List<Audio> collectGenerativeAudioTracks(List<Scene> scenes, GenerativeResolver 
   });
   return tracks;
 }
-
-/// The source string [Audio.music] takes for a produced [AudioSource], which
-/// `audioSourceFromString` round-trips back to the same kind.
-String _audioPath(AudioSource source) => switch (source) {
-  FileAudioSource(:final path) => path,
-  AssetAudioSource(:final name) => name,
-  NetworkAudioSource(:final url) => url.toString(),
-};

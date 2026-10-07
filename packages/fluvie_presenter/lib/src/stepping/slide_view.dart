@@ -1,5 +1,3 @@
-import 'dart:async' show unawaited;
-
 import 'package:flutter/widgets.dart' hide Animation;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie/fluvie.dart'
@@ -15,6 +13,7 @@ import 'package:fluvie_presenter/src/stepping/stop.dart';
 import 'package:fluvie_presenter/src/stepping/stop_state.dart';
 import 'package:fluvie_presenter/src/stepping/stretched_scene.dart';
 
+part 'mounted_slide.dart';
 part 'slide_view_state.dart';
 
 /// Renders the current slide at the current step and follows the

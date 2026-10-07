@@ -2,6 +2,15 @@
 # markers are checked, but keeps the rest of the workspace strictness relaxed:
 # the fixtures carry intentionally-wrong code (dangling anchors, deprecated
 # names, layering breaks) that would otherwise trip --fatal-infos.
+formatter:
+  page_width: 100
+
 analyzer:
+  errors:
+    # The dedicated custom_lint gate checks the fixture markers while the
+    # current upstream builder still needs the legacy plugin registration.
+    analysis_options_deprecated_plugins: ignore
+  exclude:
+    - build/**
   plugins:
     - custom_lint

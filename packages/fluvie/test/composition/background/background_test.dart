@@ -143,6 +143,16 @@ void main() {
       );
       expect(tester.takeException(), isA<AssertionError>());
     });
+
+    testWidgets('threads explicit stop offsets to the painted gradient', (tester) async {
+      await tester.pumpWidget(Background.gradient(const [_red, _green], stops: const [0, 0.25]));
+      expect(_paintedLinear(tester).stops, const [0, 0.25]);
+    });
+
+    testWidgets('paints without stops by default (even spacing)', (tester) async {
+      await tester.pumpWidget(Background.gradient(const [_red, _green]));
+      expect(_paintedLinear(tester).stops, isNull);
+    });
   });
 
   group('Background.radial (WI-22, D10)', () {
@@ -163,6 +173,11 @@ void main() {
         Color.lerp(_white, _blue, 0.5),
         Color.lerp(_blue, _red, 0.5),
       ]);
+    });
+
+    testWidgets('threads explicit stop offsets to the painted gradient', (tester) async {
+      await tester.pumpWidget(Background.radial(const [_white, _blue], stops: const [0.1, 0.8]));
+      expect(_paintedRadial(tester).stops, const [0.1, 0.8]);
     });
   });
 

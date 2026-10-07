@@ -38,7 +38,7 @@ final class ReactiveScope extends InheritedWidget {
   ///
   /// A `null` [anchor] resolves the default [table]; a non-null [anchor]
   /// resolves its per-track table, falling back to the default when the track
-  /// has none (so an unanalysed track still reacts to the master mix rather
+  /// has none (so an unanalysed track still reacts to the default table rather
   /// than reading silence).
   static BandTable? tableFor(BuildContext context, Anchor? anchor) {
     final scope = context.dependOnInheritedWidgetOfExactType<ReactiveScope>();

@@ -4,10 +4,12 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:fluvie_cli/src/cli_failure.dart';
 import 'package:fluvie_cli/src/file_target.dart';
+import 'package:fluvie_cli/src/init_support.dart' show localFluvieOverrides;
 import 'package:fluvie_cli/src/process_runner.dart';
 import 'package:fluvie_cli/src/templates/preview_app_template.dart';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
+import 'package:yaml_edit/yaml_edit.dart';
 
 /// The preview app's cache root: `$XDG_CACHE_HOME/fluvie/preview` (POSIX) or
 /// `%LOCALAPPDATA%\fluvie\preview` (Windows), mirroring the ffmpeg cache.
@@ -37,7 +39,13 @@ String previewAppDir(String projectDir, {Map<String, String>? environment}) {
 
 /// What the scaffolded app was built for, so a stale one is rebuilt rather than
 /// silently reused.
-typedef PreviewStamp = ({String projectDir, String target, String entry, String cliVersion});
+typedef PreviewStamp = ({
+  String projectDir,
+  String target,
+  String entry,
+  String cliVersion,
+  String inputs,
+});
 
 /// Scaffolds (or reuses) the preview app for [target] and returns its directory.
 ///
@@ -65,6 +73,7 @@ Future<String> ensurePreviewApp({
     target: target.path,
     entry: target.entry,
     cliVersion: cliVersion,
+    inputs: _inputDigest(target.projectDir),
   );
   if (_stampMatches(dir, stamp) && _hasPlatforms(dir, platforms)) return dir;
 
@@ -94,6 +103,7 @@ Future<String> ensurePreviewApp({
       importLine: "import '${_previewImport(target)}' as target;",
       functionName: 'target.${target.entry}',
       title: p.basenameWithoutExtension(target.path),
+      localMediaBridge: true,
     ),
   );
   // The counter test flutter create leaves behind names a widget the preview app
@@ -109,24 +119,7 @@ Future<String> ensurePreviewApp({
   return dir;
 }
 
-/// The import the preview app's `main.dart` reaches [target] by.
-///
-/// It must be a `package:` URI. The app lives outside the project, and a
-/// relative import cannot escape a package: the compiler resolves it inside the
-/// app's own `lib/`, so a `../..` climb to another tree fails to read. A render
-/// has no such constraint because its harness is staged inside the project.
-String _previewImport(FileTarget target) {
-  final uri = target.packageUri;
-  if (uri != null) return uri;
-  throw CliFailure(
-    'A previewed composition must live under lib/, and '
-    '"${p.relative(target.path, from: target.projectDir)}" does not.\n'
-    'The preview app runs outside your project and can only import your '
-    'composition through its package URI, which only a file under lib/ has.\n'
-    'Move it to lib/ and run: fluvie preview '
-    './lib/${p.basename(target.path)}',
-  );
-}
+String _previewImport(FileTarget target) => target.externalImport;
 
 bool _hasPlatforms(String dir, List<String> platforms) => platforms.every(
   (platform) => Directory(p.join(dir, platform == 'web' ? 'web' : platform)).existsSync(),
@@ -140,7 +133,8 @@ bool _stampMatches(String dir, PreviewStamp stamp) {
   return decoded['projectDir'] == stamp.projectDir &&
       decoded['target'] == stamp.target &&
       decoded['entry'] == stamp.entry &&
-      decoded['cliVersion'] == stamp.cliVersion;
+      decoded['cliVersion'] == stamp.cliVersion &&
+      decoded['inputs'] == stamp.inputs;
 }
 
 void _writeStamp(String dir, PreviewStamp stamp) =>
@@ -150,117 +144,208 @@ void _writeStamp(String dir, PreviewStamp stamp) =>
         'target': stamp.target,
         'entry': stamp.entry,
         'cliVersion': stamp.cliVersion,
+        'inputs': stamp.inputs,
       }),
     );
 
-/// Writes the preview app's pubspec: a path dependency on the user's project
-/// plus a copy of its dependency overrides.
-///
-/// The overrides matter: pub applies `dependency_overrides` only from the root
-/// package of a resolution, so without copying them a contributor who
-/// path-overrides `fluvie` would preview against the published package while
-/// their renders use the local one — the same composition, different pixels.
+/// The source lock graph supplies exact package roots to the cached host solver.
+/// Only preview-specific adapters are added; consumer libraries keep one identity.
 void _writePreviewPubspec({required String dir, required FileTarget target}) {
   final name = packageNameOf(target.projectDir);
-  if (name == null) {
-    throw CliFailure(
-      'The project at "${target.projectDir}" has no package name in its '
-      'pubspec.yaml, so the preview app cannot depend on it.',
-    );
-  }
-  final overrides = _resolvedOverrides(target.projectDir);
-  final buffer = StringBuffer('''
-name: fluvie_preview
-description: The generated Fluvie preview app. Do not edit; it is regenerated.
-publish_to: none
-version: 1.0.0
-
-environment:
-  sdk: ^3.12.0
-
-dependencies:
-  flutter:
-    sdk: flutter
-  $name:
-    path: ${p.absolute(target.projectDir)}
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-
-flutter:
-  uses-material-design: true
-  assets:
-''');
-  for (final entry in _assetEntriesFor(target.projectDir)) {
-    buffer.writeln('    - $entry');
-  }
-  if (overrides.isNotEmpty) {
-    buffer
-      ..writeln('\ndependency_overrides:')
-      ..write(overrides);
-  }
-  File(p.join(dir, 'pubspec.yaml')).writeAsStringSync(buffer.toString());
-}
-
-/// The user's `dependency_overrides`, re-emitted with every relative path made
-/// absolute, or empty when there are none.
-///
-/// Both the project's own pubspec and its `pubspec_overrides.yaml` are read, and
-/// so is the workspace root's when the project is a workspace member, because
-/// pub requires a workspace's overrides to live at the root.
-String _resolvedOverrides(String projectDir) {
-  final buffer = StringBuffer();
-  for (final dir in _overrideSources(projectDir)) {
-    for (final file in ['pubspec_overrides.yaml', 'pubspec.yaml']) {
-      final path = File(p.join(dir, file));
-      if (!path.existsSync()) continue;
-      final doc = loadYaml(path.readAsStringSync());
-      if (doc is! YamlMap) continue;
-      final overrides = doc['dependency_overrides'];
-      if (overrides is! YamlMap) continue;
-      overrides.forEach((key, value) {
-        if (value is YamlMap && value['path'] != null) {
-          final resolved = p.normalize(p.join(dir, '${value['path']}'));
-          buffer.writeln('  $key:\n    path: $resolved');
-        } else if (value is String) {
-          buffer.writeln('  $key: $value');
+  if (name == null) throw CliFailure('The project at "${target.projectDir}" has no package name.');
+  final source = _yamlMap(File(p.join(target.projectDir, 'pubspec.yaml')));
+  final resolved = _resolvedPackages(target.projectDir);
+  final overrides = <String, Object?>{};
+  // Explicit root declarations also cover unresolved projects and git/hosted forms.
+  for (final root in _overrideSources(target.projectDir)) {
+    for (final filename in ['pubspec.yaml', 'pubspec_overrides.yaml']) {
+      final doc = _yamlMap(File(p.join(root, filename)));
+      final values = doc['dependency_overrides'];
+      if (values is! Map) continue;
+      for (final entry in values.entries) {
+        final declaration = _plain(entry.value);
+        if (declaration is Map<String, Object?> && declaration['path'] is String) {
+          declaration['path'] = p.normalize(p.join(root, declaration['path']! as String));
         }
-      });
+        overrides[entry.key.toString()] = declaration;
+      }
     }
   }
-  return buffer.toString();
+  final declared = (source['dependencies'] as Map?)?['fluvie'];
+  final overridden = overrides['fluvie'];
+  final localDeclaration = overridden is Map
+      ? overridden
+      : declared is Map
+      ? declared
+      : null;
+  final localPath = localDeclaration?['path'];
+  final fluvieRoot =
+      resolved['fluvie'] ??
+      (localPath is String &&
+              File(p.join(target.projectDir, localPath, 'pubspec.yaml')).existsSync()
+          ? p.normalize(p.join(target.projectDir, localPath))
+          : null);
+  if (fluvieRoot != null) overrides.putIfAbsent('fluvie', () => {'path': fluvieRoot});
+  if (fluvieRoot != null) {
+    for (final entry in localFluvieOverrides(fluvieRoot).entries) {
+      overrides.putIfAbsent(entry.key, () => {'path': entry.value});
+    }
+  }
+  final webSibling = fluvieRoot == null
+      ? null
+      : p.join(p.dirname(fluvieRoot), 'fluvie_web_encoder');
+  final hasWebSibling = webSibling != null && File(p.join(webSibling, 'pubspec.yaml')).existsSync();
+  if (hasWebSibling) overrides.putIfAbsent('fluvie_web_encoder', () => {'path': webSibling});
+  // A resolved consumer graph is authoritative over declarations and host solving.
+  for (final entry in resolved.entries) {
+    if (entry.key == name || _sdkPackages.contains(entry.key)) continue;
+    overrides[entry.key] = {'path': entry.value};
+  }
+  final flutter = Map<String, Object?>.from((source['flutter'] as Map?) ?? {});
+  flutter['uses-material-design'] = true;
+  final assetEntries = <Object?>[
+    ...?flutter['assets'] as List?,
+    ..._assetEntriesFor(target.projectDir),
+  ];
+  if (assetEntries.isNotEmpty) flutter['assets'] = assetEntries.toSet().toList();
+  final fluvieVersion = fluvieRoot == null
+      ? '^0.3.1'
+      : _yamlMap(File(p.join(fluvieRoot, 'pubspec.yaml')))['version'].toString();
+  final editor = YamlEditor('')
+    ..update([], {
+      'name': 'fluvie_preview',
+      'description': 'Package-owned live Fluvie preview host.',
+      'publish_to': 'none',
+      'version': '1.0.0',
+      'environment': {'sdk': '^3.12.0'},
+      'dependencies': {
+        'flutter': {'sdk': 'flutter'},
+        name: {'path': p.absolute(target.projectDir)},
+        'fluvie': fluvieVersion,
+        'fluvie_web_encoder': fluvieVersion,
+        'http': '^1.2.0',
+      },
+      if (overrides.isNotEmpty) 'dependency_overrides': overrides,
+      'flutter': flutter,
+    });
+  File(p.join(dir, 'pubspec.yaml')).writeAsStringSync(editor.toString());
 }
 
-/// The project directory plus any ancestor that declares a pub `workspace:`.
-List<String> _overrideSources(String projectDir) {
-  final sources = <String>[p.absolute(projectDir)];
-  var dir = p.dirname(p.absolute(projectDir));
+const _sdkPackages = {
+  'flutter',
+  'flutter_test',
+  'flutter_driver',
+  'flutter_web_plugins',
+  'flutter_localizations',
+  'flutter_goldens',
+  'sky_engine',
+};
+
+Map<String, Object?> _yamlMap(File file) {
+  if (!file.existsSync()) return {};
+  final value = _plain(loadYaml(file.readAsStringSync()));
+  return value is Map<String, Object?> ? value : {};
+}
+
+Object? _plain(Object? value) => switch (value) {
+  final Map<Object?, Object?> map => <String, Object?>{
+    for (final entry in map.entries) entry.key.toString(): _plain(entry.value),
+  },
+  final List<Object?> list => list.map(_plain).toList(),
+  _ => value,
+};
+
+Map<String, String> _resolvedPackages(String projectDir) {
+  for (final dir in _ancestors(projectDir)) {
+    final file = File(p.join(dir, '.dart_tool', 'package_config.json'));
+    if (!file.existsSync()) continue;
+    final doc = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+    return {
+      for (final entry in (doc['packages'] as List).cast<Map<String, dynamic>>())
+        entry['name'] as String: file.uri.resolve(entry['rootUri'] as String).toFilePath(),
+    };
+  }
+  return {};
+}
+
+Iterable<String> _ancestors(String projectDir) sync* {
+  var dir = p.absolute(projectDir);
   while (true) {
-    final pubspec = File(p.join(dir, 'pubspec.yaml'));
-    if (pubspec.existsSync()) {
-      final doc = loadYaml(pubspec.readAsStringSync());
-      if (doc is YamlMap && doc['workspace'] != null) sources.add(dir);
-    }
+    yield dir;
     final parent = p.dirname(dir);
-    if (parent == dir) return sources;
+    if (parent == dir) return;
     dir = parent;
   }
+}
+
+String _inputDigest(String projectDir) {
+  final buffer = StringBuffer();
+  for (final dir in _overrideSources(projectDir)) {
+    for (final name in [
+      'pubspec.yaml',
+      'pubspec_overrides.yaml',
+      '.dart_tool/package_config.json',
+    ]) {
+      final file = File(p.join(dir, name));
+      if (file.existsSync()) buffer.write(file.readAsStringSync());
+    }
+  }
+  return sha256.convert(utf8.encode(buffer.toString())).toString();
+}
+
+/// Least specific workspace roots first; source overrides then take precedence.
+List<String> _overrideSources(String projectDir) {
+  final sources = <String>[];
+  for (final dir in _ancestors(projectDir)) {
+    if (dir == p.absolute(projectDir) ||
+        _yamlMap(File(p.join(dir, 'pubspec.yaml'))).containsKey('workspace')) {
+      sources.add(dir);
+    }
+  }
+  return sources.reversed.toList();
 }
 
 /// Symlinks the project's asset directories into the app root and returns the
 /// pubspec entries for them.
 void _linkAssets({required String dir, required String projectDir}) {
-  final source = Directory(p.join(projectDir, 'assets'));
-  if (!source.existsSync()) return;
-  final link = Link(p.join(dir, 'assets'));
-  if (link.existsSync()) link.deleteSync();
-  try {
-    link.createSync(p.absolute(source.path));
-  } on FileSystemException {
-    // Windows needs Developer Mode or elevation for a symlink; a copy bundles
-    // the same bytes, it just goes stale until the next scaffold.
-    _copyDirectory(source, Directory(p.join(dir, 'assets')));
+  final source = _yamlMap(File(p.join(projectDir, 'pubspec.yaml')));
+  final flutter = source['flutter'] as Map?;
+  final paths = <String>{if (Directory(p.join(projectDir, 'assets')).existsSync()) 'assets'};
+  for (final entry in (flutter?['assets'] as List?) ?? const []) {
+    final path = entry is String
+        ? entry
+        : entry is Map
+        ? entry['path']
+        : null;
+    if (path is String && !path.startsWith('packages/')) paths.add(path);
+  }
+  for (final family in (flutter?['fonts'] as List?) ?? const []) {
+    if (family is! Map) continue;
+    for (final font in (family['fonts'] as List?) ?? const []) {
+      if (font is Map && font['asset'] is String) paths.add(font['asset'] as String);
+    }
+  }
+  final linked = <String>[];
+  for (final logical in paths.toList()..sort((a, b) => a.length.compareTo(b.length))) {
+    final sourcePath = p.normalize(p.join(projectDir, logical));
+    final dest = p.normalize(p.join(dir, logical));
+    if (!p.isWithin(dir, dest)) {
+      throw CliFailure('Preview assets must use paths inside the project: "$logical".');
+    }
+    if (linked.any((path) => sourcePath == path || p.isWithin(path, sourcePath))) continue;
+    final type = FileSystemEntity.typeSync(sourcePath);
+    if (type == FileSystemEntityType.notFound) continue;
+    Directory(p.dirname(dest)).createSync(recursive: true);
+    try {
+      Link(dest).createSync(p.absolute(sourcePath));
+    } on FileSystemException {
+      if (type == FileSystemEntityType.directory) {
+        _copyDirectory(Directory(sourcePath), Directory(dest));
+      } else {
+        File(sourcePath).copySync(dest);
+      }
+    }
+    linked.add(sourcePath);
   }
 }
 

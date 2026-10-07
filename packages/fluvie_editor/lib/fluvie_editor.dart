@@ -7,21 +7,10 @@
 /// serializable.
 library;
 
-export 'src/canvas/editor_canvas.dart' show EditorCanvas;
-export 'src/document/document_history.dart' show DocumentHistory;
-export 'src/document/editor_command.dart'
-    show
-        AddSceneCommand,
-        EditorCommand,
-        InsertElementCommand,
-        RemoveElementCommand,
-        RemoveSceneCommand,
-        ReorderElementCommand,
-        ReorderSceneCommand,
-        ReplaceElementCommand,
-        SetElementMetaCommand,
-        SetTransformCommand;
-export 'src/document/editor_document.dart' show EditorDocument, EditorDocumentMutations;
-export 'src/selection/scene_geometry.dart' show ElementGeometry, SceneGeometry;
-export 'src/selection/selection_controller.dart' show SelectionController, selectionProvider;
-export 'src/widgets/canvas_viewport.dart' show CanvasViewport, CanvasViewportController;
+export 'src/api/canvas_api.dart';
+export 'src/api/commands_api.dart';
+export 'src/api/document_api.dart';
+export 'src/api/media_api.dart';
+export 'src/api/timeline_api.dart';
+export 'src/api/widgets_api.dart';
+export 'src/api/workspace_api.dart';

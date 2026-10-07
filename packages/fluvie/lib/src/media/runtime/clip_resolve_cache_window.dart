@@ -8,13 +8,17 @@ typedef _ClipPlan = ({
   int compFps,
   int trimStartFrames,
   int trimEndFrames,
+  double trimStartOffsetFrames,
+  double trimEndOffsetFrames,
+  double speed,
+  List<double>? sourceTimeMap,
 });
 
 /// The streaming-mode state behind [ClipResolveCache]: the per-clip plans and
 /// store keys, which source frames already sit in the [ClipFrameStore], and
 /// the bounded LRU window of decoded frames paint reads synchronously.
 final class _ClipStreamer {
-  final Map<MediaSource, _ClipPlan> _plans = {};
+  final Map<MediaSource, List<_ClipPlan>> _plans = {};
   final Map<MediaSource, String> _keys = {};
   final Map<MediaSource, Set<int>> _storedFrames = {};
   final LinkedHashMap<String, ui.Image> _window = LinkedHashMap<String, ui.Image>();
@@ -25,7 +29,21 @@ final class _ClipStreamer {
   /// The opaque store key for [source], assigned on first use.
   String keyFor(MediaSource source) => _keys.putIfAbsent(source, () => 'clip${_keyCounter++}');
 
-  void registerPlan(MediaSource source, _ClipPlan plan) => _plans[source] = plan;
+  /// Records one window [plan] for [source].
+  ///
+  /// A source can be painted by more than one element — the same clip in two
+  /// scenes, or twice in one scene with different `show` windows — and each
+  /// resamples from its own window start, so every plan is kept and warmed.
+  /// Records compare by value, so re-registering an identical plan is a no-op
+  /// and the contract's per-source idempotence holds.
+  void registerPlan(MediaSource source, _ClipPlan plan) {
+    final plans = _plans.putIfAbsent(source, () => <_ClipPlan>[]);
+    if (!plans.contains(plan)) plans.add(plan);
+  }
+
+  /// How many windows are registered across every source — the floor on the
+  /// decode window, since each one warms a frame per composition frame.
+  int get _planCount => _plans.values.fold(0, (total, plans) => total + plans.length);
 
   /// Extracts the not-yet-stored [sourceFrames] of [source] into [store] in
   /// chunks of [chunkSize], via the resolver's [extract] callback.
@@ -58,6 +76,7 @@ final class _ClipStreamer {
   Future<void> prepareForComposition({
     required int compFrame,
     required Map<MediaSource, ClipMetadata> meta,
+    required Map<MediaSource, MediaTimeline> timelines,
     required ClipFrameStore store,
     required int windowCapacity,
     required String debugOwner,
@@ -65,17 +84,25 @@ final class _ClipStreamer {
     for (final entry in _plans.entries) {
       final clipMeta = meta[entry.key];
       if (clipMeta == null) continue;
-      await _ensureDecoded(
-        source: entry.key,
-        sourceFrame: _resample(compFrame, entry.value, clipMeta.fps),
-        store: store,
-        meta: clipMeta,
-        // Every registered clip warms one frame per composition frame, so the
-        // window must hold at least that many at once or a clip's just-warmed
-        // frame would be evicted before paint reads it.
-        capacity: math.max(windowCapacity, _plans.length),
-        debugOwner: debugOwner,
-      );
+      for (final plan in entry.value) {
+        if (plan.windowLength <= 0 || compFrame < plan.windowStart) continue;
+        await _ensureDecoded(
+          source: entry.key,
+          sourceFrame: _resample(
+            compFrame.clamp(plan.windowStart, plan.windowStart + plan.windowLength - 1),
+            plan,
+            clipMeta.fps,
+            timelines[entry.key],
+          ),
+          store: store,
+          meta: clipMeta,
+          // Every registered window warms one frame per composition frame, so
+          // the window must hold at least that many at once or a just-warmed
+          // frame would be evicted before paint reads it.
+          capacity: math.max(windowCapacity, _planCount),
+          debugOwner: debugOwner,
+        );
+      }
     }
   }
 
@@ -125,11 +152,26 @@ final class _ClipStreamer {
   }
 }
 
-int _resample(int compFrame, _ClipPlan plan, double srcFps) {
-  final advanced = ((compFrame - plan.windowStart) / plan.compFps * srcFps).floor();
-  final raw = advanced + plan.trimStartFrames;
-  return math.max(plan.trimStartFrames, math.min(raw, plan.trimEndFrames - 1));
-}
+/// The frame [plan] paints on composition frame [compFrame].
+///
+/// Delegates to the one resampling rule the painter uses, so the streamer can
+/// never warm a different frame than paint asks for. It used to be a second
+/// copy of that arithmetic; two copies is how a future rate parameter would
+/// have desynced streaming from paint without a test noticing.
+int _resample(int compFrame, _ClipPlan plan, double srcFps, MediaTimeline? timeline) =>
+    resampleClipFrame(
+      compFrame: compFrame,
+      windowStart: plan.windowStart,
+      compFps: plan.compFps,
+      srcFps: srcFps,
+      timeline: timeline,
+      trimStartFrames: plan.trimStartFrames,
+      trimEndFrames: plan.trimEndFrames,
+      trimStartOffsetFrames: plan.trimStartOffsetFrames,
+      trimEndOffsetFrames: plan.trimEndOffsetFrames,
+      speed: plan.speed,
+      sourceTimeMap: plan.sourceTimeMap,
+    );
 
 Future<ui.Image> _decodeRawFrame(MediaSource source, RawFrame raw) =>
     _decodeRgba(source, raw.rgba, raw.width, raw.height);

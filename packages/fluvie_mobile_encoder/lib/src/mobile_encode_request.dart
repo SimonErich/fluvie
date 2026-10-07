@@ -29,6 +29,7 @@ final class MobileEncodeRequest {
     this.codec = MobileVideoCodec.h264,
     this.audioTracks = const <MobileAudioTrack>[],
     this.audioMasterVolume = 1,
+    this.audioStartSeconds = 0,
   }) {
     _nonEmpty(framesPath, 'framesPath');
     _nonEmpty(outputPath, 'outputPath');
@@ -37,6 +38,13 @@ final class MobileEncodeRequest {
     _positive(fps, 'fps');
     _positive(frameCount, 'frameCount');
     _positive(bitRate, 'bitRate');
+    if (!audioStartSeconds.isFinite || audioStartSeconds < 0) {
+      throw ArgumentError.value(
+        audioStartSeconds,
+        'audioStartSeconds',
+        'must be finite and nonnegative',
+      );
+    }
   }
 
   /// Absolute path of the raw RGBA8888 frames file to read.
@@ -69,6 +77,10 @@ final class MobileEncodeRequest {
   /// The final gain applied after mixing [audioTracks] together.
   final double audioMasterVolume;
 
+  /// Absolute authored mix time corresponding to output picture zero.
+  /// Cropping the completed mix preserves fades, loops and speed maps.
+  final double audioStartSeconds;
+
   /// The argument map handed to the platform method channel.
   Map<String, Object?> toArguments() => {
     'framesPath': framesPath,
@@ -81,6 +93,7 @@ final class MobileEncodeRequest {
     'codec': codec.wireName,
     'audioMasterVolume': audioMasterVolume,
     'audioTracks': [for (final track in audioTracks) track.toArguments()],
+    if (audioStartSeconds > 0) 'audioStartSeconds': audioStartSeconds,
   };
 
   static void _positive(int value, String name) {

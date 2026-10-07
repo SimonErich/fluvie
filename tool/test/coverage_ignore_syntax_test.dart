@@ -17,8 +17,10 @@ final _anyMarker = RegExp('coverage:ignore-(start|end|line|file)');
 void main() {
   test('every coverage:ignore marker parses under package:coverage', () {
     final problems = <String>[];
-    final libFiles = Directory('packages')
-        .listSync(recursive: true)
+    final libFiles = ['packages', 'apps', 'examples']
+        .map(Directory.new)
+        .where((d) => d.existsSync())
+        .expand((d) => d.listSync(recursive: true))
         .whereType<File>()
         .where((f) => f.path.endsWith('.dart') && f.path.contains('/lib/'));
     for (final file in libFiles) {

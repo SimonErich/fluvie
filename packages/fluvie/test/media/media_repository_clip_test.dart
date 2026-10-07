@@ -16,6 +16,7 @@ import 'package:fluvie/src/media/net/media_http_client.dart';
 import 'package:fluvie/src/media/net/network_allowlist.dart';
 import 'package:fluvie/src/rendering/capture/raw_frame.dart';
 import 'package:fluvie/src/rendering/encoding/frame_extraction_service.dart';
+import 'package:fluvie/src/rendering/encoding/frame_extraction_session.dart';
 import 'package:fluvie/src/rendering/encoding/video_probe_service.dart';
 
 class _MapBundle extends CachingAssetBundle {
@@ -108,6 +109,27 @@ const _probeResult = VideoProbeResult(
 );
 
 void main() {
+  test('one decoder lease serves consecutive source batches and closes on release', () async {
+    final extractor = _SessionExtractor();
+    final repo = _repo(
+      assets: {'clip_1s.mp4': Uint8List(16)},
+      probe: _FakeProbe(_probeResult),
+      extractor: extractor,
+    );
+    await repo.preResolveClip(_clip, [0, 1]);
+    await repo.preResolveClip(_clip, [2, 3]);
+    expect(extractor.opens, 1);
+    expect(extractor.calls, 0, reason: 'the stateless fallback does not restart the decoder');
+    expect(extractor.session.requests, [
+      [0, 1],
+      [2, 3],
+    ]);
+    repo.dispose();
+    expect(extractor.session.closed, isTrue);
+    await Future<void>.delayed(Duration.zero);
+    expect(extractor.session.closeCalls, 1);
+  });
+
   test('preResolveClip probes once and extracts the listed frames', () async {
     final probe = _FakeProbe(_probeResult);
     final extractor = _FakeExtractor();
@@ -358,4 +380,40 @@ void main() {
       }
     }
   });
+}
+
+class _SessionExtractor extends _FakeExtractor implements FrameExtractionSessionService {
+  int opens = 0;
+  final session = _FakeFrameSession();
+  @override
+  Future<FrameExtractionSession> openSession(
+    Uri source, {
+    required int width,
+    required int height,
+    String? decoder,
+    Future<void>? whenCancelled,
+  }) async {
+    opens++;
+    return session;
+  }
+}
+
+class _FakeFrameSession implements FrameExtractionSession {
+  bool closed = false;
+  int closeCalls = 0;
+  final requests = <List<int>>[];
+  @override
+  Future<Map<int, RawFrame>> extractFrames(Iterable<int> indices) async {
+    requests.add(indices.toList());
+    return {
+      for (final index in indices)
+        index: RawFrame(frameIndex: index, width: 2, height: 2, rgba: Uint8List(16)),
+    };
+  }
+
+  @override
+  Future<void> close() async {
+    closed = true;
+    closeCalls++;
+  }
 }

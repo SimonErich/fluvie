@@ -3,6 +3,22 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- `DartEditService` for exact, bounded source patches with structural repair and
+  shared validation of unique, non-overlapping original ranges.
+- `RecordingAiClient` for explicit prompt, reply, error and latency evidence,
+  excluding transport credentials and headers.
+
+### Fixed
+
+- Selected image evidence reaches supported provider transports within shared
+  count and byte limits. Composite evidence preserves each selected picture.
+- Invalid provider replies, unsupported image data and oversized evidence fail
+  explicitly instead of discarding context or bypassing transport limits.
+
 ## [0.3.1] - 2026-07-16
 
 Lockstep release with the rest of the Fluvie workspace.

@@ -75,6 +75,19 @@ ResolvedComposition resolveCompositionDetailed(CompositionPlan plan) {
     }
   }
 
+  // The overlays, against the root scope: no scene start to offset from and
+  // no scene defaults in the cascade, because an overlay is in no scene.
+  for (final element in plan.overlays) {
+    final window = resolveElementWindow(element.window, root);
+    windows[element] = ResolvedSpan(window.start, window.end);
+    scopes[element] = elementScopeFor(element.window, root);
+    mergedDefaults[element] = mergeDefaultsChain(
+      element: element.defaults,
+      video: plan.defaults,
+      theme: plan.themeDefaults,
+    );
+  }
+
   final registry = AnchorRegistry.collect(plan);
   final graph = DependencyGraph.fromRegistry(registry);
   final spans = <int, ResolvedSpan>{};

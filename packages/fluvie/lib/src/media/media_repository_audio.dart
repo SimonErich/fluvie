@@ -8,6 +8,10 @@ MediaSource _audioMediaSource(AudioSource source) => switch (source) {
   AssetAudioSource(:final name) => MediaSource.asset(name),
   FileAudioSource(:final path) => MediaSource.file(path),
   NetworkAudioSource(:final url) => MediaSource.network(url),
+  MemoryAudioSource(:final bytes, :final debugLabel) => MediaSource.memory(
+    bytes,
+    debugLabel: debugLabel,
+  ),
 };
 
 /// The audio resolution path of [MediaRepository]: validate + allowlist each
@@ -59,16 +63,18 @@ extension _ReactiveResolution on MediaRepository {
       final path = _audioPaths[source] ?? await _materializeAudio(source);
       _audioPaths[source] = path;
       final decodeSource = AudioSource.file(path);
-      _beatGrids[source] = await beatDetector.detect(
+      final grid = await beatDetector.detect(
         decodeSource,
         fps: fps,
         totalFrames: totalFrames,
       );
-      _bandTables[source] = await analyzer.analyze(
+      final bands = await analyzer.analyze(
         decodeSource,
         fps: fps,
         totalFrames: totalFrames,
       );
+      _beatGrids[source] = grid;
+      _bandTables[source] = bands;
     }
   }
 }

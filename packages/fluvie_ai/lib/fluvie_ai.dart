@@ -8,6 +8,7 @@
 library;
 
 export 'src/author/ai_providers.dart';
+export 'src/author/dart_edit_service.dart' show DartEditService;
 export 'src/author/prompting.dart' show buildAuthorSystemPrompt;
 export 'src/author/video_author_service.dart';
 export 'src/client/ai_client.dart';
@@ -16,6 +17,7 @@ export 'src/client/claude_ai_client.dart' show ClaudeAiClient;
 export 'src/client/gemini_ai_client.dart' show GeminiAiClient;
 export 'src/client/mistral_ai_client.dart' show MistralAiClient;
 export 'src/client/ollama_ai_client.dart' show OllamaAiClient;
+export 'src/client/recording_ai_client.dart' show AiGenerationRecord, RecordingAiClient;
 export 'src/fake/fake_ai_client.dart' show FakeAiClient;
 export 'src/generative/widgets/generative_image.dart';
 export 'src/generative/widgets/generative_music.dart';

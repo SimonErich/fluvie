@@ -1,8 +1,9 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter/widgets.dart' as flutter;
+import 'package:flutter/widgets.dart';
 import 'package:fluvie/src/core/errors/fluvie_render_exception.dart';
 import 'package:fluvie/src/core/media/snapshot_source.dart';
 import 'package:fluvie/src/media/runtime/image_resolver_scope.dart';
+import 'package:fluvie/src/rendering/runtime/preparation_scope.dart';
 import 'package:fluvie/src/rendering/runtime/render_mode_context.dart';
 
 /// Paints one pre-resolved [SnapshotSource]: the single synchronous `RawImage`
@@ -45,6 +46,9 @@ final class ResolvedSnapshot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (PreparationScope.exposesOnlyGeometry(context)) return const SizedBox.shrink();
+
+    PreparationScope.requirePrepared(context, source, 'snapshot');
     final resolver = ImageResolverScope.maybeOf(context);
     if (resolver != null) {
       final image = resolver.decodedSnapshotFor(source);

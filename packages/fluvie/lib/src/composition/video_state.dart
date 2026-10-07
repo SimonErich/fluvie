@@ -13,6 +13,9 @@ part of 'video.dart';
 final class VideoState extends State<Video> {
   late VideoRegistrar _registrar;
   late List<GlobalKey> _sceneKeys;
+  // The overlay layer's identity: keyed so nothing above it can rebuild it
+  // into a new element and re-mount every overlay mid-video.
+  final GlobalKey _overlayKey = GlobalKey(debugLabel: 'fluvie overlays');
   // The per-collect-generation hero registry: slots register
   // through the per-scene SharedElementScope below, the post-frame resolve
   // validates the set, and a composition change resets it.
@@ -68,6 +71,7 @@ final class VideoState extends State<Video> {
     // rebuild their tokens instead of throwing.
     if (!identical(oldWidget.scenes, widget.scenes) ||
         oldWidget.fps != widget.fps ||
+        !identical(oldWidget.overlays, widget.overlays) ||
         oldWidget.motionDefaults != widget.motionDefaults ||
         oldWidget.transition != widget.transition) {
       _registrar.reset(sceneCount: widget.scenes.length);
@@ -82,7 +86,9 @@ final class VideoState extends State<Video> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_registrar.isResolved && !_resolveScheduled) {
+    if (PreparationScope.shouldResolveTiming(context) &&
+        !_registrar.isResolved &&
+        !_resolveScheduled) {
       _resolveScheduled = true;
       WidgetsBinding.instance.addPostFrameCallback(_resolveSchedules);
     }
@@ -94,20 +100,46 @@ final class VideoState extends State<Video> {
       // blends every scene in one shared expanding Stack from the same offset
       // math the getters use. The caption layer sits on top.
       child: _withCaptions(
-        TransitionCompositor(
-          offsets: offsets,
-          transitions: widget._boundaryTransitions,
-          sharedElements: _sharedElements,
-          sceneShells: [
-            for (var s = 0; s < widget.scenes.length; s++)
-              _sceneShell(
-                widget.scenes[s],
-                sceneIndex: s,
-                startFrame: offsets.startFrames[s],
-              ),
-          ],
+        _withOverlays(
+          TransitionCompositor(
+            offsets: offsets,
+            transitions: widget._boundaryTransitions,
+            sharedElements: _sharedElements,
+            sceneShells: [
+              for (var s = 0; s < widget.scenes.length; s++)
+                _sceneShell(
+                  widget.scenes[s],
+                  sceneIndex: s,
+                  startFrame: offsets.startFrames[s],
+                ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  /// Mounts the video's overlays above [composition]: one Stack child holding
+  /// every overlay, inside the video's own time scope and its own registration
+  /// bucket, so each overlay is one instance for the whole video whose window
+  /// resolves against the video rather than a scene.
+  ///
+  /// A video with no overlays is returned unchanged, so it mounts no layer at
+  /// all — the mounted tree of every existing video is untouched.
+  ///
+  /// `StackFit.passthrough`, like the caption layer: the composition below
+  /// keeps the constraints it had, and an overlay sizes itself.
+  Widget _withOverlays(Widget composition) {
+    if (widget.overlays.isEmpty) return composition;
+    return Stack(
+      fit: StackFit.passthrough,
+      children: [
+        composition,
+        CompositionRegistrarScope(
+          registrar: _registrar.forOverlays(),
+          child: OverlayLayer(overlays: widget.overlays, key: _overlayKey),
+        ),
+      ],
     );
   }
 
@@ -179,7 +211,12 @@ final class VideoState extends State<Video> {
   /// a structured error instead of a red debug banner.
   void _resolveSchedules(Duration _) {
     _resolveScheduled = false;
-    if (!mounted || _registrar.isResolved || _timingErrorReported) return;
+    if (!mounted ||
+        _registrar.isResolved ||
+        _timingErrorReported ||
+        !PreparationScope.shouldResolveTiming(context)) {
+      return;
+    }
     // The capture shell mounts a BeatGridScope with the analysed grids;
     // threading them into the plan lets `Trigger.beat` resolve
     // without a grid touching the Video surface. No scope leaves the grids
@@ -193,6 +230,7 @@ final class VideoState extends State<Video> {
             (duration: scene.duration, defaults: scene.motionDefaults),
         ],
         registrationsByScene: _registrar.registrationsByScene,
+        overlays: _registrar.overlayRegistrations,
         videoDefaults: widget.motionDefaults,
         themeDefaults: _themeMotion,
         boundaryTransitions: widget._boundaryTransitions,
@@ -209,6 +247,7 @@ final class VideoState extends State<Video> {
       setState(() {});
     } on FluvieTimingError catch (error) {
       _timingErrorReported = true;
+      if (PreparationScope.reportTimingError(context, error)) return;
       final probe = TimelineProbeScope.maybeOf(context);
       if (probe != null) {
         // Include anchor names (e.g. "(anchors: music)") by using toString()

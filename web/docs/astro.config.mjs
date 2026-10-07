@@ -5,6 +5,8 @@ import { defineConfig } from 'astro/config';
 // by scripts/import-docs.mjs (run automatically by `npm run build`/`dev`).
 export default defineConfig({
   site: 'https://docs.fluvie.dev',
+  // Preserve spaces between inline elements when upgrading the compiler.
+  compressHTML: true,
   integrations: [
     starlight({
       title: 'Fluvie',
@@ -27,6 +29,7 @@ export default defineConfig({
           items: [
             { label: 'Installation', slug: 'getting-started/installation' },
             { label: 'Start a project', slug: 'getting-started/start-a-project' },
+            { label: 'Create from local assets', slug: 'getting-started/authoring-with-assets' },
             { label: 'Your first video', slug: 'getting-started/your-first-video' },
             { label: 'Core concepts', slug: 'getting-started/core-concepts' },
           ],
@@ -35,6 +38,7 @@ export default defineConfig({
           label: 'Guides',
           items: [
             { label: 'Layouts', slug: 'guides/layouts' },
+            { label: 'Free placement', slug: 'guides/free-placement' },
             { label: 'Backgrounds and gradients', slug: 'guides/backgrounds-and-gradients' },
             { label: 'Text and typography', slug: 'guides/text-and-typography' },
             { label: 'Animating elements', slug: 'guides/animating-elements' },
@@ -47,6 +51,8 @@ export default defineConfig({
             { label: 'Audio and captions', slug: 'guides/audio-and-captions' },
             { label: 'Authoring with specs', slug: 'guides/authoring-with-specs' },
             { label: 'AI and MCP', slug: 'guides/ai-and-mcp' },
+            { label: 'Asset evidence', slug: 'guides/asset-evidence' },
+            { label: 'Review a video', slug: 'guides/reviewing-a-video' },
             { label: 'Rendering on a server', slug: 'guides/rendering-on-a-server' },
             { label: 'The Playground', slug: 'guides/playground' },
             { label: 'On-device mobile rendering', slug: 'guides/on-device-mobile-rendering' },
@@ -58,6 +64,31 @@ export default defineConfig({
           ],
         },
         { label: 'Cookbook', slug: 'cookbook' },
+        {
+          label: 'Editor',
+          items: [
+            { label: 'Getting started', slug: 'editor/editor-getting-started' },
+            { label: 'The start screen', slug: 'editor/editor-start-screen' },
+            { label: 'Workspaces', slug: 'editor/editor-workspaces' },
+            { label: 'Media bin and source monitor', slug: 'editor/editor-media-bin' },
+            { label: 'NLE timeline', slug: 'editor/editor-nle-timeline' },
+            { label: 'Continuity', slug: 'editor/editor-continuity' },
+            { label: 'Effects', slug: 'editor/editor-effects' },
+            { label: 'Colour', slug: 'editor/editor-colour' },
+            { label: 'Audio', slug: 'editor/editor-audio' },
+            { label: 'Transitions and speed', slug: 'editor/editor-transitions' },
+            { label: 'Titles and motion', slug: 'editor/editor-titles' },
+            { label: 'Delivery and performance', slug: 'editor/editor-delivery' },
+            { label: 'The canvas', slug: 'editor/editor-canvas' },
+            { label: 'Media and bundles', slug: 'editor/editor-media' },
+            { label: 'The timeline', slug: 'editor/editor-timeline' },
+            { label: 'Video mode', slug: 'editor/editor-video-mode' },
+            { label: 'Exporting a video', slug: 'editor/editor-export' },
+            { label: 'Themes, masters, templates', slug: 'editor/editor-themes' },
+            { label: 'Shortcuts', slug: 'editor/editor-shortcuts' },
+            { label: 'FAQ', slug: 'editor/editor-faq' },
+          ],
+        },
         {
           label: 'Advanced',
           items: [
@@ -77,6 +108,9 @@ export default defineConfig({
             { label: 'Cheatsheet', slug: 'reference/cheatsheet' },
             { label: 'Animation presets', slug: 'reference/animation-presets' },
             { label: 'The rendering surface', slug: 'reference/rendering-surface' },
+            { label: 'Render capabilities', slug: 'reference/render-capabilities' },
+            { label: 'Server protocol', slug: 'reference/server-protocol' },
+            { label: 'Configure a TrackTimeline', slug: 'reference/track-timeline' },
             { label: 'Migration', slug: 'reference/migration' },
             { label: 'FAQ', slug: 'reference/faq' },
           ],
@@ -87,7 +121,13 @@ export default defineConfig({
             { label: 'Overview', slug: 'contributing/overview' },
             { label: 'Testing', slug: 'contributing/testing' },
             { label: 'Coverage', slug: 'contributing/coverage' },
+            { label: 'Package releases', slug: 'contributing/package-release' },
+            { label: 'Browser release checks', slug: 'contributing/browser-release-checks' },
+            { label: 'Editor release verification', slug: 'contributing/editor-release-verification' },
+            { label: 'Flutter SDK golden migration', slug: 'contributing/flutter-sdk-golden-migration' },
             { label: 'Untrusted render security', slug: 'contributing/untrusted-render-security' },
+            { label: 'ADR: steps, notes, digest', slug: 'contributing/steps-notes-digest' },
+            { label: 'ADR: the video-mode document', slug: 'contributing/video-mode-document' },
           ],
         },
       ],

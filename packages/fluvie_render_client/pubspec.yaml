@@ -1,0 +1,16 @@
+name: fluvie_render_client
+version: 0.3.1
+description: Web-safe HTTP client for the self-hosted Fluvie render API.
+repository: https://github.com/SimonErich/fluvie/tree/main/packages/fluvie_render_client
+homepage: https://fluvie.dev
+issue_tracker: https://github.com/SimonErich/fluvie/issues
+resolution: workspace
+environment:
+  sdk: ^3.12.0
+dependencies:
+  http: ^1.5.0
+  meta: ^1.16.0
+dev_dependencies:
+  mocktail: ^1.0.5
+  test: ^1.31.0
+  very_good_analysis: ^10.2.0

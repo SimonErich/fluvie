@@ -15,7 +15,12 @@ abstract interface class VideoAuthorService {
   /// Pass [base] to refine an existing spec, and [lastFrame] to ground the edit
   /// on a rendered preview. Throws an [AiClientException] if the model cannot
   /// produce a valid spec within the repair budget.
-  Future<VideoSpec> author(String prompt, {VideoSpec? base, AiImage? lastFrame});
+  Future<VideoSpec> author(
+    String prompt, {
+    VideoSpec? base,
+    AiImage? lastFrame,
+    List<AiImage> evidenceImages = const [],
+  });
 }
 
 /// The default [VideoAuthorService]: schema-constrained generation with a
@@ -36,10 +41,20 @@ final class LlmVideoAuthorService implements VideoAuthorService {
   final int _maxRepairs;
 
   @override
-  Future<VideoSpec> author(String prompt, {VideoSpec? base, AiImage? lastFrame}) async {
+  Future<VideoSpec> author(
+    String prompt, {
+    VideoSpec? base,
+    AiImage? lastFrame,
+    List<AiImage> evidenceImages = const [],
+  }) async {
     final messages = <AiMessage>[
       AiMessage.system(buildAuthorSystemPrompt(_schema)),
       AiMessage.user(_userPrompt(prompt, base), image: lastFrame),
+      for (var index = 0; index < evidenceImages.length; index++)
+        AiMessage.user(
+          evidenceImages[index].description ?? 'Visual evidence image ${index + 1}.',
+          image: evidenceImages[index],
+        ),
     ];
     var attempt = 0;
     while (true) {

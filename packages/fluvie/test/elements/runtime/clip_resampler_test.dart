@@ -13,6 +13,7 @@ int _resample({
   int compFps = 30,
   double srcFps = 30,
   int trimStartFrames = 0,
+  double speed = 1,
 }) => resampleClipFrame(
   compFrame: compFrame,
   windowStart: windowStart,
@@ -20,6 +21,7 @@ int _resample({
   srcFps: srcFps,
   trimStartFrames: trimStartFrames,
   trimEndFrames: trimEndFrames,
+  speed: speed,
 );
 
 void main() {
@@ -117,6 +119,72 @@ void main() {
           ),
         );
       }
+    });
+  });
+
+  group('speed retimes the source', () {
+    test('half speed advances one source frame every two composition frames', () {
+      expect(_resample(compFrame: 0, trimEndFrames: 30, speed: 0.5), 0);
+      expect(_resample(compFrame: 1, trimEndFrames: 30, speed: 0.5), 0);
+      expect(_resample(compFrame: 2, trimEndFrames: 30, speed: 0.5), 1);
+      expect(_resample(compFrame: 9, trimEndFrames: 30, speed: 0.5), 4);
+    });
+
+    test('double speed advances two source frames per composition frame', () {
+      expect(_resample(compFrame: 0, trimEndFrames: 60, speed: 2), 0);
+      expect(_resample(compFrame: 1, trimEndFrames: 60, speed: 2), 2);
+      expect(_resample(compFrame: 7, trimEndFrames: 60, speed: 2), 14);
+    });
+
+    test('speed 1 is exactly the unretimed rule', () {
+      // Held in a variable so the analyzer does not read it as a redundant
+      // literal: passing the default explicitly is the point of the test.
+      final sourceSpeed = double.parse('1');
+      for (final frame in [0, 1, 7, 29]) {
+        expect(
+          _resample(compFrame: frame, trimEndFrames: 30, speed: sourceSpeed),
+          _resample(compFrame: frame, trimEndFrames: 30),
+        );
+      }
+    });
+
+    test('a fast clip still holds on its last frame rather than reading past it', () {
+      // The clamp is what makes a 2x clip in a long window freeze instead of
+      // running off the end of the trim.
+      expect(_resample(compFrame: 40, trimEndFrames: 30, speed: 2), 29);
+    });
+
+    test('reverse counts back from the last source frame', () {
+      expect(_resample(compFrame: 0, trimEndFrames: 30, speed: -1), 29);
+      expect(_resample(compFrame: 1, trimEndFrames: 30, speed: -1), 28);
+      expect(_resample(compFrame: 29, trimEndFrames: 30, speed: -1), 0);
+    });
+
+    test('reverse clamps at the trim start once it has run out', () {
+      expect(_resample(compFrame: 45, trimEndFrames: 30, speed: -1), 0);
+    });
+
+    test('reverse honours the trim, not the whole source', () {
+      // Trim 10..20 reversed opens on source 19 and walks down to 10.
+      expect(
+        _resample(compFrame: 0, trimStartFrames: 10, trimEndFrames: 20, speed: -1),
+        19,
+      );
+      expect(
+        _resample(compFrame: 9, trimStartFrames: 10, trimEndFrames: 20, speed: -1),
+        10,
+      );
+      expect(
+        _resample(compFrame: 30, trimStartFrames: 10, trimEndFrames: 20, speed: -1),
+        10,
+        reason: 'past the end it holds the trim start, never below it',
+      );
+    });
+
+    test('half speed reversed halves the walk back', () {
+      expect(_resample(compFrame: 0, trimEndFrames: 30, speed: -0.5), 29);
+      expect(_resample(compFrame: 1, trimEndFrames: 30, speed: -0.5), 29);
+      expect(_resample(compFrame: 2, trimEndFrames: 30, speed: -0.5), 28);
     });
   });
 }

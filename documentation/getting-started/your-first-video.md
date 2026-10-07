@@ -53,13 +53,13 @@ lesson so thirteen of them can live side by side.
 
 ## Render it
 
-Point the CLI at the file and name an output:
+Point the CLI at the file:
 
 ```sh
-fluvie render ./lib/my_video.dart --out hello.mp4
+fluvie render ./lib/my_video.dart
 ```
 
-The CLI captures every frame, then FFmpeg encodes the MP4. From this repo, render
+The CLI captures every frame, then FFmpeg encodes `build/fluvie/my_video.mp4`. From this repo, render
 the lesson by its key instead, because the gallery keeps a registry:
 
 ```sh

@@ -89,6 +89,29 @@ void main() {
       expect(_alphaAt(frame, _webmSize ~/ 2, _webmSize ~/ 2), greaterThan(247));
     }, tags: ['ffmpeg']);
 
+    test('owned batched extraction preserves exact frames and their alpha', () async {
+      final frames = await service.extractFrames(
+        webm,
+        const [0, 5, 9],
+        width: _webmSize,
+        height: _webmSize,
+        decoder: 'libvpx-vp9',
+      );
+      expect(frames.keys, [0, 5, 9]);
+      for (final index in frames.keys) {
+        final individuallyDecoded = await service.extractFrame(
+          webm,
+          index,
+          width: _webmSize,
+          height: _webmSize,
+          decoder: 'libvpx-vp9',
+        );
+        expect(frames[index], individuallyDecoded);
+        expect(_alphaAt(frames[index]!, 0, 0), lessThan(8));
+        expect(_alphaAt(frames[index]!, _webmSize ~/ 2, _webmSize ~/ 2), greaterThan(247));
+      }
+    }, tags: ['ffmpeg']);
+
     // The regression this whole decoder choice exists for: VP9 codes alpha as a
     // separate layer that only libvpx-vp9 reads, so the default decoder returns
     // a fully opaque frame instead of failing. A render composites it over black

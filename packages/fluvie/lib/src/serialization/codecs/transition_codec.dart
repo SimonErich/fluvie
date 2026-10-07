@@ -1,4 +1,5 @@
 import 'package:flutter/painting.dart' show Alignment;
+import 'package:fluvie/src/composition/transition/transition_strategy.dart';
 import 'package:fluvie/src/core/ease.dart';
 import 'package:fluvie/src/core/edge.dart';
 import 'package:fluvie/src/core/errors/fluvie_spec_error.dart';
@@ -13,8 +14,15 @@ import 'package:fluvie/src/serialization/codecs/time_codec.dart';
 /// canonical fields for that kind (a cut carries only its kind).
 Map<String, Object?> encodeTransition(Transition transition, {List<String> path = const []}) {
   String time() => encodeTime(transition.duration, path: path);
-  String ease() => encodeCurve(transition.ease, path: path);
+  Object ease() => encodeCurve(transition.ease, path: path);
   return switch (transition.kind) {
+    TransitionKind.custom => {
+      ...transition.parameters,
+      'kind': transition.customKind,
+      'duration': time(),
+      'overlap': transition.overlap,
+      'ease': ease(),
+    },
     TransitionKind.cut => {'kind': 'cut'},
     TransitionKind.crossFade => {
       'kind': 'crossFade',
@@ -54,6 +62,18 @@ Transition decodeTransition(Object? raw, {List<String> path = const []}) {
   if (raw is! Map<String, Object?>) {
     throw FluvieSpecError('Expected a transition object', path: path);
   }
+  final rawKind = raw['kind'];
+  final custom = rawKind is String && !TransitionKind.values.any((kind) => kind.name == rawKind);
+  if (custom && hasTransitionStrategy(rawKind)) {
+    return Transition.custom(
+      rawKind,
+      _duration(raw, path),
+      overlap: raw['overlap'] is! bool || raw['overlap'] == true,
+      ease: raw['ease'] == null ? Ease.linear : decodeCurve(raw['ease'], path: [...path, 'ease']),
+      parameters: {...raw}
+        ..removeWhere((key, _) => const {'kind', 'duration', 'overlap', 'ease'}.contains(key)),
+    );
+  }
   final kind = decodeEnum(
     TransitionKind.values,
     raw['kind'],
@@ -67,6 +87,10 @@ Transition decodeTransition(Object? raw, {List<String> path = const []}) {
       : decodeCurve(raw['ease'], path: [...path, 'ease']);
   Time duration() => _duration(raw, path);
   return switch (kind) {
+    TransitionKind.custom => throw FluvieSpecError(
+      'Use the registered custom kind name',
+      path: path,
+    ),
     TransitionKind.cut => const Transition.cut(),
     TransitionKind.crossFade => Transition.crossFade(duration(), overlap: overlap, ease: ease),
     TransitionKind.wipe => Transition.wipe(

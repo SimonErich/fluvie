@@ -1,0 +1,87 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "overlays": [
+    {
+      "id": "ov-logo",
+      "type": "Image",
+      "source": {
+        "kind": "asset",
+        "value": "media/logo.png"
+      },
+      "transform": {
+        "x": 0.9,
+        "y": 0.12,
+        "w": 0.12,
+        "h": 0.12
+      },
+      "animate": [
+        {
+          "preset": "fadeIn",
+          "duration": "12f"
+        }
+      ]
+    },
+    {
+      "id": "ov-ticker",
+      "type": "Text",
+      "text": "live",
+      "style": {
+        "fontSize": 18
+      },
+      "transform": {
+        "x": 0.1,
+        "y": 0.92
+      },
+      "show": {
+        "from": "45f",
+        "to": "180f"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "duration": "90f",
+      "background": {
+        "kind": "color",
+        "color": "#101018"
+      },
+      "children": [
+        {
+          "id": "el-one",
+          "type": "Text",
+          "text": "First"
+        }
+      ]
+    },
+    {
+      "duration": "120f",
+      "enter": {
+        "kind": "crossFade",
+        "duration": "15f"
+      },
+      "background": {
+        "kind": "color",
+        "color": "#181020"
+      },
+      "children": [
+        {
+          "id": "el-two",
+          "type": "Text",
+          "text": "Second"
+        }
+      ]
+    }
+  ],
+  "editor": {
+    "editorSchema": 1,
+    "overlayHomes": {
+      "ov-logo": 0,
+      "ov-ticker": 1
+    }
+  }
+}

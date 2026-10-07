@@ -18,6 +18,9 @@ final class MemoryRenderSandbox implements RenderSandbox {
   /// The names currently held, in insertion order (for tests and inspection).
   Iterable<String> get names => _files.keys;
 
+  /// Releases every staged byte after a completed or cancelled render.
+  void clear() => _files.clear();
+
   @override
   String? get directoryPath => null;
 

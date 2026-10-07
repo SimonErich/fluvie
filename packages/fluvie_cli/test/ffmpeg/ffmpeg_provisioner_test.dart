@@ -28,18 +28,38 @@ final class _FakeDownloader implements FfmpegDownloader {
   }
 }
 
+final class _BoundedDownloader implements BoundedFfmpegDownloader {
+  _BoundedDownloader(this.bytes);
+  final List<int> bytes;
+  final limits = <int>[];
+
+  @override
+  Future<List<int>> download(String url) => throw StateError('Expected a bounded download.');
+
+  @override
+  Future<List<int>> downloadBounded(String url, {required int maxBytes}) async {
+    limits.add(maxBytes);
+    return bytes;
+  }
+}
+
 final _payload = Uint8List.fromList(List<int>.generate(4096, (i) => (i * 31) % 256));
 
 const _innerPath = 'build/bin/ffmpeg';
 
 List<int> _tarXz(List<int> bytes) => XZEncoder().encode(
-  TarEncoder().encode(Archive()..add(ArchiveFile(_innerPath, bytes.length, bytes))),
+  TarEncoder().encode(
+    Archive()
+      ..add(ArchiveFile(_innerPath, bytes.length, bytes))
+      ..add(ArchiveFile('build/bin/ffprobe', bytes.length, bytes)),
+  ),
 );
 
 FfmpegAsset _assetFor(List<int> archiveBytes, {int? sizeBytes, String? sha256Hex}) => FfmpegAsset(
   url: 'https://github.com/fixture/ffmpeg.tar.xz',
   format: FfmpegArchiveFormat.tarXz,
   archiveBinaryPath: _innerPath,
+  archiveProbePath: 'build/bin/ffprobe',
   sha256: sha256Hex ?? sha256.convert(archiveBytes).toString(),
   sizeBytes: sizeBytes ?? archiveBytes.length,
 );
@@ -68,6 +88,28 @@ void main() {
       FfmpegProvisioner(runner: runner, downloader: downloader, cache: cache);
 
   group('install', () {
+    test('bounds both archive downloads to their exact trusted sizes', () async {
+      final archive = _tarXz(_payload);
+      final downloader = _BoundedDownloader(archive);
+      final pinned = _assetFor(archive);
+      final asset = FfmpegAsset(
+        url: pinned.url,
+        format: pinned.format,
+        archiveBinaryPath: pinned.archiveBinaryPath,
+        sha256: pinned.sha256,
+        sizeBytes: pinned.sizeBytes,
+        probeAsset: pinned,
+      );
+      final path = await FfmpegProvisioner(
+        runner: runner,
+        downloader: downloader,
+        cache: cache,
+      ).install(asset: asset);
+      expect(downloader.limits, [archive.length, archive.length]);
+      expect(File(path).readAsBytesSync(), _payload);
+      expect(File(cache.probePath!).readAsBytesSync(), _payload);
+    });
+
     test('downloads, extracts, chmods, probes, and installs the binary', () async {
       final archive = _tarXz(_payload);
       final downloader = _FakeDownloader(archive);
@@ -78,8 +120,9 @@ void main() {
       expect(path, cache.binaryPath);
       expect(File(path).existsSync(), isTrue);
       expect(File(path).readAsBytesSync(), equals(_payload));
-      verify(() => runner.run('chmod', ['+x', '$path.tmp'])).called(1);
-      verify(() => runner.run(path, const ['-version'])).called(1);
+      verify(() => runner.run('chmod', any())).called(2);
+      expect(File(cache.probePath!).readAsBytesSync(), equals(_payload));
+      verify(() => runner.run(any(), const ['-version'])).called(2);
       expect(File('$path.tmp').existsSync(), isFalse);
       expect(logs, isNotEmpty);
       expect(downloader.calls, 1);
@@ -153,7 +196,7 @@ void main() {
       final archive = _tarXz(_payload);
       final downloader = _FakeDownloader(archive);
       when(
-        () => runner.run(cache.binaryPath!, const ['-version']),
+        () => runner.run(any(), const ['-version']),
       ).thenAnswer((_) async => const ProcessRunResult(exitCode: 127, stdout: '', stderr: ''));
 
       await expectLater(
@@ -161,6 +204,49 @@ void main() {
         throwsA(isA<CliFailure>().having((e) => e.message, 'message', contains('did not run'))),
       );
       expect(File(cache.binaryPath!).existsSync(), isFalse);
+    });
+
+    test('concurrent installers share one complete installation', () async {
+      final archive = _tarXz(_payload);
+      final downloader = _FakeDownloader(archive);
+      final first = provisioner(downloader);
+      final second = provisioner(downloader);
+      final paths = await Future.wait([
+        first.install(asset: _assetFor(archive)),
+        second.install(asset: _assetFor(archive)),
+      ]);
+      expect(paths, [cache.binaryPath, cache.binaryPath]);
+      expect(downloader.calls, 1);
+      expect(File(cache.probePath!).existsSync(), isTrue);
+    });
+
+    test('failed forced update retains the previous complete pair', () async {
+      final archive = _tarXz(_payload);
+      final downloader = _FakeDownloader(archive);
+      final installer = provisioner(downloader);
+      await installer.install(asset: _assetFor(archive));
+      when(() => runner.run(any(), const ['-version'])).thenAnswer(
+        (_) async => const ProcessRunResult(exitCode: 1, stdout: '', stderr: 'broken'),
+      );
+      await expectLater(
+        installer.install(asset: _assetFor(archive), force: true),
+        throwsA(isA<CliFailure>()),
+      );
+      expect(File(cache.binaryPath!).readAsBytesSync(), _payload);
+      expect(File(cache.probePath!).readAsBytesSync(), _payload);
+    });
+
+    test('repairs a corrupt cached binary instead of reusing it', () async {
+      final archive = _tarXz(_payload);
+      final downloader = _FakeDownloader(archive);
+      final installer = provisioner(downloader);
+      await installer.install(asset: _assetFor(archive));
+      when(() => runner.run(cache.binaryPath!, const ['-version'])).thenAnswer(
+        (_) async => const ProcessRunResult(exitCode: 1, stdout: '', stderr: 'broken'),
+      );
+      await installer.install(asset: _assetFor(archive));
+      expect(downloader.calls, 2);
+      expect(File(cache.probePath!).existsSync(), isTrue);
     });
 
     test('exposes the managed binary path and default wiring constructs', () {

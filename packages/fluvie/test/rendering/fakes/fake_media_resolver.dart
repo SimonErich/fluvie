@@ -21,7 +21,10 @@ import 'package:fluvie/src/core/media/snapshot_source.dart';
 ///
 /// Demoted to a test fixture once the real `MediaRepository` became the
 /// `mediaResolverProvider` default (the Seams Ledger `MediaResolver` row).
-final class FakeMediaResolver implements MediaResolver {
+///
+/// Open to extension so a test that needs to observe one call (which sources a
+/// pass probed, say) can override that member and delegate the rest.
+class FakeMediaResolver implements MediaResolver {
   /// Creates a resolver serving exactly [canned], with optional pre-decoded
   /// [images] for the image sources, plus canned clip [metadata] and
   /// [clipFrames] (`source -> frame -> image`) for the clip sources.

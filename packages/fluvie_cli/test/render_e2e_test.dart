@@ -42,9 +42,10 @@ Video build() => Video(
 
 Future<ProcessResult> _renderKey(String key, String outPath, List<String> extra) =>
     Process.run('dart', [
-      'run',
       'bin/fluvie.dart',
       'render',
+      '--toolchain',
+      'system',
       key,
       '--out',
       outPath,
@@ -55,9 +56,10 @@ Future<ProcessResult> _renderKey(String key, String outPath, List<String> extra)
 /// Renders a composition FILE (the single-file flow), rather than a registry key.
 Future<ProcessResult> _renderFile(String path, String outPath, List<String> extra) =>
     Process.run('dart', [
-      'run',
       'bin/fluvie.dart',
       'render',
+      '--toolchain',
+      'system',
       path,
       '--out',
       outPath,
@@ -122,10 +124,13 @@ dependencies:
   fluvie:
     path: ${Directory.current.parent.path}/fluvie
 
+dependency_overrides:
+  fluvie_media:
+    path: ${Directory.current.parent.path}/fluvie_media
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  alchemist: ^0.14.0
 ''');
     File('${project.path}/lib/example_video.dart')
       ..createSync(recursive: true)
@@ -156,7 +161,12 @@ dev_dependencies:
     // The harness is generated per render and never committed, so it cannot
     // drift from the CLI that writes it. It survives the render so `flutter
     // test`'s kernel cache hits on a re-render of the same target.
-    final harness = File('$_fileTargetProject/.fluvie/lib_example_video_dart/harness_test.dart');
+    expect(Directory('$_fileTargetProject/.fluvie').existsSync(), isFalse);
+    final harnessPath = RegExp(
+      r'loading ([^\r\n]+harness_test\.dart)',
+    ).firstMatch(_combined(result))?.group(1);
+    expect(harnessPath, isNotNull, reason: _combined(result));
+    final harness = File(harnessPath!);
     expect(harness.existsSync(), isTrue);
     // Imported by its package URI: a relative import would give the same file a
     // second library identity, so its Video would not be the harness's Video.
@@ -172,6 +182,125 @@ dev_dependencies:
       const ['--no-cache'],
     );
     expect(again.exitCode, 0, reason: _combined(again));
+
+    // Projects can omit flutter_test entirely: support is resolved outside the
+    // consumer, and the optional --out uses its build directory.
+    final pubspec = File('${project.path}/pubspec.yaml');
+    pubspec.writeAsStringSync(
+      pubspec.readAsStringSync().replaceFirst(
+        'dev_dependencies:\n  flutter_test:\n    sdk: flutter\n',
+        '',
+      ),
+    );
+    final resolved = await Process.run('flutter', ['pub', 'get'], workingDirectory: project.path);
+    expect(resolved.exitCode, 0, reason: _combined(resolved));
+    final beforeSupport = pubspec.readAsStringSync();
+    final supported = await Process.run('dart', [
+      'bin/fluvie.dart',
+      'render',
+      '$_fileTargetProject/lib/example_video.dart',
+      '--toolchain',
+      'system',
+      '--machine',
+      '--poster',
+      '0.2s',
+    ]);
+    expect(supported.exitCode, 0, reason: _combined(supported));
+    final machineEvents = const LineSplitter()
+        .convert(supported.stdout as String)
+        .map((line) => jsonDecode(line) as Map<String, Object?>)
+        .toList();
+    expect(machineEvents.last['event'], 'artifact');
+    expect(machineEvents.any((event) => event['completed'] == 6 && event['total'] == 6), isTrue);
+    const defaultOutput = '$_fileTargetProject/build/fluvie/example_video.mp4';
+    expect(File(defaultOutput).existsSync(), isTrue);
+    final receipt =
+        jsonDecode(
+              File('$_fileTargetProject/build/fluvie/example_video.render.json').readAsStringSync(),
+            )
+            as Map<String, Object?>;
+    expect(receipt['sourceFingerprint'], matches(RegExp(r'^[a-f0-9]{64}$')));
+    expect((receipt['toolchain']! as Map<String, Object?>)['build'], 'system');
+    expect((receipt['capture']! as Map<String, Object?>)['frameCount'], 6);
+    final media = (receipt['output']! as Map<String, Object?>)['media']! as Map<String, Object?>;
+    expect(media['width'], 64);
+    expect(media['height'], 64);
+    expect(media['codec'], 'h264');
+    final poster = receipt['poster']! as Map<String, Object?>;
+    expect(File(poster['path']! as String).existsSync(), isTrue);
+    expect(poster['sha256'], matches(RegExp(r'^[a-f0-9]{64}$')));
+    expect(
+      (receipt['output']! as Map<String, Object?>)['sha256'],
+      matches(RegExp(r'^[a-f0-9]{64}$')),
+    );
+    expect(pubspec.readAsStringSync(), beforeSupport);
+    expect(Directory('$_fileTargetProject/.fluvie').existsSync(), isFalse);
+
+    // Serialized specs use the same managed engine without a gallery harness.
+    final spec = File('${project.path}/cat.fluvie.json')
+      ..writeAsStringSync(
+        jsonEncode({
+          'fluvieSpec': 1,
+          'size': {'width': 64, 'height': 64},
+          'fps': 12,
+          'scenes': [
+            {
+              'duration': '6f',
+              'children': [
+                {'type': 'Text', 'text': 'Cat'},
+              ],
+            },
+          ],
+        }),
+      );
+    final specResult = await Process.run('dart', [
+      'bin/fluvie.dart',
+      'render',
+      '--spec',
+      spec.path,
+      '--project',
+      project.path,
+      '--toolchain',
+      'system',
+    ]);
+    expect(specResult.exitCode, 0, reason: _combined(specResult));
+    expect(File('${project.path}/build/fluvie/cat.mp4').existsSync(), isTrue);
+
+    final inspection = await Process.run('dart', [
+      'bin/fluvie.dart',
+      'inspect',
+      '$_fileTargetProject/lib/example_video.dart',
+      '--toolchain',
+      'system',
+      '--json',
+    ]);
+    expect(inspection.exitCode, 0, reason: _combined(inspection));
+    final details = jsonDecode(inspection.stdout as String) as Map<String, Object?>;
+    expect(details['totalFrames'], 6);
+    expect(details['fps'], 12);
+    final frame = await Process.run('dart', [
+      'bin/fluvie.dart',
+      'frame',
+      '$_fileTargetProject/lib/example_video.dart',
+      '--frame',
+      '5',
+      '--toolchain',
+      'system',
+      '--json',
+    ]);
+    expect(frame.exitCode, 0, reason: _combined(frame));
+    final frameReport = jsonDecode(frame.stdout as String) as Map<String, Object?>;
+    expect(frameReport['frame'], 5);
+    expect(File(frameReport['filePath']! as String).readAsBytesSync().take(8), [
+      137,
+      80,
+      78,
+      71,
+      13,
+      10,
+      26,
+      10,
+    ]);
   });
 
   test('fluvie render demo: encode, probe, cache hits, --no-cache', () async {
@@ -277,7 +406,7 @@ dev_dependencies:
   });
 
   test('fluvie list prints the demo key (WI-26)', () async {
-    final result = await Process.run('dart', const ['run', 'bin/fluvie.dart', 'list']);
+    final result = await Process.run('dart', const ['bin/fluvie.dart', 'list']);
     expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
     expect(result.stdout as String, contains('demo'));
   });

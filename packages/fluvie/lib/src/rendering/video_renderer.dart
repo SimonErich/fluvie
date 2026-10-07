@@ -6,11 +6,12 @@ import 'package:fluvie/src/rendering/render_progress.dart';
 /// lands on disk (desktop, on-device mobile), bytes where it stays in memory
 /// (the browser).
 ///
-/// One contract, three symmetric implementations — `DesktopVideoRenderer`
+/// A shared host contract for `DesktopVideoRenderer`
 /// (local FFmpeg), `OnDeviceVideoRenderer` in `fluvie_mobile_encoder` (the
 /// platform's hardware encoder), and `WebVideoRenderer` in
-/// `fluvie_web_encoder` (ffmpeg.wasm). All three run the same deterministic
-/// capture loop; only the encode edge differs. Implementations may add
+/// `fluvie_web_encoder` (ffmpeg.wasm). They share the deterministic frame capture
+/// loop; media decoding, audio support and export capabilities depend on the
+/// backend. Implementations may add
 /// platform extras as further optional named parameters (an output file, a
 /// codec, an `Export` mode) and choose their own defaults.
 // ignore: one_member_abstracts — the renderer family contract; three platform arms implement it.
@@ -20,7 +21,9 @@ abstract interface class VideoRenderer<T> {
   ///
   /// [fps] and [duration] set the frame count; [longEdge] sets the canvas's
   /// longer side in pixels (the shorter side is derived from [aspect]).
-  /// [audio] opts a `Video`'s declared `Audio` tracks into the encode; when a
+  /// [audio] controls whether authored audio joins the encode. Its default is
+  /// chosen by each implementation; desktop rendering currently enables it.
+  /// Pass it explicitly when selecting a backend dynamically. When a
   /// composition declares audio the renderer drops, it warns once unless
   /// [warnOnDroppedAudio] is `false`. [onProgress] observes the capturing,
   /// encoding, and complete phases; [compositionKey] labels them.

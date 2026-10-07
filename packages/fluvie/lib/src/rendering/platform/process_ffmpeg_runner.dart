@@ -3,7 +3,11 @@ import 'dart:io';
 import 'package:fluvie/src/core/errors/fluvie_encode_exception.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_runner.dart';
 import 'package:fluvie/src/rendering/encoding/ffmpeg_version.dart';
+import 'package:fluvie/src/rendering/platform/cancellable_process_runner.dart';
 import 'package:fluvie/src/rendering/platform/process_runner.dart';
+import 'package:fluvie/src/rendering/render_cancellation.dart';
+
+import 'package:fluvie_media/native.dart' show resolveMediaExecutable;
 
 /// The native [FfmpegRunner]: spawns a local FFmpeg binary through a
 /// [ProcessRunner] with argument arrays, never a shell.
@@ -22,10 +26,15 @@ final class ProcessFfmpegRunner implements FfmpegRunner {
   /// (defaulting to [Platform.environment]; injectable for tests) is
   /// consulted for [environmentVariable] before falling back to `ffmpeg`.
   ProcessFfmpegRunner({
-    this._runner = const IoProcessRunner(),
+    ProcessRunner? runner,
     this._binaryPath,
     this._environment,
-  });
+    RenderCancellation? cancellation,
+  }) : _runner =
+           runner ??
+           (cancellation == null
+               ? const IoProcessRunner()
+               : CancellableProcessRunner(cancellation));
 
   /// The environment variable that overrides the `ffmpeg` PATH lookup.
   static const String environmentVariable = 'FLUVIE_FFMPEG';
@@ -33,41 +42,15 @@ final class ProcessFfmpegRunner implements FfmpegRunner {
   /// How much trailing stderr is retained for diagnostics (4 KiB).
   static const int stderrTailLength = 4096;
 
-  /// The cache subdirectory of the FFmpeg build `fluvie ffmpeg install`
-  /// provisions. Kept in sync with `fluvie_cli`'s `pinnedFfmpegVersion` (the
-  /// CLI owns provisioning; this library only reads the cache it populates).
-  static const String _managedFfmpegVersion = '8.1';
-
   final ProcessRunner _runner;
   final String? _binaryPath;
   final Map<String, String>? _environment;
 
-  String get _binary =>
-      _binaryPath ??
-      (_environment ?? Platform.environment)[environmentVariable] ??
-      _managedCacheBinary() ??
-      'ffmpeg';
-
-  /// The managed-cache FFmpeg path when present on disk, else `null`. Mirrors
-  /// `fluvie_cli`'s cache convention: `<cacheRoot>/fluvie/ffmpeg/<version>/`,
-  /// rooted at `%LOCALAPPDATA%` on Windows or `$XDG_CACHE_HOME` / `~/.cache`
-  /// elsewhere.
-  String? _managedCacheBinary() {
-    final env = _environment ?? Platform.environment;
-    final base = Platform.isWindows
-        ? _nonEmpty(env['LOCALAPPDATA'])
-        : _nonEmpty(env['XDG_CACHE_HOME']) ?? _cacheUnderHome(env['HOME']);
-    if (base == null) return null;
-    final sep = Platform.pathSeparator;
-    final name = Platform.isWindows ? 'ffmpeg.exe' : 'ffmpeg';
-    final path = [base, 'fluvie', 'ffmpeg', _managedFfmpegVersion, name].join(sep);
-    return File(path).existsSync() ? path : null;
-  }
-
-  static String? _cacheUnderHome(String? home) =>
-      _nonEmpty(home) == null ? null : '$home${Platform.pathSeparator}.cache';
-
-  static String? _nonEmpty(String? value) => (value == null || value.isEmpty) ? null : value;
+  String get _binary => resolveMediaExecutable(
+    'ffmpeg',
+    explicit: _binaryPath,
+    environment: _environment,
+  );
 
   @override
   Future<FfmpegVersion?> probeVersion() => _probe();

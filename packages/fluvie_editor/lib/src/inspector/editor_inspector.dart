@@ -1,0 +1,24 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluvie_editor/src/document/editor_command.dart';
+import 'package:fluvie_editor/src/document/editor_document.dart';
+import 'package:fluvie_editor/src/inspector/animate_section.dart';
+import 'package:fluvie_editor/src/inspector/block_section.dart';
+import 'package:fluvie_editor/src/inspector/chart_data_section.dart';
+import 'package:fluvie_editor/src/inspector/deck_section.dart';
+import 'package:fluvie_editor/src/inspector/inspector_sections.dart';
+import 'package:fluvie_editor/src/inspector/keyframe_section.dart';
+import 'package:fluvie_editor/src/inspector/morph_section.dart';
+import 'package:fluvie_editor/src/inspector/quick_deck_section.dart';
+import 'package:fluvie_editor/src/inspector/quick_element_section.dart';
+import 'package:fluvie_editor/src/inspector/terminal_lines_section.dart';
+import 'package:fluvie_editor/src/inspector/transform_section.dart';
+import 'package:fluvie_editor/src/selection/keyframe_selection.dart';
+import 'package:fluvie_editor/src/selection/selection_controller.dart';
+import 'package:fluvie_editor/src/shell/editor_workspace.dart';
+import 'package:fluvie_editor/src/theme/token_color_scope.dart';
+import 'package:fluvie_editor/src/transitions/clip_speed_section.dart';
+import 'package:fluvie_editor/src/widgets/editor_tip.dart';
+import 'package:obers_ui/obers_ui.dart';
+
+part 'editor_inspector_view.dart';

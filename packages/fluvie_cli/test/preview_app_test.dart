@@ -186,22 +186,12 @@ dependencies:
       expect(main, contains('target.build'));
     });
 
-    test('a composition outside lib/ is a stated error naming lib/', () async {
-      // The preview app runs outside the project, and a relative import cannot
-      // escape a package: the compiler resolves it inside the app's own lib/,
-      // so a `../..` climb to another tree fails to read. Say so, rather than
-      // emitting an import the compiler cannot resolve.
+    test('a composition outside lib uses an absolute file import', () async {
       stubFlutter();
-
-      await expectLater(
-        ensure(targetAt('example_video.dart')),
-        throwsA(
-          isA<CliFailure>()
-              .having((e) => e.message, 'message', contains('must live under lib/'))
-              .having((e) => e.message, 'message', contains('example_video.dart'))
-              .having((e) => e.message, 'message', contains('fluvie preview ./lib/')),
-        ),
-      );
+      final target = targetAt('example_video.dart');
+      final dir = await ensure(target);
+      final main = File(p.join(dir, 'lib', 'main.dart')).readAsStringSync();
+      expect(main, contains("import '${File(target.path).uri}' as target;"));
     });
 
     test('the app lands in the temp cache, never inside the project', () async {

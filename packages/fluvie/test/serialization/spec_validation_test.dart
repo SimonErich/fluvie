@@ -68,7 +68,7 @@ void main() {
       expect(warnings, hasLength(2));
       expect(_messages(warnings), contains('"fill"'));
       expect(_messages(warnings), contains('"width"'));
-      expect(_messages(warnings), contains('allowed: color, size'));
+      expect(_messages(warnings), contains('allowed: color, decoration, size'));
       expect(warnings.first.path, ['scenes', '0', 'children', '0']);
     });
 
@@ -152,6 +152,32 @@ void main() {
       expect(messages, contains('"angle"'));
     });
 
+    test('gradient stop offsets are known on backgrounds and decorations', () {
+      expect(
+        unknownSpecProps(
+          _spec(
+            background: const {
+              'kind': 'radial',
+              'colors': ['#000000', '#ffffff'],
+              'stops': [0.1, 0.8],
+            },
+            children: const [
+              {
+                'type': 'Box',
+                'decoration': {
+                  'gradient': {
+                    'colors': ['#101018', '#2D3436'],
+                    'stops': [0, 0.35],
+                  },
+                },
+              },
+            ],
+          ),
+        ),
+        isEmpty,
+      );
+    });
+
     test('flags an unrecognized top-level and scene key', () {
       final messages = _messages(
         unknownSpecProps(
@@ -175,6 +201,97 @@ void main() {
       );
     });
 
+    test('flags a stray argument on an animation preset', () {
+      final warnings = unknownSpecProps(
+        _spec(
+          children: const [
+            {
+              'type': 'Box',
+              'animate': [
+                {'preset': 'fadeIn', 'sigma': 4},
+              ],
+            },
+          ],
+        ),
+      );
+
+      expect(_messages(warnings), contains('"sigma"'));
+      expect(_messages(warnings), contains('a fadeIn animation'));
+      expect(warnings.single.path, ['scenes', '0', 'children', '0', 'animate', '0']);
+    });
+
+    test('accepts every wave-2 preset argument, including open shader uniforms', () {
+      expect(
+        unknownSpecProps(
+          _spec(
+            children: const [
+              {
+                'type': 'Box',
+                'animate': [
+                  {'preset': 'scaleY', 'on': 'mid', 'gain': 1.5, 'track': 'music'},
+                  {'preset': 'pulse', 'on': 'bass', 'gain': 1.2, 'track': 'music'},
+                  {'preset': 'along', 'path': 'M 0 0 L 1 1', 'orient': false, 'phase': 'during'},
+                  {
+                    'preset': 'shader',
+                    'asset': 'shaders/ripple.frag',
+                    'uniforms': {'anySlotName': 3},
+                  },
+                  {
+                    'preset': 'particles',
+                    'spec': {'kind': 'snow', 'count': 12},
+                  },
+                ],
+              },
+            ],
+          ),
+        ),
+        isEmpty,
+      );
+    });
+
+    test('flags a typo inside a particles spec, located at the spec path', () {
+      final warnings = unknownSpecProps(
+        _spec(
+          children: const [
+            {
+              'type': 'Box',
+              'animate': [
+                {
+                  'preset': 'particles',
+                  'spec': {'kind': 'confetti', 'countt': 3},
+                },
+              ],
+            },
+          ],
+        ),
+      );
+
+      expect(_messages(warnings), contains('Did you mean "count"?'));
+      expect(warnings.single.path, ['scenes', '0', 'children', '0', 'animate', '0', 'spec']);
+    });
+
+    test('leaves raw keyframes and unknown presets to the parser', () {
+      expect(
+        unknownSpecProps(
+          _spec(
+            children: const [
+              {
+                'type': 'Box',
+                'animate': [
+                  {
+                    'from': {'opacity': 0, 'blur': 8},
+                  },
+                  {'preset': 'teleport', 'warp': 9},
+                  'nope',
+                ],
+              },
+            ],
+          ),
+        ),
+        isEmpty,
+      );
+    });
+
     test('does not flag a valid prop that is invalid only on a sibling type', () {
       // "color" is valid on a Box even though it is invalid (must nest) on a Text.
       expect(
@@ -187,6 +304,189 @@ void main() {
         ),
         isEmpty,
       );
+    });
+  });
+
+  group('unknownSpecProps over masters', () {
+    Map<String, Object?> masteredSpec({
+      Map<String, Object?>? master,
+      Map<String, Object?> extraScene = const {},
+    }) => _spec(
+      extraTop: {
+        'masters': {
+          'content':
+              master ??
+              const {
+                'background': {'kind': 'color', 'color': '#FF101018'},
+                'children': [
+                  {'type': 'Box', 'color': '#FF6C5CE7'},
+                  {
+                    'type': 'Placeholder',
+                    'slot': 'title',
+                    'transform': {'x': 0.5, 'y': 0.3},
+                    'style': {'fontSize': 34},
+                  },
+                ],
+              },
+        },
+      },
+      extraScene: {
+        'master': 'content',
+        'fills': {
+          'title': {'type': 'Text', 'text': 'Filled'},
+        },
+        ...extraScene,
+      },
+    );
+
+    test('a clean mastered spec has no unknown properties', () {
+      expect(unknownSpecProps(masteredSpec()), isEmpty);
+    });
+
+    test('flags an unknown key on a master, located at the master', () {
+      final warnings = unknownSpecProps(
+        masteredSpec(
+          master: const {
+            'children': [
+              {'type': 'Placeholder', 'slot': 'title'},
+            ],
+            'chidren': <Object?>[],
+          },
+        ),
+      );
+      expect(warnings, hasLength(1));
+      expect(warnings.single.path, ['masters', 'content']);
+      expect(warnings.single.message, contains('"chidren"'));
+      expect(warnings.single.message, contains('"children"'));
+    });
+
+    test('flags unknown keys on a placeholder and typos in its transform and style', () {
+      final warnings = unknownSpecProps(
+        masteredSpec(
+          master: const {
+            'children': [
+              {
+                'type': 'Placeholder',
+                'slot': 'title',
+                'fill': 'body',
+                'transform': {'x': 0.5, 'y': 0.3, 'rotate': 4},
+                'style': {'fontSiez': 34},
+              },
+            ],
+          },
+        ),
+      );
+      expect(_messages(warnings), contains('"fill"'));
+      expect(_messages(warnings), contains('"rotate"'));
+      expect(_messages(warnings), contains('"fontSiez"'));
+      expect(warnings.first.path, ['masters', 'content', 'children', '0']);
+    });
+
+    test('flags identity keys on master children, nested ones included', () {
+      final warnings = unknownSpecProps(
+        masteredSpec(
+          master: const {
+            'children': [
+              {'type': 'Box', 'color': '#FF000000', 'id': 'chrome'},
+              {
+                'type': 'Group',
+                'children': [
+                  {'type': 'Box', 'color': '#FF000000', 'anchor': 'a'},
+                ],
+              },
+              {'type': 'Placeholder', 'slot': 'title'},
+            ],
+          },
+        ),
+      );
+      expect(warnings, hasLength(2));
+      expect(warnings[0].message, contains('"id"'));
+      expect(warnings[0].path, ['masters', 'content', 'children', '0']);
+      expect(warnings[1].message, contains('"anchor"'));
+      expect(warnings[1].path, ['masters', 'content', 'children', '1', 'children', '0']);
+    });
+
+    test('sweeps master chrome elements and the master background as usual', () {
+      final warnings = unknownSpecProps(
+        masteredSpec(
+          master: const {
+            'background': {'kind': 'color', 'colour': '#FF101018'},
+            'children': [
+              {'type': 'Box', 'colour': '#FF000000'},
+              {'type': 'Placeholder', 'slot': 'title'},
+            ],
+          },
+        ),
+      );
+      expect(_messages(warnings), contains('"colour"'));
+      expect(warnings.map((w) => w.path), [
+        ['masters', 'content', 'background'],
+        ['masters', 'content', 'children', '0'],
+      ]);
+    });
+
+    test('flags a Placeholder outside a master', () {
+      final warnings = unknownSpecProps(
+        _spec(
+          children: const [
+            {'type': 'Placeholder', 'slot': 'title'},
+          ],
+        ),
+      );
+      expect(warnings, hasLength(1));
+      expect(warnings.single.message, contains('master'));
+      expect(warnings.single.path, ['scenes', '0', 'children', '0']);
+    });
+
+    test('flags an unknown master name and an unknown fill slot', () {
+      final unknownName = unknownSpecProps(masteredSpec(extraScene: const {'master': 'missing'}));
+      expect(_messages(unknownName), contains('"missing"'));
+      expect(unknownName.single.path, ['scenes', '0', 'master']);
+
+      final unknownSlot = unknownSpecProps(
+        masteredSpec(
+          extraScene: const {
+            'fills': {
+              'footer': {'type': 'Text', 'text': 'x'},
+            },
+          },
+        ),
+      );
+      expect(_messages(unknownSlot), allOf(contains('"footer"'), contains('"title"')));
+      expect(unknownSlot.single.path, ['scenes', '0', 'fills', 'footer']);
+    });
+
+    test('a step may reveal a fill by its id', () {
+      final warnings = unknownSpecProps(
+        masteredSpec(
+          extraScene: const {
+            'fills': {
+              'title': {'type': 'Text', 'id': 'fill-title', 'text': 'x'},
+            },
+            'steps': [
+              {
+                'elements': ['fill-title'],
+              },
+            ],
+          },
+        ),
+      );
+      expect(warnings, isEmpty);
+    });
+
+    test('sweeps fill elements like any other element', () {
+      final warnings = unknownSpecProps(
+        masteredSpec(
+          extraScene: const {
+            'fills': {
+              'title': {'type': 'Text', 'text': 'x', 'txetAlign': 'center'},
+            },
+          },
+        ),
+      );
+      expect(warnings, hasLength(1));
+      expect(warnings.single.message, contains('"txetAlign"'));
+      expect(warnings.single.path, ['scenes', '0', 'fills', 'title']);
     });
   });
 

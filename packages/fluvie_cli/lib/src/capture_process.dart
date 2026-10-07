@@ -119,7 +119,9 @@ List<String> captureTestArgs({
   String? poster,
   String harnessPath = 'test/render/capture_harness_test.dart',
   Map<String, String> extraDefines = const {},
+  String? packageConfigPath,
 }) => [
+  if (packageConfigPath != null) '--packages=$packageConfigPath',
   'test',
   '--no-pub',
   if (impeller) '--enable-impeller',
@@ -132,7 +134,7 @@ List<String> captureTestArgs({
   if (quality != null) '--dart-define=FLUVIE_RENDER_QUALITY=$quality',
   if (format != null) '--dart-define=FLUVIE_RENDER_FORMAT=$format',
   if (poster != null) '--dart-define=FLUVIE_RENDER_POSTER=$poster',
-  for (final define in extraDefines.entries) '--dart-define=${define.key}=${define.value}',
+  for (final define in extraDefines.entries) _captureDefine(define.key, define.value),
 ];
 
 /// Runs the capture step: `flutter test` on the harness inside [projectDir],
@@ -166,6 +168,7 @@ Future<void> runCapture({
   String harnessPath = 'test/render/capture_harness_test.dart',
   Map<String, String> extraDefines = const {},
   Map<String, String>? environment,
+  String? packageConfigPath,
 }) async {
   final args = captureTestArgs(
     key: key,
@@ -179,6 +182,7 @@ Future<void> runCapture({
     poster: poster,
     harnessPath: harnessPath,
     extraDefines: extraDefines,
+    packageConfigPath: packageConfigPath,
   );
   final ProcessRunResult result;
   try {
@@ -245,4 +249,11 @@ String excerpt(String output) {
   return '${output.substring(0, head)}\n'
       '... [$elided characters elided] ...\n'
       '${output.substring(output.length - tail)}';
+}
+
+String _captureDefine(String key, String value) {
+  if (key == 'FLUVIE_AI_PROMPT' && (value.contains('\n') || value.contains('\r'))) {
+    return '--dart-define=FLUVIE_AI_PROMPT_B64=${base64Encode(utf8.encode(value))}';
+  }
+  return '--dart-define=$key=$value';
 }

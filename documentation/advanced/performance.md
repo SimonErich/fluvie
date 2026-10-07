@@ -6,11 +6,20 @@ habits that keep a render fast. Start with the biggest lever, the frame cache:
 
 ```sh
 # an unchanged composition, re-rendered: every frame is a cache hit
-fluvie render ./lib/my_video.dart --out out.mp4 --cache
+fluvie render ./lib/my_video.dart
 ```
 
 Run that twice and the second run reads frames from disk instead of pumping the
-widget tree. The rest of this page covers why, and why you have to ask for it.
+widget tree. File renders enable this cache automatically.
+
+## Keep the authoring engine warm
+
+`fluvie workspace lib/my_video.dart` keeps one Flutter worker alive per source
+revision. Exact frames, reviews and exports reuse compilation and engine startup.
+Each request still mounts a fresh composition and releases its media. Source
+changes retire the worker, and edits during rendering reject stale results.
+Measure `startupMilliseconds`, `captureMilliseconds` and `elapsedMilliseconds`
+separately. See [the authoring workspace](../guides/authoring-workspace.md).
 
 ## Capture and encode are two phases
 
@@ -28,42 +37,48 @@ each frame pumps a full tree. The encode is one FFmpeg pass over those frames.
 
 ## The frame cache skips repeated work
 
-Captured frames are stored on disk, keyed by a render digest. The digest combines
-the composition key, the render config, and the Fluvie version. On the next run, a
-frame whose digest and index are already on disk replays from the cache without
-pumping the tree at all. For a file target there is no registry key, so the file's
-path stands in.
+Captured frames are stored on disk, keyed by a render digest and frame index.
+For a Dart file, the CLI adds a content fingerprint covering project-local Dart
+sources, including helpers and parts outside `lib/`, resolved dependency Dart
+code, pubspec and package resolution, assets and fonts,
+explicit renderer or harness files, export options, and toolchain identity.
+Editing a source file or replacing an asset invalidates the cached frames even
+when the video keeps the same duration and dimensions.
 
-The cache is advisory: the digest does not cover the composition's source code. An
-edited composition with the same size and frame count keeps the same digest, so it
-would replay its old frames and you would render yesterday's video. A Fluvie
-version bump invalidates every cached frame on its own.
+Build/tool caches and generated adapter directories are excluded from the
+project scan. A target or renderer physically outside the selected project
+disables frame caching unless you supply a caller-owned `--cache-key`: its
+external relative dependency closure is not covered. Include a version or hash
+for external input in that key and change it when the input changes. Runtime
+network data, generators and undeclared external files need `--no-cache` when
+you cannot establish a reliable identity.
 
-That is why the cache is **off by default** when you render a `.dart` file. You
-edit a file far more often than you re-render an unchanged one, so the safe
-default is to capture fresh. Pass `--cache` when you know the composition has not
-changed:
+An unchanged file render reuses frames by default. Changing an export option also
+changes the fingerprint; this conservative rule can recapture frames even when
+an option affects only encoding. Use `--no-cache` to force fresh capture:
 
 ```sh
-fluvie render ./lib/my_video.dart --out out.mp4                       # fresh capture
-fluvie render ./lib/my_video.dart --out out.gif --format gif --cache  # reuse the frames
+fluvie render ./lib/my_video.dart
+fluvie render ./lib/my_video.dart --no-cache
 ```
 
-The second call hits the cache because `--format` changes only the encode, not
-the capture. `--quality` and `--aspect` are part of the render config and so part
-of the digest, so changing either one re-captures whether or not you pass
-`--cache`.
-
-A key render is the other way round: the cache is on, and `--no-cache` bypasses it
-for one run.
+The CLI does not automatically track changing network content. Built-in
+`generate` and `edit` author-and-render operations capture fresh. A custom
+programmatic renderer must supply its own stable composition identity when it
+enables frame caching; the CLI source fingerprint belongs to the CLI host.
+See the [cache identity contract](../guides/exporting-your-video.md#the-frame-cache)
+for the command-line and `runRenderPipeline` options.
 
 ## Content-hash caching loads media once
 
-Media is the one thing that needs IO, so Fluvie resolves all of it before frame
-0. A collect pass walks your scenes, gathers every `Image` and `Clip` source,
-fetches the bytes, hashes them, and decodes them. During the frame loop every
-media read is a synchronous cache lookup. No frame waits on a download or a
-decode.
+Preparation mounts the composition's real Flutter tree, gathers its media,
+resolves images, and probes clips before capture. Resource bytes and decoded
+images are shared through content-hash caches. Clip source frames use a bounded
+frame cache instead of decoding an entire long clip upfront.
+
+Painting reads prepared media synchronously. The preparation step for a capture
+frame can still await clip decoding; that work happens before pumping and reading
+the widget's pixels. Synchronous paint lookup does not mean decoding is free.
 
 Each asset is keyed by the hash of its bytes, so identical declarations share
 one load. Reuse a declaration to get the cache hit:
@@ -76,6 +91,64 @@ logo, // scene two: a cache hit on the same bytes
 
 Two `Image.network` calls to the same URL also hash to the same bytes, so they
 share a decode even when they are separate declarations.
+
+## Native clip decoding stays bounded
+
+Persistent decoded clip frames also include the extractor's implementation/build
+identity in their key, alongside source content, dimensions and decoder choice.
+The default desktop extractor streams a SHA-256 of the resolved FFmpeg executable
+and hashes its full version/build output. It memoizes that lookup by canonical
+path, size and filesystem times, with up to 16 build lookups retained; normal
+binary replacement invalidates reuse without per-frame hashing. Changes that
+preserve all of those filesystem metadata values are outside that memoization
+contract.
+
+A custom extractor can implement `FrameExtractionCacheIdentity` and return a
+stable `cacheIdentity`, or supply an explicit identity to
+`FfmpegFrameExtractionService` when using an injected process runner. Include
+every pixel-affecting setting and change it when output can change. Missing,
+empty or unavailable identities disable persistent clip-frame reuse; bounded
+in-run decoding remains available. The versioned cache key leaves older entries
+cold so an earlier decoder build cannot silently supply new pixels.
+
+Package export hosts look ahead 15 frames, grouping up to 16 source-frame requests
+into one decode. A per-source 32 MiB RGBA budget limits batch size and retained
+scrub frames, normally to at most 16 indices. This is a soft budget: a single
+larger frame or simultaneously required pictures can exceed it. Direct preview
+seeks use zero lookahead. Future clip
+windows wait until visible, and a seek that needs a held final picture reuses
+that picture. Replaced decode-all frame handles are released after painting.
+Advanced hosts can tune `CompositionSession.clipLookaheadFrames` on the rendering
+barrel; ordinary CLI renders use the package default automatically.
+
+A local two-second H.264 fixture at 160×90 and 30 fps took 2,741 ms for 60 cold
+single-frame native requests, compared with 221 ms for four batches of up to 16
+frames: about 12.4 times faster, with identical concatenated RGBA hashes. This is
+one extraction measurement; resolution, codec, source offset, and machine change
+the cost.
+
+The default native clip reader keeps an owned FFmpeg frame session. Sequential
+requests continue from the decoder's current position; backward seeks restart it.
+Only requested pixels enter the Dart frame cache. A distant or backward request
+seeks from an indexed source keyframe and verifies the first decoded presentation
+timestamp. If the demuxer cannot establish exact alignment, the reader falls back
+to decoding from the origin. `decoderStarts` and `framesRead` expose the work for
+diagnostics; long GOPs and uncertain seek alignment can still cost more.
+Close the session when its source is released. Timeout,
+cancellation and disposal terminate and reap its owned decoder.
+The local HTTP bridge used by browser preview retains at most four source
+sessions with least-recently-used eviction. Decoded frame caching is bounded to
+32 MiB; releasing a source or closing the bridge closes its owned decoder.
+
+Native timing uses presentation timestamps rather than average FPS when a source
+has variable frame intervals. `MediaTimeline` normalizes the first displayed
+picture to time zero and preserves the final picture's interval. The default
+native resolver supplies that index to clip trim, speed and resampling logic.
+Custom media resolvers can expose `ClipTimelineResolver`. Browser byte decoders
+can additionally implement `WebClipTimelineDecoder` from the rendering barrel;
+`WebImageMediaResolver` uses its `MediaTimeline` when one is available. The local
+preview bridge supplies the native source index through this interface. A decoder
+without a source timeline falls back to its reported constant frame rate.
 
 ## Keep snapshots pre-resolved
 
@@ -120,10 +193,45 @@ inline list.
 
 ## Memory for large compositions
 
+Default native reactive-audio analysis decodes the audible source interval plus
+250 ms of FFT/onset lookahead. Declared `Audio` tracks share the encoder's timing
+resolution: trims start at source time, scene and sound-effect delays place the
+analysis on the composition clock, and loops repeat the decoded interval. Source
+EOF carries its actual duration so a fractional-frame loop does not accumulate
+rounding drift. Energies and beats are silent outside the audible window.
+
+`AudioWindowResolver`, `RangedBeatDetectionService` and
+`RangedFrequencyAnalyzer` are additive capabilities for custom hosts. The ranged
+band result includes the actual source duration. Existing resolvers retain their
+source-only contract; existing analysis services can analyze the needed source
+prefix for a window-aware repository. Native `FfmpegPcmDecoder.decodeRange`
+seeks and bounds the decoded interval. Legacy PCM decoders can be sliced after
+full decoding; their peak allocation remains the delegate's responsibility.
+
+Reactivity still reads normalized energies from the selected track, with the
+first audible declared track as the default. This is not analysis of the encoded
+master mix, gain automation or clipping. Generated audio without a declared
+track window retains the source-only fallback.
+
+Default reactive-audio preparation shares one PCM decode between beat detection
+and frequency-band analysis for the same source. `SharedPcmDecoder` coalesces
+equal active requests and retains at most one completed source and 128 MiB by
+default, counting the backing buffer. Preparation releases that PCM after the
+derived beat grids and band tables are built, including on failure. A failed band
+analysis publishes neither table, so retry can prepare the complete source.
+Injected analysis services keep their own decoder ownership.
+
+Custom hosts can share `SharedPcmDecoder` between their analysis services, tune
+`maxBytes`/`maxSources`, and call `clear()` when source files change or `dispose()`
+when the preparation ends. Its budgets bound completed retention, not allocations
+inside a delegate or samples still held by callers. Disposal rejects pending
+requests but does not dispose an injected delegate; connect the same cancellation
+signal to any native decoder it owns.
+
 Captured frames stream straight to a file as they are produced, so the captured
-sequence does not sit in memory. The two things that do grow with the
-composition are the resolved media cache (one decoded image or clip-frame set
-per unique asset) and the frame cache on disk (one file per cached frame).
+sequence does not sit in memory. The things that do grow with the
+composition are the resolved resource bytes and images, bounded clip-frame
+caches, and the frame cache on disk (one file per cached frame).
 
 For a long video with many large stills, reuse declarations so the media cache
 holds one copy per unique asset. For a quick draft, render a frame window with

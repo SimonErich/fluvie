@@ -3,9 +3,12 @@ import 'package:fluvie_server/src/api/storage/file_store.dart';
 import 'package:fluvie_server/src/api/storage/s3_file_store.dart';
 import 'package:fluvie_server/src/api/storage/s3_object_storage.dart';
 import 'package:fluvie_server/src/api/storage/stored_object.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 import 'fakes/fake_s3_object_storage.dart';
+
+class _MockStorage extends Mock implements S3ObjectStorage {}
 
 /// An S3 backend whose uploads silently vanish, to exercise the persist check.
 final class _DroppingStorage implements S3ObjectStorage {
@@ -164,5 +167,24 @@ void main() {
     );
     expect(grant.mode, DownloadMode.redirect);
     expect(grant.url, Uri.parse('https://s3.test/rnd_1/video.mp4?expires=900'));
+  });
+
+  test('proxy downloads stream both private and public objects without minting URLs', () async {
+    final storage = _MockStorage();
+    final proxy = S3FileStore(
+      storage,
+      publicBaseUrl: Uri.parse('https://cdn.test/'),
+      proxyDownloads: true,
+    );
+    for (final visibility in StoreVisibility.values) {
+      final grant = await proxy.downloadGrant(
+        'rnd_1/video.mp4',
+        visibility: visibility,
+        ttl: const Duration(minutes: 15),
+      );
+      expect(grant.mode, DownloadMode.stream);
+      expect(grant.url, isNull);
+    }
+    verifyZeroInteractions(storage);
   });
 }

@@ -1,6 +1,8 @@
 // Compiled, tested snippets for the presenter docs. They live here, not
 // hand-typed in Markdown, so the documentation never drifts from a real API.
 // Each `#docregion` flows into one fence via a `<!-- code-excerpt -->` marker.
+import 'dart:convert';
+
 import 'package:flutter/widgets.dart' hide Animation;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvie/fluvie.dart';
@@ -28,6 +30,23 @@ Widget configured(Video video) => FluvieSlides(
   ),
 );
 // #enddocregion config-flags
+
+/// A deck loaded from a `.fluvie` document and presented.
+// #docregion deck-from-spec
+Widget presentSpec(String fluvieJson) {
+  final spec = VideoSpec.fromJson(jsonDecode(fluvieJson) as Map<String, Object?>);
+  return FluvieSlides(deckFromSpec(spec));
+}
+// #enddocregion deck-from-spec
+
+/// The compile-level checks a tool runs while steps are edited.
+// #docregion validate-step-plan
+void reportStepProblems(VideoSpec spec) {
+  for (final error in validateStepPlan(spec)) {
+    debugPrint(error.message);
+  }
+}
+// #enddocregion validate-step-plan
 
 /// The speaker window's root, mounted on the speaker route.
 // #docregion speaker-root

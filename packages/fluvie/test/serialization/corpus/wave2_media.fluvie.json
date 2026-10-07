@@ -1,0 +1,184 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "180f",
+      "layout": "canvas",
+      "background": {
+        "kind": "color",
+        "color": "#101018"
+      },
+      "children": [
+        {
+          "id": "el-session",
+          "type": "Terminal",
+          "lines": [
+            {
+              "cmd": "npm install",
+              "prompt": ">"
+            },
+            {
+              "out": "added 120 packages"
+            },
+            {
+              "cmd": "npm test"
+            }
+          ],
+          "prompt": "$ ",
+          "chrome": {
+            "title": "zsh"
+          },
+          "typingSpeed": "3f",
+          "lineGap": "24f",
+          "style": {
+            "fontSize": 13
+          },
+          "transform": {
+            "x": 0.28,
+            "y": 0.3,
+            "w": 0.5,
+            "h": 0.5
+          }
+        },
+        {
+          "id": "el-snippet",
+          "type": "Code",
+          "source": "void main() {\n  print('hi');\n}",
+          "language": "dart",
+          "theme": "dark",
+          "reveal": {
+            "kind": "typing",
+            "speed": "2f"
+          },
+          "focusLines": [2],
+          "highlightLines": [2],
+          "transform": {
+            "x": 0.75,
+            "y": 0.3,
+            "w": 0.4,
+            "h": 0.4
+          }
+        },
+        {
+          "id": "el-change",
+          "type": "Code",
+          "source": "final x = 1;",
+          "after": "final x = 2;",
+          "language": "dart",
+          "theme": "light",
+          "reveal": {
+            "kind": "lineByLine",
+            "perLine": "12f"
+          },
+          "transform": {
+            "x": 0.5,
+            "y": 0.78,
+            "w": 0.7,
+            "h": 0.3
+          }
+        }
+      ]
+    },
+    {
+      "duration": "180f",
+      "layout": "canvas",
+      "children": [
+        {
+          "id": "el-columns",
+          "type": "Chart",
+          "variant": "bar",
+          "data": {
+            "Jan": 30,
+            "Feb": 45,
+            "Mar": 28
+          },
+          "reveal": "45f",
+          "stagger": {
+            "each": "3f"
+          },
+          "transform": {
+            "x": 0.25,
+            "y": 0.28,
+            "w": 0.4,
+            "h": 0.4
+          }
+        },
+        {
+          "id": "el-share",
+          "type": "Chart",
+          "variant": "donut",
+          "data": {
+            "Web": 52,
+            "Mobile": 48
+          },
+          "innerRadius": 0.4,
+          "transform": {
+            "x": 0.75,
+            "y": 0.28,
+            "w": 0.35,
+            "h": 0.4
+          }
+        },
+        {
+          "id": "el-trend",
+          "type": "Chart",
+          "variant": "line",
+          "series": [
+            {
+              "name": "Sales",
+              "color": "#6C5CE7",
+              "data": {
+                "Q1": 12,
+                "Q2": 19
+              }
+            },
+            {
+              "name": "Churn",
+              "data": {
+                "Q1": 4,
+                "Q2": 3
+              }
+            }
+          ],
+          "reveal": "0.5r",
+          "transform": {
+            "x": 0.25,
+            "y": 0.75,
+            "w": 0.4,
+            "h": 0.35
+          }
+        },
+        {
+          "id": "el-spread",
+          "type": "Chart",
+          "variant": "scatter",
+          "points": [
+            {
+              "x": 1,
+              "y": 2,
+              "label": "Q1"
+            },
+            {
+              "x": 3,
+              "y": 4
+            }
+          ],
+          "stagger": {
+            "evenly": "30f"
+          },
+          "transform": {
+            "x": 0.75,
+            "y": 0.75,
+            "w": 0.35,
+            "h": 0.35
+          }
+        }
+      ]
+    }
+  ]
+}

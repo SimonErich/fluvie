@@ -1,0 +1,126 @@
+{
+  "fluvieSpec": 1,
+  "size": {
+    "width": 640,
+    "height": 360
+  },
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": "150f",
+      "layout": "canvas",
+      "background": {
+        "kind": "color",
+        "color": "#0B0B12"
+      },
+      "children": [
+        {
+          "id": "el-flow",
+          "type": "Mermaid",
+          "source": "graph TD; A-->B; B-->C;",
+          "theme": "dark",
+          "reveal": {
+            "kind": "fadeNodes",
+            "window": "30f"
+          },
+          "fit": "contain",
+          "transform": {
+            "x": 0.28,
+            "y": 0.35,
+            "w": 0.5,
+            "h": 0.6
+          }
+        },
+        {
+          "id": "el-pricing",
+          "type": "WebView",
+          "uri": "https://example.com/pricing",
+          "viewport": {
+            "width": 1280,
+            "height": 800,
+            "deviceScale": 2
+          },
+          "scroll": {
+            "x": 0,
+            "y": 240
+          },
+          "clip": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 400
+          },
+          "fit": "cover",
+          "transform": {
+            "x": 0.75,
+            "y": 0.3,
+            "w": 0.4,
+            "h": 0.4
+          }
+        },
+        {
+          "id": "el-banner",
+          "type": "Html",
+          "source": "<h1>Hello</h1>",
+          "viewport": {
+            "width": 800,
+            "height": 200
+          },
+          "transform": {
+            "x": 0.5,
+            "y": 0.85,
+            "w": 0.8,
+            "h": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "duration": "150f",
+      "layout": "canvas",
+      "children": [
+        {
+          "id": "el-chapter",
+          "type": "TitleCard",
+          "title": "Chapter One",
+          "subtitle": "The beginning",
+          "reveal": "20f",
+          "transform": {
+            "x": 0.5,
+            "y": 0.3,
+            "w": 0.9,
+            "h": 0.5
+          }
+        },
+        {
+          "id": "el-caption",
+          "type": "LowerThird",
+          "name": "Ada Lovelace",
+          "title": "Mathematician",
+          "reveal": "12f",
+          "color": "#CC101418",
+          "transform": {
+            "x": 0.5,
+            "y": 0.75,
+            "w": 0.9,
+            "h": 0.4
+          }
+        },
+        {
+          "id": "el-spectrum",
+          "type": "Bars",
+          "count": 32,
+          "band": "treble",
+          "gain": 1.5,
+          "track": "music",
+          "transform": {
+            "x": 0.5,
+            "y": 0.94,
+            "w": 0.8,
+            "h": 0.1
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,27 +1,12 @@
 import 'package:flutter/animation.dart' show Curve;
+import 'package:flutter/foundation.dart' show mapEquals;
 import 'package:flutter/painting.dart' show Alignment;
 import 'package:fluvie/src/core/ease.dart';
 import 'package:fluvie/src/core/edge.dart';
 import 'package:fluvie/src/core/time.dart';
 import 'package:meta/meta.dart';
 
-/// Which scene-to-scene blend a [Transition] performs.
-enum TransitionKind {
-  /// A hard cut: no blend window, the next scene simply starts.
-  cut,
-
-  /// A dissolve: the incoming scene fades in over the outgoing one.
-  crossFade,
-
-  /// A travelling reveal: the incoming scene is uncovered along an [Edge].
-  wipe,
-
-  /// The outgoing scene scales up and fades out, pushing *into* the cut.
-  zoom,
-
-  /// A push: the incoming scene slides in while the outgoing slides away.
-  slide,
-}
+part 'transition_kind.part.dart';
 
 /// How two adjacent scenes blend at their boundary.
 ///
@@ -51,7 +36,9 @@ final class Transition {
       ease = Ease.linear,
       direction = null,
       into = null,
-      from = null;
+      from = null,
+      customKind = null,
+      parameters = const {};
 
   /// A dissolve lasting [duration]: the incoming scene fades in over the
   /// outgoing one, with no dip to the background in between.
@@ -59,7 +46,9 @@ final class Transition {
     : kind = TransitionKind.crossFade,
       direction = null,
       into = null,
-      from = null;
+      from = null,
+      customKind = null,
+      parameters = const {};
 
   /// A reveal lasting [duration] whose front travels toward [direction]:
   /// `Edge.right` uncovers the incoming scene left-to-right.
@@ -70,7 +59,9 @@ final class Transition {
     this.ease = Ease.linear,
   }) : kind = TransitionKind.wipe,
        into = null,
-       from = null;
+       from = null,
+       customKind = null,
+       parameters = const {};
 
   /// A zoom lasting [duration]: the outgoing scene scales up anchored at
   /// [into] while fading out over the incoming one.
@@ -81,7 +72,9 @@ final class Transition {
     this.ease = Ease.linear,
   }) : kind = TransitionKind.zoom,
        direction = null,
-       from = null;
+       from = null,
+       customKind = null,
+       parameters = const {};
 
   /// A push lasting [duration]: the incoming scene slides in from the [from]
   /// edge while the outgoing slides off toward the opposite one.
@@ -92,7 +85,28 @@ final class Transition {
     this.ease = Ease.linear,
   }) : kind = TransitionKind.slide,
        direction = null,
-       into = null;
+       into = null,
+       customKind = null,
+       parameters = const {};
+
+  /// A registered strategy named [customKind], with JSON-compatible parameters.
+  /// Register its implementation before building or decoding this transition.
+  const Transition.custom(
+    this.customKind,
+    this.duration, {
+    this.parameters = const {},
+    this.overlap = true,
+    this.ease = Ease.linear,
+  }) : kind = TransitionKind.custom,
+       direction = null,
+       into = null,
+       from = null;
+
+  /// Registered strategy name for a custom transition; null for built-ins.
+  final String? customKind;
+
+  /// Strategy-specific JSON-compatible values for custom transitions.
+  final Map<String, Object?> parameters;
 
   /// Which blend this transition performs.
   final TransitionKind kind;
@@ -138,15 +152,29 @@ final class Transition {
       other.ease == ease &&
       other.direction == direction &&
       other.into == into &&
-      other.from == from;
+      other.from == from &&
+      other.customKind == customKind &&
+      mapEquals(other.parameters, parameters);
 
   @override
-  int get hashCode => Object.hash(Transition, kind, duration, overlap, ease, direction, into, from);
+  int get hashCode => Object.hash(
+    Transition,
+    kind,
+    duration,
+    overlap,
+    ease,
+    direction,
+    into,
+    from,
+    customKind,
+    Object.hashAllUnordered(parameters.entries.map((e) => Object.hash(e.key, e.value))),
+  );
 
   /// The factory-call form, omitting [ease]: curve singletons have no stable
   /// textual form, and identity equality makes one up unhelpful.
   @override
   String toString() => switch (kind) {
+    TransitionKind.custom => 'Transition.custom($customKind, $duration, overlap: $overlap)',
     TransitionKind.cut => 'Transition.cut()',
     TransitionKind.crossFade => 'Transition.crossFade($duration, overlap: $overlap)',
     TransitionKind.wipe => 'Transition.wipe($duration, direction: $direction, overlap: $overlap)',

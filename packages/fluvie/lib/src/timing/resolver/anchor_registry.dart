@@ -27,7 +27,8 @@ final class AnimationNode {
   /// Global declaration position across the whole composition, from `0`.
   final int index;
 
-  /// The position of the owning scene within the composition.
+  /// The position of the owning scene within the composition, or
+  /// [overlaySceneIndex] for an element that belongs to no scene.
   final int sceneIndex;
 
   /// The position of the owning element within its scene.
@@ -47,6 +48,13 @@ final class AnimationNode {
       'AnimationNode(#$index, scene: $sceneIndex, element: ${element.ownerId}, '
       'animation: $animationIndex)';
 }
+
+/// The [AnimationNode.sceneIndex] of an element that belongs to no scene.
+///
+/// Negative on purpose: every real index is a position in `scenes`, so a
+/// sentinel that could be mistaken for one — the length, say — would read as
+/// "the scene after the last" to anything doing arithmetic on it.
+const int overlaySceneIndex = -1;
 
 /// The collect pass of the two-pass trigger resolver: every animation becomes
 /// an [AnimationNode] in declaration order, and every attached [Anchor] is
@@ -68,37 +76,46 @@ final class AnchorRegistry {
     final elementByAnchor = <Anchor, ElementPlan>{};
     final nodesByAnchor = <Anchor, List<AnimationNode>>{};
     var index = 0;
+    void take(ElementPlan element, {required int sceneIndex, required int elementIndex}) {
+      final anchor = element.anchor;
+      if (anchor != null) {
+        final existing = elementByAnchor[anchor];
+        if (existing != null) {
+          throw FluvieTimingError(
+            "$anchor is attached to both '${existing.ownerId}' and "
+            "'${element.ownerId}' — an anchor names exactly one element, "
+            'so create a separate Anchor for each.',
+            anchors: [anchor],
+          );
+        }
+        elementByAnchor[anchor] = element;
+        nodesByAnchor[anchor] = [];
+      }
+      for (var a = 0; a < element.animations.length; a++) {
+        final node = AnimationNode(
+          index: index++,
+          sceneIndex: sceneIndex,
+          elementIndex: elementIndex,
+          animationIndex: a,
+          element: element,
+          plan: element.animations[a],
+        );
+        nodes.add(node);
+        nodesByAnchor[anchor]?.add(node);
+      }
+    }
+
     for (var s = 0; s < plan.scenes.length; s++) {
       final scene = plan.scenes[s];
       for (var e = 0; e < scene.elements.length; e++) {
-        final element = scene.elements[e];
-        final anchor = element.anchor;
-        if (anchor != null) {
-          final existing = elementByAnchor[anchor];
-          if (existing != null) {
-            throw FluvieTimingError(
-              "$anchor is attached to both '${existing.ownerId}' and "
-              "'${element.ownerId}' — an anchor names exactly one element, "
-              'so create a separate Anchor for each.',
-              anchors: [anchor],
-            );
-          }
-          elementByAnchor[anchor] = element;
-          nodesByAnchor[anchor] = [];
-        }
-        for (var a = 0; a < element.animations.length; a++) {
-          final node = AnimationNode(
-            index: index++,
-            sceneIndex: s,
-            elementIndex: e,
-            animationIndex: a,
-            element: element,
-            plan: element.animations[a],
-          );
-          nodes.add(node);
-          nodesByAnchor[anchor]?.add(node);
-        }
+        take(scene.elements[e], sceneIndex: s, elementIndex: e);
       }
+    }
+    // The overlays last, on the same counter: `previous` stays the node before
+    // this one, and an overlay anchor collides with a scene anchor exactly as
+    // two scene anchors would.
+    for (var e = 0; e < plan.overlays.length; e++) {
+      take(plan.overlays[e], sceneIndex: overlaySceneIndex, elementIndex: e);
     }
     return AnchorRegistry._(
       List.unmodifiable(nodes),

@@ -69,7 +69,7 @@ for f in "${DOCS_FILES[@]}"; do
     fail=1
   fi
   # Naked-fence gate: every ```dart fence needs a preceding code-excerpt
-  # directive (snippets are compiled, never hand-typed — see CLAUDE.md).
+  # directive (snippets are compiled, never hand-typed — see CONTRIBUTING.md).
   naked="$(printf '%s\n' "$content" | naked_dart_fences)"
   if [ -n "$naked" ]; then
     for ln in $naked; do

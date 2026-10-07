@@ -9,6 +9,34 @@ import 'package:fluvie/rendering.dart';
 import 'fakes/fake_media_resolver.dart';
 
 void main() {
+  testWidgets('freezes a mounted custom-widget snapshot for every output frame', (tester) async {
+    tester.view
+      ..physicalSize = const Size(32, 32)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final sandbox = MemoryRenderSandbox();
+    await tester.runAsync(
+      () => renderToSandbox(
+        composition: Builder(
+          builder: (_) => const Snapshot(child: ColoredBox(color: Color(0xFF00FF00))),
+        ),
+        aspect: Aspect.square,
+        frameCount: 2,
+        longEdge: 32,
+        sandbox: sandbox,
+        capture: const RepaintBoundaryCaptureService(),
+        pumpWidget: tester.pumpWidget,
+        pumpFrame: tester.pump,
+      ),
+    );
+    final frames = await sandbox.readBytes('frames.rgba');
+    expect(frames.length, 2 * 32 * 32 * 4);
+    expect(frames.sublist(0, 4), [0, 255, 0, 255]);
+    expect(frames.sublist(32 * 32 * 4, 32 * 32 * 4 + 4), [0, 255, 0, 255]);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('captures a composition into an in-memory sandbox + manifest', (tester) async {
     tester.view
       ..physicalSize = const Size(64, 64)

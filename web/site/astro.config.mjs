@@ -7,4 +7,6 @@ import { defineConfig } from 'astro/config';
 // main repo's CI; the fluvie_website repo serves the result.
 export default defineConfig({
   site: 'https://fluvie.dev',
+  // Preserve spaces between inline elements when upgrading the compiler.
+  compressHTML: true,
 });

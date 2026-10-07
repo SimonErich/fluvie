@@ -90,6 +90,51 @@ void main() {
     });
   });
 
+  group('a Group is one unit', () {
+    // The 5.1 scope decision: a group hit-tests as a whole through its own
+    // transform (Figma's default before double-click-to-enter); per-child
+    // entry inside a group arrives with the arrange operations (epic 5.3).
+    Map<String, Object?> groupDeck() => {
+      'fluvieSpec': 1,
+      'size': {'width': 320, 'height': 180},
+      'fps': 30,
+      'scenes': [
+        {
+          'duration': '60f',
+          'layout': 'canvas',
+          'children': [
+            {
+              'id': 'el-group',
+              'type': 'Group',
+              'transform': {'x': 0.5, 'y': 0.5, 'w': 0.5, 'h': 0.5},
+              'children': [
+                {
+                  'id': 'el-member',
+                  'type': 'Box',
+                  'color': '#6C5CE7',
+                  'transform': {'x': 0.5, 'y': 0.5, 'w': 0.5, 'h': 0.5},
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    test('hit-testing anywhere in the group box selects the group, never a member', () {
+      final geometry = SceneGeometry.of(EditorDocument.fromJson(groupDeck()), 0);
+      expect(geometry.rectOf('el-group'), const Rect.fromLTWH(80, 45, 160, 90));
+      // The member's own center inside the group still answers with the group.
+      expect(geometry.hitTest(canvas.center(Offset.zero)), 'el-group');
+      expect(geometry.rectOf('el-member'), isNull);
+    });
+
+    test('the scene addresses only top-level ids; members stay inside the group', () {
+      final document = EditorDocument.fromJson(groupDeck());
+      expect(document.elementIdsInScene(0), ['el-group']);
+    });
+  });
+
   group('marquee', () {
     test('collects every element whose shape intersects the rect', () {
       final geometry = _geometry();

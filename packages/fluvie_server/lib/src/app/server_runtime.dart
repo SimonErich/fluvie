@@ -4,6 +4,7 @@ import 'package:fluvie_server/src/api/http/server_dependencies.dart';
 import 'package:fluvie_server/src/app/server_tools.dart';
 import 'package:fluvie_server/src/config/fluvie_server_config.dart';
 import 'package:fluvie_server/src/config/mcp_mode.dart';
+import 'package:fluvie_server/src/docs/bundled_doc_repository.dart';
 import 'package:fluvie_server/src/docs/doc_repository.dart';
 import 'package:fluvie_server/src/docs/doc_search_service.dart';
 import 'package:fluvie_server/src/mcp/api_render_gateway.dart';
@@ -19,7 +20,11 @@ const String _version = '0.3.1';
 
 /// Loads the documentation corpus when docs are enabled, else `null`.
 DocSearchService? buildDocs(FluvieServerConfig config) => config.enableDocs
-    ? DocSearchService.fromRepository(FileDocRepository(Directory(config.docsDir)))
+    ? DocSearchService.fromRepository(
+        config.docsDir == defaultDocsDir
+            ? const BundledDocRepository()
+            : FileDocRepository(Directory(config.docsDir)),
+      )
     : null;
 
 /// Selects the render gateway for MCP build mode: the in-process [api] when it

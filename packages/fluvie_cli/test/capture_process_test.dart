@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluvie_cli/src/capture_process.dart';
@@ -23,6 +24,20 @@ void main() {
   }
 
   group('captureTestArgs', () {
+    test('multiline Unicode authoring prompts survive Flutter test argument parsing', () {
+      const prompt = 'Edit the cat 🐈\nRepair this diagnostic:\r\nUnknown API';
+      final args = captureTestArgs(
+        key: 'demo',
+        sandbox: sandbox,
+        extraDefines: const {'FLUVIE_AI_PROMPT': prompt},
+      );
+      final encoded = args.singleWhere(
+        (arg) => arg.startsWith('--dart-define=FLUVIE_AI_PROMPT_B64='),
+      );
+      expect(encoded.contains('\n'), isFalse);
+      expect(utf8.decode(base64Decode(encoded.split('=').skip(2).join('='))), prompt);
+    });
+
     test('builds the exact harness argv with the two mandatory defines', () {
       expect(captureTestArgs(key: 'demo', sandbox: sandbox), [
         'test',

@@ -5,6 +5,28 @@ the versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `runFluvieWorker` and bounded `RenderInvocation.fromJson` requests for custom
+  hosts that retain a Flutter engine between captures.
+- Optional ranged audio analysis contracts for trimmed, delayed and looped
+  tracks, with composition-clock alignment and shared bounded PCM retention.
+- Native review findings for laid-out text overflow, reading windows and
+  unbundled font families, with frame intervals and suggested remedies.
+
+### Changed
+
+- Top and bottom caption presets adapt their safe-area inset to small canvases.
+  Custom positions retain exact insets; `adaptiveSafeArea` explicitly opts in.
+- Reactive API documentation consistently describes the default as the first
+  audible declared track's source energy, independently of encoded mix gain.
+
+### Fixed
+
+- Apply the local-file input protocol policy to legacy single-frame extraction
+  as well as batch and streaming decoding, preventing native FFmpeg from
+  fetching unstaged network sources.
+
 ## [0.3.1] - 2026-07-16
 
 ### Changed
